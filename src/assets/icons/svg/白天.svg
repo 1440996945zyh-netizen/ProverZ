@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>白天</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="1" transform="translate(-203.000000, -185.000000)">
+            <g id="白天" transform="translate(203.000000, 185.000000)">
+                <polygon id="Fill-1" fill="#FFFFFF" points="0 16 16 16 16 0 0 0"></polygon>
+                <g id="分组" transform="translate(1.000000, 1.000000)" stroke="#606266">
+                    <path d="M11.1388,6.9999 C11.1388,9.2859 9.2848,11.1389 6.9998,11.1389 C4.7138,11.1389 2.8618,9.2859 2.8618,6.9999 C2.8618,4.7139 4.7138,2.8619 6.9998,2.8619 C9.2848,2.8619 11.1388,4.7139 11.1388,6.9999 Z" id="Stroke-2"></path>
+                    <path d="M7.0001,1.3881 L7.0001,0.2221" id="Stroke-4" stroke-linecap="round"></path>
+                    <path d="M3.0323,3.0317 L2.2083,2.2077" id="Stroke-6" stroke-linecap="round"></path>
+                    <path d="M1.3878,6.9999 L0.2228,6.9999" id="Stroke-8" stroke-linecap="round"></path>
+                    <path d="M3.0323,10.9682 L2.2083,11.7922" id="Stroke-10" stroke-linecap="round"></path>
+                    <path d="M7.0001,12.6117 L7.0001,13.7777" id="Stroke-12" stroke-linecap="round"></path>
+                    <path d="M10.9679,10.9682 L11.7919,11.7922" id="Stroke-14" stroke-linecap="round"></path>
+                    <path d="M12.6114,6.9999 L13.7774,6.9999" id="Stroke-16" stroke-linecap="round"></path>
+                    <path d="M10.9679,3.0317 L11.7919,2.2077" id="Stroke-18" stroke-linecap="round"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

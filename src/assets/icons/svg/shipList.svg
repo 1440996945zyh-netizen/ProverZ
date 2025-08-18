@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>船</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="2" transform="translate(-258.000000, -504.000000)">
+            <g id="分组-3" transform="translate(228.000000, 469.000000)">
+                <g id="船" transform="translate(30.000000, 35.000000)">
+                    <circle id="椭圆形" fill="#F3B040" cx="30" cy="30" r="30"></circle>
+                    <g id="分组" transform="translate(14.250000, 10.500000)" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                        <polygon id="Stroke-1" points="0.575 28.68779 13.9999 28.68779 13.9999 20.71659 0.575 20.71659"></polygon>
+                        <path d="M5.21924,29.143325 L5.21924,38.373275" id="Stroke-3"></path>
+                        <path d="M9.71924,29.143325 L9.71924,38.373275" id="Stroke-3"></path>
+                        <path d="M14.00096,24.491515 L25.75106,0.575265" id="Stroke-4"></path>
+                        <path d="M5.39424,20.71659 L25.75,0.575795" id="Stroke-5"></path>
+                        <path d="M26.23871,23.498245 L26.23871,0.376995" id="Stroke-6"></path>
+                        <polygon id="Stroke-7" points="26.199755 23.22397 30.625255 28.63792 21.774255 28.63792"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

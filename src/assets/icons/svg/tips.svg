@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="23px" height="20px" viewBox="0 0 23 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>分组</title>
+    <desc>Created with Sketch.</desc>
+    <g id="首页设计" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="镇江港通用版尝试-copy-16" transform="translate(-1408.000000, -291.000000)">
+            <g id="分组" transform="translate(1366.000000, 180.000000)">
+                <g transform="translate(0.456237, 0.162849)">
+                    <g transform="translate(40.780127, 108.337151)">
+                        <polygon id="Fill-1" points="0 24 24.1454545 24 24.1454545 0 0 0"></polygon>
+                        <g transform="translate(1.006061, 3.000000)">
+                            <path d="M2.39150667,5.8379 C1.03231879,5.8379 0.964912727,7.0199 0.964912727,7.2569 L0.964912727,11.5149 C0.964912727,12.8639 2.1530703,12.9339 2.39150667,12.9339 L6.67430667,12.9339 C6.85237939,12.9339 7.02240364,12.9989 7.15117939,13.1169 L13.1000158,18.4359 L13.1000158,0.3369 L7.15319152,5.6549 C7.02240364,5.7729 6.85137333,5.8379 6.67430667,5.8379 L2.39150667,5.8379 Z" id="Stroke-2" stroke="#4CAEFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <g transform="translate(16.096970, 1.000000)">
+                                <path d="M0.306647273,3.499 L3.49183515,0.332" id="Fill-4" fill="#FFFFFF"></path>
+                                <path d="M0.306647273,3.499 L3.49183515,0.332" id="Stroke-6" stroke="#4CAEFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                            <g transform="translate(16.096970, 14.000000)">
+                                <path d="M0.306647273,0.1187 L3.49183515,3.2847" id="Fill-7" fill="#FFFFFF"></path>
+                                <path d="M0.306647273,0.1187 L3.49183515,3.2847" id="Stroke-9" stroke="#4CAEFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                            <g transform="translate(16.096970, 8.000000)">
+                                <path d="M0.453532121,1.3208 L5.29670788,1.3208" id="Fill-10" fill="#FFFFFF"></path>
+                                <path d="M0.453532121,1.3208 L5.29670788,1.3208" id="Stroke-12" stroke="#4CAEFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

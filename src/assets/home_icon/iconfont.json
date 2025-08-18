@@ -1,0 +1,23 @@
+{
+  "id": "4301260",
+  "name": "wppm_view",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "11056708",
+      "name": "el-icon-caret-bottom",
+      "font_class": "el-icon-caret-bottom1",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
+      "icon_id": "11056714",
+      "name": "el-icon-caret-top",
+      "font_class": "el-icon-caret-top1",
+      "unicode": "e629",
+      "unicode_decimal": 58921
+    }
+  ]
+}

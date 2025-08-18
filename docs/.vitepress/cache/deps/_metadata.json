@@ -1,0 +1,98 @@
+{
+  "hash": "16b64cc2",
+  "browserHash": "195cc33d",
+  "optimized": {
+    "vue": {
+      "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "37fe7b32",
+      "needsInterop": false
+    },
+    "element-plus": {
+      "src": "../../../../node_modules/element-plus/es/index.mjs",
+      "file": "element-plus.js",
+      "fileHash": "b0d09ff0",
+      "needsInterop": false
+    },
+    "element-plus/lib/locale/lang/zh-cn": {
+      "src": "../../../../node_modules/element-plus/lib/locale/lang/zh-cn.js",
+      "file": "element-plus_lib_locale_lang_zh-cn.js",
+      "fileHash": "6c984098",
+      "needsInterop": true
+    },
+    "vxe-table": {
+      "src": "../../../../node_modules/vxe-table/es/index.esm.js",
+      "file": "vxe-table.js",
+      "fileHash": "3ad4a05e",
+      "needsInterop": false
+    },
+    "pinia": {
+      "src": "../../../../node_modules/pinia/dist/pinia.mjs",
+      "file": "pinia.js",
+      "fileHash": "d4ff957f",
+      "needsInterop": false
+    },
+    "mitt": {
+      "src": "../../../../node_modules/mitt/dist/mitt.mjs",
+      "file": "mitt.js",
+      "fileHash": "13c1381a",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../../../node_modules/vue-router/dist/vue-router.mjs",
+      "file": "vue-router.js",
+      "fileHash": "894f7f6f",
+      "needsInterop": false
+    },
+    "@vueuse/core": {
+      "src": "../../../../node_modules/@vueuse/core/index.mjs",
+      "file": "@vueuse_core.js",
+      "fileHash": "58ea4ad7",
+      "needsInterop": false
+    },
+    "js-cookie": {
+      "src": "../../../../node_modules/js-cookie/dist/js.cookie.mjs",
+      "file": "js-cookie.js",
+      "fileHash": "809a7b23",
+      "needsInterop": false
+    },
+    "axios": {
+      "src": "../../../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "bd09065b",
+      "needsInterop": true
+    },
+    "vue3-tabs-chrome": {
+      "src": "../../../../node_modules/vue3-tabs-chrome/dist/vue3-tabs-chrome.common.js",
+      "file": "vue3-tabs-chrome.js",
+      "fileHash": "9743c8d4",
+      "needsInterop": true
+    },
+    "file-saver": {
+      "src": "../../../../node_modules/file-saver/dist/FileSaver.min.js",
+      "file": "file-saver.js",
+      "fileHash": "442ecb95",
+      "needsInterop": true
+    },
+    "sortablejs": {
+      "src": "../../../../node_modules/sortablejs/modular/sortable.esm.js",
+      "file": "sortablejs.js",
+      "fileHash": "6f177c44",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-IPZLLPFO": {
+      "file": "chunk-IPZLLPFO.js"
+    },
+    "chunk-KIXE3NUN": {
+      "file": "chunk-KIXE3NUN.js"
+    },
+    "chunk-TTC6GIF7": {
+      "file": "chunk-TTC6GIF7.js"
+    },
+    "chunk-AC2VUBZ6": {
+      "file": "chunk-AC2VUBZ6.js"
+    }
+  }
+}

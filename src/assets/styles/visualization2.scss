@@ -1,0 +1,439 @@
+.app-main {
+  width: 100%;
+  height: 100%;
+}
+.container-flex {
+	width: 100%;
+  height: calc(100vh - 84px);
+	background: url(@/assets/visualization/index_bg.png) left top no-repeat;
+	background-size: 100% 100%;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	outline: none;
+	color: aliceblue;
+  .box_left  {
+    width: 28%;
+    height: 100%;
+    background: url(@/assets/visualization/line_img.png) top right repeat-y;
+  }
+
+  .box_right{
+    width: 28%;
+    height: 70%;
+    background: url(@/assets/visualization/line_img.png) top left repeat-y;
+    padding-left: 15px;
+  }
+  // 中间视图
+  .box_center{
+    width: 44%;
+    height: 70%;
+    .center_top {
+      width: 100%;
+      height: 8.8%;
+      position: relative;
+      top: 0;
+      left: 0;
+      background: url(@/assets/visualization/title_border.png) bottom center no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+        h1 {
+          color: #cdddf7;
+          font-size: 30px;
+          font-weight: 900;
+          letter-spacing: 5px;
+        }
+    }
+  }
+  .box_center_right{
+    width: 71%;
+    height: 29%;
+    position: absolute;
+    margin-top: 80px;
+    bottom: 5px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    color: #6fb3e0;
+    font-size: 14px;
+    background: url(@/assets/visualization/line_crosswise_img.png) top center no-repeat;
+  }
+}
+
+.left_top{
+  height: 30%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+.right_top{
+  height: 50%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+.left_center{
+  height: 35%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+}
+.right_center{
+  height: 50%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+}
+.left_bottom,.right_bottom{
+  height: 35%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+}
+.title_box{
+    width: 90%;
+    height: 30px;
+    background: url(@/assets/visualization/box_title.png) top left no-repeat;
+    background-size: 100% 100%;
+    margin: auto;
+    font-size: 18px;
+    padding-left: 6%;
+}
+.echarts_box{
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  #top_left,#top_right{
+    width: 45%;
+    height: 100%;
+    // background-color: #01279d;
+  }
+  #rightTop_left{
+    width: 65%;
+    height: 100%;
+  }
+  #rightTop_right{
+    flex: 1;
+    margin-left: 3%;
+    color: #fff;
+    p:first-child{
+      font-size: 24px
+    }
+    p:nth-child(2){
+      font-size: 20px;
+    }
+  }
+}
+#echarts_left_top,#echarts_left_center,
+#echarts_left_bottom,#echarts_right_top,#echarts_right_center,#echarts_right_bottom{
+  flex: 1;
+  width: 100%;
+  // border:1px solid #eee;
+}
+
+
+
+// 天气
+.center_weather{
+  width: 100%;
+  height: 20%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  .weather_box{
+    width: 60%;
+    height: 90%;
+    border: 1px solid #0E94EA;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height:0px;
+    color: #cdddf7;
+    .line{
+      width: .3%;
+      height: 70%;
+      background-color:#cdddf7 ;
+      margin: 0px 10%;
+    }
+    .data {
+      width: 40%;
+      text-align: right;
+      .time{
+        font-size: 32px;
+        font-weight:500;
+      }
+      #date{
+        font-size: 14px;
+      }
+    }
+
+    .weather{
+      flex: 1;
+      text-align: center;
+      display: flex;
+      p{
+        font-size: 12px;
+        // color: #cdddf7;
+      }
+      p:nth-child(2){
+        line-height: 10px;
+      }
+      .active{
+        font-size: 16px;
+        color: white;
+      }
+    }
+    img{
+      height: 100%;
+      margin-right: 5%;
+    }
+  }
+
+}
+#center_center{
+  width: 100%;
+  height: 70%;
+  margin-top: 20px;
+  // border: 1px solid #cdddf7;
+
+}
+.center_bottom_left{
+    width: 65%;
+    height: 50%;
+    float: left;
+}
+.center_bottom_row{
+    width: 100%;
+    height: 30%;
+    margin-bottom: 30px;
+    display:flex;
+    align-items: center;
+    text-align: center;
+    .liIn{
+      width: 25%;
+      height: 30px;
+      margin: 0px 5px;
+      text-align: center;
+      line-height: 30px;
+      position:relative;
+      border:1px solid rgb(144 162 210);
+      h3{
+        font-size:26px;
+        line-height: 0px;
+        color:#fff;
+       }
+       .shu{
+        font-size:20px;
+        color:rgba(14,253,255,1);
+        font-family:dig;
+       }
+       .border_bg_leftTop{
+          position:absolute;
+	        left:-1% ;
+	        top:-18%;
+	        width:20%;
+	        height:14%;
+	        display:block;
+	        background:#01279d url(@/assets/visualization/title_left_bg.png) no-repeat;
+	        background-size:cover;
+       }
+      .border_bg_rightBottom{
+        position:absolute;
+        right:0;
+        bottom:0;
+        width:10px;
+	      height:10px;
+        display:block;
+        background-image: url(../../assets/visualization/title_right_bg.png) ;
+        background-repeat: no-repeat;
+        background-size:contain;
+      }
+
+    }
+}
+.center_bottom_right{
+    width: 35%;
+    height: 100%;
+    float: right;
+    display:flex;
+    align-items: center;
+    justify-content: space-around;
+    .col_left  {
+      width: 55%;
+      height: 100%;
+      padding-top: 20px;
+      margin-left: 15px;
+      .row1{
+        border:1px solid rgb(144 162 210);
+        margin-top: 10px;
+        margin-bottom: 10px;
+        .border_bg_leftTop{
+          position:relative;
+          left:-1% ;
+          top:-18%;
+          width:20%;
+          height:14%;
+          display:block;
+          background:#01279d url(@/assets/visualization/title_left_bg.png) no-repeat;
+          background-size:cover;
+        }
+      }
+      .row2{
+        border:1px solid rgb(144 162 210);
+        margin-top: 20px;
+        margin-bottom: 10px
+      }
+    }
+    .col_right{
+      width: 20%;
+      height: 85%;
+      margin: 20px 10px 0px 10px;
+      position:relative;
+      .col_bg_leftTop{
+        position:absolute;
+        left:-1% ;
+        top:-18%;
+        width:20%;
+        height:14%;
+        display:block;
+        background:#01279d url(@/assets/visualization/title_left_bg.png) no-repeat;
+        background-size:cover;
+      }
+      .col_bg_rightBottom{
+        position:absolute;
+        right:0;
+        bottom:0;
+        width:10px;
+        height:10px;
+        display:block;
+        background-image: url(../../assets/visualization/title_right_bg.png) ;
+        background-repeat: no-repeat;
+        background-size:contain;
+      }
+
+
+
+
+    }
+    .liIn{
+      width: 25%;
+      height: 30px;
+      margin: 0px 5px;
+      text-align: center;
+      line-height: 30px;
+      position:relative;
+      border:1px solid rgb(144 162 210);
+      h3{
+        font-size:26px;
+        line-height: 0px;
+        color:#fff;
+       }
+       .shu{
+        font-size:20px;
+        color:rgba(14,253,255,1);
+        font-family:dig;
+       }
+       .border_bg_leftTop{
+          position:absolute;
+	        left:-1% ;
+	        top:-18%;
+	        width:20%;
+	        height:14%;
+	        display:block;
+	        background:#01279d url(@/assets/visualization/title_left_bg.png) no-repeat;
+	        background-size:cover;
+       }
+      .border_bg_rightBottom{
+        position:absolute;
+        right:0;
+        bottom:0;
+        width:10px;
+	      height:10px;
+        display:block;
+        background-image: url(../../assets/visualization/title_right_bg.png) ;
+        background-repeat: no-repeat;
+        background-size:contain;
+      }
+
+    }
+
+}
+
+
+
+.marquee {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #6fb3e0;
+  padding: 10px 0px 10px 10px;
+  height:100%;
+
+}
+
+.marquee ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+  animation: marquee 5s linear infinite; /* 应用滚动动画，意思是定义了一个名为animation的动画效果，以相同的速度持续5秒，无限次循环，每次动画结束后重新开始动画 */
+}
+
+.marquee li {
+  display: inline-block;
+  padding-right: 100%; /* 确保所有元素在一行上 */
+  white-space: nowrap; /* 防止换行 */
+}
+
+@keyframes marquee {
+  0% { transform: translateY(10%); } /* 初始位置（让元素从页面顶端出现，为了避免内容出现时过于卡顿，所以取巧没有设置为-100%），同理如果左右动画就用translateY */
+  50% { transform: translateY(-10%); }	/* (此行在示例效果中可省略)走到中间的时候元素全部显示 */
+  100% { transform: translateY(10%);} /* 滚动到最下边，直至消失 */
+}
+
+.box-card{
+  width:100px;
+  height: 160px;
+  margin: 0px 5px;
+  text-align: center;
+  line-height: 30px;
+  border:1px solid rgb(144 162 210);
+  h3{
+    font-size:26px;
+    line-height: 0px;
+    color:#fff;
+  }
+  .shu{
+    font-size:20px;
+    color:rgba(14,253,255,1);
+    font-family:dig;
+  }
+  .card_bg_leftTop{
+    position:absolute;
+    left:-1% ;
+    top:-18%;
+    width:20%;
+    height:14%;
+    display:block;
+    background:#01279d url(@/assets/visualization/title_left_bg.png) no-repeat;
+    background-size:cover;
+  }
+  .card_bg_rightBottom{
+    position:absolute;
+    right:0;
+    bottom:0;
+    width:10px;
+    height:10px;
+    display:block;
+    background-image: url(../../assets/visualization/title_right_bg.png) ;
+    background-repeat: no-repeat;
+    background-size:contain;
+  }
+
+}

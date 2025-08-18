@@ -1,0 +1,252 @@
+.app-main {
+  width: 100%;
+  height: 100%;
+}
+div::-webkit-scrollbar{
+  display:none
+}
+.container-flex {
+  width: 100%;
+  height: calc(100vh - 0px);
+  background: url(@/assets/visualization/index_bg.png) left top no-repeat;
+  background-size: 100% 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  outline: none;
+  color: aliceblue;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  .box_left  {
+    width: 28%;
+    height: 100%;
+    background: url(@/assets/visualization/line_img.png) top right repeat-y;
+  }
+  .box_right{
+    width: 28%;
+    height: 100%;
+    background: url(@/assets/visualization/line_img.png) top left repeat-y;
+    padding-left: 15px;
+  }
+  // 中间视图
+  .box_center{
+    width: 44%;
+    height: 100%;
+    .center_top {
+      width: 100%;
+      height: 8.8%;
+      position: relative;
+      top: 0;
+      left: 0;
+      background: url(@/assets/visualization/title_border.png) bottom center no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      h1 {
+        color: #cdddf7;
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 5px;
+      }
+    }
+  }
+}
+
+.left_top{
+  height: 34%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+.right_top{
+  height: 30%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+.left_center{
+  height: 34%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+}
+.right_center{
+  height: 35%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+}
+.left_bottom{
+  height: 32%;
+  width: 98%;
+  //display: flex;
+  flex-direction: column;
+}
+.right_bottom{
+  height: 35%;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+}
+.title_box{
+  width: 90%;
+  height: 30px;
+  background: url(@/assets/visualization/box_title.png) top left no-repeat;
+  background-size: 100% 100%;
+  margin: auto;
+  font-size: 18px;
+  padding-left: 6%;
+}
+.echarts_box{
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  #top_left,#top_right{
+    width: 45%;
+    height: 100%;
+    // background-color: #01279d;
+  }
+  #rightTop_left{
+    width: 65%;
+    height: 100%;
+  }
+  #rightTop_right{
+    flex: 1;
+    margin-left: 3%;
+    color: #fff;
+    p:first-child{
+      font-size: 24px
+    }
+    p:nth-child(2){
+      font-size: 20px;
+    }
+  }
+}
+#echarts_left_top,#echarts_left_center,
+#echarts_left_bottom,#echarts_right_top,#echarts_right_center,#echarts_right_bottom{
+  flex: 1;
+  width: 100%;
+  // border:1px solid #eee;
+}
+
+
+
+// 天气
+.center_weather{
+  width: 100%;
+  height: 15%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  .weather_box{
+    width: 60%;
+    height: 90%;
+    border: 1px solid #0E94EA;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height:0px;
+    color: #cdddf7;
+    .line{
+      width: .3%;
+      height: 70%;
+      background-color:#cdddf7 ;
+      margin: 0px 10%;
+    }
+    .data {
+      width: 40%;
+      text-align: right;
+      .time{
+        font-size: 32px;
+        font-weight:500;
+      }
+      #date{
+        font-size: 14px;
+      }
+    }
+
+    .weather{
+      flex: 1;
+      text-align: center;
+      display: flex;
+      p{
+        font-size: 12px;
+        // color: #cdddf7;
+      }
+      p:nth-child(2){
+        line-height: 10px;
+      }
+      .active{
+        font-size: 16px;
+        color: white;
+      }
+    }
+    img{
+      height: 100%;
+      margin-right: 5%;
+    }
+  }
+
+}
+#center_center{
+  width: 100%;
+  height: 50%;
+  // border: 1px solid #cdddf7;
+
+}
+.center_bottom{
+  width: 98%;
+  height: 7%;
+  display:flex;
+  margin-top: 3%;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 12px;
+  .liIn{
+    width: 20.5%;
+    height: 45px;
+    line-height: 45px;
+    position:relative;
+    padding-left: 5px;
+    border:1px solid rgb(144 162 210);
+    h3{
+      font-size:26px;
+      line-height: 0px;
+      color:#fff;
+    }
+    .shu{
+      font-size:20px;
+      color:rgba(14,253,255,1);
+      font-family:dig;
+    }
+    .border_bg_leftTop{
+      position:absolute;
+      left:-1% ;
+      top:-15%;
+      width:26%;
+      height:12%;
+      display:block;
+      background:#01279d url(@/assets/visualization/title_left_bg.png) no-repeat;
+      background-size:cover;
+    }
+    .border_bg_rightBottom{
+      position:absolute;
+      right:0;
+      bottom:0;
+      width:14px;
+      height:14px;
+      display:block;
+      background-image: url(../../assets/visualization/title_right_bg.png) ;
+      background-repeat: no-repeat;
+      background-size:contain;
+    }
+
+  }
+
+}
+

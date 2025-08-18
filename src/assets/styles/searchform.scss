@@ -1,0 +1,332 @@
+/********* 头部搜索公共样式 *******/
+::v-deep(.el-button--primary) {
+  background-color: #338ce8;
+  border-color: #338ce8;
+}
+::v-deep(.el-divider--vertical) {
+  height: 1.6em;
+}
+::v-deep(.el-select .el-input .el-select__caret) {
+  font-size: 10px !important;
+}
+::v-deep(.el-button--mini,el-button--mini.is-round) {
+  padding: 7px 9px;
+}
+::v-deep(.el-button+.el-button) {
+  margin-left: 6px;
+}
+.search_form {
+  background-color: #F5F7FA;
+  color: #303133;
+  border-radius: 0px;
+  border: 1px solid #E1E4EB!important;
+  font-size: 14px;
+  color: #606266;
+  border-bottom: none;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 10px;
+  box-sizing: border-box;
+
+  ::v-deep(.search_btn) {
+    margin-left: 0.7em!important;
+  }
+  ::v-deep(.el-date-editor) {
+    margin-left: 0.7em!important;
+    width:180px!important;
+    height:32px!important;
+  }
+  ::v-deep(.inout) {
+    width: 100px;
+  }
+  ::v-deep(.el-input) {
+    margin-left:0.7em;
+    width:180px!important;
+   /* height:32px!important;*/
+  }
+
+  ::v-deep(.el-select) {
+    margin-left:0.7em;
+    width:180px!important;
+    /*height:32px!important;*/
+    .el-input{
+      margin-left:0em;
+    }
+  }
+
+  ::v-deep(button) {
+    vertical-align: top;
+  }
+
+  ::v-deep(.el-range-input) {
+    width:80px!important;
+  }
+
+  ::v-deep(.el-date-editor .el-range-separator) {
+    padding: 0px 1px;
+  }
+  ::v-deep(.el-date-editor .el-range-separator) {
+    width: 10%;
+  }
+
+  .el-form {
+    margin-left: 10px;
+  }
+  .el-form-item--mini.el-form-item {
+    margin-bottom: 0px!important;
+  }
+}
+
+.search_form.percent {
+  display:block;
+  line-height: 50px;
+  .el-button-group {
+    margin-top: 11px!important;
+  }
+  .btnWrapper {
+    float: right;
+    line-height: 49px;
+    height: 49px;
+    border: none!important;
+  }
+  ::v-deep(button) {
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  ::v-deep(.el-date-editor) {
+    width: calc(100% - 5px)!important;
+  }
+  ::v-deep(.el-input) {
+    width: calc(100% - 5px)!important;
+  }
+  ::v-deep(.el-select) {
+    width: calc(100% - 5px)!important;
+  }
+}
+
+.search_form.percent.adSearch {
+  position: relative;
+  line-height: 50px!important;
+  margin:0px;
+  .el-button-group {
+    margin-top: 11px!important;
+  }
+  ::v-deep(button) {
+    vertical-align: baseline;
+  }
+  ::v-deep(.el-date-editor) {
+    width: calc(100% - 5px)!important;
+  }
+  ::v-deep(.el-input) {
+    width: calc(100% - 5px)!important;
+  }
+  ::v-deep(.el-select) {
+    width: calc(100% - 5px)!important;
+  }
+  ::v-deep(.el-select.el-select--mini) {
+    width: calc(100% - 5px)!important;
+  }
+
+}
+
+
+.search_form.adSearch {
+  position: relative;
+  line-height: 50px!important;
+  margin:0px;
+
+  ::v-deep(.search_btn) {
+    margin-left: 0.7em!important;
+  }
+  ::v-deep(.el-date-editor) {
+    margin-left: 0.7em!important;
+    width:180px!important;
+    height:32px!important;
+  }
+  ::v-deep(.inout) {
+    width: 100px;
+  }
+  ::v-deep( .el-input) {
+    margin-left:0.7em;
+    width:180px!important;
+    height:32px!important;
+  }
+
+  ::v-deep( .el-select) {
+    margin-left:0.7em;
+    width:180px!important;
+/*    height:32!important;*/
+    .el-input{
+      margin-left:0em;
+    }
+  }
+
+  ::v-deep(  button ){
+    vertical-align: top;
+    margin-left:6px;
+  }
+
+  ::v-deep( .el-range-input) {
+    width:80px!important;
+  }
+
+  ::v-deep( .el-date-editor .el-range-separator) {
+    padding: 0px 1px;
+  }
+  ::v-deep(  .el-date-editor .el-range-separator) {
+    width: 10%;
+  }
+
+  .el-form {
+    margin-left: 10px;
+  }
+  .el-form-item--mini.el-form-item {
+    margin-bottom: 0px!important;
+  }
+}
+.search_form.adSearch:first-child {
+    position: absolute;
+    left:0px;
+    top:0px;
+    width:100%;
+}
+
+
+
+::v-deep(.el-button-group) {
+  vertical-align: top;
+  margin-left:0.7em;
+  button {
+    vertical-align: inherit;
+  }
+  .el-button--primary {
+    min-width: 56px;
+    /*max-height: 28px;*/
+    background-color: #2EA2F8;
+    border-color: #0C85DE;
+    margin-left:5px;
+  }
+
+  .el-button--default {
+    background-color: #1693EF;
+    border-color: #0C85DE;
+    color: white;
+    margin-left: 0px;
+    width: 24px;
+    /*height: 28px;
+    padding: 7px 5px;*/
+  }
+}
+
+/***********/
+
+//输入框；选择框只保留下边框
+.agreementDetails{
+  padding-top: 12px;
+  padding-left: 12px;
+  ::v-deep(.el-input__inner) {
+    border-radius: 0;
+    border-top:none ;
+    border-left:none;
+    border-right: none;
+  }
+  ::v-deep(.el-form-item__label) {
+    line-height: 12px;
+  }
+  ::v-deep(.el-form-item__content) {
+    line-height: 0px;
+  }
+}
+//折叠面饭样式调整
+::v-deep(.el-collapse-item__header) {
+  background: #F5F7FA;
+  border: 1px solid #E1E4EB!important;
+  border-top: none;
+  padding-left: 12px;
+  height: 40px;
+}
+
+//普通抽屉表单样式
+.detailForm {
+  //  padding-left: 20px;
+  ::v-deep(.el-form-item) {
+    margin-top: 24px;
+    margin-left: 12px;
+  }
+  ::v-deep(.el-input) {
+    width: 80%;
+    background-color: #ffffff;
+    .el-input__inner{
+      width: 100%;
+    }
+  }
+  ::v-deep(.el-select) {
+    width: 80%;
+    background-color: #ffffff;
+    .el-input{
+      width:100%
+    }
+    .el-input__inner{
+      width: 100%;
+    }
+  }
+  ::v-deep(.el-textarea) {
+    margin-left: 0 !important;
+    width:  80%;
+  }
+  ::v-deep( .el-upload-list) {
+    width: 80%;
+  }
+}
+::v-deep(.el-tabs__header) {
+  margin: 0 0 0 ;
+}
+
+
+::v-deep( .iconfont) {
+  font-size: 14px;
+}
+
+::v-deep( .commonSearch) {
+  border-top: none;
+  top:50px;
+  position: absolute;
+  z-index: 10;
+  height: auto;
+  width: 100%;
+  padding-right: 0;
+  box-shadow:0px 2px 4px 0px #E3E5EE;
+  border-bottom: 1px solid #E1E4EB;
+}
+::v-deep( .commonSearcha) {
+  border-top: none;
+  top:60px;
+  //position: absolute;
+  z-index: 10;
+  height: auto;
+  width: 100%;
+  padding-right: 0;
+  padding-left: 25px;
+  padding-bottom: 10px;
+  box-shadow:0px 2px 4px 0px #E3E5EE;
+  border-bottom: 1px solid #E1E4EB;
+}
+.container{
+  position: relative;
+  ::v-deep( .el-tabs--border-card) {
+    background: #FFFFFF;
+    border: 1px solid #DCDFE6;
+    -webkit-box-shadow: 0 0px 0px 0!important;
+    box-shadow: 0 0px 0px 0!important;
+  }
+  ::v-deep( .el-tabs--border-card .el-tabs__content) {
+    padding: 5px;
+  }
+}
+::v-deep(.el-input__inner) {
+  background: white;
+}
+
+

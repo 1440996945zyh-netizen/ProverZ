@@ -1,0 +1,12 @@
+.vp-doc th, .vp-doc td {
+    border: none;
+    padding: 0;
+}
+.vp-doc table {
+    display: block;
+    margin: 0;
+    overflow-x: hidden;
+}
+.vp-doc tr:nth-child(2n) {
+    background-color: transparent;
+}

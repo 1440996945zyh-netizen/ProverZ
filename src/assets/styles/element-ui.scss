@@ -1,0 +1,164 @@
+// cover some element-ui styles
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+	font-weight: 400 !important;
+}
+
+.el-upload {
+	input[type='file'] {
+		display: none !important;
+	}
+}
+
+.el-upload__input {
+	display: none;
+}
+
+.cell {
+	.el-tag {
+		margin-right: 0px;
+	}
+}
+
+.small-padding {
+	.cell {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+}
+
+.fixed-width {
+	.el-button--mini {
+		padding: 7px 10px;
+		width: 60px;
+	}
+}
+
+.status-col {
+	.cell {
+		padding: 0 10px;
+		text-align: center;
+
+		.el-tag {
+			margin-right: 0px;
+		}
+	}
+}
+
+// to fixed https://github.com/ElemeFE/element/issues/2461
+.el-dialog {
+	transform: none;
+	left: 0;
+	position: relative;
+	margin: 0 auto;
+}
+
+// refine element ui upload
+.upload-container {
+	.el-upload {
+		width: 100%;
+
+		.el-upload-dragger {
+			width: 100%;
+			height: 200px;
+		}
+	}
+}
+
+// dropdown
+.el-dropdown-menu {
+	a {
+		display: block;
+	}
+}
+
+// fix date-picker ui bug in filter-item
+.el-range-editor.el-input__inner {
+	display: inline-flex !important;
+}
+
+// to fix el-date-picker css style
+.el-range-separator {
+	box-sizing: content-box;
+}
+
+.el-menu--collapse > div > .el-submenu > .el-submenu__title .el-submenu__icon-arrow {
+	display: none;
+}
+
+.el-dropdown .el-dropdown-link {
+	color: var(--el-color-primary) !important;
+}
+
+/**------自定义-----------------------------------*/
+.el-drawer.ltr,
+.el-drawer.rtl {
+	height: calc(100% - 0px) !important;
+	top: 0px !important;
+	bottom: 0;
+}
+.el-drawer__header {
+	align-items: center;
+	color: #72767b;
+	display: flex;
+	margin-bottom: -1px !important;
+	/* padding-bottom: 31px; */
+	padding: var(--el-drawer-padding-primary);
+	//padding-bottom: 31px !important;
+	background-color: #f5f7fa;
+	border-bottom: 1px solid #c8cfde;
+}
+.el-drawer__body {
+	flex: 1;
+	padding: 0px 0px 0px 0px !important;
+	/* overflow: auto; */
+}
+
+.el-drawer__footer {
+	background-color: #f5f7fa;
+	border-top: 1px solid #c8cfde;
+	padding-top: 20px !important;
+}
+
+.el-dialog__header {
+	padding: var(--el-dialog-padding-primary);
+	padding-bottom: 16px !important;
+	margin-right: 0px !important;
+	word-break: break-all;
+	background-color: #f5f7fa;
+	border-bottom: 1px solid #c8cfde;
+}
+
+.el-dialog__footer {
+	padding: var(--el-dialog-padding-primary);
+	padding-top: 17px;
+	text-align: right;
+	box-sizing: border-box;
+	background-color: #f5f7fa;
+	border-top: 1px solid #c8cfde;
+}
+
+.el-collapse-item__content {
+	padding-bottom: 1px !important;
+	padding-top: 10px !important;
+	font-size: var(--el-collapse-content-font-size);
+	color: var(--el-collapse-content-text-color);
+	line-height: 1.7692307692;
+}
+
+.el-date-editor.el-input {
+	width: 100% !important;
+}
+.el-range-editor.el-input__wrapper {
+	width: 100%;
+}
+.el-form .el-form-item__label {
+	font-weight: 500 !important;
+}
+.el-tabs {
+	padding-left: 10px !important;
+}
+.el-tabs__header {
+	margin: 0 0 10px;
+}
