@@ -297,7 +297,7 @@ import Dialog from '@/components/Dialog/index.vue'
 import IconSelect from '@/components/IconSelect'
 import tableParamsStore from '@/store/modules/tableParams'
 
-import { addMenu, delMenu, getMenu, listMenu, updateMenu, getListByParentId,getContentsMenu} from '@/api/system/menu'
+import { addMenu, delMenu, getMenu, listMenu, updateMenu, getListByParentId, getContentsMenu } from '@/api/system/menu'
 const { proxy } = getCurrentInstance()
 
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
@@ -651,14 +651,14 @@ const getList = params => {
  */
 const getTreeselect = async () => {
 	menuOptions.value = []
-	getContentsMenu().then(response => {
+	listMenu().then(response => {
 		const menu = { menuId: 0, menuName: '主类目', children: [] }
 		menu.children = proxy.handleTree(response.data, 'menuId')
 		menuOptions.value.push(menu)
 	})
 }
 /** 新增菜单 */
-const handleAdd =async row => {
+const handleAdd = async row => {
 	reset()
 	await getTreeselect()
 	if (row != null && row.menuId) {
@@ -698,7 +698,6 @@ const toggleExpandAll = () => {
 /** 行点击事件 */
 const cellClickEvent = ({ row }) => {
 	console.log('行点击事件', row)
-	
 }
 /**
  * @description 显示选择图标弹窗

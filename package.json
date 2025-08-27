@@ -31,7 +31,6 @@
 		"crypto-js": "^4.2.0",
 		"docx-preview": "^0.1.16",
 		"echarts": "^5.4.0",
-		"echarts-liquidfill": "^2.0.2",
 		"element-plus": "2.9.7",
 		"esbuild-windows-64": "^0.15.18",
 		"eslint": "8.57.0",

@@ -20,10 +20,8 @@ import Layout from '@/layout'
 	title: 'title'                  // 设置该路由在侧边栏和面包屑中展示的名字
 	icon: 'svg-name'                // 设置该路由的图标，对应路径src/assets/icons/svg
 	breadcrumb: false               // 如果设置为false，则不会在breadcrumb面包屑中显示
-	activeMenu: '/system/user'      // 当路由设置了该属性，则会高亮相对应的侧边栏。
-  }
- */
-
+	activeMenu: '/system/user'      // 当路由设置
+	*/
 // 公共路由
 export const constantRoutes = [
 	{
@@ -42,19 +40,6 @@ export const constantRoutes = [
 		component: () => import('@/views/login'),
 		hidden: true,
 	},
-	// {
-	//   path: '',
-	//   component: Layout,
-	//   redirect: '/standardization/singleShipReport',
-	//   children: [
-	//     {
-	//       path: '/standardization/singleShipReport',
-	//       component: () => import('@/views/standardization/basicdata/singleShipReport/index'),
-	//       name: 'singleShipReport',
-	//       meta: { title: '单船测试报告', icon: 'dashboard', affix: true },
-	//     },
-	//   ],
-	// },
 	{
 		path: '/register',
 		component: () => import('@/views/register'),
@@ -77,7 +62,7 @@ export const constantRoutes = [
 		children: [
 			{
 				path: '/index',
-				component: () => import('@/views/index'),
+				component: () => import('@/views/home/index'),
 				name: 'Index',
 				meta: { title: '首页', icon: 'dashboard', affix: true },
 			},
@@ -103,66 +88,6 @@ export const constantRoutes = [
 			},
 		],
 	},
-	// {
-	// 	path: '/largeDataScreen',
-	// 	component: () => import('@/views/standardization/visualization4'),
-	// 	hidden: true,
-	// },
-  {
-    path: '/gis',
-    component: Layout,
-    hidden: true,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'onSiteDynamics',
-        component: () => import('@/views/gis/onSiteDynamics/index'),
-        name: 'OnSiteDynamics',
-        meta: { title: 'GIS地图', icon: 'dashboard' },
-      },
-    ],
-  },
-  {
-    path: '/dispatch',
-    component: Layout,
-    hidden: true,
-    redirect: 'noredirect',
-    children: [
-      {
-        path: 'visualization',
-        component: () => import('@/views/dispatch/visualization/index'),
-        name: 'Visualization',
-        meta: { title: '数据大屏', icon: 'dashboard' },
-      },
-    ],
-  },
-	// {
-	// 	path: '/tools',
-	// 	component: Layout,
-	// 	hidden: false,
-	// 	redirect: 'noredirect',
-	// 	meta: { title: '框架工具', icon: 'user' },
-	// 	children: [
-	// 		{
-	// 			path: 'demo',
-	// 			component: () => import('@/views/tools/demo/index.vue'),
-	// 			name: 'Demo',
-	// 			meta: { title: 'demo', icon: 'user' },
-	// 		},
-	// 		{
-	// 			path: 'lowcode',
-	// 			component: () => import('@/views/tools/lowCode/index.vue'),
-	// 			name: 'Lowcode',
-	// 			meta: { title: '小李测试', icon: 'user' },
-	// 		},
-	// 		{
-	// 			path: 'templateDesign',
-	// 			component: () => import('@/views/tools/templateDesign/index.vue'),
-	// 			name: 'TemplateDesign',
-	// 			meta: { title: '模板设计', icon: 'user' },
-	// 		},
-	// 	],
-	// },
 ]
 
 // 动态路由，基于用户权限动态去加载
