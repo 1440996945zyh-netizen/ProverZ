@@ -1,6 +1,6 @@
-import request from '../../utils/request'
+import request from '../../utils/auth/request'
 import axios from 'axios'
-import { getToken } from '../../utils/auth'
+import { getToken } from '../../utils/auth/token'
 const api = {
 	/**
 	 * 获取字典，数据结构为res.data中key:[]

@@ -20,8 +20,8 @@
 
 <script setup>
 import Fuse from 'fuse.js'
-import { getNormalPath } from '@/utils/yangyi'
-import { isHttp } from '@/utils/validate'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
+import { isHttp } from '@/utils/verify/validate'
 import usePermissionStore from '@/store/modules/permission'
 
 const search = ref('')
@@ -152,15 +152,15 @@ watchEffect(() => {
 	searchPool.value = generateRoutes(routes.value)
 })
 
-watch(show, (value) => {
-  const handleClose = () => {
-    show.value = false
-    emit('update:visible', false)
-    document.body.removeEventListener('click', handleClose)
-  }
-  if (value) {
-    document.body.addEventListener('click', handleClose)
-  }
+watch(show, value => {
+	const handleClose = () => {
+		show.value = false
+		emit('update:visible', false)
+		document.body.removeEventListener('click', handleClose)
+	}
+	if (value) {
+		document.body.addEventListener('click', handleClose)
+	}
 })
 
 watch(searchPool, list => {

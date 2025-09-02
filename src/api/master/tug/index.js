@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 import get from "../../../../docs/.vitepress/cache/deps/element-plus";
 
 const api = {

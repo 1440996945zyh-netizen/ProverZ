@@ -25,10 +25,7 @@
 					<span class="menu-label">{{ item.meta.title }}</span>
 				</app-link>
 				<!-- 一级菜单和有三级菜单的二级菜单不使用链接 -->
-				<span 
-					v-else-if="item.meta && (level === 1 || (level === 2 && hasValidChildren))" 
-					class="menu-label non-clickable"
-				>
+				<span v-else-if="item.meta && (level === 1 || (level === 2 && hasValidChildren))" class="menu-label non-clickable">
 					{{ item.meta.title }}
 				</span>
 			</div>
@@ -51,8 +48,8 @@
 
 <script setup>
 import AppLink from '@/layout/components/Sidebar/Link'
-import { isExternal } from '@/utils/validate'
-import { getNormalPath } from '@/utils/yangyi'
+import { isExternal } from '@/utils/verify/validate'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 import { computed, ref } from 'vue'
 
 const props = defineProps({
@@ -241,11 +238,11 @@ $transition: all 0.2s ease;
 	.multi-node .children-container {
 		margin-top: 12px;
 	}
-	
+
 	/* 一级菜单不可点击样式 */
 	.non-clickable {
 		cursor: default; /* 默认鼠标样式 */
-		
+
 		&:hover {
 			/* 移除悬停效果 */
 			background-color: $level-1-bg;
@@ -283,7 +280,7 @@ $transition: all 0.2s ease;
 	.clickable .menu-label {
 		cursor: pointer; /* 小手鼠标样式 */
 		font-weight: bold;
-		
+
 		&:hover {
 			border-color: $primary-color;
 		}
@@ -327,4 +324,3 @@ $transition: all 0.2s ease;
 	}
 }
 </style>
-    

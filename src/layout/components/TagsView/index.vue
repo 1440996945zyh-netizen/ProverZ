@@ -41,7 +41,7 @@
 <script setup name="TagsView">
 import Vue3TabsChrome from 'vue3-tabs-chrome'
 import 'vue3-tabs-chrome/dist/vue3-tabs-chrome.css'
-import { getNormalPath } from '@/utils/yangyi'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 import useTagsViewStore from '@/store/modules/tagsView'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'

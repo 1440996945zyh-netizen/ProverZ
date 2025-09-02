@@ -19,8 +19,8 @@
 import AppLink from '@/layout/components/Sidebar/Link'
 import useUserStore from '@/store/modules/user'
 import { onMounted, getCurrentInstance, ref, computed, nextTick } from 'vue'
-import { isExternal } from '@/utils/validate'
-import { getNormalPath } from '@/utils/yangyi'
+import { isExternal } from '@/utils/verify/validate'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 import api from '@/api/system/user'
 import usePermissionStore from '@/store/modules/permission'
 
@@ -30,10 +30,10 @@ const sidebarRouters = computed(() => permissionStore.sidebarRouters.filter(i =>
 const emit = defineEmits(['getMenuList'])
 // const sideRoutes = JSON.parse(JSON.stringify(sidebarRouters.value))
 let arr = []
-sidebarRouters.value.forEach( v => {
-  // 去掉 children 属性，避免循环引用
-  const { children, ...routeWithoutChildren } = v
-  arr.push(routeWithoutChildren)
+sidebarRouters.value.forEach(v => {
+	// 去掉 children 属性，避免循环引用
+	const { children, ...routeWithoutChildren } = v
+	arr.push(routeWithoutChildren)
 })
 const sideRoutes = arr
 const menuList = ref([])
