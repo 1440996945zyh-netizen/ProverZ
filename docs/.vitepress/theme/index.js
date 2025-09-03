@@ -11,7 +11,7 @@ import 'vxe-table/lib/style.css'
 import plugins from '../plugins/index.js' // plugins
 
 import verify from '@/utils/verify/verify'
-import { setFormData, setEditTableOptions, deepClone } from '@/utils/commonFunc/yangyi' // 业务方法
+import { setFormData, setEditTableOptions, deepClone } from '@/utils/common/common' // 业务方法
 import { resetObj } from '@/utils/index.js' // 清空对象方法
 import { getRules } from '@/utils/verify/validate.js' // form校验规则
 import $bus from '@/utils/bus.js' // 全局事件总线

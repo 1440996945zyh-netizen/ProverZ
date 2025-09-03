@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ElNotification, ElMessageBox, ElMessage, ElLoading } from 'element-plus'
 import { getToken, removeToken, setToken } from '../../utils/auth/token'
 import errorCode from '../../utils/constant/errorCode'
-import { tansParams, blobValidate } from '../../utils/commonFunc/yangyi'
+import { tansParams,  } from '../../utils/common/common'
 import cache from '../../plugins/cache'
 import { saveAs } from 'file-saver'
 import useUserStore from '../../store/modules/user'
@@ -227,5 +227,8 @@ export function download(url, params, filename, config) {
 			downloadLoadingInstance.close()
 		})
 }
-
+// 验证是否为blob格式
+export function blobValidate(data) {
+	return data.type !== 'application/json'
+}
 export default service

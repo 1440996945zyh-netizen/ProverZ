@@ -4,7 +4,7 @@
 
 <script setup>
 import useSettingsStore from '@/store/modules/settings'
-import { handleThemeStyle } from '@/utils/commonFunc/theme'
+import { handleThemeStyle } from '@/utils/common/theme'
 import tableParamsStore from '@/store/modules/tableParams'
 
 onMounted(() => {

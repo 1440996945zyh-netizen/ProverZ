@@ -1,4 +1,4 @@
-import { parseTime } from './commonFunc/yangyi'
+import { parseTime } from './common/day'
 import { pinyin } from './constant/constant'
 
 /**

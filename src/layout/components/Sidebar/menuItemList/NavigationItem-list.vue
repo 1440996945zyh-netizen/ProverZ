@@ -38,7 +38,7 @@
 <script setup>
 import AppLink from '@/layout/components/Sidebar/Link'
 import { isExternal } from '@/utils/verify/validate'
-import { getNormalPath } from '@/utils/commonFunc/yangyi'
+import { getNormalPath } from '@/utils/common/common'
 import useAppStore from '@/store/modules/app'
 import { getCurrentInstance } from 'vue'
 import Star from '../../../../assets/icons/star.png'

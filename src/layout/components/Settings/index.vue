@@ -104,11 +104,11 @@ import variables from '@/assets/styles/variables.module.scss'
 // import originElementPlus from 'element-plus/theme-chalk/index.css'
 import axios from 'axios'
 import { ElLoading, ElMessage } from 'element-plus'
-import { useDynamicTitle } from '@/utils/commonFunc/dynamicTitle'
+import { useDynamicTitle } from '@/utils/common/dynamicTitle'
 import useAppStore from '@/store/modules/app'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
-import { handleThemeStyle } from '@/utils/commonFunc/theme'
+import { handleThemeStyle } from '@/utils/common/theme'
 
 const { proxy } = getCurrentInstance()
 const appStore = useAppStore()

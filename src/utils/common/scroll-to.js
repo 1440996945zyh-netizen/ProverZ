@@ -1,3 +1,14 @@
+/**
+ * @Author: zhangsd
+ * @Date: 2025-09-03 11:35:03
+ * @LastEditTime: 2025-09-03 11:35:03
+ * @LastEditors: zhangsd
+ * @Description: 滚动
+ * @FilePath: D:\YangyiWork\YYFRAMEWORK\view\src\utils\common\scroll-to.js
+ */
+/**
+ * 滚动到指定位置
+ */
 Math.easeInOutQuad = function(t, b, c, d) {
   t /= d / 2
   if (t < 1) {
