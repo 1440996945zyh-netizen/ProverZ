@@ -40,9 +40,9 @@ export function debounce(func, wait, immediate) {
 }
 
 // 表单重置
-export function resetForm(refName) {
-  if (this.$refs[refName]) {
-    this.$refs[refName].resetFields()
+export function resetForm(vm, refName) {
+  if (vm.$refs[refName]) {
+    vm.$refs[refName].resetFields()
   }
 }
 
@@ -145,13 +145,17 @@ export function mergeRecursive(source, target) {
     }
   }
   return source
-}
+} 
 
 // 路径规范化（去除重复斜杠）
 export function getNormalPath(p) {
-  if (p.length === 0 || !p || p === 'undefined') return p
-  let res = p.replace('//', '/')
-  if (res[res.length - 1] === '/') res = res.slice(0, res.length - 1)
+  if (!p || typeof p !== 'string' || p.length === 0) return p
+  // 替换所有连续的斜杠为单个斜杠
+  let res = p.replace(/\/+/g, '/')
+  // 去除结尾的斜杠（根路径除外）
+  if (res.length > 1 && res[res.length - 1] === '/') {
+    res = res.slice(0, res.length - 1)
+  }
   return res
 }
 /**
@@ -160,15 +164,67 @@ export function getNormalPath(p) {
  * @param {Object} propsObj {需要赋值的列的prop：赋值的数据}
  */
 export const setEditTableOptions = (columns, propsObj) => {
-	columns.forEach(item => {
-		if (propsObj[item.prop]) {
-			item.selectData = propsObj[item.prop]
-		}
-	})
+  // 返回新数组，避免修改原数组
+  return columns.map(item => {
+    if (propsObj[item.prop]) {
+      return { ...item, selectData: propsObj[item.prop] }
+    }
+    return { ...item }
+  })
 }
+
+
+export function formatMoney(value) {
+  if (!value && value !== 0) {
+    return '-'
+  }
+  
+  // 处理负数
+  let isNegative = false
+  let num = Number(value)
+  
+  if (isNaN(num)) return '-'
+  if (num < 0) {
+    isNegative = true
+    num = Math.abs(num)
+  }
+  
+  // 格式化数字为两位小数
+  const formatted = num.toFixed(2)
+  
+  // 分割整数和小数部分
+  const [integerPart, decimalPart] = formatted.split('.')
+  
+  // 添加千分位分隔符
+  const integerWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  
+  // 组合结果并处理负数
+  const result = `${integerWithCommas}.${decimalPart}`
+  return isNegative ? `-${result}` : result
+}
+
 /**
- * 深拷贝
+ * 将格式化的金额字符串转换回数字
+ * @param {*} formattedValue 
+ * @returns 
  */
-export const deepClone = v => {
-	return JSON.parse(JSON.stringify(v))
+export function unformatMoney(formattedValue) {
+  // 如果值为空或无效，返回 0
+  if (!formattedValue || formattedValue === '-' || formattedValue === 'N/A') {
+    return 0
+  }
+  
+  // 移除千分位分隔符(逗号)
+  let cleanedValue = String(formattedValue).replace(/,/g, '')
+  
+  // 转换为数字
+  const numericValue = parseFloat(cleanedValue)
+  
+  // 如果转换结果不是数字，返回 0
+  if (isNaN(numericValue)) {
+    console.warn(`无法将 '${formattedValue}' 转换为数字`);
+    return 0;
+  }
+  
+  return numericValue;
 }
