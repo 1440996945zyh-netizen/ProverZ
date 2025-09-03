@@ -162,12 +162,12 @@ export function getRules(rules) {
 		}
 		return array
 		// eslint-disable-next-line no-empty
-	} catch (e) {}
+	} catch (e) { }
 }
 /**
  * 验证邮箱
  */
-const isEmail = (rule, value = rule.cellValue, callback) => {
+export const isEmail = (rule, value = rule.cellValue, callback) => {
 	if (isEmpty(value)) {
 		if (!callback) return
 		callback()
@@ -184,7 +184,7 @@ const isEmail = (rule, value = rule.cellValue, callback) => {
 /**
  * 数字位数验证
  */
-const numberCheck = (rule, value = rule.cellValue, callback) => {
+export const numberCheck = (rule, value = rule.cellValue, callback) => {
 	if (value === null) {
 		if (!callback) return
 		callback()
@@ -253,14 +253,14 @@ const numberCheck = (rule, value = rule.cellValue, callback) => {
  * @param num
  * @returns {string}
  */
-const notGreater = (msg, num) => {
+export const notGreater = (msg, num) => {
 	return msg + '位不能大于' + num + '位'
 }
 
 /**
  * 空验证（trim）
  */
-const isEmptyTrim = value => {
+export const isEmptyTrim = value => {
 	if (value === undefined || value === null || (value + '').trim() === '') {
 		return true
 	}
@@ -270,7 +270,7 @@ const isEmptyTrim = value => {
 /**
  * 半角数字
  */
-const isLong = value => {
+export const isLong = value => {
 	// -01 01 00
 	let reg = /^-?0[0-9]+/
 	if (reg.test(value)) {
@@ -290,7 +290,7 @@ const isLong = value => {
 /**
  * 半角数字
  */
-const isDouble = value => {
+export const isDouble = value => {
 	// -01 01 00
 	let reg = /^-?0[0-9]+/
 	if (reg.test(value)) {
@@ -309,7 +309,7 @@ const isDouble = value => {
 }
 
 // 验证银行卡号
-const isBankCard = (rule, value = rule.cellValue, callback) => {
+ export const isBankCard = (rule, value = rule.cellValue, callback) => {
 	if (isEmpty(value)) {
 		if (!callback) return
 		callback()
@@ -323,7 +323,7 @@ const isBankCard = (rule, value = rule.cellValue, callback) => {
 }
 
 // 手机号码
-const isHandset = (rule, value = rule.cellValue, callback) => {
+ export const isHandset = (rule, value = rule.cellValue, callback) => {
 	if (isEmpty(value)) {
 		if (!callback) return
 		callback()
@@ -337,7 +337,7 @@ const isHandset = (rule, value = rule.cellValue, callback) => {
 }
 
 /* 电话号码*/
-const isTelephone = (rule, value = rule.cellValue, callback) => {
+ export const isTelephone = (rule, value = rule.cellValue, callback) => {
 	if (isEmpty(value)) {
 		if (!callback) return
 		callback()
@@ -353,7 +353,7 @@ const isTelephone = (rule, value = rule.cellValue, callback) => {
 /**
  * 验证身份证
  */
-const isIdCard = (rule, value = rule.cellValue, callback) => {
+ export const isIdCard = (rule, value = rule.cellValue, callback) => {
 	if (isEmpty(value)) {
 		if (!callback) return
 		callback()
@@ -369,7 +369,7 @@ const isIdCard = (rule, value = rule.cellValue, callback) => {
 /**
  * 空验证
  */
-const isEmpty = val => {
+ export const isEmpty = val => {
 	if (val === '' || val === null || val === undefined) {
 		if (val === 0) {
 			return false
@@ -383,167 +383,46 @@ const isEmpty = val => {
  * 通用Msg
  * @type {{number: string, isHandset: string, required: string, long: string}}
  */
-const check_msg = {
+ export const check_msg = {
 	required: '不能为空',
 	number: '请输入数字',
 	long: '请输入整数',
 	handset: '请输入正确的手机号',
 }
-
-/*
-export function isvalidUsername(str) {
-  const valid_map = ['admin', 'editor']
-  return valid_map.indexOf(str.trim()) >= 0
-}
-
-/!* 合法uri*!/
-export function validateURL(textval) {
-  const urlregex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/
-  return urlregex.test(textval)
-}
-
-/!*合并行 *!/
-export function mergeTableRow(data, merge) {
-  if (!merge || merge.length === 0) {
-    return data
-  }
-  merge.forEach((m) => {
-      const mList = {}
-      data = data.map((v, index) => {
-        const rowVal = v[m]
-        if (mList[rowVal] && mList[rowVal].newIndex === index) {
-          mList[rowVal]['num']++
-          mList[rowVal]['newIndex']++
-          data[mList[rowVal]['index']][m + '-span'].rowspan++
-          v[m + '-span'] = {
-            rowspan: 0,
-            colspan: 0
-          }
-        } else {
-          mList[rowVal] = { num: 1, index: index, newIndex: index + 1 }
-          v[m + '-span'] = {
-            rowspan: 1,
-            colspan: 1
-          }
-        }
-        return v
-      })
-    })
-  return data
-
-}
-
-/!* 小写字母*!/
-export function validateLowerCase(str) {
-  const reg = /^[a-z]+$/;
-  return reg.test(str)
-}
-
-/!* 大写字母*!/
-export function validateUpperCase(str) {
-  const reg = /^[A-Z]+$/;
-  return reg.test(str)
-}
-
-/!* 大小写字母*!/
-export function validateAlphabets(str) {
-  const reg = /^[A-Za-z]+$/;
-  return reg.test(str)
-}
-
-/!* 数字与字母*!/
+/* 数字与字母*/
 export function validateAlphanumeric(str, min, max) {
-  const reg = new RegExp('^(?![^A-z]+$)(?!\\D+$)[A-z\\d]{' + min + ',' + max + '}$');
-  return reg.test(str)
+	const reg = new RegExp('^(?![^A-z]+$)(?!\\D+$)[A-z\\d]{' + min + ',' + max + '}$');
+	return reg.test(str)
 }
 
-/!* 可以输入字母、数字*!/
+/* 可以输入字母、数字*/
 export function validateAlphaOrnumeric(str, min, max) {
-  const reg = new RegExp('^[A-z\\d]{' + min + ',' + max + '}$');
-  return reg.test(str)
-}
-
-/!* 首个字母，剩下的数字或字母，数字与字母*!/
-export function validateFirstAlphanumeric(str, min, max) {
-  const reg = new RegExp('^[a-zA-Z](?!\\D+$)[A-z\\d]{' + (min - 1) + ',' + (max - 1) + '}$');
-  return reg.test(str)
+	const reg = new RegExp('^[A-z\\d]{' + min + ',' + max + '}$');
+	return reg.test(str)
 }
 
 /* 电话号码*/
-/* export function validatePhone(str) {
-  const reg = /^((0\d{2,3})-)?(\d{7,8})(-(\d{3,4}))?$/;
-  return reg.test(str)
+export function validatePhone(str) {
+	const reg = /^((0\d{2,3})-)?(\d{7,8})(-(\d{3,4}))?$/;
+	return reg.test(str)
 }
-
-/!* 邮箱*!/
+/* 邮箱*/
 export function validatePostbox(str) {
-  const reg = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/;
-  return reg.test(str)
+	const reg = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/;
+	return reg.test(str)
 }
-
-/!* 版本号*!/
+/* 版本号*/
 export function validateVersion(str) {
-  const reg = /^\d+\.\d+\.\d+$/;
-  return reg.test(str)
-}*/
-
-/* 格式化时间*/
-/* export function formattingTime(str, boot) {
-  if (!str) return ' ';
-  if (typeof str !== 'number') { return str; }
-  const datee = new Date(str).toJSON();
-  const date = new Date(+new Date(datee) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '');
-  return boot ? date.split(' ')[0] : date;
-}*/
-
-/**
- * validate email
- * @param email
- * @returns {boolean}
- */
-/* export function validateEmail(email) {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  return re.test(email)
-}*/
-
-/*
- * 金额
- * 小数点只能输入9位数，点后面2位
- * */
-/* export function validateMoney(money) {
-  const reg = /^(\d{0,5}.\d{0,3})(\.\d{1,2})?$/;
-  return reg.test(money)
-}*/
-
-/*
- * 比例 100
- * */
-/* export function validateRatio(ratio) {
-  /!* var le=/^(\d{0,3}.\d{0,3})(\.\d{1,2})?$/!*!/
-  const reg = /^((\d|[1-9]\d|100)|.)(\.\d{1,2})?$/;
-  return reg.test(ratio)
-}*/
-/* export function validateRatioContinuous(e) {
-  let inl = e;
-  if (e !== '') {
-    inl = String(e).indexOf('.');
-    if (String(e * 1).indexOf('.') === inl) {
-      inl = e * 1;
-    } else {
-      inl = e
-    }
-  }
-  inl * 1 > 100 ? inl = '100.00' : inl
-  return inl;
-}*/
+	const reg = /^\d+\.\d+\.\d+$/;
+	return reg.test(str)
+}
 /*
  *  校验IP
  * */
-/* export function isValidIP(ip) {
-  const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
-  return reg.test(ip);
-}*/
-
+export function isValidIP(ip) {
+	const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+	return reg.test(ip);
+}
 /**
  * 
  * @param {*} type 
@@ -583,7 +462,7 @@ export function fileTypeback(type, file) {
 /*
  *  校验上传文件
  * */
-const validUploadFile = (type, file) => {
+export const validUploadFile = (type, file) => {
 	const typeStr = []
 	if (!type) {
 		type = 'img'

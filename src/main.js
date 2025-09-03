@@ -43,8 +43,9 @@ import {
   handleTree,
   setFormData,
   setEditTableOptions,
-  deepClone,
+
 } from '@/utils/common/common'
+import {  deepClone,} from '@/utils/common/data'
 import { parseTime } from '@/utils/common/day'
 import {
   selectDictLabel,

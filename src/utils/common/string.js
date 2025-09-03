@@ -9,7 +9,7 @@
 /**
  * 字符串处理工具（格式化、URL、拼音等）
  */
-import { pinyin } from './constant/constant'
+import { pinyin } from '../constant/constant'
 
 // 字符串格式化（%s占位符）
 export function sprintf(str) {
