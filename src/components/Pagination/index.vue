@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { scrollTo } from '../../utils/commonFunc/scroll-to'
+import { scrollTo } from '../../utils/common/scroll-to'
 import { computed } from 'vue'
 const props = defineProps({
 	total: {

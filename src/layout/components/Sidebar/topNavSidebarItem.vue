@@ -20,7 +20,7 @@
 import { computed, ref } from 'vue'
 import { isExternal } from '@/utils/verify/validate'
 import AppLink from './Link'
-import { getNormalPath } from '@/utils/commonFunc/yangyi'
+import { getNormalPath } from '@/utils/common/common'
 
 // 定义清晰的props类型和默认值
 const props = defineProps({

@@ -6,9 +6,9 @@ import ElementPlus from 'element-plus'
 import locale from 'element-plus/dist/locale/zh-cn.mjs'
 import 'element-plus/dist/index.css'
 import VxeUIAll from 'vxe-pc-ui'
-            import 'vxe-pc-ui/es/style.css'
-      import VxeUITable from 'vxe-table'
-            import 'vxe-table/es/style.css'
+import 'vxe-pc-ui/es/style.css'
+import VxeUITable from 'vxe-table'
+import 'vxe-table/es/style.css'
 
 import '@/assets/styles/index.scss' // global css
 import './assets/newIconFonts/iconfont.css' // iconfont
@@ -35,19 +35,21 @@ import { ElMessage } from 'element-plus'
 
 import './permission' // permission control
 
-import { useDict } from '@/utils/commonFunc/dict'
+import { useDict } from '@/utils/common/dict'
 import verify from '@/utils/verify/verify'
 import {
-	parseTime,
-	resetForm,
-	addDateRange,
-	handleTree,
-	selectDictLabel,
-	selectDictLabels,
-	setFormData,
-	setEditTableOptions,
-	deepClone,
-} from '@/utils/commonFunc/yangyi'
+  resetForm,
+  addDateRange,
+  handleTree,
+  setFormData,
+  setEditTableOptions,
+  deepClone,
+} from '@/utils/common/common'
+import { parseTime } from '@/utils/common/day'
+import {
+  selectDictLabel,
+  selectDictLabels,
+} from '@/utils/common/dict'
 import { getRules } from '@/utils/verify/validate.js'
 import { resetObj } from '@/utils/index.js'
 import $bus from '@/utils/bus.js'
@@ -106,7 +108,7 @@ app.component('svg-icon', SvgIcon)
 // 在 main.js 或入口文件中
 Number.prototype._toFixed = Number.prototype.toFixed; // 备份原方法
 
-Number.prototype.toFixed = function (n ) {
+Number.prototype.toFixed = function (n) {
   //console.log("精度计算")
   // 处理边界情况
   if (n === undefined || n < 0 || n > 20) {
@@ -116,7 +118,7 @@ Number.prototype.toFixed = function (n ) {
   // 使用科学计数法避免浮点误差
   const power = 10 ** (n + 1); // 放大到 n+1 位
   // 添加极小修正值（避免浮点误差干扰）
-  let rounded = ((num * power+0.1) / power);
+  let rounded = ((num * power + 0.1) / power);
   return rounded._toFixed(n)
 };
 
@@ -124,9 +126,9 @@ directive(app)
 
 // 使用element-plus 并且设置全局的大小
 app.use(ElementPlus, {
-	locale: locale,
-	// 支持 large、default、small
-	size: Cookies.get('size') || 'default',
+  locale: locale,
+  // 支持 large、default、small
+  size: Cookies.get('size') || 'default',
 })
 app.use(VxeUIAll)
 app.use(VxeUITable)

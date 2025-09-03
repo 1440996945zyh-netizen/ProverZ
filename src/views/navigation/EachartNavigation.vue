@@ -8,7 +8,7 @@
 import { ref, onMounted, watch, onUnmounted, defineEmits, nextTick, getCurrentInstance } from 'vue'
 import * as echarts from 'echarts'
 import { isExternal } from '@/utils/verify/validate'
-import { getNormalPath } from '@/utils/commonFunc/yangyi'
+import { getNormalPath } from '@/utils/common/common'
 import router from '@/router'
 // 定义要向父组件发射的事件
 const emit = defineEmits(['menuClick', 'labelClick'])

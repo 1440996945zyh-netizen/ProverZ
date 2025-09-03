@@ -20,7 +20,7 @@
 
 <script setup>
 import Fuse from 'fuse.js'
-import { getNormalPath } from '@/utils/commonFunc/yangyi'
+import { getNormalPath } from '@/utils/common/common'
 import { isHttp } from '@/utils/verify/validate'
 import usePermissionStore from '@/store/modules/permission'
 

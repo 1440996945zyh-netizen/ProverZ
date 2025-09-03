@@ -1,3 +1,13 @@
+
+/**
+ * @Author: zhangsd
+ * @Date: 2025-09-03 11:00:59
+ * @LastEditTime: 2025-09-03 11:00:59
+ * @LastEditors: zhangsd
+ * @Description: 数学运算+金额
+ * @FilePath: D:\YangyiWork\YYFRAMEWORK\view\src\utils\commonFunc\math.js
+ */
+
 let math = {
     // 加法运算
     numAdd(num1, num2) {
