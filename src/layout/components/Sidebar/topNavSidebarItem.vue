@@ -18,9 +18,9 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { isExternal } from '@/utils/validate'
+import { isExternal } from '@/utils/verify/validate'
 import AppLink from './Link'
-import { getNormalPath } from '@/utils/yangyi'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 
 // 定义清晰的props类型和默认值
 const props = defineProps({
@@ -37,7 +37,6 @@ const props = defineProps({
 		type: String,
 		default: '',
 	},
-	
 })
 
 // 定义事件
@@ -138,9 +137,8 @@ function handleMenuClick() {
 :deep(.el-menu-item.is-active) {
 	font-weight: 500;
 }
-svg-icon{
+svg-icon {
 	width: 1.25em;
 	height: 1.25em;
 }
 </style>
-    

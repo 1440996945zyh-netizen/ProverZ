@@ -37,13 +37,13 @@
 </template>
 <script setup>
 import AppLink from '@/layout/components/Sidebar/Link'
-import { isExternal } from '@/utils/validate'
-import { getNormalPath } from '@/utils/yangyi'
+import { isExternal } from '@/utils/verify/validate'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 import useAppStore from '@/store/modules/app'
 import { getCurrentInstance } from 'vue'
 import Star from '../../../../assets/icons/star.png'
 import FullStar from '../../../../assets/icons/full-star.png'
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 import usePermissionStore from '@/store/modules/permission'
 const permissionStore = usePermissionStore()
 const sidebarRouters = computed(() => permissionStore.sidebarRouters.filter(i => i.hidden == false))

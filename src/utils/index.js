@@ -1,8 +1,10 @@
-import { parseTime } from './yangyi'
-import { pinyin } from './constant'
+import { parseTime } from './commonFunc/yangyi'
+import { pinyin } from './constant/constant'
 
 /**
  * 表格时间格式化
+ * yyyy-MM-dd hh:mm:ss格式
+ * @param {*} cellValue
  */
 export function formatDate(cellValue) {
 	if (cellValue == null || cellValue == '') return ''
@@ -20,6 +22,12 @@ export function formatDate(cellValue) {
  * @param {number} time
  * @param {string} option
  * @returns {string}
+ * 系统时间与传入时间差值小于30秒则返回“刚刚”
+ * 大于30秒小于1小时则返回xx分钟前
+ * 大于1小时小于24小时则返回xx小时前
+ * 大于24小数小于48小时返回一天前
+ * 如果都不满足则返回传入时间，格式为传入的option
+ * 
  */
 export function formatTime(time, option) {
 	if (('' + time).length === 10) {
@@ -49,6 +57,17 @@ export function formatTime(time, option) {
 	}
 }
 
+/**
+ * 
+ * 根据传入的时间戳，返回一个时间字符串
+ * 示例：
+ * 使用默认格式（秒级时间戳）parseDate(1684132225) 
+ * 输出："2023-05-15 14:30:25"（假设时间戳对应此时间）
+ * 自定义格式（毫秒级时间戳）parseDate(1684132225000, '{yyyy}年{mm}月{dd}日 星期{a}') 
+ * 输出："2023年05月15日 星期一"
+ * 传入Date对象 parseDate(new Date(), '{hh}:{ii}:{ss}') 
+ * 输出："14:30:25"（当前时间的时分秒）
+ */
 export function parseDate(time, cFormat) {
 	if (!time) {
 	  return ''
@@ -84,11 +103,12 @@ export function parseDate(time, cFormat) {
   }
 /**
  * 格式化金额
+ * 每三位用一个逗号隔开
+ * 保留两位小数
  * @param value
  * @returns {string|boolean}
  */
 export function formatMoney(value) {
-	console.log(value, 'value')
 	if (!value) {
 		return '-'
 	}
@@ -367,6 +387,8 @@ export const resetObj = obj => {
 /**
  * @param {string} url
  * @returns {Object}
+ * 解析 URL 中的查询参数
+ * 并将其转换为键值对形式的 JavaScript 对象，方便获取 URL 中携带的参数。
  */
 export function getQueryObject(url) {
 	url = url == null ? window.location.href : url
@@ -386,6 +408,7 @@ export function getQueryObject(url) {
 /**
  * @param {string} input value
  * @returns {number} output value
+ * 计算UTF-8 编码下字符串的字节长度
  */
 export function byteLength(str) {
 	// returns the byte length of an utf8 string
@@ -402,6 +425,7 @@ export function byteLength(str) {
 /**
  * @param {Array} actual
  * @returns {Array}
+ * 清除数组中的空元素
  */
 export function cleanArray(actual) {
 	const newArray = []
@@ -416,6 +440,7 @@ export function cleanArray(actual) {
 /**
  * @param {Object} json
  * @returns {Array}
+ * 将 JavaScript 对象转换为 URL 查询参数字符串（如 key1=value1&key2=value2）
  */
 export function param(json) {
 	if (!json) return ''
@@ -430,6 +455,7 @@ export function param(json) {
 /**
  * @param {string} url
  * @returns {Object}
+ * 将 URL 中的查询参数字符串解析为 JavaScript 对象
  */
 export function param2Obj(url) {
 	const search = decodeURIComponent(url.split('?')[1]).replace(/\+/g, ' ')
@@ -452,6 +478,7 @@ export function param2Obj(url) {
 /**
  * @param {string} val
  * @returns {string}
+ * 将 HTML 字符串转换为纯文本，即移除 HTML 标签，只保留其中的文本内容
  */
 export function html2Text(val) {
 	const div = document.createElement('div')
@@ -464,6 +491,10 @@ export function html2Text(val) {
  * @param {Object} target
  * @param {(Object|Array)} source
  * @returns {Object}
+ * 深度合并两个对象
+ * 将源对象（source）的属性合并到目标对象（target）中
+ * 支持嵌套对象的递归合并。
+ * 与简单的浅拷贝不同，它会处理嵌套的对象结构，而不是直接覆盖。
  */
 export function objectMerge(target, source) {
 	if (typeof target !== 'object') {
@@ -486,6 +517,7 @@ export function objectMerge(target, source) {
 /**
  * @param {HTMLElement} element
  * @param {string} className
+ * 如果元素已经包含该类名，则移除它；如果不包含，则添加它。
  */
 export function toggleClass(element, className) {
 	if (!element || !className) {
@@ -504,6 +536,8 @@ export function toggleClass(element, className) {
 /**
  * @param {string} type
  * @returns {Date}
+ * 返回90 天前的当前时间戳（毫秒级）start
+ * 返回当前时间戳（毫秒级）
  */
 export function getTime(type) {
 	if (type === 'start') {
@@ -518,6 +552,7 @@ export function getTime(type) {
  * @param {number} wait
  * @param {boolean} immediate
  * @return {*}
+ * 防抖 const debouncedSearch = debounce(fetchSearchResults, 500, false);
  */
 export function debounce(func, wait, immediate) {
 	let timeout, args, context, timestamp, result
@@ -560,6 +595,7 @@ export function debounce(func, wait, immediate) {
  * If you want to use a perfect deep copy, use lodash's _.cloneDeep
  * @param {Object} source
  * @returns {Object}
+ * 深度复制对象（递归）
  */
 export function deepClone(source) {
 	if (!source && typeof source !== 'object') {
@@ -590,6 +626,7 @@ export function createUniqueString() {
  * @param {HTMLElement} elm
  * @param {string} cls
  * @returns {boolean}
+ * 判断某个元素是否包含某个class
  */
 export function hasClass(ele, cls) {
 	return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
@@ -599,6 +636,7 @@ export function hasClass(ele, cls) {
  * Add class to element
  * @param {HTMLElement} elm
  * @param {string} cls
+ * 给元素新增一个class
  */
 export function addClass(ele, cls) {
 	if (!hasClass(ele, cls)) ele.className += ' ' + cls
@@ -608,6 +646,7 @@ export function addClass(ele, cls) {
  * Remove class from element
  * @param {HTMLElement} elm
  * @param {string} cls
+ * 删除元素中的class
  */
 export function removeClass(ele, cls) {
 	if (hasClass(ele, cls)) {
@@ -616,6 +655,17 @@ export function removeClass(ele, cls) {
 	}
 }
 
+/**
+ * 
+ * @param {*} str 
+ * @param {*} expectsLowerCase 
+ * @returns 
+ * 生成检查函数：判断值是否在 ["name", "age", "gender"] 中
+ * const isUserField = makeMap("name,age,gender", false);
+ * isUserField("name"); // true（存在）
+ * isUserField("Name"); // false（大小写不同，严格区分）
+ * isUserField("email"); // false（不存在）
+ */
 export function makeMap(str, expectsLowerCase) {
 	const map = Object.create(null)
 	const list = str.split(',')

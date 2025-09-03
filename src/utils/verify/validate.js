@@ -28,6 +28,7 @@ export function validUsername(str) {
 /**
  * @param {string} url
  * @returns {Boolean}
+ * 判断输入的字符串是否符合标准 URL 的结构
  */
 export function validURL(url) {
 	const reg =
@@ -38,6 +39,7 @@ export function validURL(url) {
 /**
  * @param {string} str
  * @returns {Boolean}
+ * 验证字符串是否仅包含小写字母
  */
 export function validLowerCase(str) {
 	const reg = /^[a-z]+$/
@@ -47,6 +49,7 @@ export function validLowerCase(str) {
 /**
  * @param {string} str
  * @returns {Boolean}
+ * 验证字符串是否仅包含大写字母
  */
 export function validUpperCase(str) {
 	const reg = /^[A-Z]+$/
@@ -56,6 +59,7 @@ export function validUpperCase(str) {
 /**
  * @param {string} str
  * @returns {Boolean}
+ * 验证字符串是否仅包含字母
  */
 export function validAlphabets(str) {
 	const reg = /^[A-Za-z]+$/
@@ -65,6 +69,7 @@ export function validAlphabets(str) {
 /**
  * @param {string} email
  * @returns {Boolean}
+ * 验证邮箱是否有效
  */
 export function validEmail(email) {
 	const reg =
@@ -75,6 +80,7 @@ export function validEmail(email) {
 /**
  * @param {string} str
  * @returns {Boolean}
+ * 验证是否为字符串
  */
 export function isString(str) {
 	if (typeof str === 'string' || str instanceof String) {
@@ -86,6 +92,7 @@ export function isString(str) {
 /**
  * @param {Array} arg
  * @returns {Boolean}
+ * 验证是否为数组
  */
 export function isArray(arg) {
 	if (typeof Array.isArray === 'undefined') {
@@ -537,6 +544,13 @@ export function validateVersion(str) {
   return reg.test(ip);
 }*/
 
+/**
+ * 
+ * @param {*} type 
+ * @param {*} file 
+ * 判断该文件属于哪种具体的类型类别
+ * @returns 
+ */
 export function fileTypeback(type, file) {
 	const typeStr = []
 	if (!type) {

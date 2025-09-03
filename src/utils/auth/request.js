@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { ElNotification, ElMessageBox, ElMessage, ElLoading } from 'element-plus'
-import { getToken, removeToken, setToken } from '../utils/auth'
-import errorCode from '../utils/errorCode'
-import { tansParams, blobValidate } from '../utils/yangyi'
-import cache from '../plugins/cache'
+import { getToken, removeToken, setToken } from '../../utils/auth/token'
+import errorCode from '../../utils/constant/errorCode'
+import { tansParams, blobValidate } from '../../utils/commonFunc/yangyi'
+import cache from '../../plugins/cache'
 import { saveAs } from 'file-saver'
-import useUserStore from '../store/modules/user'
+import useUserStore from '../../store/modules/user'
 import router from '@/router/index'
 let downloadLoadingInstance
 // 是否显示重新登录

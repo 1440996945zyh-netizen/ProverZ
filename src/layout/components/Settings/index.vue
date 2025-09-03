@@ -104,11 +104,11 @@ import variables from '@/assets/styles/variables.module.scss'
 // import originElementPlus from 'element-plus/theme-chalk/index.css'
 import axios from 'axios'
 import { ElLoading, ElMessage } from 'element-plus'
-import { useDynamicTitle } from '@/utils/dynamicTitle'
+import { useDynamicTitle } from '@/utils/commonFunc/dynamicTitle'
 import useAppStore from '@/store/modules/app'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
-import { handleThemeStyle } from '@/utils/theme'
+import { handleThemeStyle } from '@/utils/commonFunc/theme'
 
 const { proxy } = getCurrentInstance()
 const appStore = useAppStore()
@@ -124,7 +124,7 @@ const predefineColors = ref(['#409EFF', '#ff4500', '#ff8c00', '#ffd700', '#90ee9
 const topNav = computed({
 	get: () => storeSettings.value.topNav,
 	set: val => {
-		console.log(val,'val');
+		console.log(val, 'val')
 		settingsStore.changeSetting({ key: 'topNav', value: val })
 		if (!val) {
 			appStore.toggleSideBarHide(false)

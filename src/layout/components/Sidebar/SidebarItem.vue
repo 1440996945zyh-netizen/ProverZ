@@ -8,9 +8,9 @@
 					<svg-icon
 						v-if="(item.meta && item.meta.icon) || onlyOneChild.meta.icon"
 						:icon-class="onlyOneChild.meta.icon || (item.meta && item.meta.icon)"
-						style="font-size: 28px;" 
+						style="font-size: 28px"
 					/>
-					
+
 					<template #title>
 						<span class="menu-title" :title="hasTitle(onlyOneChild.meta.title)">
 							{{ onlyOneChild.meta.title }}
@@ -39,9 +39,9 @@
 </template>
 
 <script setup>
-import { isExternal } from '@/utils/validate'
+import { isExternal } from '@/utils/verify/validate'
 import AppLink from './Link'
-import { getNormalPath } from '@/utils/yangyi'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 
 const props = defineProps({
 	// route object
@@ -57,7 +57,6 @@ const props = defineProps({
 		type: String,
 		default: '',
 	},
-
 })
 
 const onlyOneChild = ref({})
@@ -113,7 +112,7 @@ function hasTitle(title) {
 }
 </script>
 <style lang="scss" scoped>
-svg-icon{
+svg-icon {
 	width: 1.25em;
 	height: 1.25em;
 }

@@ -24,8 +24,8 @@ import directive from './directive' // directive
 
 // 注册指令
 import plugins from './plugins' // plugins
-import { download } from '@/utils/request'
-import request from '@/utils/request'
+import { download } from '@/utils/auth/request'
+import request from '@/utils/auth/request'
 
 // svg图标
 import 'virtual:svg-icons-register'
@@ -35,8 +35,8 @@ import { ElMessage } from 'element-plus'
 
 import './permission' // permission control
 
-import { useDict } from '@/utils/dict'
-import verify from '@/utils/verify'
+import { useDict } from '@/utils/commonFunc/dict'
+import verify from '@/utils/verify/verify'
 import {
 	parseTime,
 	resetForm,
@@ -47,8 +47,8 @@ import {
 	setFormData,
 	setEditTableOptions,
 	deepClone,
-} from '@/utils/yangyi'
-import { getRules } from '@/utils/validate.js'
+} from '@/utils/commonFunc/yangyi'
+import { getRules } from '@/utils/verify/validate.js'
 import { resetObj } from '@/utils/index.js'
 import $bus from '@/utils/bus.js'
 // 分页组件

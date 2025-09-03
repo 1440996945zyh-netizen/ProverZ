@@ -1,3 +1,8 @@
+/**
+ * cookies缓存存储数据
+ * 方法：get、set、remove
+ * 
+ */
 import Cookies from 'js-cookie'
 
 const TokenKey = 'Admin-Token'
@@ -13,3 +18,4 @@ export function setToken(token) {
 export function removeToken() {
   return Cookies.remove(TokenKey)
 }
+

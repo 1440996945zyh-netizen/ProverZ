@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { scrollTo } from '../../utils/scroll-to'
+import { scrollTo } from '../../utils/commonFunc/scroll-to'
 import { computed } from 'vue'
 const props = defineProps({
 	total: {
@@ -114,7 +114,7 @@ function handleCurrentChange(val) {
 	align-items: center;
 	// margin-right: 10px;
 	min-width: 140px; /* 确保有足够宽度 */
-	
+
 	select {
 		min-width: 80px; /* 确保选择器有足够宽度 */
 		padding: 5px;
@@ -132,7 +132,7 @@ function handleCurrentChange(val) {
 		min-width: auto;
 		margin-right: 5px;
 	}
-	
+
 	.pagination-container {
 		padding: 10px 5px;
 	}

@@ -43,7 +43,7 @@
 <script setup>
 import { getCodeImg } from '@/api/login'
 import Cookies from 'js-cookie'
-import { encrypt, decrypt } from '@/utils/jsencrypt'
+import { encrypt, decrypt } from '@/utils/auth/jsencrypt'
 import useUserStore from '@/store/modules/user'
 
 const userStore = useUserStore()
@@ -106,7 +106,7 @@ function handleLogin() {
 					}
 				})
 				.catch(() => {
-						loginForm.value.passwd = decrypt(loginForm.value.passwd)
+					loginForm.value.passwd = decrypt(loginForm.value.passwd)
 
 					loading.value = false
 					// 重新获取验证码

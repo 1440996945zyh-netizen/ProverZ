@@ -85,13 +85,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppLink from '@/layout/components/Sidebar/Link'
-import { isExternal } from '@/utils/validate'
-import { getNormalPath } from '@/utils/yangyi'
+import { isExternal } from '@/utils/verify/validate'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 import { getCurrentInstance } from 'vue'
 import { ArrowDownBold, ArrowRightBold } from '@element-plus/icons-vue'
 import Star from '../../../../assets/icons/star.png'
 import FullStar from '../../../../assets/icons/full-star.png'
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 import usePermissionStore from '@/store/modules/permission'
 
 const permissionStore = usePermissionStore()

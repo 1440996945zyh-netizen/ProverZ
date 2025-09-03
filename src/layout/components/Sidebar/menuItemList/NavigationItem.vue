@@ -69,11 +69,11 @@
 // 脚本部分保持不变
 import { ref, computed, onMounted } from 'vue'
 import AppLink from '@/layout/components/Sidebar/Link'
-import { isExternal } from '@/utils/validate'
-import { getNormalPath } from '@/utils/yangyi'
+import { isExternal } from '@/utils/verify/validate'
+import { getNormalPath } from '@/utils/commonFunc/yangyi'
 import useAppStore from '@/store/modules/app'
 import { getCurrentInstance } from 'vue'
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 import usePermissionStore from '@/store/modules/permission'
 import Star from '@/assets/icons/star.png'
 import FullStar from '@/assets/icons/full-star.png'
@@ -216,21 +216,21 @@ const handleMenuSelect = menuItem => {
 	const path = resolvePath(menuItem.path, menuItem.meta?.query)
 	console.log(path)
 	if (path) {
-    if(menuItem.isFrame == 0){
-      // 构建完整的URL，包含noLayout参数
-      const fullUrl = new URL(path, window.location.origin)
-      fullUrl.searchParams.set('noLayout', 'true')
+		if (menuItem.isFrame == 0) {
+			// 构建完整的URL，包含noLayout参数
+			const fullUrl = new URL(path, window.location.origin)
+			fullUrl.searchParams.set('noLayout', 'true')
 
-      // 在新标签页中打开
-      const newWindow = window.open(fullUrl.toString(), '_blank')
-      if (newWindow) {
-        newWindow.focus()
-        proxy.$bus.emit('closeMask')
-      }
-    }else{
-      proxy.$router.push(path)
-      proxy.$bus.emit('closeMask')
-    }
+			// 在新标签页中打开
+			const newWindow = window.open(fullUrl.toString(), '_blank')
+			if (newWindow) {
+				newWindow.focus()
+				proxy.$bus.emit('closeMask')
+			}
+		} else {
+			proxy.$router.push(path)
+			proxy.$bus.emit('closeMask')
+		}
 	}
 }
 /**
