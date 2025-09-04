@@ -174,51 +174,71 @@ export const setEditTableOptions = (columns, propsObj) => {
 }
 
 
-export function formatMoney(value) {
-  if (!value && value !== 0) {
+/**
+ * 格式化金额，支持自定义保留的小数位数
+ * @param {number|string} value - 要格式化的金额数值
+ * @param {number} [precision=2] - 保留的小数位数，默认为2位
+ * @returns {string} 格式化后的金额字符串
+ */
+export function formatMoney(value, precision = 2) {
+  // 处理空值或无效值
+  if (value === null || value === undefined || value === '') {
     return '-'
   }
   
-  // 处理负数
-  let isNegative = false
-  let num = Number(value)
+  // 验证小数位数参数，确保是有效的非负整数
+  const decimalDigits = Math.max(0, Math.floor(Number(precision))) ?? 2;
   
-  if (isNaN(num)) return '-'
+  // 处理负数
+  let isNegative = false;
+  let num = Number(value);
+  
+  if (isNaN(num)) return '-';
   if (num < 0) {
-    isNegative = true
-    num = Math.abs(num)
+    isNegative = true;
+    num = Math.abs(num);
   }
   
-  // 格式化数字为两位小数
-  const formatted = num.toFixed(2)
+  // 格式化数字为指定小数位数
+  const formatted = num.toFixed(decimalDigits);
   
   // 分割整数和小数部分
-  const [integerPart, decimalPart] = formatted.split('.')
+  const parts = formatted.split('.');
+  const integerPart = parts[0];
+  const decimalPart = parts[1] || '';
   
   // 添加千分位分隔符
-  const integerWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  const integerWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   
-  // 组合结果并处理负数
-  const result = `${integerWithCommas}.${decimalPart}`
-  return isNegative ? `-${result}` : result
+  // 组合结果（重点修复0位小数的显示问题）
+  let result;
+  if (decimalDigits === 0) {
+    // 0位小数时不显示小数点和小数部分
+    result = integerWithCommas;
+  } else {
+    // 有小数位时才显示小数点和小数部分
+    result = `${integerWithCommas}.${decimalPart}`;
+  }
+  
+  return isNegative ? `-${result}` : result;
 }
 
 /**
  * 将格式化的金额字符串转换回数字
- * @param {*} formattedValue 
- * @returns 
+ * @param {string} formattedValue - 格式化的金额字符串
+ * @returns {number} 转换后的数字
  */
 export function unformatMoney(formattedValue) {
   // 如果值为空或无效，返回 0
   if (!formattedValue || formattedValue === '-' || formattedValue === 'N/A') {
-    return 0
+    return 0;
   }
   
   // 移除千分位分隔符(逗号)
-  let cleanedValue = String(formattedValue).replace(/,/g, '')
+  let cleanedValue = String(formattedValue).replace(/,/g, '');
   
   // 转换为数字
-  const numericValue = parseFloat(cleanedValue)
+  const numericValue = parseFloat(cleanedValue);
   
   // 如果转换结果不是数字，返回 0
   if (isNaN(numericValue)) {
