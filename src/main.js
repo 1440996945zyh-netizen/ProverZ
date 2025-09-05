@@ -10,6 +10,13 @@ import 'vxe-pc-ui/es/style.css'
 import VxeUITable from 'vxe-table'
 import 'vxe-table/es/style.css'
 
+
+import { hiPrintPlugin } from 'vue-plugin-hiprint'
+// 样式
+import "./assets/styles/hiprint.css"
+import "./assets/styles/print-lock.css"
+hiPrintPlugin.disAutoConnect() // 取消自动连接直接打印客户端
+
 import '@/assets/styles/index.scss' // global css
 import './assets/newIconFonts/iconfont.css' // iconfont
 import './assets/home_icon/font_icon/iconfont.css' // iconfont
@@ -45,7 +52,7 @@ import {
   setEditTableOptions,
 
 } from '@/utils/common/common'
-import {  deepClone,} from '@/utils/common/data'
+import { deepClone, } from '@/utils/common/data'
 import { parseTime } from '@/utils/common/day'
 import {
   selectDictLabel,
@@ -103,6 +110,7 @@ app.component('Editor', Editor)
 app.use(router)
 app.use(store)
 app.use(plugins)
+app.use(hiPrintPlugin)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
 

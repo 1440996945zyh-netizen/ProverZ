@@ -40,9 +40,9 @@ export function debounce(func, wait, immediate) {
 }
 
 // 表单重置
-export function resetForm(vm, refName) {
-  if (vm.$refs[refName]) {
-    vm.$refs[refName].resetFields()
+export function resetForm(refName) {
+  if (this.$refs[refName]) {
+    this.$refs[refName].resetFields()
   }
 }
 
