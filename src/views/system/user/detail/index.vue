@@ -79,15 +79,13 @@
 						<el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
 					</el-form-item>
 				</el-col>
-
-				<el-col :span="12">
-					<el-form-item label="单位类型" prop="unitTypeCode">
-						<Select v-model:value="formData.unitTypeCode" v-model:label="formData.unitTypeName" />
-					</el-form-item>
-				</el-col>
 				<el-col :span="12">
 					<el-form-item label="岗位" prop="postCode">
-						<Select v-model:value="formData.postCode" v-model:label="formData.postName" />
+						<Select
+							:dataConfig="{ params: { type: 'DICT', dictType: 'POST' } }"
+							v-model:value="formData.postCode"
+							v-model:label="formData.postName"
+						/>
 					</el-form-item>
 				</el-col>
 				<el-col :span="24">
