@@ -4,17 +4,17 @@
 			<el-collapse-item title="基本信息" name="1">
 				<!-- 基本信息 -->
 				<el-row :gutter="20" style="margin-left: 0px">
-					<el-col :span="8">
+					<el-col :span="6">
 						<el-form-item prop="roleCode" label="角色编号">
 							<el-input v-model="form.roleCode" placeholder="请输入角色代码" />
 						</el-form-item>
 					</el-col>
-					<el-col :span="8">
+					<el-col :span="6">
 						<el-form-item label="角色名称" prop="roleName">
 							<el-input v-model="form.roleName" placeholder="请输入角色名称" />
 						</el-form-item>
 					</el-col>
-					<el-col :span="8">
+					<el-col :span="6">
 						<el-form-item label="状态">
 							<el-radio-group v-model="form.status">
 								<el-radio key="0" label="0">停用</el-radio>
@@ -22,21 +22,21 @@
 							</el-radio-group>
 						</el-form-item>
 					</el-col>
-					<el-col :span="8">
+					<el-col :span="6">
 						<el-form-item label="角色顺序" prop="roleSort">
 							<el-input-number v-model="form.roleSort" controls-position="right" :min="0" style="width: 100%" />
 						</el-form-item>
 					</el-col>
-					<el-col :span="8">
+					<!-- <el-col :span="8">
 						<el-form-item label="角色类别" prop="roleClass">
-              <el-input v-model="form.roleClass" placeholder="请输入角色类别" />
+							<el-input v-model="form.roleClass" placeholder="请输入角色类别" />
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
 						<el-form-item label="部门名称" prop="deptName">
-              <el-input v-model="form.deptName" placeholder="请输入部门名称" />
+							<el-input v-model="form.deptName" placeholder="请输入部门名称" />
 						</el-form-item>
-					</el-col>
+					</el-col> -->
 					<el-col :span="24">
 						<el-form-item label="备注" prop="remark">
 							<el-input
@@ -51,7 +51,7 @@
 			</el-collapse-item>
 			<!-- 权限信息 -->
 			<el-row>
-				<el-tabs type="border-card" style="width: 100%" v-model="tabSelectedName">
+				<el-tabs type="border-card" style="width: 100%; min-height: 500px; padding-left: 0 !important" v-model="tabSelectedName">
 					<el-tab-pane label="功能权限分配" name="menuTab">
 						<el-checkbox v-model="menuExpand" @change="handleCheckedTreeExpand($event, 'menu')">展开/折叠</el-checkbox>
 						<el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
@@ -73,7 +73,7 @@
 						<el-form-item label="权限范围">
 							<el-radio-group v-model="form.dataScope">
 								<el-radio key="1" label="1">全部</el-radio>
-								<el-radio key="2" label="2">自定义</el-radio>
+								<!-- <el-radio key="2" label="2">自定义</el-radio> -->
 								<el-radio key="3" label="3">本部门</el-radio>
 								<el-radio key="4" label="4">本部门及以下</el-radio>
 								<el-radio key="5" label="5">仅本人</el-radio>
@@ -132,9 +132,9 @@ const form = ref({
 	menuCheckStrictly: true,
 	deptCheckStrictly: false,
 	remark: '',
-  roleClass:'',
-  deptName:'',
-  })
+	roleClass: '',
+	deptName: '',
+})
 // 验证
 const rules = reactive({
 	roleName: proxy.getRules({

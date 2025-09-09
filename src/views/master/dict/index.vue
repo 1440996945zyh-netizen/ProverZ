@@ -36,17 +36,16 @@
 <script setup name="dict">
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ref, reactive } from 'vue'
-import { ElButton,ElTag } from 'element-plus'
+import { ElButton, ElTag } from 'element-plus'
 import api from '@/api/master/dict/index.js'
 import detail from './detail/index.vue'
 import drawerList from './drawerList/index.vue'
-
 
 const { proxy } = getCurrentInstance()
 
 const baseTable = ref() // table的ref
 const detailRef = ref() // 明细组件ref
-const drawerListRef = ref()//明细列表
+const drawerListRef = ref() //明细列表
 const dictVisible = ref(false)
 const drawerVisible = ref(false)
 const total = ref('') // 数据总数
@@ -59,13 +58,13 @@ const queryParams = ref({
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
-	{ label: '字典类型名称', prop: 'dictName',align: 'left', },
-	{ label: '字典类型编号', prop: 'dictType',align: 'left', },
-	{ label: '备注', prop: 'remark' ,align: 'left',},
-	{ label: '排序号', prop: 'sortNum' ,align: 'left',},
+	{ label: '字典类型名称', prop: 'dictName', align: 'left' },
+	{ label: '字典类型编号', prop: 'dictType', align: 'left' },
+	{ label: '备注', prop: 'remark', align: 'left' },
+	{ label: '排序号', prop: 'sortNum', align: 'left' },
 	{
-        label: '状态',
-        prop: 'statusLabel',
+		label: '状态',
+		prop: 'statusLabel',
 		align: 'center',
 		render: row => {
 			return [
@@ -80,8 +79,7 @@ const tableColumns = ref([
 				),
 			]
 		},
-
-    },
+	},
 	{
 		prop: '',
 		label: '操作',
@@ -155,7 +153,7 @@ const buttonList = reactive([
 		type: 'primary', // 按钮类型
 		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
 		click: () => add, // 回调函数
-		permission: 'master:dict:insert', // 权限
+		permission: 'system:user:add', // 权限
 	},
 ])
 // 获取点击行数据
@@ -164,7 +162,7 @@ const cellClickEvent = ({ row }) => {
 }
 
 /** 查询字典类型列表 */
-const getList = e =>  {
+const getList = e => {
 	queryParams.value = e
 	api.getAllDictTypeList(queryParams.value).then(response => {
 		tableData.value = response.data.pages
@@ -179,13 +177,13 @@ const add = () => {
 	nextTick(() => {
 		detailRef.value.resetForm() // 清空事件
 		detailRef.value.formData.id = '' // 清空id
-		detailRef.value.formData.status = '1';
+		detailRef.value.formData.status = '1'
 	})
 }
 
 /** 修改字典类型按钮操作 */
 const edit = row => {
-    const editRow = row || clickRow.value // 拿到所编辑行的数据
+	const editRow = row || clickRow.value // 拿到所编辑行的数据
 	dictVisible.value = true
 	title.value = '编辑'
 	nextTick(() => {
@@ -221,21 +219,21 @@ const save = async () => {
 }
 
 /** 字典列表操作 */
-const handleDictList = (row) => {
+const handleDictList = row => {
 	const editRow = row || clickRow.value // 拿到所编辑行的数据
 	drawerVisible.value = true
 	nextTick(() => {
-		drawerListRef.value.getData({dictType: editRow.dictType,dictName: editRow.dictName})
+		drawerListRef.value.getData({ dictType: editRow.dictType, dictName: editRow.dictName })
 	})
 }
 
 /** 删除字典类型按钮操作 */
-const handleDelete = (row) => {
-    const deleteRow = row || clickRow.value // 拿到所删除行的数据
+const handleDelete = row => {
+	const deleteRow = row || clickRow.value // 拿到所删除行的数据
 	proxy.$modal
 		.confirm('确定删除？')
-		.then(res=> {
-			api.deleteDictTypeById(deleteRow.id).then((res) => {
+		.then(res => {
+			api.deleteDictTypeById(deleteRow.id).then(res => {
 				getList(queryParams.value)
 				proxy.$modal.msgSuccess(res.msg)
 			})
@@ -246,5 +244,4 @@ getList(queryParams.value)
 </script>
 <style lang="less" scoped>
 // @import '../../../assets/styles/searchform.scss';
-
 </style>
