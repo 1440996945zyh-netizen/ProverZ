@@ -20,11 +20,7 @@
 				</el-col>
 				<el-col :span="12">
 					<el-form-item label="版本类型" prop="versionType">
-						<Select
-							:dataConfig="{ params: { type: 'DICT', dictType: 'VERSION_CONTROL' } }"
-							v-model:value="formData.versionType"
-							v-model:label="formData.versionTypeName"
-						/>
+						<Select v-model:value="formData.versionType" v-model:label="formData.versionTypeName" />
 					</el-form-item>
 				</el-col>
 				<el-col :span="24">

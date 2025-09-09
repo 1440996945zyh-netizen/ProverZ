@@ -1,7 +1,7 @@
 import path from 'path'
 module.exports = {
 	// 网站标题
-	title: '扬奕E-port',
+	title: import.meta.env.VITE_APP_TITLE,
 	// 网站描述
 	description: 'Interview with vitePress',
 	// 打包目录
