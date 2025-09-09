@@ -13,7 +13,7 @@
 			:total="total"
 		/>
 		<!-- 新增，修改抽屉组件 -->
-		<el-drawer v-model="roleVisible" :title="drawerTitle" size="55%">
+		<el-drawer v-model="roleVisible" :title="drawerTitle" size="65%">
 			<Drawer ref="roleRef" />
 			<template #footer>
 				<div style="flex: auto">
@@ -281,8 +281,8 @@ const edit = row => {
 		roleRef.value.resetForm() // 清空事件
 		getRole(editRow.id).then(res => {
 			proxy.setFormData(roleRef.value.form, res.data)
-      roleRef.value.form.roleClass = res.data.roleClass
-      roleRef.value.form.deptName = res.data.deptName
+			roleRef.value.form.roleClass = res.data.roleClass
+			roleRef.value.form.deptName = res.data.deptName
 		})
 		roleRef.value.getUpdate(editRow.id)
 	})

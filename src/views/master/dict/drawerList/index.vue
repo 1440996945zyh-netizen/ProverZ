@@ -134,7 +134,7 @@ const buttonList = reactive([
 		type: 'primary', // 按钮类型
 		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
 		click: () => add, // 回调函数
-		permission: 'master:dict:insert', // 权限
+		permission: 'system:user:add', // 权限
 	},
 ])
 

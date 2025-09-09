@@ -26,10 +26,10 @@ class WebSocketService {
       console.error('请配置 VITE_WS_BASE_URL');
       return '';
     }
-    // 自动切换 ws/wss（无需修改）
-    return window.location.protocol === 'https:' 
-      ? baseUrl.replace('http:', 'ws:').replace('https:', 'wss:')
-      : baseUrl.replace('https:', 'wss:').replace('http:', 'ws:');
+    // 自动适配 http->ws、https->wss（避免重复替换）
+    return baseUrl.startsWith('http')
+      ? baseUrl.replace('http://', 'ws://').replace('https://', 'wss://')
+      : baseUrl;
   }
 
   /**
@@ -38,8 +38,20 @@ class WebSocketService {
    */
   connect(token) {
     return new Promise((resolve, reject) => {
+      // 先关闭旧连接（防止并行连接）
+      if (this.ws) {
+        if ([WebSocket.CONNECTING, WebSocket.OPEN].includes(this.ws.readyState)) {
+          this.ws.close(1000, '新连接发起，关闭旧连接');
+        }
+        this.ws = null;
+      }
+      // 如果正在连接或已连接，直接返回
       if (this.isConnected) {
         resolve('已连接');
+        return;
+      }
+      if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+        resolve('正在连接中');
         return;
       }
       this.isManualClose = false;
@@ -58,7 +70,7 @@ class WebSocketService {
       this.ws.onopen = () => {
         this.isConnected = true;
         this.reconnectCount = 0;
-        console.log(`已连接到: ${fullUrl}`);
+        console.log(`已连接`);
         this.emit('open');
         resolve('连接成功');
       };
@@ -77,13 +89,12 @@ class WebSocketService {
         this.isConnected = false;
         console.log(`关闭（代码: ${event.code}，原因: ${event.reason}）`);
         this.emit('close', event);
-
-        // 重连：传递存储的 Token（关键修改）
-        if (!this.isManualClose && 
-            (this.maxReconnectAttempts === -1 || this.reconnectCount < this.maxReconnectAttempts)) {
-          this.reconnectCount++;
-          console.log(`第${this.reconnectCount}次重连（${this.reconnectInterval}ms后）`);
-          setTimeout(() => this.connect(this.saveToken), this.reconnectInterval);
+        // 清空实例，避免内存泄漏
+        this.ws.onopen = this.ws.onmessage = this.ws.onerror = this.ws.onclose = null;
+        this.ws = null;
+        // 优化：增加 Token 有效性判断（登出后 Token 已被清除）
+        if (this.isManualClose) {
+          this.saveToken = '';
         }
       };
 
@@ -120,13 +131,24 @@ class WebSocketService {
   /**
    * 手动关闭WebSocket连接（不会触发自动重连）
    */
-  close() {
+  close(code = 1000, reason = '手动关闭') {
     if (this.ws) {
-      this.isManualClose = true; // 标记为手动关闭
-      this.isConnected = false;
-      this.ws.close(1000, '手动关闭连接'); // 1000表示正常关闭
+      // 1. 标记手动关闭，阻止重连
+      this.isManualClose = true;
+      // 2. 强制关闭连接（无论当前状态）
+      if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+        this.ws.close(code, reason); // 标准关闭码
+      }
+      // 3. 彻底清空连接实例
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onclose = null;
+      this.ws.onerror = null;
       this.ws = null;
-      console.log('WebSocket已手动关闭');
+      // 4. 同步状态
+      this.isConnected = false;
+      this.saveToken = ''; // 清除存储的Token，防止残留
+      console.log('WebSocket连接已彻底关闭（含状态清理）');
     }
   }
 
