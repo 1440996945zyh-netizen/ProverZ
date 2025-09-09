@@ -189,5 +189,16 @@ const api = {
       responseType
     })
   },
+  /**
+   * 更新消息状态
+   * @param {Object} params {messageId: '', isSent: 1}
+   */
+  updateMessageStatus(params) {
+    return request({
+      url: '/api/internal/wsOfflineMessage/updateIsSent',
+      method: 'post',
+      data: params,
+    })
+  },
 }
 export default api
