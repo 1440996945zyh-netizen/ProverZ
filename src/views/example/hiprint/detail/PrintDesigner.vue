@@ -7,7 +7,7 @@
  * @FilePath: \view\src\views\example\hiprint\detail\PrintDesigner.vue
 -->
 <template>
-	<div class="app-container">
+	<div class="app-container" v-if="visible">
 		<div class="print-designer card-container">
 			<!-- 头部控制区：保留原分区，补充参考代码功能按钮 -->
 			<div class="print-paper-header">
@@ -150,6 +150,8 @@ import api from '@/api/master/template' // 参考代码：模板接口
 // 引入打印数据
 import printData from './print-data'
 const isLoading = ref(true)
+// 是否显示
+const  visible = ref(false)
 
 // 1. 核心实例与基础配置
 const instance = getCurrentInstance()
