@@ -9,6 +9,7 @@
 			:before-close="handleClose"
 			:append-to-body="appendToBody"
 			class="custom-dialog"
+			:draggable="draggable"
 			:show-close="false" 
 		>
 			<template #title>
@@ -82,6 +83,11 @@ const props = defineProps({
 	appendToBody: {
 		type: Boolean,
 		default: false,
+	},
+	//是否允许拖拽
+	draggable: {
+		type: Boolean,
+		default: true,
 	},
 })
 const emit = defineEmits(['update:visible', 'close'])  // 添加close事件
@@ -265,5 +271,11 @@ const handleCustomClose = () => {
 :deep(.el-dialog) {
 	--el-dialog-padding-primary: 0px;
 	--el-dialog-padding-secondary: 0px;
+}
+:deep .el-dialog .el-dialog__header {
+	padding: 0px !important;
+}
+:deep .el-dialog .el-dialog__footer {
+	padding: 0px !important;
 }
 </style>
