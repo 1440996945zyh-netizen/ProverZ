@@ -31,7 +31,7 @@
 			/>
 		</div>
 		<!-- 新增弹窗/编辑弹窗 -->
-		<Dialog v-model:visible="open" :title="title" width="50%">
+		<Dialog v-model:visible="open" :title="title" width="50%" >
 			<el-form ref="menuRef" :model="form" :rules="rules" label-width="100px" style="padding: 20px">
 				<el-row>
 					<el-col :span="24">

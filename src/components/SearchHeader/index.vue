@@ -2,15 +2,15 @@
 	<!-- 搜索框封装 -->
 	<div>
 		<div class="selectBox" id="selectBox">
-			<el-row class="left" id="left" :style="buttonList.length === 0 ? 'width:calc(60% - 180px);' : `width:${defaultWidth}%;`">
-				<el-col name="header" v-for="item in showSelectData" :span="item.span" style="padding-right: 10px">
+			<el-row class="left" id="left" :style="leftRowWidth">
+				<el-col name="header" v-for="item in showSelectData" :span="item.span" style="padding-right: 10px" :key="item.modelValue">
 					<el-input
 						:placeholder="item.name"
 						v-if="item.type == 'input'"
 						:maxlength="item.maxlength ? item.maxlength : 20"
 						v-model="searchData[item.modelValue]"
 						clearable
-						@keyup.enter.native="searchHandler"
+						@keyup.enter="searchHandler"
 					></el-input>
 					<Select
 						v-if="item.type == 'select'"
@@ -195,13 +195,13 @@
 		<!-- 高级查询 -->
 		<div class="selectBox" v-show="showMore" style="border-top: none">
 			<el-row class="left_high">
-				<el-col v-for="item in moreSelectData" :span="item.span" style="padding-right: 10px">
+				<el-col v-for="item in moreSelectData" :span="item.span" style="padding-right: 10px" :key="item.modelValue">
 					<el-input
 						:placeholder="item.name"
 						v-if="item.type == 'input'"
 						v-model="searchData[item.modelValue]"
 						clearable
-						@keyup.enter.native="searchHandler"
+						@keyup.enter="searchHandler"
 					></el-input>
 					<Select
 						v-if="item.type == 'select'"
@@ -328,6 +328,7 @@ const searchData = ref({
 	startPage: 1,
 	pageSize: 10,
 })
+
 const showMore = ref(false)
 const props = defineProps({
 	// 搜索框集合
@@ -388,6 +389,23 @@ const moreSelectData = computed(() => {
 	} else {
 		return showData.slice(props.showNum ? props.showNum : 6, 20)
 	}
+})
+// 动态计算左侧宽度
+const leftRowWidth = computed(() => {
+  if (props.buttonList.length === 0) {
+    const len = showSelectData.value.length
+    if (len <= 1) {
+      return 'width: calc(30% - 180px);'
+    } else if (len <= 2) {
+      return 'width: calc(40% - 180px);'
+    } else if (len <= 3) {
+      return 'width: calc(50% - 180px);'
+    } else {
+      return 'width: calc(60% - 180px);'
+    }
+  } else {
+    return `width: ${props.defaultWidth}%;`
+  }
 })
 const getMore = () => {
 	showMore.value = !showMore.value

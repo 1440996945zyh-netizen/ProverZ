@@ -11,6 +11,8 @@
 			:cellClickEvent="cellClickEvent"
 			:total="total"
 			@Status_Change="Status_Change"
+			defaultWidth="60"
+			showNum="6"
 		/>
 		<!-- 查看 抽屉组件 -->
 		<el-drawer v-model="loginVisible" :title="title" size="70%">
