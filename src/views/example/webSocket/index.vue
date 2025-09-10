@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-05 16:01:51
- * @LastEditTime: 2025-09-09 17:53:14
+ * @LastEditTime: 2025-09-10 09:46:54
  * @LastEditors: zhangsd
  * @Description: WebSocket演示界面（接收/发送消息均显示在左侧）
  * @FilePath: \view\src\views\example\webSocket\index.vue
@@ -99,15 +99,15 @@
 				<div class="send-controls">
 					<div class="char-count">{{ inputMsg.length }} 字符</div>
 					<div class="char-count-btn">
-            <button @click="sendCustomMsg('person')" class="send-btn" :disabled="!wsStore.connected || !inputMsg.trim()">
-						<i class="icon-send"></i>
-						发送个人消息
-					</button>
-					<button @click="sendCustomMsg('group')" class="send-btn" :disabled="!wsStore.connected || !inputMsg.trim()">
-						<i class="icon-send"></i>
-						发送群体消息
-					</button>
-          </div>
+						<button @click="sendCustomMsg('person')" class="send-btn" :disabled="!wsStore.connected || !inputMsg.trim()">
+							<i class="icon-send"></i>
+							发送个人消息
+						</button>
+						<button @click="sendCustomMsg('group')" class="send-btn" :disabled="!wsStore.connected || !inputMsg.trim()">
+							<i class="icon-send"></i>
+							发送群体消息
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -181,12 +181,12 @@ const getSenderName = msg => {
 const sendCustomMsg = type => {
 	const msgContent = inputMsg.value.trim()
 	if (!msgContent) return ElMessage.warning('请输入消息内容')
-  let  customMsgData = {}
+	let customMsgData = {}
 	if (type == 'person') {
 		// 构建消息格式
-		 customMsgData = {
+		customMsgData = {
 			...wsStore.mesConnectPerson,
-      mesShowType: 1,
+			mesShowType: 0,
 			senderAccount: userStore.userAccount, //发送者
 			receiverAccount: 'websocket', //接受者
 			content: msgContent, //消息内容
@@ -194,12 +194,12 @@ const sendCustomMsg = type => {
 		}
 	} else {
 		// 构建消息格式
-		 customMsgData = {
-			...wsStore.mesConnectPerson,
-      mesShowType: 1,
+		customMsgData = {
+			...wsStore.mesConnectGroup,
+			mesShowType: 1,
 			senderAccount: userStore.userAccount, //发送者
-			deptId: 'websocket', //接受者
-      postCode: 'websocket',//岗位code
+			deptId: '1746695314942857216', //接受者
+			postCode: 'TJY', //岗位code
 			content: msgContent, //消息内容
 			timestamp: Date.now(), //发送时间
 		}
@@ -700,9 +700,9 @@ onMounted(() => {
 	font-size: 13px;
 	color: #94a3b8;
 }
-.char-count-btn{
-  display: flex;
-  gap: 10px;
+.char-count-btn {
+	display: flex;
+	gap: 10px;
 }
 .send-btn {
 	display: flex;
