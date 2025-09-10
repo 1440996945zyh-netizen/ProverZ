@@ -1,42 +1,59 @@
 <template>
-	<div class="login">
-		<el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-			<h3 class="title">扬奕E-port港口生产管理系统</h3>
-			<el-form-item prop="userAccount">
-				<el-input
-					type="text"
-					v-model="loginForm.userAccount"
-					size="large"
-					placeholder="账号"
-					prefix-icon="User"
-					@keyup.enter="handleLogin"
-				/>
-			</el-form-item>
-			<el-form-item prop="passwd">
-				<el-input
-					type="password"
-					v-model="loginForm.passwd"
-					size="large"
-					placeholder="密码"
-					prefix-icon="Lock"
-					@keyup.enter="handleLogin"
-				/>
-			</el-form-item>
-			<el-checkbox v-model="loginForm.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
-			<el-form-item style="width: 100%">
-				<el-button :loading="loading" size="large" type="primary" style="width: 100%" @click.prevent="handleLogin">
-					<span v-if="!loading">登 录</span>
-					<span v-else>登 录 中...</span>
-				</el-button>
-				<div style="float: right" v-if="register">
-					<router-link class="link-type" :to="'/register'">立即注册</router-link>
-				</div>
-			</el-form-item>
-		</el-form>
-		<!--  底部  -->
-		<div class="el-login-footer">
-			<span>Copyright © 2018-2023 yangyi.vip All Rights Reserved.</span>
+	<div class="header flex justify-between">
+		<div class="header-left flex items-center">
+			<img class="logo" src="@/assets/logo/logo3.png" alt="" />
+			<span style="margin-left: -0.3125rem">扬奕基础框架</span>
 		</div>
+	</div>
+	<div class="login">
+		<div class="flex login-box">
+			<div class="left-box"></div>
+			<div class="right-box">
+				<el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
+					<div class="login-title">登录</div>
+					<el-form-item prop="userAccount" style="margin-top: 1.25rem">
+						<!-- <el-input
+							type="text"
+							v-model="loginForm.userAccount"
+							size="large"
+							placeholder="账号"
+							prefix-icon="User"
+							@keyup.enter="handleLogin"
+						/> -->
+						<el-input v-model="loginForm.userAccount" type="text" size="mini" auto-complete="off" placeholder="账号">
+							<template #prefix><svg-icon icon-class="user" class="el-input__icon input-icon" /></template>
+						</el-input>
+					</el-form-item>
+					<el-form-item prop="passwd" style="margin-top: 3rem">
+						<el-input
+							type="password"
+							v-model="loginForm.passwd"
+							size="large"
+							show-password
+							placeholder="密码"
+							auto-complete="off"
+							@keyup.enter="handleLogin"
+						>
+							<template #prefix><svg-icon icon-class="password" class="el-input__icon input-icon" /></template>
+						</el-input>
+					</el-form-item>
+					<el-checkbox v-model="loginForm.rememberMe" style="margin: 1rem 0rem 1.5625rem 0rem">记住密码</el-checkbox>
+					<el-form-item style="width: 100%">
+						<el-button :loading="loading" size="large" type="primary" style="width: 100%" @click.prevent="handleLogin">
+							<span v-if="!loading">登 录</span>
+							<span v-else>登 录 中...</span>
+						</el-button>
+						<div style="float: right" v-if="register">
+							<router-link class="link-type" :to="'/register'">立即注册</router-link>
+						</div>
+					</el-form-item>
+				</el-form>
+			</div>
+		</div>
+	</div>
+	<!--  底部  -->
+	<div class="footer">
+		<span>Copyright © 2018-2023 yangyi.vip All Rights Reserved.</span>
 	</div>
 </template>
 
@@ -127,20 +144,83 @@ function getCookie() {
 		rememberMe: rememberMe === undefined ? false : Boolean(rememberMe),
 	}
 }
-
+// 基准大小
+const baseSize = 16
+function setRem() {
+	// 当前页面宽度相对于 1920宽的缩放比例，可根据自己需要修改。这里的1920是设计图的宽度
+	const scale = document.documentElement.clientWidth / 1920
+	// 设置页面根节点字体大小
+	document.documentElement.style.fontSize = baseSize * scale + 'px'
+}
 // getCode()
 getCookie()
+onMounted(() => {
+	setRem()
+	// 改变窗口大小时重新设置 rem
+	window.addEventListener('resize', () => {
+		setRem()
+	})
+})
 </script>
 
 <style lang="scss" scoped>
+.header {
+	height: 3.125rem;
+	line-height: 3.125rem;
+	color: #707070;
+
+	.header-left {
+		font-weight: 700;
+		font-size: 1.125rem;
+		letter-spacing: 0.125rem;
+	}
+	.header-right {
+		font-size: 1rem;
+		a {
+			/*color: #409eff;*/
+			color: #707070;
+			text-decoration: underline;
+		}
+	}
+
+	// background-color: #0067d1;
+	.logo {
+		width: 4.375rem;
+		height: 3.125rem;
+		line-height: 3.125rem;
+		// margin-top: -0.5rem;
+	}
+	margin-right: 20px;
+}
+
 .login {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	height: 100%;
-	background-image: url('../assets/images/bg.jpg');
+	height: calc(100% - 6.25rem);
+	background-image: url('../assets/images/login-bg5.jpg');
 	background-size: cover;
+	.login-box {
+		height: 70%;
+		min-height: 29.375rem;
+		background-color: white;
+		border-radius: 0.375rem;
+		overflow: hidden;
+		.left-box {
+			width: 30vw;
+			background-image: url('../assets/images/login-bg2.jpg');
+			background-size: 100% 100%;
+			background-repeat: no-repeat;
+			// border-right: 0.0625rem solid #b3aeaa;
+		}
+		.right-box {
+			width: 30vw;
+			padding: 2.5rem;
+			padding-top: 8%;
+		}
+	}
 }
+
 .title {
 	margin: 0px auto 30px auto;
 	text-align: center;
@@ -148,20 +228,20 @@ getCookie()
 }
 
 .login-form {
-	border-radius: 6px;
+	border-radius: 0.375rem;
 	background: #ffffff;
-	width: 400px;
-	padding: 25px 25px 5px 25px;
+	width: calc(30vw - 2.5rem);
+	padding: 0.9375rem 3.4375rem 0.3125rem 0rem;
 	.el-input {
-		height: 40px;
+		height: 2.5rem;
 		input {
-			height: 40px;
+			height: 2.5rem;
 		}
 	}
 	.input-icon {
-		height: 39px;
-		width: 14px;
-		margin-left: 0px;
+		height: 2.4375rem;
+		width: 0.875rem;
+		margin-left: 0rem;
 	}
 }
 .login-tip {
@@ -178,20 +258,43 @@ getCookie()
 		vertical-align: middle;
 	}
 }
-.el-login-footer {
-	height: 40px;
-	line-height: 40px;
-	position: fixed;
-	bottom: 0;
-	width: 100%;
+.footer {
+	height: 3.125rem;
+	line-height: 3.125rem;
 	text-align: center;
-	color: #fff;
 	font-family: Arial;
-	font-size: 12px;
-	letter-spacing: 1px;
+	font-size: 0.75rem;
+	letter-spacing: 0.0625rem;
+	background-color: #f5f5f6;
 }
 .login-code-img {
 	height: 40px;
 	padding-left: 12px;
+}
+.login-title {
+	font-size: 1.8rem;
+	text-align: center;
+	margin-bottom: 20px;
+	color: rgb(122, 126, 136);
+}
+:deep(.el-checkbox__label) {
+	font-size: 1rem;
+}
+:deep(.el-input__inner) {
+	font-size: 1.1rem;
+}
+:deep(.el-input__wrapper) {
+	height: 3rem;
+}
+
+:deep(.el-form-item--default .el-form-item__content) {
+	height: 3rem;
+	line-height: 3rem;
+}
+:deep(.el-form-item--default .el-form-item__error) {
+	padding-top: 0.625rem;
+}
+:deep(.el-button--large) {
+	--el-button-size: 3rem;
 }
 </style>

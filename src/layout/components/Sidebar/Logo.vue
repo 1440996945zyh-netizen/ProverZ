@@ -46,7 +46,7 @@ defineProps({
 	},
 })
 
-const title = ref('扬奕PMS')
+const title = ref('扬奕基础框架')
 const settingsStore = useSettingsStore()
 const sideTheme = computed(() => settingsStore.sideTheme)
 const topNav = computed(() => settingsStore.topNav)
