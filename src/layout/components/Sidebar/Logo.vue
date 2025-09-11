@@ -12,14 +12,19 @@
 	>
 		<transition name="sidebarLogoFade">
 			<router-link key="collapse" class="sidebar-logo-link" to="/">
-				<img v-if="logo" :src="logo" class="sidebar-logo" />
-				<!-- <h1
-					v-else
+				<img :src="logo" class="sidebar-logo" />
+				<h1
 					class="sidebar-title"
-					:style="{ color: !topNav?sideTheme === 'theme-dark' ? variables.logoTitleColor : variables.logoLightTitleColor: variables.logoTitleColor}"
+					:style="{
+						color: !topNav
+							? sideTheme === 'theme-dark'
+								? variables.logoTitleColor
+								: variables.logoLightTitleColor
+							: variables.logoTitleColor,
+					}"
 				>
 					{{ title }}
-				</h1> -->
+				</h1>
 			</router-link>
 			<!-- <router-link v-else key="expand" class="sidebar-logo-link" to="/">
 				<img v-if="logo" :src="logo" class="sidebar-logo" />
@@ -36,7 +41,7 @@
 
 <script setup>
 import variables from '@/assets/styles/variables.module.scss'
-import logo from '@/assets/logo/logo-h-white3.png'
+import logo from '@/assets/logo/logo1.png'
 import useSettingsStore from '@/store/modules/settings'
 
 defineProps({
@@ -75,8 +80,8 @@ const topNav = computed(() => settingsStore.topNav)
 		width: 100%;
 
 		& .sidebar-logo {
-			width: 146px;
-			height: 66px;
+			width: 40px;
+			height: 40px;
 			vertical-align: middle;
 			margin-top: -6%;
 			margin-left: -12px;
@@ -88,7 +93,7 @@ const topNav = computed(() => settingsStore.topNav)
 			color: #fff;
 			font-weight: 600;
 			line-height: 50px;
-			font-size: 14px;
+			font-size: 16px;
 			font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
 			vertical-align: middle;
 		}
