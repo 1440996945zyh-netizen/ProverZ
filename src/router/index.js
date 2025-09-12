@@ -99,6 +99,9 @@ export const constantRoutes = [
 				component: () => import('@/views/example/hiprint/detail/PrintDesigner'),
 				name: 'PrintDesigner',
 				meta: { title: '设计打印模板', icon: '' },
+				query: {
+					id: '', // 可选参数
+				},
 			},
 		],
 	},

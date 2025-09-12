@@ -37,9 +37,10 @@ import PrintDesigner from './detail/PrintDesigner.vue'
 import Dialog from '@/components/Dialog'
 import BaseTable from '@/components/BaseTable'
 import tableParamsStore from '@/store/modules/tableParams'
-import { useRoute, useRouter } from 'vue-router'
+
 import api from '@/api/master/template'
 import { ElButton } from 'element-plus'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,35 +93,6 @@ const tableColumns = ref([
 		label: '模版类型',
 		align: 'center',
 		width: 150,
-		// render: row => {
-		// 	let type = ''
-		// 	let label = ''
-		// 	if (row.menuType === 'M') {
-		// 		type = 'primary'
-
-		// 		label = '目录'
-		// 	} else if (row.menuType === 'C') {
-		// 		type = 'warninging'
-		// 		label = '菜单'
-		// 	} else if (row.menuType === 'F') {
-		// 		type = 'danger'
-		// 		label = '按钮'
-		// 	}
-		// 	return [
-		// 		h(
-		// 			ElTag,
-		// 			{
-		// 				type: type,
-		// 				size: 'default',
-		// 			},
-		// 			{
-		// 				default: () => {
-		// 					return label
-		// 				},
-		// 			}
-		// 		),
-		// 	]
-		// },
 	},
 	{
 		prop: 'createBy', // 绑定到菜单名字段
@@ -226,7 +198,10 @@ const handleAdd = async row => {
 
 /** 编辑菜单 */
 const handleUpdate = async row => {
-	console.log('编辑', row)
+	router.push({
+		name: 'PrintDesigner',
+		query: { id: row.id },
+	})
 }
 /**
  * @description 删除
@@ -234,14 +209,16 @@ const handleUpdate = async row => {
 
  */
 const handleDelete = row => {
+	const deleteRow = row // 拿到所删除行的数据
 	proxy.$modal
 		.confirm('确定删除？')
-		.then(function () {})
-		.then(() => {
-			getList()
-			proxy.$modal.msgSuccess('删除成功')
+		.then(res => {
+			api.delete(deleteRow.id).then(res => {
+				proxy.$message.success(res.msg)
+				getList(queryParams.value)
+			})
 		})
-		.catch(() => {})
+		.catch(err => {})
 }
 
 /** 行点击事件 */

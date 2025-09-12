@@ -30,11 +30,11 @@
 				<div class="control-group template-select-group">
 					<span class="control-label">模板选择：</span>
 					<Select
-						v-model:value="formData.modelTypeCode"
-						v-model:label="formData.modelTypeName"
+						v-model:value="formData.modelName"
+						v-model:label="formData.modelName"
 						placeholder="请选择打印模板"
 						class="template-select"
-						:dataConfig="{ params: { type: 'DICT', dictType: 'MBLX' } }"
+						:selectData="modelTypeList"
 						@change="handleTemplateChange"
 					/>
 					<!-- 	:disabled="!formData.id"  -->
@@ -169,11 +169,15 @@
 
 <script setup>
 import { ref, reactive, nextTick, onMounted, getCurrentInstance } from 'vue'
-import { ElMessage, ElIcon, ElPopconfirm, ElMessageBox } from 'element-plus'
+import { ElMessage, ElIcon, ElPopconfirm, ElMessageBox, ElSegmented } from 'element-plus'
 import { ZoomOut, ZoomIn, RefreshRight, Printer, Close } from '@element-plus/icons-vue'
 import { hiprint, defaultElementTypeProvider } from 'vue-plugin-hiprint'
 import Select from '@/components/Select'
 import api from '@/api/master/template' // 参考代码：模板接口
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
 // 引入打印数据
 import printData from './print-data'
 const isLoading = ref(true)
@@ -223,7 +227,17 @@ const printDataInfo = ref()
  */
 onMounted(async () => {
 	await nextTick()
-	await initHiprintDesigner() // 等待初始化完成（含模板加载）
+	// 判断是否为编辑状态
+	const templateId = route.query.id
+	getModelTypeList()
+	if (templateId) {
+		console.log('编辑模板', templateId)
+		// 编辑状态：加载模板数据
+		await initHiprintDesigner()
+	} else {
+		console.log('新增模板')
+		await initHiprintDesigner() // 等待初始化完成（含模板加载）
+	}
 })
 
 /**
@@ -231,6 +245,7 @@ onMounted(async () => {
  */
 const initHiprintDesigner = async () => {
 	isLoading.value = true // 开始加载
+	const templateId = route.query.id
 	try {
 		printDataInfo.value = printData
 		// 初始化hiprint基础配置
@@ -271,10 +286,9 @@ const initHiprintDesigner = async () => {
 		hiprintTemplate.value.zoom(scaleValue.value)
 
 		// 模板加载优先级：编辑模板（formData.model）> 默认模板（panel.js）
-		if (formData.value.modelContent) {
+		if (templateId) {
 			// 1. 编辑状态：加载已有模板
-			mergeTemplate(JSON.parse(formData.value.modelContent))
-			ElMessage.success(`已加载【${formData.modelName || '编辑模板'}】`)
+			await getDetail(templateId)
 		} else {
 			// 2. 新增状态：加载默认模板（panel.js）
 			await getPanel()
@@ -302,12 +316,13 @@ const buildLeftElement = () => {
 /**
  * 4. 模板选择切换（仅编辑时可用）
  */
-const handleTemplateChange = async (value, label) => {
-	if (!value || !hiprintTemplate.value || !formData.value.id) return // 新增时禁用切换
+const handleTemplateChange = async option => {
+	console.log('模板选择切换', option)
+	if (!option) return // 新增时禁用切换
 
 	try {
 		// 从接口获取选中的模板数据
-		const res = await api.getDetail(value)
+		const res = await api.getDetail(option.value)
 		if (res.code !== '0000') {
 			ElMessage.error(`加载模板失败：${res.msg}`)
 			return
@@ -316,8 +331,8 @@ const handleTemplateChange = async (value, label) => {
 		// 更新表单数据（保持编辑状态）
 		formData.value = {
 			...formData.value,
-			modelTypeCode: value,
-			modelTypeName: label,
+			modelTypeCode: res.data.modelTypeCode,
+			modelTypeName: res.data.modelTypeName,
 			modelContent: res.data.modelContent,
 		}
 
@@ -325,12 +340,26 @@ const handleTemplateChange = async (value, label) => {
 		if (res.data.modelContent) {
 			mergeTemplate(JSON.parse(res.data.modelContent))
 		}
-		ElMessage.success(`已切换至模板：${label}`)
+		ElMessage.success(`已切换至模板：${res.data.modelName}`)
 	} catch (error) {
 		ElMessage.error(`模板加载接口异常：${error.message}`)
 	}
 }
+//编辑调用接口
+const getDetail = async id => {
+	const res = await api.getDetail(id)
+	if (res.code !== '0000') {
+		ElMessage.error(`加载模板失败：${res.msg}`)
+		return
+	}
 
+	// 更新表单数据（保持编辑状态）
+	formData.value = res.data
+	console.log('formData.value', formData.value)
+	templateForm.value = res.data
+	mergeTemplate(JSON.parse(res.data.modelContent))
+	ElMessage.success(`已加载【${formData.value.modelName || '编辑模板'}】`)
+}
 /**
  * 5. 加载默认模板（panel.js）- 新增时使用
  */
@@ -398,7 +427,6 @@ const saveTemplate = async () => {
 	// 步骤1：获取当前模板JSON数据
 	const templateJson = hiprintTemplate.value.getJson()
 	formData.value.modelContent = JSON.stringify(templateJson)
-
 	// 步骤2：新增状态 - 弹出对话框输入模板名和选择模板类型
 	if (!formData.value.id) {
 		// 重置表单数据
@@ -407,13 +435,13 @@ const saveTemplate = async () => {
 			modelTypeCode: '',
 			modelTypeName: '',
 		}
-
-		// 显示对话框
-		templateDialogVisible.value = true
-
-		// 等待用户确认或取消
-		return
 	}
+	console.log('11111.value')
+	// 显示对话框
+	templateDialogVisible.value = true
+
+	// 等待用户确认或取消
+	return
 }
 // 添加确认模板表单的方法
 const confirmTemplateForm = async () => {
@@ -426,22 +454,45 @@ const confirmTemplateForm = async () => {
 
 	// 关闭对话框
 	templateDialogVisible.value = false
+	// 根据id判断是新增还是编辑
+	if (formData.value.id) {
+		// 编辑状态 - 二次确认
+		await ElMessageBox.confirm('确定更新此模板？', '更新确认', {
+			confirmButtonText: '确认',
+			cancelButtonText: '取消',
+			type: 'warning',
+		})
 
-	// 继续保存操作 - 二次确认
-	await ElMessageBox.confirm('确定新增此模板？', '新增确认', {
-		confirmButtonText: '确认',
-		cancelButtonText: '取消',
-		type: 'warning',
-	})
-
-	// 调用接口保存
-	const res = await api.insert(formData.value)
-	if (res.code === '0000') {
-		ElMessage.success('模板新增成功')
-		//跳转
-		proxy.$router.go(-1)
+		// 调用接口更新
+		const res = await api.update(formData.value)
+		if (res.code === '0000') {
+			ElMessage.success('模板更新成功')
+			//跳转
+			router.push({
+				name: 'hiprintIndex',
+			})
+		} else {
+			ElMessage.error(`更新失败：${res.msg || '未知错误'}`)
+		}
 	} else {
-		ElMessage.error(`保存失败：${res.msg || '未知错误'}`)
+		// 继续保存操作 - 二次确认
+		await ElMessageBox.confirm('确定新增此模板？', '新增确认', {
+			confirmButtonText: '确认',
+			cancelButtonText: '取消',
+			type: 'warning',
+		})
+
+		// 调用接口保存
+		const res = await api.insert(formData.value)
+		if (res.code === '0000') {
+			ElMessage.success('模板新增成功')
+			//跳转
+			router.push({
+				name: 'hiprintIndex',
+			})
+		} else {
+			ElMessage.error(`保存失败：${res.msg || '未知错误'}`)
+		}
 	}
 }
 /**
@@ -617,6 +668,19 @@ defineExpose({
 		initHiprintDesigner()
 	},
 })
+const modelTypeList = ref([])
+const getModelTypeList = () => {
+	api.getModelTypeList().then(res => {
+		if (res.code === '0000') {
+			// 转换数据结构以匹配 Select 组件的要求
+			modelTypeList.value = res.data.map(item => ({
+				value: item.id,
+				label: item.modelName,
+			}))
+			console.log('modelTypeList', modelTypeList.value)
+		}
+	})
+}
 </script>
 
 <style scoped>
