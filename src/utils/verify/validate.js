@@ -1,4 +1,12 @@
 /**
+ * @Author: zhangsd
+ * @Date: 2025-09-12 14:23:00
+ * @LastEditTime: 2025-09-12 14:23:00
+ * @LastEditors: zhangsd
+ * @Description: validate.js 围绕 “合法性校验” 展开，仅返回 “是否合法” 的结果（布尔值、错误信息），不改变原始输入
+ * @FilePath: D:\YangyiWork\YYFRAMEWORK\view\src\utils\verify\validate.js
+ */
+/**
  * 判断url是否是http或https
  * @param {string} path
  * @returns {Boolean}
