@@ -52,14 +52,14 @@ import {
   setEditTableOptions,
 
 } from '@/utils/common/common'
-import { deepClone, } from '@/utils/common/data'
+import { deepClone,resetObj } from '@/utils/common/data'
 import { parseTime } from '@/utils/common/day'
 import {
   selectDictLabel,
   selectDictLabels,
 } from '@/utils/common/dict'
 import { getRules } from '@/utils/verify/validate.js'
-import { resetObj } from '@/utils/index.js'
+
 import $bus from '@/utils/bus.js'
 // 分页组件
 import Pagination from '@/components/Pagination'
