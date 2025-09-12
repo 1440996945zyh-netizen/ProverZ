@@ -93,7 +93,17 @@ export function parseTime(time, pattern) {
   return time_str
 }
 
-// 相对时间格式化（刚刚/xx分钟前等）
+/**
+ * @param {number} time
+ * @param {string} option
+ * @returns {string}
+ * 系统时间与传入时间差值小于30秒则返回“刚刚”
+ * 大于30秒小于1小时则返回xx分钟前
+ * 大于1小时小于24小时则返回xx小时前
+ * 大于24小数小于48小时返回一天前
+ * 如果都不满足则返回传入时间，格式为传入的option
+ * 
+ */
 export function formatTime(time, option) {
   if (('' + time).length === 10) {
     time = parseInt(time) * 1000
@@ -108,48 +118,19 @@ export function formatTime(time, option) {
   else if (diff < 3600) return Math.ceil(diff / 60) + '分钟前'
   else if (diff < 3600 * 24) return Math.ceil(diff / 3600) + '小时前'
   else if (diff < 3600 * 24 * 2) return '1天前'
-  
+
   if (option) return parseTime(time, option)
   else return `${d.getMonth() + 1}月${d.getDate()}日${d.getHours()}时${d.getMinutes()}分`
 }
 
-// 日期格式化（支持自定义格式）
-export function parseDate(time, cFormat) {
-  if (!time) return ''
-  const format = cFormat || '{yyyy}-{mm}-{dd} {hh}:{ii}:{ss}'
-  let date
-  if (typeof time === 'object') {
-    date = time
-  } else {
-    if (parseInt(time) + ''.length === 10) {
-      time = parseInt(time) * 1000
-    }
-    date = new Date(time)
-  }
-  const formatObj = {
-    y: date.getFullYear(),
-    m: date.getMonth() + 1,
-    d: date.getDate(),
-    h: date.getHours(),
-    i: date.getMinutes(),
-    s: date.getSeconds(),
-    a: date.getDay()
-  }
-  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
-    let value = formatObj[key]
-    if (key === 'a') return ['一', '二', '三', '四', '五', '六', '日'][value - 1]
-    if (result.length > 0 && value < 10) value = '0' + value
-    return value || 0
-  })
-  return time_str
-}
+
 
 // 时间段计算时长
 export const getDuration = (type, timeList) => {
   if (timeList.length !== 2) return
   const beginTime = new Date(timeList[0])
   const endTime = new Date(timeList[1])
-  
+
   if (type === 'hour') {
     const hours = (endTime - beginTime) / (1000 * 60 * 60)
     return Math.round(hours * 10) / 10
@@ -186,7 +167,19 @@ export const getNowDate = dateType => {
     default: return ''
   }
 }
-
+/**
+ * @param {string} type
+ * @returns {Date}
+ * 返回90 天前的当前时间戳（毫秒级）start
+ * 返回当前时间戳（毫秒级）
+ */
+export function getTime(type) {
+	if (type === 'start') {
+		return new Date().getTime() - 3600 * 1000 * 24 * 90
+	} else {
+		return new Date(new Date().toDateString())
+	}
+}
 // 获取当前时间前后N天
 export const getBeforeAfter = (dateType, num, type) => {
   let now
@@ -214,4 +207,61 @@ export const getBeforeAfter = (dateType, num, type) => {
     case 'YYYY': return `${year}`
     default: return ''
   }
+}
+/**
+ * 表格时间格式化
+ * yyyy-MM-dd hh:mm:ss格式
+ * @param {*} cellValue
+ */
+export function formatDate(cellValue) {
+  if (cellValue == null || cellValue == '') return ''
+  var date = new Date(cellValue)
+  var year = date.getFullYear()
+  var month = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+  var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+  var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+  var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+  var seconds = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
+  return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds
+}
+
+
+/**
+ * 时间格式化
+ * @param {*} time 
+ * @param {*} cFormat 
+ * @returns 
+ */
+export function parseDate(time, cFormat) {
+  if (!time) {
+    return ''
+  }
+  const format = cFormat || '{yyyy}-{mm}-{dd} {hh}:{ii}:{ss}'
+  let date
+  if (typeof time === 'object') {
+    date = time
+  } else {
+    if (parseInt(time) + ''.length === 10) {
+      time = parseInt(time) * 1000
+    }
+    date = new Date(time)
+  }
+  const formatObj = {
+    y: date.getFullYear(),
+    m: date.getMonth() + 1,
+    d: date.getDate(),
+    h: date.getHours(),
+    i: date.getMinutes(),
+    s: date.getSeconds(),
+    a: date.getDay()
+  }
+  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+    let value = formatObj[key]
+    if (key === 'a') return ['一', '二', '三', '四', '五', '六', '日'][value - 1]
+    if (result.length > 0 && value < 10) {
+      value = '0' + value
+    }
+    return value || 0
+  })
+  return time_str
 }

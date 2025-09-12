@@ -1,3 +1,11 @@
+/**
+ * @Author: zhangsd
+ * @Date: 2025-09-12 14:22:24
+ * @LastEditTime: 2025-09-12 14:22:24
+ * @LastEditors: zhangsd
+ * @Description: 该文件仅暴露一个filter函数，核心逻辑是 “按规则修正原始输入”（通过正则替换、格式调整等方式，将输入值转为符合要求的格式），直接改变输入值
+ * @FilePath: D:\YangyiWork\YYFRAMEWORK\view\src\utils\verify\verify.js
+ */
 const filter = (type, value) => {
 	switch (type) {
 		case 'duty':

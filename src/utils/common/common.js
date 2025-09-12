@@ -11,7 +11,14 @@
  */
 // import cache from '../plugins/cache'
 
-// 防抖函数
+/**
+ * 防抖函数
+ * @param {Function} func
+ * @param {number} wait
+ * @param {boolean} immediate
+ * @return {*}
+ * 防抖 const debouncedSearch = debounce(fetchSearchResults, 500, false);
+ */
 export function debounce(func, wait, immediate) {
   let timeout, args, context, timestamp, result
   const later = function () {
@@ -248,3 +255,88 @@ export function unformatMoney(formattedValue) {
   
   return numericValue;
 }
+/**
+ * 检查字符串是否为数字
+ * @param {*} str 
+ * @returns 
+ */
+export function isNumberStr(str) {
+	return /^[+-]?(0|([1-9]\d*))(\.\d+)?$/g.test(str)
+}
+
+/**
+ * Check if an element has a class
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ * @returns {boolean}
+ * 判断某个元素是否包含某个class
+ */
+export function hasClass(ele, cls) {
+	return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
+}
+
+/**
+ * Add class to element
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ * 给元素新增一个class
+ */
+export function addClass(ele, cls) {
+	if (!hasClass(ele, cls)) ele.className += ' ' + cls
+}
+
+/**
+ * Remove class from element
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ * 删除元素中的class
+ */
+export function removeClass(ele, cls) {
+	if (hasClass(ele, cls)) {
+		const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
+		ele.className = ele.className.replace(reg, ' ')
+	}
+}
+
+/**
+ * 
+ * @param {*} str 
+ * @param {*} expectsLowerCase 
+ * @returns 
+ * 生成检查函数：判断值是否在 ["name", "age", "gender"] 中
+ * const isUserField = makeMap("name,age,gender", false);
+ * isUserField("name"); // true（存在）
+ * isUserField("Name"); // false（大小写不同，严格区分）
+ * isUserField("email"); // false（不存在）
+ */
+export function makeMap(str, expectsLowerCase) {
+	const map = Object.create(null)
+	const list = str.split(',')
+	for (let i = 0; i < list.length; i++) {
+		map[list[i]] = true
+	}
+	return expectsLowerCase ? val => map[val.toLowerCase()] : val => map[val]
+}
+
+
+
+/**
+ * @param {HTMLElement} element
+ * @param {string} className
+ * 如果元素已经包含该类名，则移除它；如果不包含，则添加它。
+ */
+export function toggleClass(element, className) {
+	if (!element || !className) {
+		return
+	}
+	let classString = element.className
+	const nameIndex = classString.indexOf(className)
+	if (nameIndex === -1) {
+		classString += '' + className
+	} else {
+		classString = classString.substr(0, nameIndex) + classString.substr(nameIndex + className.length)
+	}
+	element.className = classString
+}
+
+
