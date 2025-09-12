@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-04 10:05:32
- * @LastEditTime: 2025-09-10 14:20:24
+ * @LastEditTime: 2025-09-11 14:57:55
  * @LastEditors: zhangsd
  * @Description: 自定义打印
  * @FilePath: \view\src\views\example\hiprint\index.vue
@@ -174,7 +174,7 @@ const buttonList = reactive([
 		type: 'primary', // 按钮类型
 		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
 		click: () => handleAdd(), // 回调函数
-		permission: 'system:hiprint:insert', // 权限
+		permission: 'master:hiprint:insert', // 权限
 	},
 ])
 /**
