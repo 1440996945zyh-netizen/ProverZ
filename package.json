@@ -57,7 +57,8 @@
 		"vxe-table": "^4.3.11",
 		"xe-utils": "^3.5.7",
 		"xlsx": "^0.16.8",
-		"xss": "^1.0.15"
+		"xss": "^1.0.15",
+		"yarn": "^1.22.22"
 	},
 	"devDependencies": {
 		"@vitejs/plugin-vue": "^4.6.2",
