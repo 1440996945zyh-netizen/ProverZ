@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-04 10:05:32
- * @LastEditTime: 2025-09-10 14:20:24
+ * @LastEditTime: 2025-09-11 14:57:55
  * @LastEditors: zhangsd
  * @Description: 自定义打印
  * @FilePath: \view\src\views\example\hiprint\index.vue

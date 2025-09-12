@@ -29,6 +29,7 @@
 		"ant-design-vue": "^4.2.6",
 		"axios": "0.27.2",
 		"crypto-js": "^4.2.0",
+		"dagre": "^0.8.5",
 		"docx-preview": "^0.1.16",
 		"echarts": "^5.4.0",
 		"element-plus": "2.9.7",
