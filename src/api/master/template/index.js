@@ -4,7 +4,7 @@ const api = {
 	// 获取列表
 	getList(query) {
 		return request({
-			url: '/api/external/costmodel/queryall',
+			url: '/api/internal/print/getList',
 			method: 'get',
 			params: query,
 		})
@@ -21,7 +21,7 @@ const api = {
 	// 新建
 	insert(data) {
 		return request({
-			url: '/api/external/costmodel/add',
+			url: '/api/internal/print/insert',
 			method: 'post',
 			data: data,
 		})

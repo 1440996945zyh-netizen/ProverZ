@@ -88,6 +88,20 @@ export const constantRoutes = [
 			},
 		],
 	},
+	{
+		path: '/example/hiprint/detail/PrintDesigner',
+		component: Layout,
+		hidden: true,
+		redirect: 'noredirect',
+		children: [
+			{
+				path: '',
+				component: () => import('@/views/example/hiprint/detail/PrintDesigner'),
+				name: 'PrintDesigner',
+				meta: { title: '设计打印模板', icon: '' },
+			},
+		],
+	},
 ]
 
 // 动态路由，基于用户权限动态去加载

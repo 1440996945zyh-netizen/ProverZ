@@ -37,6 +37,12 @@ import PrintDesigner from './detail/PrintDesigner.vue'
 import Dialog from '@/components/Dialog'
 import BaseTable from '@/components/BaseTable'
 import tableParamsStore from '@/store/modules/tableParams'
+import { useRoute, useRouter } from 'vue-router'
+import api from '@/api/master/template'
+import { ElButton } from 'element-plus'
+
+const route = useRoute()
+const router = useRouter()
 
 const { proxy } = getCurrentInstance()
 
@@ -50,75 +56,83 @@ const printDesignerRef = ref(null)
 const tableLoading = ref(false)
 /* 表格数据 */
 const tableData = ref([])
+const queryParams = ref({
+	startPage: 1,
+	pageSize: 10,
+})
+const total = ref(0)
+const baseTable = ref()
 /* 菜单查询条件 */
 const selectData = reactive([
 	{
 		name: '模版名称',
 		type: 'input',
-		modelValue: 'menuName',
+		modelValue: 'modelName',
 		span: 12,
 	},
 	{
 		name: '模版类型',
 		type: 'select',
-		modelValue: 'type',
+		modelValue: 'modelTypeCode',
 		span: 12,
 		placeholder: '模版类型',
-		selectData: [
-			{ dictLabel: '普通', dictValue: '0' },
-			{ dictLabel: '复杂', dictValue: '1' },
-			{ dictLabel: '列表', dictValue: '2' },
-			{ dictLabel: '表格', dictValue: '3' },
-			{ dictLabel: '图片', dictValue: '4' },
-		],
-		selectLabel: 'dictLabel', // 下拉选项的文本字段
-		selectValue: 'dictValue', // 下拉选项的value字段
+		dataConfig: { params: { type: 'DICT', dictType: 'MODEL_TYPE' } },
 	},
 ])
 /* 表格数据列 */
 const tableColumns = ref([
 	{
-		prop: 'menuName', // 绑定到菜单名字段
-		label: '菜单名称',
+		prop: 'modelName', // 绑定到菜单名字段
+		label: '模板名称',
 		align: 'center',
-		showOverFlow: true,
-		width: 250,
-		treeNode: true, // 标记为树形节点列（关键配置）
+		minWidth: 250,
 	},
 	{
-		prop: 'menuType',
+		prop: 'modelTypeName',
 		label: '模版类型',
 		align: 'center',
 		width: 150,
-		render: row => {
-			let type = ''
-			let label = ''
-			if (row.menuType === 'M') {
-				type = 'primary'
+		// render: row => {
+		// 	let type = ''
+		// 	let label = ''
+		// 	if (row.menuType === 'M') {
+		// 		type = 'primary'
 
-				label = '目录'
-			} else if (row.menuType === 'C') {
-				type = 'warninging'
-				label = '菜单'
-			} else if (row.menuType === 'F') {
-				type = 'danger'
-				label = '按钮'
-			}
-			return [
-				h(
-					ElTag,
-					{
-						type: type,
-						size: 'default',
-					},
-					{
-						default: () => {
-							return label
-						},
-					}
-				),
-			]
-		},
+		// 		label = '目录'
+		// 	} else if (row.menuType === 'C') {
+		// 		type = 'warninging'
+		// 		label = '菜单'
+		// 	} else if (row.menuType === 'F') {
+		// 		type = 'danger'
+		// 		label = '按钮'
+		// 	}
+		// 	return [
+		// 		h(
+		// 			ElTag,
+		// 			{
+		// 				type: type,
+		// 				size: 'default',
+		// 			},
+		// 			{
+		// 				default: () => {
+		// 					return label
+		// 				},
+		// 			}
+		// 		),
+		// 	]
+		// },
+	},
+	{
+		prop: 'createBy', // 绑定到菜单名字段
+		label: '创建人',
+		align: 'center',
+		minWidth: 250,
+	},
+	{
+		prop: 'createTime', // 绑定到菜单名字段
+		label: '创建时间',
+		align: 'center',
+		minWidth: 250,
 	},
 
 	{
@@ -139,13 +153,13 @@ const tableColumns = ref([
 						type: 'primary',
 						link: true,
 						icon: 'Edit',
-						permission: 'system:hiprint:update',
+						permission: 'master:hiprint:update',
 					},
 					{
 						default: () => '编辑',
 					}
 				),
-				
+
 				h(
 					ElButton,
 					{
@@ -156,7 +170,7 @@ const tableColumns = ref([
 						type: 'danger',
 						link: true,
 						icon: 'Delete',
-						permission: 'system:hiprint:delete',
+						permission: 'master:hiprint:delete',
 					},
 					{
 						default: () => '删除',
@@ -174,14 +188,20 @@ const buttonList = reactive([
 		type: 'primary', // 按钮类型
 		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
 		click: () => handleAdd(), // 回调函数
-		permission: 'system:hiprint:insert', // 权限
+		permission: 'master:hiprint:insert', // 权限
 	},
 ])
 /**
  * 查询主列表数据
  */
-const getList = params => {
-	tableLoading.value = true
+
+const getList = e => {
+	queryParams.value = e
+	api.getList(queryParams.value).then(res => {
+		tableData.value = res.data.pages
+		total.value = res.data.totalNum
+	})
+	// tableLoading.value = true
 	// 改为实际的接口请求
 	// listMenu(params)
 	// 	.then(response => {
@@ -197,7 +217,11 @@ const getList = params => {
 /** 新增菜单 */
 const handleAdd = async row => {
 	console.log('新增', row)
-  dialogVisible.value = true
+	// dialogVisible.value = true
+	// 使用 router 跳转到打印设计页面
+	router.push({
+		name: 'PrintDesigner',
+	})
 }
 
 /** 编辑菜单 */
@@ -233,6 +257,6 @@ const editTemplate = template => {
 		model: template.model, // 模板JSON字符串
 	})
 }
+getList(queryParams.value)
 </script>
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -7,7 +7,7 @@
  * @FilePath: \view\src\views\example\hiprint\detail\PrintDesigner.vue
 -->
 <template>
-	<div class="app-container" v-if="visible">
+	<div class="app-container">
 		<div class="print-designer card-container">
 			<!-- 头部控制区：保留原分区，补充参考代码功能按钮 -->
 			<div class="print-paper-header">
@@ -30,13 +30,12 @@
 				<div class="control-group template-select-group">
 					<span class="control-label">模板选择：</span>
 					<Select
-						v-model:value="formData.rateTypeCode"
-						v-model:label="formData.rateTypeName"
+						v-model:value="formData.modelTypeCode"
+						v-model:label="formData.modelTypeName"
 						placeholder="请选择打印模板"
 						class="template-select"
 						:dataConfig="{ params: { type: 'DICT', dictType: 'MBLX' } }"
 						@change="handleTemplateChange"
-					
 					/>
 					<!-- 	:disabled="!formData.id"  -->
 				</div>
@@ -138,6 +137,34 @@
 			</div>
 		</div>
 	</div>
+	<!-- 在模板部分添加 Dialog -->
+	<el-dialog
+		v-model="templateDialogVisible"
+		title="新增模板"
+		width="500px"
+		:close-on-click-modal="false"
+		@close="handleTemplateDialogClose"
+	>
+		<el-form ref="templateFormRef" :model="templateForm" :rules="templateFormRules" label-width="100px">
+			<el-form-item label="模板名称" prop="modelName">
+				<el-input v-model="templateForm.modelName" placeholder="请输入模板名称，例如：个人信息报表模板" />
+			</el-form-item>
+			<el-form-item label="模板类型" prop="modelTypeCode">
+				<Select
+					v-model:value="templateForm.modelTypeCode"
+					v-model:label="templateForm.modelTypeName"
+					placeholder="请选择模板类型"
+					:dataConfig="{ params: { type: 'DICT', dictType: 'MODEL_TYPE' } }"
+				/>
+			</el-form-item>
+		</el-form>
+		<template #footer>
+			<span class="dialog-footer">
+				<el-button @click="templateDialogVisible = false">取消</el-button>
+				<el-button type="primary" @click="confirmTemplateForm">确认</el-button>
+			</span>
+		</template>
+	</el-dialog>
 </template>
 
 <script setup>
@@ -151,7 +178,7 @@ import api from '@/api/master/template' // 参考代码：模板接口
 import printData from './print-data'
 const isLoading = ref(true)
 // 是否显示
-const  visible = ref(false)
+const visible = ref(false)
 
 // 1. 核心实例与基础配置
 const instance = getCurrentInstance()
@@ -182,9 +209,10 @@ const scaleMin = ref(0.5)
 // 3. 模板与打印数据：新增id字段区分新增/编辑（id为空=新增，有值=编辑）
 const formData = ref({
 	id: '', // 模板ID（编辑时从接口获取，新增时为空）
-	rateTypeCode: '', // 模板编码（字典选择）
-	rateTypeName: '', // 模板名称（新增时手动输入，编辑时从接口获取）
-	model: null, // 模板JSON字符串（核心数据）
+	modelTypeCode: '', // 模板类型编码（字典选择）
+	modelTypeName: '', // 模板类型名称（字典选择）
+	modelName: '', // 模板名称（新增时手动输入，编辑时从接口获取）
+	modelContent: null, // 模板JSON字符串（核心数据）
 })
 // 打印模拟数据
 const printDataInfo = ref()
@@ -243,10 +271,10 @@ const initHiprintDesigner = async () => {
 		hiprintTemplate.value.zoom(scaleValue.value)
 
 		// 模板加载优先级：编辑模板（formData.model）> 默认模板（panel.js）
-		if (formData.value.model) {
+		if (formData.value.modelContent) {
 			// 1. 编辑状态：加载已有模板
-			mergeTemplate(JSON.parse(formData.value.model))
-			ElMessage.success(`已加载【${formData.rateTypeName || '编辑模板'}】`)
+			mergeTemplate(JSON.parse(formData.value.modelContent))
+			ElMessage.success(`已加载【${formData.modelName || '编辑模板'}】`)
 		} else {
 			// 2. 新增状态：加载默认模板（panel.js）
 			await getPanel()
@@ -288,14 +316,14 @@ const handleTemplateChange = async (value, label) => {
 		// 更新表单数据（保持编辑状态）
 		formData.value = {
 			...formData.value,
-			rateTypeCode: value,
-			rateTypeName: label,
-			model: res.data.model,
+			modelTypeCode: value,
+			modelTypeName: label,
+			modelContent: res.data.modelContent,
 		}
 
 		// 应用选中的模板
-		if (res.data.model) {
-			mergeTemplate(JSON.parse(res.data.model))
+		if (res.data.modelContent) {
+			mergeTemplate(JSON.parse(res.data.modelContent))
 		}
 		ElMessage.success(`已切换至模板：${label}`)
 	} catch (error) {
@@ -342,6 +370,22 @@ const getPanel = async () => {
 	}
 }
 
+// 在 script setup 中添加相关数据和方法
+const templateDialogVisible = ref(false)
+const templateFormRef = ref(null)
+const templateForm = ref({
+	modelName: '',
+	modelTypeCode: '',
+	modelTypeName: '',
+})
+
+const templateFormRules = {
+	modelName: [
+		{ required: true, message: '请输入模板名称', trigger: 'blur' },
+		{ pattern: /^[\u4e00-\u9fa5a-zA-Z0-9_]{2,20}$/, message: '模板名需为2-20位中英文、数字或下划线', trigger: 'blur' },
+	],
+	modelTypeCode: [{ required: true, message: '请选择模板类型', trigger: 'change' }],
+}
 /**
  * 6. 模板保存：新增需输入名称，编辑直接保存
  */
@@ -351,71 +395,55 @@ const saveTemplate = async () => {
 		return
 	}
 
-	try {
-		// 步骤1：获取当前模板JSON数据
-		const templateJson = hiprintTemplate.value.getJson()
-		formData.value.model = JSON.stringify(templateJson)
+	// 步骤1：获取当前模板JSON数据
+	const templateJson = hiprintTemplate.value.getJson()
+	formData.value.modelContent = JSON.stringify(templateJson)
 
-		// 步骤2：新增状态 - 强制输入模板名
-		if (!formData.value.id) {
-			// 弹出输入框获取模板名
-			const { value: templateName, action } = await ElMessageBox.prompt(
-				'请输入模板名称（必填）：',
-				'新增模板',
-				{
-					confirmButtonText: '确认',
-					cancelButtonText: '取消',
-					inputPlaceholder: '例如：个人信息报表模板',
-					validatePattern: /^[\u4e00-\u9fa5a-zA-Z0-9_]{2,20}$/, // 2-20位中英文/数字/下划线
-					validateMessage: '模板名需为2-20位中英文、数字或下划线',
-					inputType: 'text',
-				}
-			)
-
-			// 用户取消输入
-			if (action === 'cancel') return
-
-			// 赋值模板名（rateTypeName用于显示和接口传递）
-			formData.value.rateTypeName = templateName
-			// 若需要模板编码（rateTypeCode），可补充字典选择或自动生成逻辑
-			if (!formData.value.rateTypeCode) {
-				ElMessage.warning('建议先选择模板编码（字典选择），再保存')
-				// 可选：自动生成编码（示例）
-				// formData.value.rateTypeCode = 'TEMPLATE_' + Date.now()
-			}
+	// 步骤2：新增状态 - 弹出对话框输入模板名和选择模板类型
+	if (!formData.value.id) {
+		// 重置表单数据
+		templateForm.value = {
+			modelName: '',
+			modelTypeCode: '',
+			modelTypeName: '',
 		}
 
-		// 步骤3：二次确认保存操作
-		await ElMessageBox.confirm(
-			formData.value.id ? '确定更新当前模板？' : '确定新增此模板？',
-			formData.value.id ? '更新确认' : '新增确认',
-			{
-				confirmButtonText: '确认',
-				cancelButtonText: '取消',
-				type: 'warning',
-			}
-		)
+		// 显示对话框
+		templateDialogVisible.value = true
 
-		// 步骤4：调用接口保存（新增/编辑统一用insert接口，若接口区分需调整）
-		const res = await api.insert(formData.value)
-		if (res.code === '0000') {
-			const msg = formData.value.id ? '模板更新成功' : '模板新增成功'
-			ElMessage.success(msg)
-			// 新增成功后赋值ID（切换为编辑状态）
-			if (!formData.value.id) {
-				formData.value.id = res.data.id
-			}
-		} else {
-			ElMessage.error(`保存失败：${res.msg || '未知错误'}`)
-		}
-	} catch (error) {
-		// 取消操作时不提示错误
-		if (error.name !== 'Cancel' && error.action !== 'cancel') {
-			ElMessage.error(`保存接口异常：${error.message}`)
-		}
+		// 等待用户确认或取消
+		return
 	}
 }
+// 添加确认模板表单的方法
+const confirmTemplateForm = async () => {
+	await templateFormRef.value.validate()
 
+	// 将表单数据赋值给 formData
+	formData.value.modelName = templateForm.value.modelName
+	formData.value.modelTypeCode = templateForm.value.modelTypeCode
+	formData.value.modelTypeName = templateForm.value.modelTypeName
+
+	// 关闭对话框
+	templateDialogVisible.value = false
+
+	// 继续保存操作 - 二次确认
+	await ElMessageBox.confirm('确定新增此模板？', '新增确认', {
+		confirmButtonText: '确认',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+
+	// 调用接口保存
+	const res = await api.insert(formData.value)
+	if (res.code === '0000') {
+		ElMessage.success('模板新增成功')
+		//跳转
+		proxy.$router.go(-1)
+	} else {
+		ElMessage.error(`保存失败：${res.msg || '未知错误'}`)
+	}
+}
 /**
  * 7. 清空设计区（保留纸张尺寸）
  */
@@ -568,19 +596,20 @@ defineExpose({
 	formData,
 	printDataInfo,
 	// 父组件调用：设置编辑模板数据（如从列表页跳转时传入）
-	setEditTemplate: (templateData) => {
+	setEditTemplate: templateData => {
 		formData.value = {
 			id: templateData.id,
-			rateTypeCode: templateData.rateTypeCode,
-			rateTypeName: templateData.rateTypeName,
-			model: templateData.model,
+			modelTypeCode: templateData.modelTypeCode,
+			modelTypeName: templateData.modelTypeName,
+			modelName: templateData.modelName,
+			modelContent: templateData.modelContent,
 		}
 		// 重新初始化设计器（加载编辑模板）
 		initHiprintDesigner()
 	},
 	// 重置为新增状态
 	reset: () => {
-		formData.value = { id: '', rateTypeCode: '', rateTypeName: '', model: null }
+		formData.value = { id: '', modelTypeCode: '', modelTypeName: '', modelName: '', modelContent: null }
 		paperWidth.value = 210
 		paperHeight.value = 296.6
 		curPaper.value = { type: 'A4', width: 210, height: 296.6 }
