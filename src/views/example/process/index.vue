@@ -2,7 +2,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-10 15:18:28
- * @LastEditTime: 2025-09-12 14:02:48
+ * @LastEditTime: 2025-09-15 09:10:22
  * @LastEditors: zhangsd
  * @Description: 流程关系
  * @FilePath: \view\src\views\example\process\index.vue
@@ -10,7 +10,7 @@
 <template>
 	<div class="app">
 		<h1>港口作业流程图演示</h1>
-
+		<!-- <el-button @click="dialogVisible = true">哈哈哈哈</el-button> -->
 		<div class="tabs">
 			<el-tabs v-model="activeTab">
 				<el-tab-pane label="ECharts版本" name="echarts">
@@ -38,6 +38,34 @@
 				</el-tab-pane>
 			</el-tabs>
 		</div>
+		<!-- 弹窗 -->
+		<Dialog :title="dialogTitle" v-model:visible="dialogVisible" width="60%" :close-on-click-modal="false">
+			<template #header>
+				<div class="dialog-header">
+					<h2>{{ dialogTitle }}</h2>
+					<svg-icon id="close-icon" icon-class="close" @click="dialogVisible = false" class="close-icon" />
+				</div>
+			</template>
+			<div>
+				<el-form :model="form">
+					<el-form-item label="Promotion name" :label-width="formLabelWidth">
+						<el-input v-model="form.name" autocomplete="off" />
+					</el-form-item>
+					<el-form-item label="Zones" :label-width="formLabelWidth">
+						<el-select v-model="form.region" placeholder="Please select a zone">
+							<el-option label="Zone No.1" value="shanghai" />
+							<el-option label="Zone No.2" value="beijing" />
+						</el-select>
+					</el-form-item>
+				</el-form>
+			</div>
+			<template #footer>
+				<div class="dialog-footer">
+					<el-button @click="dialogVisible = false">Cancel</el-button>
+					<el-button type="primary" @click="dialogVisible = false">Confirm</el-button>
+				</div>
+			</template>
+		</Dialog>
 	</div>
 </template>
 
@@ -46,8 +74,21 @@ import FlowChart from './detail/FlowChart.vue'
 import PortOperationFlowchart from './detail/PortOperationFlowchart.vue'
 import PortFlowChart from './detail/PortFlowChart.vue'
 import { ref } from 'vue'
-
+import Dialog from '@/components/Dialog'
 const activeTab = ref('echarts')
+const dialogTitle = ref('测试')
+const dialogVisible = ref(false)
+const form = reactive({
+  name: '',
+  region: '',
+  date1: '',
+  date2: '',
+  delivery: false,
+  type: [],
+  resource: '',
+  desc: '',
+})
+const formLabelWidth = '140px'
 const treeFlowData = ref([
 	// 流程1：集港→货区→装船/转栈→疏港/二次转栈
 	// 流程1：集港→货区→装船/转栈→疏港/二次转栈
