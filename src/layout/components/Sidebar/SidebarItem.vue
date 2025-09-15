@@ -39,9 +39,9 @@
 </template>
 
 <script setup>
-import { isExternal } from '@/utils/verify/validate'
+import { isExternal } from '@/utils/common/form-validation'
 import AppLink from './Link'
-import { getNormalPath } from '@/utils/common/common'
+import { getNormalPath } from '@/utils/common/core'
 
 const props = defineProps({
 	// route object

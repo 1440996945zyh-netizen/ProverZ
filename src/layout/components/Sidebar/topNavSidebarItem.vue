@@ -18,9 +18,9 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { isExternal } from '@/utils/verify/validate'
+import { isExternal } from '@/utils/common/form-validation'
 import AppLink from './Link'
-import { getNormalPath } from '@/utils/common/common'
+import { getNormalPath } from '@/utils/common/core'
 
 // 定义清晰的props类型和默认值
 const props = defineProps({

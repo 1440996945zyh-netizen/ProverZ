@@ -20,8 +20,8 @@
 
 <script setup>
 import Fuse from 'fuse.js'
-import { getNormalPath } from '@/utils/common/common'
-import { isHttp } from '@/utils/verify/validate'
+import { getNormalPath } from '@/utils/common/core'
+import { isHttpOrHttps } from '@/utils/common/form-validation'
 import usePermissionStore from '@/store/modules/permission'
 
 const search = ref('')
@@ -66,7 +66,7 @@ const handleBlur = () => {
 
 function change(val) {
 	const path = val.path
-	if (isHttp(path)) {
+	if (isHttpOrHttps(path)) {
 		// http(s):// 路径新窗口打开
 		const pindex = path.indexOf('http')
 		window.open(path.substr(pindex, path.length), '_blank')
@@ -112,7 +112,7 @@ function generateRoutes(routes, basePath = '', prefixTitle = []) {
 		}
 		const p = r.path.length > 0 && r.path[0] === '/' ? r.path : '/' + r.path
 		const data = {
-			path: !isHttp(r.path) ? getNormalPath(basePath + p) : r.path,
+			path: !isHttpOrHttps(r.path) ? getNormalPath(basePath + p) : r.path,
 			title: [...prefixTitle],
 		}
 

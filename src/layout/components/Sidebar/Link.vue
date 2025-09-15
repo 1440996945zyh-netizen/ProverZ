@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { isExternal } from '@/utils/verify/validate'
+import { isExternal } from '@/utils/common/form-validation'
 
 const props = defineProps({
 	to: {

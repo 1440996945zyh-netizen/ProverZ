@@ -184,7 +184,7 @@ function getRoleList() {
 /** 查询部门下拉树结构 */
 function getDeptTree() {
 	publicApi.getDeptList().then(response => {
-		deptOptions.value = proxy.handleTree(response.data)
+		deptOptions.value = proxy.flattenToTree(response.data)
 	})
 }
 //身份证号是否合理

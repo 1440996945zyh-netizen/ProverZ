@@ -86,7 +86,7 @@
 import { getCurrentInstance, ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ArrowLeftBold, ArrowRightBold, Menu, Search } from '@element-plus/icons-vue'
 import { constantRoutes } from '@/router'
-import { isHttp } from '@/utils/verify/validate'
+import { isHttpOrHttps } from '@/utils/common/form-validation'
 import useAppStore from '@/store/modules/app'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
@@ -140,7 +140,7 @@ const childrenMenus = computed(() => {
 				if (router.path === '/') {
 					router.children[item].path = '/' + router.children[item].path
 				} else {
-					if (!isHttp(router.children[item].path)) {
+					if (!isHttpOrHttps(router.children[item].path)) {
 						router.children[item].path = router.path + '/' + router.children[item].path
 					}
 				}
@@ -169,7 +169,7 @@ const activeMenu = computed(() => {
 })
 
 function handleSelect(key, keyPath) {
-	if (isHttp(key)) {
+	if (isHttpOrHttps(key)) {
 		window.open(key, '_blank')
 	} else {
 		router
@@ -418,7 +418,7 @@ const handleWheel = e => {
 
 // 下拉菜单点击页面项的处理逻辑
 const handleMenuSelect = item => {
-	if (isHttp(item.path)) {
+	if (isHttpOrHttps(item.path)) {
 		window.open(item.path, '_blank')
 	} else {
 		router

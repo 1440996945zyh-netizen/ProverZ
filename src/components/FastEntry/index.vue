@@ -19,8 +19,8 @@
 import AppLink from '@/layout/components/Sidebar/Link'
 import useUserStore from '@/store/modules/user'
 import { onMounted, getCurrentInstance, ref, computed, nextTick } from 'vue'
-import { isExternal } from '@/utils/verify/validate'
-import { getNormalPath } from '@/utils/common/common'
+import { isExternal } from '@/utils/common/form-validation'
+import { getNormalPath } from '@/utils/common/core'
 import api from '@/api/system/user'
 import usePermissionStore from '@/store/modules/permission'
 

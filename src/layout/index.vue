@@ -42,8 +42,8 @@ import { computed, watch, ref, onMounted } from 'vue'
 import Sidebar from './components/Sidebar/index.vue'
 import { AppMain, Navbar, Settings, TagsView } from './components'
 import defaultSettings from '@/settings'
-import { isExternal } from '@/utils/verify/validate'
-import { getNormalPath } from '@/utils/common/common'
+import { isExternal } from '@/utils/common/form-validation'
+import { getNormalPath } from '@/utils/common/core'
 import menuItemList from './components/Sidebar/menuItemList'
 const { proxy } = getCurrentInstance()
 const route = useRoute()

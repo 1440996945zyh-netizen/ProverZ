@@ -109,7 +109,7 @@ watch(deptName, val => {
 function getDeptTree() {
 	console.log(window.innerHeight)
 	publicApi.getDeptList().then(response => {
-		deptOptions.value = proxy.handleTree(response.data)
+		deptOptions.value = proxy.flattenToTree(response.data)
 	})
 }
 /** 节点单击事件 */

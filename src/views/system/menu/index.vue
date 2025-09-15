@@ -653,7 +653,7 @@ const getTreeselect = async () => {
 	menuOptions.value = []
 	listMenu().then(response => {
 		const menu = { menuId: 0, menuName: '主类目', children: [] }
-		menu.children = proxy.handleTree(response.data, 'menuId')
+		menu.children = proxy.flattenToTree(response.data, 'menuId')
 		menuOptions.value.push(menu)
 	})
 }

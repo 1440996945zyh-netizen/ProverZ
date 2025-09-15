@@ -41,24 +41,11 @@ import elementIcons from '@/components/SvgIcon/svgicon'
 import { ElMessage } from 'element-plus'
 
 import './permission' // permission control
-
-import { useDict } from '@/utils/common/dict'
-import verify from '@/utils/verify/verify'
 import {
-  resetForm,
-  addDateRange,
-  handleTree,
-  setFormData,
-  setEditTableOptions,
+  useDict, deepClone, clearObjectValues, flattenToTree, setEditTableOptions, formatDate, addDateRange, selectDictLabel,
+  selectDictLabels, getRules, resetForm, setFormData, filterInput
+} from '@/utils'
 
-} from '@/utils/common/common'
-import { deepClone,resetObj } from '@/utils/common/data'
-import { parseTime } from '@/utils/common/day'
-import {
-  selectDictLabel,
-  selectDictLabels,
-} from '@/utils/common/dict'
-import { getRules } from '@/utils/verify/validate.js'
 
 import $bus from '@/utils/bus.js'
 // 分页组件
@@ -81,17 +68,17 @@ const app = createApp(App)
 // 全局方法挂载
 app.config.globalProperties.useDict = useDict
 app.config.globalProperties.download = download
-app.config.globalProperties.parseTime = parseTime
+app.config.globalProperties.parseTime = formatDate
 app.config.globalProperties.resetForm = resetForm
-app.config.globalProperties.handleTree = handleTree
+app.config.globalProperties.flattenToTree = flattenToTree
 app.config.globalProperties.addDateRange = addDateRange
 app.config.globalProperties.selectDictLabel = selectDictLabel
 app.config.globalProperties.selectDictLabels = selectDictLabels
-app.config.globalProperties.verify = verify // 正则匹配
+app.config.globalProperties.verify = filterInput // 正则匹配
 app.config.globalProperties.getRules = getRules // 校验rules封装
 app.config.globalProperties.setFormData = setFormData // 修改详情的form
 app.config.globalProperties.setEditTableOptions = setEditTableOptions // 可编辑表格中的下拉框赋值方法
-app.config.globalProperties.resetObj = resetObj // 清空对象方法
+app.config.globalProperties.clearObjectValues = clearObjectValues // 清空对象方法
 app.config.globalProperties.deepClone = deepClone // 深拷贝
 app.config.globalProperties.$bus = $bus // 全局事件总线
 app.config.globalProperties.$message = ElMessage

@@ -270,7 +270,7 @@ const getList = data => {
 	console.log('查询shuju', data)
 	listDept(data).then(response => {
 		console.log('列表', response)
-		deptList.value = proxy.handleTree(response.data)
+		deptList.value = proxy.flattenToTree(response.data)
 	})
 }
 /** 取消按钮 */
@@ -307,7 +307,7 @@ function resetQuery() {
 function handleAdd(row) {
 	reset()
 	publicApi.getDeptList().then(response => {
-		deptOptions.value = proxy.handleTree(response.data)
+		deptOptions.value = proxy.flattenToTree(response.data)
 	})
 	if (row != undefined) {
 		form.value.parentId = row.id
@@ -328,7 +328,7 @@ function handleUpdate(row) {
 	console.log(row)
 	reset()
 	publicApi.getDeptList().then(response => {
-		deptOptions.value = proxy.handleTree(response.data)
+		deptOptions.value = proxy.flattenToTree(response.data)
 	})
 	getDept(row.id).then(response => {
 		form.value = response.data
@@ -376,7 +376,7 @@ function handleDelete(row) {
 const getdeptLevelList = () => {
 	publicApi.getDictList({ types: 'DEPT_LEVEL' }).then(response => {
 		console.log('级别字典', response)
-		deptLevelList.value = proxy.handleTree(response.data.DEPT_LEVEL)
+		deptLevelList.value = proxy.flattenToTree(response.data.DEPT_LEVEL)
 	})
 }
 getdeptLevelList()
