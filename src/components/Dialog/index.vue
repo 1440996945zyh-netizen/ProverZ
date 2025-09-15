@@ -29,9 +29,10 @@
 							:icon-class="fullscreen ? 'exit-fullscreen' : 'fullscreen'"
 							@click="changeFullScreen"
 							class="fullscreen-icon"
+							:color="fullscreen ? '#909399' : ''"
 						/>
 						<!-- 自定义关闭按钮 -->
-						<svg-icon
+						<svg-icon 
 							id="close-icon"
 							icon-class="close"  
 							@click="handleCustomClose"
@@ -53,6 +54,7 @@
 	</div>
 </template>
 <script setup name="Dialog">
+import { color } from 'echarts'
 import { nextTick, computed, ref } from 'vue'
 
 const props = defineProps({
@@ -103,9 +105,14 @@ const visible = computed({
 
 const fullscreen = ref(props.isFullscreen)
 const changeFullScreen = () => {
-	setTimeout(() => {
-		fullscreen.value = !fullscreen.value
-	}, 100)
+ fullscreen.value = !fullscreen.value;
+  // 全屏切换后，强制刷新 body 高度（确保样式生效）
+  nextTick(() => {
+    const bodyEl = document.querySelector('.dialog-body');
+    if (bodyEl) {
+      bodyEl.style.height = '100%';
+    }
+  });
 }
 
 // 处理默认关闭逻辑
@@ -241,24 +248,49 @@ const handleCustomClose = () => {
 	--el-dialog-border-radius: 0;
 }
 
-/* 关键修改：全屏时不覆盖顶部和侧边栏 */
+// 关键：全屏状态下，让 el-dialog 内部容器垂直撑满，body 占剩余空间
 :deep(.is-fullscreen) {
-	// 距离顶部50px（避开顶部导航），距离左侧55px（避开侧边栏）
-	top: 50px !important;
-	left: 55px !important;
-	
-	// 宽度 = 窗口宽度 - 左侧边栏宽度
-	width: calc(100vw - 55px) !important;
-	
-	// 高度 = 窗口高度 - 顶部导航高度
-	height: calc(100vh - 50px) !important;
-	
-	// 清除margin，确保计算准确
-	margin: 0 !important;
-	.dialog-body {
-		height: 100%;
-	}
+  top: 50px !important;
+  left: 54px !important;
+  width: calc(100vw - 55px) !important;
+  height: calc(100vh - 50px) !important;
+  margin: 0 !important;
 
+  // 1. 让 el-dialog 内部的「内容容器」垂直撑满（包含 header/body/footer）
+  .el-dialog__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%; // 撑满 el-dialog 的高度
+  }
+
+  // 2. 让 el-dialog__body（body 的父容器）撑满剩余空间
+  .el-dialog__body {
+    flex: 1; // 占用 header 和 footer 之外的剩余高度
+    overflow: hidden; // 避免内部内容溢出容器
+  }
+
+  // 3. 让 dialog-body 完全撑满父容器（el-dialog__body）
+  .dialog-body {
+    height: calc(100vh - 170px) !important; // 覆盖默认高度，撑满父容器
+    max-height: none !important; // 清除默认 max-height 限制
+    overflow: auto; // 内部内容超出时滚动
+  }
+
+  // 4. 固定 footer 在底部（可选，避免footer被body覆盖）
+  .dialog-footer {
+    flex-shrink: 0; // 禁止 footer 被压缩
+  }
+}
+
+// 5. 优化非全屏状态的 body 高度（可选，避免默认样式冲突）
+.dialog-body {
+  height: 100%;
+  max-height: calc(100vh - 180px); // 非全屏时的默认最大高度
+  overflow: auto;
+  padding: 20px 24px;
+  font-size: 14px;
+  color: var(--el-dialog-body-color);
+  line-height: 1.5;
 }
 
 :deep(.el-dialog--fullscreen .el-dialog__header) {

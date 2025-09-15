@@ -159,9 +159,9 @@
 		</div>
 
 		<!-- 节点详情弹窗 -->
-		<el-dialog
+		<Dialog
 			:title="selectedNodeDetails?.label || '节点详情'"
-			v-model="detailDialogVisible"
+			 v-model:visible="detailDialogVisible"
 			width="60%"
 			:close-on-click-modal="false"
 		>
@@ -171,7 +171,7 @@
 				:relatedNodes="getRelatedNodes(selectedNodeDetails.id)"
 				@nodeClick="handleRelatedNodeClick"
 			/>
-		</el-dialog>
+		</Dialog>
 
 		<!-- 连接线详情弹窗 -->
 		<el-dialog title="连接详情" v-model="linkDialogVisible" width="50%" :close-on-click-modal="false">
@@ -193,7 +193,7 @@ import { Refresh, ZoomIn, ZoomOut, Position, Picture, Grid, FullScreen } from '@
 import NodeDetailPanel from './NodeDetailPanel.vue'
 import LinkDetailPanel from './LinkDetailPanel.vue'
 import { dagreLayout } from './dagreLayout'
-
+import Dialog from '@/components/Dialog'
 // 节点图标SVG
 const NODE_ICONS = {
 	// 开始节点图标
