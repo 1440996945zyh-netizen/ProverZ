@@ -62,7 +62,7 @@ const formData = reactive({
 	remark: '',
 })
 const resetForm = () => {
-	proxy.resetObj(formData)
+	proxy.clearObjectValues(formData)
 	ruleForm.value.clearValidate()
 }
 // 验证

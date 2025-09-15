@@ -2,7 +2,7 @@
 import BaseTable from '@/components/BaseTable/index.vue'
 import RenderTable from './renderTable.vue'
 import { ref, reactive, nextTick, onMounted, h } from 'vue'
-import { formatMoney } from '@/utils/common/common'
+import { formatMoney } from '@/utils/common/core'
 
 import VXETable from 'vxe-table'
 import 'vxe-table/lib/style.css'

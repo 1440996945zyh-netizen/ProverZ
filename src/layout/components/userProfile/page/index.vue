@@ -41,7 +41,7 @@ const validate = async () => {
 	return flag
 }
 const resetForm = () => {
-	proxy.resetObj(formData)
+	proxy.clearObjectValues(formData)
 }
 defineExpose({
 	formData,

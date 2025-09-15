@@ -39,7 +39,7 @@ import { nextTick, onMounted, ref, reactive, defineProps, computed, watch } from
 import BaseTable from '../BaseTable/index.vue'
 import api from '../../api/public/index.js'
 import request from '../../utils/auth/request'
-import { uniqueFunc } from '../../utils/common/data'
+import { removeDuplicatesByProperty } from '../../utils/common/data'
 const props = defineProps({
 	value: {
 		type: [Array, String],

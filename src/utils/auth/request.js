@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ElNotification, ElMessageBox, ElMessage, ElLoading } from 'element-plus'
 import { getToken, removeToken, setToken } from '../../utils/auth/token'
 import errorCode from '../../utils/constant/errorCode'
-import { tansParams,  } from '../../utils/common/common'
+import { paramsToQueryString  } from '../../utils/common/core'
 import cache from '../../plugins/cache'
 import { saveAs } from 'file-saver'
 import useUserStore from '../../store/modules/user'
@@ -60,7 +60,7 @@ service.interceptors.request.use(
 		}
 		// get请求映射params参数
 		if (config.method === 'get' && config.params) {
-			let url = config.url + '?' + tansParams(config.params)
+			let url = config.url + '?' + paramsToQueryString(config.params)
 			url = url.slice(0, -1)
 			config.params = {}
 			config.url = url
@@ -201,7 +201,7 @@ export function download(url, params, filename, config) {
 		.post(url, params, {
 			transformRequest: [
 				params => {
-					return tansParams(params)
+					return paramsToQueryString(params)
 				},
 			],
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

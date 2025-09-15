@@ -294,7 +294,7 @@ const resetForm = () => {
 	form.value.id = undefined
 	ruleForm.value.resetFields()
 
-	// proxy.resetObj(form)
+	// proxy.clearObjectValues(form)
 	// reset()
 }
 // 获取部门树

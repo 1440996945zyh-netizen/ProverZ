@@ -39,7 +39,7 @@ import { nextTick, onMounted, ref, reactive, computed, watch } from 'vue'
 import BaseTable from '../BaseTable/index.vue'
 import api from '../../api/public/index.js'
 import request from '../../utils/auth/request'
-import { uniqueFunc } from '../../utils/common/data'
+import { removeDuplicatesByProperty } from '../../utils/common/data'
 const props = defineProps({
 	value: {
 		type: [Array, String],
@@ -229,7 +229,7 @@ const getOptionsByType = async (e = '') => {
 	res.data.forEach(item => {
 		defaultOptions.value.push(item)
 	})
-	defaultOptions.value = uniqueFunc(defaultOptions.value, props.selectValue)
+	defaultOptions.value = removeDuplicatesByProperty(defaultOptions.value, props.selectValue)
 	// console.log('num.value', num.value)
 	if (props.selectFilter && num.value !== 1) {
 		filterData = res.data.filter(item => {
@@ -240,7 +240,7 @@ const getOptionsByType = async (e = '') => {
 		filterData.forEach(item => {
 			defaultOptions.value.push(item)
 		})
-		defaultOptions.value = uniqueFunc(defaultOptions.value, props.selectValue)
+		defaultOptions.value = removeDuplicatesByProperty(defaultOptions.value, props.selectValue)
 		// return
 	}
 }

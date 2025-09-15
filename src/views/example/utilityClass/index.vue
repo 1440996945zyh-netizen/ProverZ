@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-03 14:02:23
- * @LastEditTime: 2025-09-03 17:11:06
+ * @LastEditTime: 2025-09-15 15:48:13
  * @LastEditors: zhangsd
  * @Description: 工具类代码使用示例（修复子组件滚动问题）
  * @FilePath: \view\src\views\example\utilityClass\index.vue
@@ -10,24 +10,19 @@
 	<div class="app-container">
 		<!-- Tabs 头部切换栏 -->
 		<div class="tabs-header">
-			<div class="tab-item" :class="{ 'tab-active': activeTab === 'data' }" @click="activeTab = 'data'">data.js</div>
 			<div class="tab-item" :class="{ 'tab-active': activeTab === 'common' }" @click="activeTab = 'common'">common.js</div>
+			<div class="tab-item" :class="{ 'tab-active': activeTab === 'data' }" @click="activeTab = 'data'">data.js</div>
 			<div class="tab-item" :class="{ 'tab-active': activeTab === 'day' }" @click="activeTab = 'day'">day.js</div>
-			<div class="tab-item" :class="{ 'tab-active': activeTab === 'math' }" @click="activeTab = 'math'">math.js</div>
-            <div class="tab-item" :class="{ 'tab-active': activeTab === 'string' }" @click="activeTab = 'string'">string.js</div>
-            <div class="tab-item" :class="{ 'tab-active': activeTab === 'validate' }" @click="activeTab = 'validate'">validate.js</div>
-            <div class="tab-item" :class="{ 'tab-active': activeTab === 'filter' }" @click="activeTab = 'filter'">verify.js</div>
+			<div class="tab-item" :class="{ 'tab-active': activeTab === 'validation' }" @click="activeTab = 'validation'">validation.js</div>
 
 		</div>
 		<!-- 关键修复：给内容区加固定高度和滚动 -->
 		<div class="tabs-content">
-			<DataUtilsDemo v-if="activeTab === 'data'" class="tab-panel" />
+
 			<CommonUtilsDemo v-if="activeTab === 'common'" class="tab-panel" />
-			<DateUtilsDemo v-if="activeTab === 'day'" class="tab-panel" />
-			<MathUtilsDemo v-if="activeTab === 'math'" class="tab-panel" />
-            <StringUtilsDemo v-if="activeTab === 'string'" class="tab-panel" />
-            <ValidateUtilsDemo v-if="activeTab === 'validate'" class="tab-panel" />
-            <FilterUtilsDemo v-if="activeTab === 'filter'" class="tab-panel" />
+			<DataUtilsDemo v-if="activeTab === 'data'" class="tab-panel" />
+			<DayUtilsDemo v-if="activeTab === 'day'" class="tab-panel" />
+			<ValidationUtilsDemo v-if="activeTab === 'validation'" class="tab-panel" />
 		</div>
 	</div>
 </template>
@@ -35,23 +30,24 @@
 <script setup>
 import { ref } from 'vue'
 // 导入子组件（路径请确保与项目实际一致）
-import DataUtilsDemo from './detail/DataUtilsDemo.vue'
-import CommonUtilsDemo from './detail/CommonUtilsDemo.vue'
-import DateUtilsDemo from './detail/DateUtilsDemo.vue'
-import MathUtilsDemo from './detail/MathUtilsDemo.vue'
-import StringUtilsDemo from './detail/StringUtilsDemo.vue'
 
-import ValidateUtilsDemo from './detail/ValidateUtilsDemo.vue'
-import FilterUtilsDemo from './detail/FilterUtilsDemo.vue'
+import CommonUtilsDemo from './detail/CommonUtilsDemo.vue'
+import DataUtilsDemo from './detail/DataUtilsDemo.vue'
+import DayUtilsDemo from './detail/DayUtilsDemo.vue'
+import ValidationUtilsDemo from './detail/ValidationUtilsDemo.vue'
+
+
+
 
 // 激活的标签页（默认显示 data）
-const activeTab = ref('data')
+const activeTab = ref('common')
 </script>
 
 <style scoped>
 /* 根容器：占满视口高度，避免内容撑开页面 */
 .app-container {
 	margin: 0 auto;
+	width: 75vw;
 	/*padding: 20px 24px;  微调内边距，适配滚动 */
 	font-family: 'Microsoft YaHei', Arial, sans-serif;
 	color: #333;

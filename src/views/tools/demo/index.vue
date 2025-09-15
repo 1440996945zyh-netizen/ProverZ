@@ -43,7 +43,7 @@ import EditTable from '@/components/EditTable/index.vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Upload from '@/components/Upload/index.vue'
 import FormatInput from '@/components/FormatInput/index.vue'
-import { formatMoney } from '@/utils/common/common'
+import { formatMoney } from '@/utils/common/core'
 import { ElButton } from 'element-plus'
 // const { proxy } = getCurrentInstance() // 相当于vue2里的this
 

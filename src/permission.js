@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { getToken, removeToken } from '@/utils/auth/token'
-import { isHttp } from '@/utils/verify/validate'
+import { isHttpOrHttps } from '@/utils/common/form-validation'
 import { isRelogin } from '@/utils/auth/request'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
@@ -35,7 +35,7 @@ router.beforeEach((to, from, next) => {
 							.then(accessRoutes => {
 								// 根据roles权限生成可访问的路由表
 								accessRoutes.forEach(route => {
-									if (!isHttp(route.path)) {
+									if (!isHttpOrHttps(route.path)) {
 										router.addRoute(route) // 动态添加可访问路由表
 									}
 								})

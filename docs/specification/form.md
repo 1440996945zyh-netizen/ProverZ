@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, nextTick, onMounted, h,getCurrentInstance } from 'vue'
 import Select from '@/components/Select/index.vue'
-import { getRules } from '@/utils/verify/validate.js'
+import { getRules } from '@/utils/common/form-validation.js'
 const { proxy } = getCurrentInstance() // 相当于vue2里的this
 import '@/assets/styles/formData.scss';
 const formData = reactive({
