@@ -2,7 +2,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-10 15:18:28
- * @LastEditTime: 2025-09-15 09:10:22
+ * @LastEditTime: 2025-09-15 17:23:34
  * @LastEditors: zhangsd
  * @Description: 流程关系
  * @FilePath: \view\src\views\example\process\index.vue
@@ -91,110 +91,24 @@ const form = reactive({
 const formLabelWidth = '140px'
 const treeFlowData = ref([
 	// 流程1：集港→货区→装船/转栈→疏港/二次转栈
-	// 流程1：集港→货区→装船/转栈→疏港/二次转栈
 	{
-		/**
-		 * 节点唯一标识符
-		 * 作用：用于节点间关联关系构建、选中状态管理、连接线生成
-		 * 约束：必须唯一，建议使用数字或字符串类型
-		 * @type {number|string}
-		 */
 		id: 1,
-		/**
-		 * 节点显示名称
-		 * 作用：作为节点的主要标题展示在图形中央
-		 * 建议：简洁明了，包含作业类型和关键信息（如货物类型）
-		 * @type {string}
-		 */
 		label: '集港作业(钢材)',
-		/**
-		 * 节点类型
-		 * 作用：决定节点的视觉样式（颜色、图标）和功能分类
-		 * 可选值：
-		 * - 'collection'：集港作业（开始类节点，绿色系样式）
-		 * - 'unloading'：卸船作业（特殊节点，红色系图标）
-		 * - 'loading'：装船作业（特殊节点，蓝色系图标）
-		 * - 'transfer'：转栈作业（特殊节点，灰色系图标）
-		 * - 'normal'：普通作业节点（蓝色系样式）
-		 * - 'end'：结束节点（灰色系样式）
-		 * @type {string}
-		 */
-		type: 'collection', // 开始节点
-		/**
-		 * 货物类型
-		 * 作用：在节点中部展示，说明当前环节处理的货物种类
-		 * @type {string}
-		 */
+		type: 'collection',
 		cargo: '螺纹钢',
-		/**
-		 * 货物数量（件数）
-		 * 作用：与重量一起展示在节点中部，反映货物规模
-		 * 特殊值：null/0 表示无实际货物（如取消的环节）
-		 * @type {number|null}
-		 */
 		pieces: 500,
-		/**
-		 * 货物重量（吨）
-		 * 作用：与件数一起展示在节点中部，反映货物规模
-		 * @type {number|null}
-		 */
 		weight: 2500,
-		/**
-		 * 计划作业时间
-		 * 作用：在节点底部展示时间信息，用于进度对比
-		 * 格式：'YYYY-MM-DD HH:mm'
-		 * @type {string}
-		 */
 		plannedTime: '2024-05-01 08:00',
-		/**
-		 * 实际完成时间
-		 * 作用：在详情面板中展示，用于记录实际进度
-		 * 格式：与计划时间一致，未完成时可省略
-		 * @type {string|undefined}
-		 */
 		actualTime: '2024-05-01 08:30',
-		/**
-		 * 节点状态
-		 * 作用：决定节点右上角状态指示器的颜色，反映作业进度
-		 * 可选值：
-		 * - 'completed'：已完成（绿色）
-		 * - 'processing'：进行中（黄色）
-		 * - 'pending'：待处理（灰色）
-		 * - 'cancelled'：已取消（红色）
-		 * @type {string}
-		 */
 		status: 'completed',
-		/**
-		 * 操作人员
-		 * 作用：在详情面板中展示，记录负责该环节的人员
-		 * @type {string}
-		 */
 		operator: '张三',
-		/**
-		 * 作业备注
-		 * 作用：在详情面板中展示，记录特殊情况、异常信息或说明
-		 * @type {string}
-		 */
 		notes: '提前30分钟完成，无异常',
-		/**
-		 * 作业区域
-		 * 作用：在详情面板中展示，说明作业发生的物理位置
-		 * @type {string}
-		 */
 		area: '码头入口',
-		/**
-		 * 子节点数组
-		 * 作用：定义当前环节的后续流程，构建树形结构
-		 * 特点：
-		 * - 数组长度>1表示并行分支流程
-		 * - 空数组表示该节点为流程终点
-		 * @type {Array<Object>}
-		 */
 		children: [
 			{
 				id: 2,
 				label: '进入货区A',
-				type: 'normal', // 普通节点
+				type: 'normal',
 				cargo: '螺纹钢',
 				pieces: 500,
 				weight: 2500,
@@ -223,7 +137,7 @@ const treeFlowData = ref([
 							{
 								id: 4,
 								label: '疏港作业(外运)',
-								type: 'end', // 结束节点
+								type: 'end',
 								cargo: '螺纹钢',
 								pieces: 300,
 								weight: 1500,
@@ -236,14 +150,14 @@ const treeFlowData = ref([
 							},
 						],
 					},
-					// 分支2：转栈作业→疏港作业/二次转栈
+					// 分支2：多个转栈作业→共同子节点
 					{
 						id: 5,
-						label: '转栈作业(货区A→C)',
+						label: '转栈作业(A→C)',
 						type: 'transfer',
 						cargo: '螺纹钢',
-						pieces: 200,
-						weight: 1000,
+						pieces: 70,
+						weight: 350,
 						plannedTime: '2024-05-01 10:30',
 						actualTime: '2024-05-01 11:30',
 						status: 'completed',
@@ -251,50 +165,83 @@ const treeFlowData = ref([
 						notes: '叉车2台协同，无损耗',
 						area: '中转区',
 						children: [
+							// 共同子节点：三个转栈作业都会指向这个节点
 							{
-								id: 6,
-								label: '疏港作业(内运)',
-								type: 'end',
+								id: 15,
+								label: '共同存储区',
+								type: 'storage',
 								cargo: '螺纹钢',
-								pieces: 150,
-								weight: 750,
+								pieces: 200,
+								weight: 1000,
 								plannedTime: '2024-05-01 12:00',
-								actualTime: '2024-05-01 12:45',
-								status: 'completed',
-								operator: '周八',
-								notes: '内运车队#12',
-								area: '内运通道',
-							},
-							{
-								id: 7,
-								label: '二次转栈(货区C→D)',
-								type: 'normal',
-								cargo: '螺纹钢',
-								pieces: 50,
-								weight: 250,
-								plannedTime: '2024-05-01 13:00',
-								status: 'processing', // 进行中
-								operator: '吴九',
-								notes: '待入库，等待货区D空闲',
-								area: '中转区',
+								status: 'processing',
+								operator: '杨十七',
+								notes: '统一存储区，待分配',
+								area: '存储区中心',
 								children: [
 									{
-										id: 8,
-										label: '长期存储(货区D)',
+										id: 16,
+										label: '最终分配',
 										type: 'end',
 										cargo: '螺纹钢',
-										pieces: 50,
-										weight: 250,
-										plannedTime: '2024-05-01 14:30',
-										status: 'pending', // 待处理
-										operator: '郑十',
-										notes: '存储周期30天',
-										area: '货区D',
-									},
-								],
-							},
+										pieces: 200,
+										weight: 1000,
+										plannedTime: '2024-05-01 15:00',
+										status: 'pending',
+										operator: '朱十八',
+										notes: '根据订单分配至各客户',
+										area: '分配中心',
+									}
+								]
+							}
 						],
 					},
+					{
+						id: 17,
+						label: '转栈作业(A→D)',
+						type: 'transfer',
+						cargo: '螺纹钢',
+						pieces: 60,
+						weight: 300,
+						plannedTime: '2024-05-01 10:45',
+						actualTime: '2024-05-01 11:45',
+						status: 'completed',
+						operator: '秦十九',
+						notes: '使用起重机辅助转栈',
+						area: '中转区',
+						children: [
+							// 引用同一个共同子节点
+							{
+								id: 15,  // 与上面的共同子节点ID相同
+								label: '共同存储区',
+								type: 'storage'
+								// 其他属性可以省略，会使用第一个定义的完整属性
+							}
+						],
+					},
+					{
+						id: 18,
+						label: '转栈作业(A→E)',
+						type: 'transfer',
+						cargo: '螺纹钢',
+						pieces: 70,
+						weight: 350,
+						plannedTime: '2024-05-01 11:00',
+						actualTime: '2024-05-01 12:00',
+						status: 'completed',
+						operator: '尤二十',
+						notes: '夜间作业，照明充足',
+						area: '中转区',
+						children: [
+							// 引用同一个共同子节点
+							{
+								id: 15,  // 与上面的共同子节点ID相同
+								label: '共同存储区',
+								type: 'storage'
+								// 其他属性可以省略，会使用第一个定义的完整属性
+							}
+						],
+					}
 				],
 			},
 			// 集港作业的另一分支：进入货区B
@@ -306,7 +253,7 @@ const treeFlowData = ref([
 				pieces: 0,
 				weight: 0,
 				plannedTime: '2024-05-01 09:00',
-				status: 'cancelled', // 已取消
+				status: 'cancelled',
 				operator: '钱十一',
 				notes: '货区B临时占用，取消分配',
 				area: '货区B',
@@ -317,7 +264,7 @@ const treeFlowData = ref([
 	{
 		id: 10,
 		label: '卸船作业(散货)',
-		type: 'collection', // 开始节点
+		type: 'collection',
 		cargo: '煤炭',
 		pieces: 1000,
 		weight: 8000,

@@ -88,7 +88,7 @@ const useWebSocketStore = defineStore('webSocket', {
 
                 if (storedMsgs) this.messages = JSON.parse(storedMsgs);
                 if (storedUnread) this.unreadCount = Number(storedUnread);
-                console.log('WebSocket状态从本地存储恢复成功');
+                // console.log('WebSocket状态从本地存储恢复成功');
             } catch (error) {
                 console.error('WebSocket状态恢复失败:', error);
                 this.clearAllMessages(); // 恢复失败时清空，避免数据异常
@@ -164,7 +164,7 @@ const useWebSocketStore = defineStore('webSocket', {
          * @returns {String} 简化后的内容
          */
         getBriefContent(msg) {
-            console.log('msg =>', msg);
+            // console.log('msg =>', msg);
             // 心跳消息特殊处理（不显示具体内容）
             if (msg.data?.mesType === '9') {
                 return '【系统】WebSocket心跳保活';
@@ -189,7 +189,7 @@ const useWebSocketStore = defineStore('webSocket', {
          * 接收消息处理（修复：先检查错误，再过滤mesType）
          */
         addMessage(msg) {
-            console.log('msg =>', msg);
+            // console.log('msg =>', msg);
 
             // 若已标记不可恢复错误，直接忽略所有消息
             if (this.isUnrecoverableError) return;
@@ -315,7 +315,7 @@ const useWebSocketStore = defineStore('webSocket', {
             } else if (Notification.permission !== 'denied') {
                 Notification.requestPermission();
             }
-            console.log('触发通知', msg);
+            // console.log('触发通知', msg);
             import('element-plus').then(({ ElNotification }) => {
                 ElNotification({ title: `来自 ${msg.data.data?.sender || '服务器'}`, message: this.getBriefContent(msg.data), position: 'bottom-right', duration: 4000, type: 'info', showClose: true });
             });
@@ -354,7 +354,7 @@ const useWebSocketStore = defineStore('webSocket', {
             this.heartbeatTimer = setInterval(() => {
                 this.sendHeartbeat();
             }, this.heartbeatInterval);
-            console.log(`WebSocket心跳机制启动（间隔：${this.heartbeatInterval / 1000}秒）`);
+            // console.log(`WebSocket心跳机制启动（间隔：${this.heartbeatInterval / 1000}秒）`);
         },
         stopHeartbeat() {
             if (this.heartbeatTimer) {
@@ -560,9 +560,9 @@ const useWebSocketStore = defineStore('webSocket', {
                         return;
                     }
 
-                    console.log(`开始执行第${currentAttempt}次实际连接（使用最新Token）`);
+                    // console.log(`开始执行第${currentAttempt}次实际连接（使用最新Token）`);
                     await this.connect(latestToken, latestUserId);
-                    console.log(`第${currentAttempt}次重连成功！`);
+                    // console.log(`第${currentAttempt}次重连成功！`);
 
                     // 成功后重置重连计数
                     this.reconnectCount = 0;
@@ -577,7 +577,7 @@ const useWebSocketStore = defineStore('webSocket', {
                     }
                 } finally {
                     if (this.isReconnecting && this.reconnectCount === currentAttempt) {
-                        console.log(`第${currentAttempt}次重连流程结束，重置isReconnecting为false`);
+                        // console.log(`第${currentAttempt}次重连流程结束，重置isReconnecting为false`);
                         this.isReconnecting = false;
                     }
                     // 清除当前定时器引用
@@ -590,7 +590,7 @@ const useWebSocketStore = defineStore('webSocket', {
       * 手动重连方法（保持状态重置）
       */
         manualReconnect() {
-            console.log('执行手动重连，强制清理所有状态');
+            // console.log('执行手动重连，强制清理所有状态');
             // 清除可能存在的重连定时器
             if (this.reconnectTimeout) {
                 clearTimeout(this.reconnectTimeout);
@@ -617,12 +617,12 @@ const useWebSocketStore = defineStore('webSocket', {
             this.lastReconnectAttempt = 0;
 
             if (this.connected || webSocketService.isConnected) {
-                console.log('手动重连前，关闭旧连接');
+                // console.log('手动重连前，关闭旧连接');
                 this.disconnect();
             }
 
             setTimeout(async () => {
-                console.log('手动触发WebSocket连接');
+                // console.log('手动触发WebSocket连接');
                 try {
                     await this.connect(latestToken, latestUserId);
                 } catch (err) {
@@ -643,7 +643,7 @@ const useWebSocketStore = defineStore('webSocket', {
             this.reconnectCount = 0;
             this.isReconnecting = false;
             this.reconnect(userStore.token, userStore.userId);
-            console.log('WebSocket 手动重连触发');
+            // console.log('WebSocket 手动重连触发');
         },
         // -------------------------- 事件绑定（全链路检查错误） --------------------------
         bindEvents() {
@@ -658,7 +658,7 @@ const useWebSocketStore = defineStore('webSocket', {
 
             // 2. 接收消息事件（修复：先检查错误，再处理消息）
             this.handlers.onMessage = (data) => {
-                console.log('WebSocket收到消息:', data);
+                // console.log('WebSocket收到消息:', data);
                 try {
                     const messageData = typeof data === 'string' ? JSON.parse(data) : data;
 
@@ -673,9 +673,9 @@ const useWebSocketStore = defineStore('webSocket', {
                     if (messageData?.data?.mesType === "40") {
                         this.addMessage({ data: messageData, timestamp: Date.now() });
                     } else if (messageData?.data?.mesType === "9") {
-                        console.log('收到心跳反馈，忽略处理');
+                        // console.log('收到心跳反馈，忽略处理');
                     } else {
-                        console.log(`忽略非40类型消息，mesType: ${messageData.data?.mesType || '未知'}`);
+                        // console.log(`忽略非40类型消息，mesType: ${messageData.data?.mesType || '未知'}`);
                     }
                 } catch (error) {
                     console.error('解析WebSocket消息失败:', error);
@@ -694,7 +694,7 @@ const useWebSocketStore = defineStore('webSocket', {
                     this.lastConnectDuration = Date.now() - this.connectTimestamp;
                 }
 
-                console.log(`WebSocket连接关闭（持续${this.lastConnectDuration}ms，代码：${event.code}，原因：${event.reason || '无'}）`);
+                // console.log(`WebSocket连接关闭（持续${this.lastConnectDuration}ms，代码：${event.code}，原因：${event.reason || '无'}）`);
                 window.dispatchEvent(new CustomEvent('ws:connected', { detail: false }));
 
                 // 阻断重连的情况：不可恢复错误/手动关闭
@@ -787,7 +787,7 @@ const useWebSocketStore = defineStore('webSocket', {
             // 过滤出所有未读消息并标记为已读
             const unreadMessages = this.messages.filter(msg => msg.unread);
             if (unreadMessages.length === 0) {
-                console.log('没有未读消息需要标记');
+                // console.log('没有未读消息需要标记');
                 return;
             }
 
