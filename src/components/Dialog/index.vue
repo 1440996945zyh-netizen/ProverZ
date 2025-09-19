@@ -275,7 +275,10 @@ const handleCustomClose = () => {
     max-height: none !important; // 清除默认 max-height 限制
     overflow: auto; // 内部内容超出时滚动
   }
-
+  // 当没有footer时，让body占满整个空间
+  &:not(:has(.el-dialog__footer)) .dialog-body {
+    height: 100% !important;
+  }
   // 4. 固定 footer 在底部（可选，避免footer被body覆盖）
   .dialog-footer {
     flex-shrink: 0; // 禁止 footer 被压缩
@@ -303,11 +306,14 @@ const handleCustomClose = () => {
 :deep(.el-dialog) {
 	--el-dialog-padding-primary: 0px;
 	--el-dialog-padding-secondary: 0px;
+	border-radius: 8px !important;
 }
 :deep .el-dialog .el-dialog__header {
 	padding: 0px !important;
+	
 }
 :deep .el-dialog .el-dialog__footer {
 	padding: 0px !important;
 }
+	
 </style>

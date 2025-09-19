@@ -57,7 +57,7 @@
 				@footer-cell-click="footerCellClickEvent"
 				@footer-cell-dblclick="footerCellDblclickEvent"
 				@footer-cell-menu="footerCellContextMenuEvent"
-				@scroll="scrollEvent || onTableScroll"
+				@scroll="scrollEvent"
 				show-overflow
 				:header-cell-class-name="headerCellClassName"
 				:row-class-name="rowClassName || addIndex"
@@ -66,7 +66,6 @@
 				:row-style="rowStyle"
 				:cell-style="cellStyle"
 				:scroll-y="scrollY"
-				:scroll-x="scrollX"
 				@column-resize="
 					params => {
 						console.log('列宽调整事件触发：', params) // 直接打印参数
@@ -409,10 +408,6 @@ const props = defineProps({
 		type: Object,
 	},
 	scrollY: {
-		type: Object,
-		default: () => ({ enabled: true, gt: 10 }),
-	},
-	scrollX: {
 		type: Object,
 		default: () => ({ enabled: true, gt: 10 }),
 	},
@@ -800,7 +795,7 @@ const colDrop = () => {
 }
 // 工具栏方法
 const custom = params => {
-	const uniqueFunc = (arr, uniId) => {
+	const removeDuplicatesByProperty = (arr, uniId) => {
 		const res = new Map()
 		return arr.filter(item => !res.has(item[uniId]) && res.set(item[uniId], 1))
 	}
@@ -1135,267 +1130,23 @@ watch(
 	},
 	{ deep: true }
 )
-const  onTableScroll = (e) => {
-  console.log('e =>', e);
-}
-// 拖拽滚动相关状态
-const isDragging = ref(false) // 是否正在拖拽
-const startX = ref(0) // 拖拽起始鼠标X坐标
-const startScrollLeft = ref(0) // 拖拽起始表格滚动位置
-const tableBodyWrapper = ref(null) // 表格内容滚动容器
-const tableHeaderWrappers = ref([]) // 所有表头容器（主表头+固定列表头）
-const hasDragged = ref(false) // 是否产生有效拖拽
-const tableContentWrapper = ref(null) // 表格内容容器
-let scrollDebounceTimer = null // 滚动防抖计时器
-const isScrollingByBar = ref(false) // 是否通过滚动条滚动
-const tableRect = ref(null) // 表格容器的位置信息
-let scrollSyncDebounceTimer = null // 滚动同步防抖
-
-/**
- * 判断点击位置是否在表格的水平滚动条上（动态计算高度）
- */
-const isClickOnTableScrollbar = (e) => {
-  if (!tableRect.value || !tableBodyWrapper.value) return false;
-
-  const scrollbarHeight = tableBodyWrapper.value.offsetHeight - tableBodyWrapper.value.clientHeight;
-  if (scrollbarHeight <= 0) return false; // 隐藏式滚动条（如macOS）
-
-  const { left, right, bottom } = tableRect.value;
-  const scrollbarTop = bottom - scrollbarHeight;
-
-  return (
-    e.clientX >= left &&
-    e.clientX <= right &&
-    e.clientY >= scrollbarTop &&
-    e.clientY <= bottom
-  );
-};
-
-/**
- * 鼠标按下：初始化拖拽状态
- */
-const handleMouseDown = (e) => {
-  // 检查是否点击了滚动条
-  if (isClickOnTableScrollbar(e)) {
-    isScrollingByBar.value = true;
-    return;
-  }
-
-  // 如果不是点击在表格容器内，不处理
-  if (tableBodyWrapper.value && !tableBodyWrapper.value.contains(e.target)) {
-    return;
-  }
-
-  // 排除在表格单元格内的点击
-  if (e.target.closest('.vxe-body--column') || e.target.closest('.vxe-cell')) {
-    return;
-  }
-
-  // 排除可交互元素
-  const interactiveSelectors = [
-    'button', 'input', 'select', 'textarea',
-    '.el-checkbox', '.el-radio', '.vxe-radio', '.vxe-checkbox',
-    '.vxe-btn', '.vxe-icon', '.render-dom'
-  ];
-  const targetIsInteractive = e.target.closest(interactiveSelectors.join(','));
-  if (targetIsInteractive) return;
-
-  // 确保滚动容器存在
-  if (!tableBodyWrapper.value) {
-    console.warn('滚动容器不存在');
-    return;
-  }
-
-  isDragging.value = true;
-  startX.value = e.clientX;
-  startScrollLeft.value = tableBodyWrapper.value.scrollLeft;
-  hasDragged.value = false;
-
-  // 设置拖拽样式
-  tableBodyWrapper.value.style.cursor = 'grabbing';
-  document.body.style.userSelect = 'none';
-
-  e.preventDefault();
-};
-
-/**
- * 鼠标移动：执行拖拽滚动
- */
-const handleMouseMove = (e) => {
-  // 如果是通过滚动条滚动，跳过拖拽逻辑
-  if (isScrollingByBar.value) return;
-
-  if (!isDragging.value || !tableBodyWrapper.value) return;
-
-  const deltaX = startX.value - e.clientX;
-  const newScrollLeft = startScrollLeft.value + deltaX;
-
-  // 直接设置滚动位置（不要用 scrollTo，避免干扰）
-  tableBodyWrapper.value.scrollLeft = Math.round(newScrollLeft);
-
-  // 同步所有表头
-  syncAllHeaders(Math.round(newScrollLeft));
-
-  // 标记有效拖拽
-  if (Math.abs(deltaX) > 2) hasDragged.value = true;
-};
-
-/**
- * 鼠标抬起/离开：结束拖拽
- */
-const handleMouseUp = () => {
-  // 重置滚动条滚动状态
-  if (isScrollingByBar.value) {
-    isScrollingByBar.value = false;
-    return;
-  }
-
-  if (!isDragging.value) return;
-
-  isDragging.value = false;
-
-  if (tableBodyWrapper.value) {
-    tableBodyWrapper.value.style.cursor = 'grab';
-  }
-  document.body.style.userSelect = '';
-
-  // 如果产生了拖拽，阻止后续的点击事件
-  if (hasDragged.value) {
-    const preventClick = (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      document.removeEventListener('click', preventClick, true);
-    };
-    document.addEventListener('click', preventClick, true);
-  }
-};
-
-/**
- * 同步所有表头容器滚动位置
- */
-const syncAllHeaders = (scrollLeft) => {
-  if (typeof scrollLeft !== 'number') return;
-
-  tableHeaderWrappers.value.forEach(wrapper => {
-    if (!wrapper) return;
-    if (wrapper.scrollLeft === scrollLeft) return;
-
-    wrapper.scrollTo({
-      left: scrollLeft,
-      behavior: 'instant'
-    });
-
-    // 强制同步（应对某些浏览器 scrollTo 失效）
-    if (wrapper.scrollLeft !== scrollLeft) {
-      wrapper.scrollLeft = scrollLeft;
-    }
-  });
-};
-
-/**
- * 滚动事件处理函数（同步表头）
- * 注意：这里只做同步，绝不修改 scrollLeft！
- */
-const handleScroll = () => {
-  if (isDragging.value) return;
-
-  clearTimeout(scrollSyncDebounceTimer);
-  scrollSyncDebounceTimer = setTimeout(() => {
-    const scrollLeft = tableBodyWrapper.value?.scrollLeft;
-    if (typeof scrollLeft === 'number') {
-      syncAllHeaders(scrollLeft);
-    }
-  }, 0); // 微小延迟确保渲染稳定
-};
-
-/**
- * 更新表格位置信息
- */
-const updateTableRect = () => {
-  if (tableBodyWrapper.value) {
-    tableRect.value = tableBodyWrapper.value.getBoundingClientRect();
-  }
-};
 
 onMounted(() => {
-  if (props.showToolBar) {
-    nextTick(() => {
-      const confirmBtn = document.querySelector('.btn--confirm');
-      if (confirmBtn) confirmBtn.innerText = '保存';
-    });
-  }
+	if (props.showToolBar) {
+		nextTick(() => {
+			const confirmBtn = document.querySelector('.btn--confirm')
+			if (confirmBtn) confirmBtn.innerText = '保存'
+		})
+	}
 
-  nextTick(() => {
-    const $table = xTable.value;
-    if ($table) {
-      // 1. 获取内容滚动容器
-      tableBodyWrapper.value = $table.$el.querySelector('.vxe-table--body-wrapper');
-      // 2. 获取内容容器
-      tableContentWrapper.value = $table.$el.querySelector('.vxe-table--body');
-      // 3. 获取所有表头容器
-      tableHeaderWrappers.value = Array.from($table.$el.querySelectorAll(
-        '.vxe-header--wrapper, .vxe-header--fixed-wrapper, .vxe-table--header-inner-wrapper'
-      ));
-
-      if (tableBodyWrapper.value && tableContentWrapper.value) {
-        // 更新表格位置信息
-        updateTableRect();
-        window.addEventListener('resize', updateTableRect);
-
-        // 设置内容容器样式（确保横向可滚动）
-        tableContentWrapper.value.style.width = 'auto';
-        tableContentWrapper.value.style.display = 'table';
-        tableContentWrapper.value.style.tableLayout = 'auto';
-        tableContentWrapper.value.style.minWidth = '2000px';
-
-        // 禁止单元格换行
-        const cells = tableContentWrapper.value.querySelectorAll('.vxe-cell');
-        cells.forEach(cell => {
-          cell.style.whiteSpace = 'nowrap';
-          cell.style.overflow = 'hidden';
-        });
-
-        // 禁止列弹性压缩
-        const cols = tableContentWrapper.value.querySelectorAll('.vxe-table--col');
-        cols.forEach(col => {
-          col.style.flex = 'none';
-        });
-
-        // 初始同步表头
-        if (tableBodyWrapper.value.scrollLeft > 0) {
-          syncAllHeaders(tableBodyWrapper.value.scrollLeft);
-        }
-
-        // ✅ 关键：绑定原生滚动事件（你的是原生滚动，不是虚拟滚动）
-        tableBodyWrapper.value.addEventListener('scroll', handleScroll);
-
-        // ✅ 绑定拖拽事件
-        document.addEventListener('mousedown', handleMouseDown);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        document.addEventListener('mouseleave', handleMouseUp);
-      }
-    }
-    initColumnWidth();
-  });
-});
-
+	// 初始化列宽（从本地存储加载）
+	nextTick(() => {
+		initColumnWidth()
+	})
+})
 onUnmounted(() => {
-  // 清理所有事件监听
-  document.removeEventListener('mousedown', handleMouseDown);
-  document.removeEventListener('mousemove', handleMouseMove);
-  document.removeEventListener('mouseup', handleMouseUp);
-  document.removeEventListener('mouseleave', handleMouseUp);
-  window.removeEventListener('resize', updateTableRect);
-
-  if (tableBodyWrapper.value) {
-    tableBodyWrapper.value.removeEventListener('scroll', handleScroll);
-  }
-
-  clearTimeout(scrollSyncDebounceTimer);
-  clearTimeout(scrollDebounceTimer);
-});
-
+	clearTimeout(resizeDebounceTimer.value)
+})
 defineExpose({
 	exportDataEvent,
 	importDataEvent,
@@ -1449,38 +1200,6 @@ defineExpose({
 	right: 0px;
 }
 </style>
-<style scoped>
-
-
-:deep(.vxe-table--body-wrapper:active) {
-	cursor: grabbing !important;
-}
-
-:deep(.vxe-table--body) {
-	width: auto !important;
-	min-width: 2000px !important;
-	display: table !important;
-	table-layout: auto !important;
-}
-
-:deep(.vxe-table--col) {
-	flex: none !important;
-	width: auto !important;
-}
-
-:deep(.vxe-cell) {
-	white-space: nowrap !important;
-	overflow: hidden !important;
-}
-
-/* 确保wrapper可以滚动 */
-:deep(.vxe-table--body-wrapper) {
-	overflow-x: scroll !important;
-}
-.vxe-table--body-wrapper {
-  scroll-behavior: smooth; /* 可选：平滑滚动 */
-}
-</style>
 <style>
 .vxe-select--panel {
 	z-index: 9997 !important;
@@ -1508,20 +1227,4 @@ defineExpose({
 .vxe-table--tooltip-wrapper {
 	z-index: 10000 !important;
 }
-.vxe-table--body-wrapper {
-	overflow-x: scroll !important; /* 用scroll而非auto，强制显示滚动条 */
-	overflow-y: hidden !important; /* 避免纵向滚动干扰 */
-	width: 100% !important;
-	pointer-events: auto !important;
-	-webkit-overflow-scrolling: touch !important; /* 兼容移动端 */
-}
-
-/* 禁用任何可能阻止滚动的样式 */
-.vxe-table--body-wrapper * {
-	overflow: visible !important;
-}
-/* 可选：平滑滚动
-.vxe-table--body-wrapper {
-	scroll-behavior: smooth;
-} */
 </style>
