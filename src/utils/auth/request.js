@@ -3,7 +3,7 @@ import { ElNotification, ElMessageBox, ElMessage, ElLoading } from 'element-plus
 import { getToken, removeToken, setToken } from '../../utils/auth/token'
 import errorCode from '../../utils/constant/errorCode'
 import { paramsToQueryString  } from '../../utils/common/core'
-import cache from '../../plugins/cache'
+import cache from '@/plugins/cache'
 import { saveAs } from 'file-saver'
 import useUserStore from '../../store/modules/user'
 import router from '@/router/index'
