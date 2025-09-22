@@ -39,7 +39,14 @@ export default defineConfig(({ mode, command }) => {
 				'/ais': {
 					target: 'http://172.18.5.229:8072',
 					changeOrigin: true,
-				  },
+				},
+				// 2. 新增：代理/dev-api到后端9093服务（积木报表资源专用）
+				'/dev-api': {
+					target: 'http://localhost:9093', // 后端服务地址（端口与后端一致）
+					changeOrigin: true, // 允许跨域
+					// 不需要rewrite，因为后端context-path就是/dev-api，直接转发即可
+					// 例如：前端请求/dev-api/jmreport/xxx → 转发到http://localhost:9093/dev-api/jmreport/xxx
+				}
 			},
 		},
 		//fix:error:stdin>:7356:1: warning: "@charset" must be the first rule in the file
@@ -59,6 +66,6 @@ export default defineConfig(({ mode, command }) => {
 				],
 			},
 		},
-    assetsInclude: ['**/*.xlsx'],
-  }
+		assetsInclude: ['**/*.xlsx'],
+	}
 })
