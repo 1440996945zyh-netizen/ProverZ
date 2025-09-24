@@ -7,14 +7,13 @@
  * @FilePath: D:\YangyiWork\YYFRAMEWORK\view\src\utils\common\core.js
  */
 
-
 import { pinyin } from '../constant/constant'
 
-/* 
-* ===================================================================================================
-* 防抖函数
-* ===================================================================================================
-*/
+/*
+ * ===================================================================================================
+ * 防抖函数
+ * ===================================================================================================
+ */
 
 /**
  * 防抖函数
@@ -26,38 +25,40 @@ import { pinyin } from '../constant/constant'
  * const debouncedSearch = debounce(fetchSearchResults, 500, false);
  */
 export function debounce(func, wait, immediate) {
-  let timeout, args, context, timestamp, result
-  const later = function () {
-    const last = +new Date() - timestamp
-    if (last < wait && last > 0) {
-      timeout = setTimeout(later, wait - last)
-    } else {
-      timeout = null
-      if (!immediate) {
-        result = func.apply(context, args)
-        if (!timeout) context = args = null
-      }
-    }
-  }
-  return function (...args) {
-    context = this
-    timestamp = +new Date()
-    const callNow = immediate && !timeout
-    if (!timeout) timeout = setTimeout(later, wait)
-    if (callNow) {
-      result = func.apply(context, args)
-      context = args = null
-    }
-    return result
-  }
+	let timeout, context, timestamp, result
+
+	const later = function (args) {
+		const last = +new Date() - timestamp
+		if (last < wait && last > 0) {
+			timeout = setTimeout(() => later(args), wait - last)
+		} else {
+			timeout = null
+			if (!immediate) {
+				result = func.apply(context, args)
+			}
+		}
+	}
+
+	return function (...args) {
+		context = this
+		timestamp = +new Date()
+		const callNow = immediate && !timeout
+
+		if (!timeout) timeout = setTimeout(() => later(args), wait)
+
+		if (callNow) {
+			result = func.apply(context, args)
+		}
+
+		return result
+	}
 }
 
-
-/* 
-* ===================================================================================================
-* DOM操作
-* ===================================================================================================
-*/
+/*
+ * ===================================================================================================
+ * DOM操作
+ * ===================================================================================================
+ */
 /**
  * 判断某个元素是否包含某个class
  * @param {HTMLElement} ele - DOM元素
@@ -65,7 +66,7 @@ export function debounce(func, wait, immediate) {
  * @returns {boolean} 是否包含该class
  */
 export function hasClass(ele, cls) {
-  return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
+	return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
 }
 
 /**
@@ -74,7 +75,7 @@ export function hasClass(ele, cls) {
  * @param {string} cls - 要添加的class
  */
 export function addClass(ele, cls) {
-  if (!hasClass(ele, cls)) ele.className += ' ' + cls
+	if (!hasClass(ele, cls)) ele.className += ' ' + cls
 }
 
 /**
@@ -83,10 +84,10 @@ export function addClass(ele, cls) {
  * @param {string} cls - 要删除的class
  */
 export function removeClass(ele, cls) {
-  if (hasClass(ele, cls)) {
-    const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
-    ele.className = ele.className.replace(reg, ' ')
-  }
+	if (hasClass(ele, cls)) {
+		const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
+		ele.className = ele.className.replace(reg, ' ')
+	}
 }
 /**
  * 切换元素的class
@@ -94,17 +95,17 @@ export function removeClass(ele, cls) {
  * @param {string} className - 要切换的class
  */
 export function toggleClass(element, className) {
-  if (!element || !className) {
-    return
-  }
-  let classString = element.className
-  const nameIndex = classString.indexOf(className)
-  if (nameIndex === -1) {
-    classString += '' + className
-  } else {
-    classString = classString.substr(0, nameIndex) + classString.substr(nameIndex + className.length)
-  }
-  element.className = classString
+	if (!element || !className) {
+		return
+	}
+	let classString = element.className
+	const nameIndex = classString.indexOf(className)
+	if (nameIndex === -1) {
+		classString += '' + className
+	} else {
+		classString = classString.substr(0, nameIndex) + classString.substr(nameIndex + className.length)
+	}
+	element.className = classString
 }
 
 /**
@@ -119,14 +120,13 @@ export function toggleClass(element, className) {
  * isUserField("email"); // false（不存在）
  */
 export function createValueCheckMap(str, expectsLowerCase) {
-  const map = Object.create(null)
-  const list = str.split(',')
-  for (let i = 0; i < list.length; i++) {
-    map[list[i]] = true
-  }
-  return expectsLowerCase ? val => map[val.toLowerCase()] : val => map[val]
+	const map = Object.create(null)
+	const list = str.split(',')
+	for (let i = 0; i < list.length; i++) {
+		map[list[i]] = true
+	}
+	return expectsLowerCase ? val => map[val.toLowerCase()] : val => map[val]
 }
-
 
 /**
  * ========================================================================
@@ -140,18 +140,18 @@ export function createValueCheckMap(str, expectsLowerCase) {
  * @returns {string} 格式化后的字符串
  */
 export function sprintf(str) {
-  const args = arguments
-  let flag = true
-  let i = 1
-  str = str.replace(/%s/g, () => {
-    const arg = args[i++]
-    if (typeof arg === 'undefined') {
-      flag = false
-      return ''
-    }
-    return arg
-  })
-  return flag ? str : ''
+	const args = arguments
+	let flag = true
+	let i = 1
+	str = str.replace(/%s/g, () => {
+		const arg = args[i++]
+		if (typeof arg === 'undefined') {
+			flag = false
+			return ''
+		}
+		return arg
+	})
+	return flag ? str : ''
 }
 
 /**
@@ -160,8 +160,8 @@ export function sprintf(str) {
  * @returns {string} 转换后的字符串
  */
 export function normalizeEmptyString(str) {
-  if (!str || str === 'undefined' || str === 'null') return ''
-  return str
+	if (!str || str === 'undefined' || str === 'null') return ''
+	return str
 }
 
 /**
@@ -170,14 +170,14 @@ export function normalizeEmptyString(str) {
  * @returns {number} 字节长度
  */
 export function byteLength(str) {
-  let s = str.length
-  for (let i = str.length - 1; i >= 0; i--) {
-    const code = str.charCodeAt(i)
-    if (code > 0x7f && code <= 0x7ff) s++
-    else if (code > 0x7ff && code <= 0xffff) s += 2
-    if (code >= 0xdc00 && code <= 0xdfff) i--
-  }
-  return s
+	let s = str.length
+	for (let i = str.length - 1; i >= 0; i--) {
+		const code = str.charCodeAt(i)
+		if (code > 0x7f && code <= 0x7ff) s++
+		else if (code > 0x7ff && code <= 0xffff) s += 2
+		if (code >= 0xdc00 && code <= 0xdfff) i--
+	}
+	return s
 }
 
 /**
@@ -186,9 +186,9 @@ export function byteLength(str) {
  * @returns {string} 纯文本内容
  */
 export function html2Text(val) {
-  const div = document.createElement('div')
-  div.innerHTML = val
-  return div.textContent || div.innerText
+	const div = document.createElement('div')
+	div.innerHTML = val
+	return div.textContent || div.innerText
 }
 
 /**
@@ -197,7 +197,7 @@ export function html2Text(val) {
  * @returns {string} 首字母大写后的字符串
  */
 export function capitalize(str) {
-  return str.replace(/( |^)[a-z]/g, L => L.toUpperCase())
+	return str.replace(/( |^)[a-z]/g, L => L.toUpperCase())
 }
 
 /**
@@ -206,7 +206,7 @@ export function capitalize(str) {
  * @returns {string} 驼峰命名的字符串
  */
 export function snakeToCamel(str) {
-  return str.replace(/_[a-z]/g, str1 => str1.substr(-1).toUpperCase())
+	return str.replace(/_[a-z]/g, str1 => str1.substr(-1).toUpperCase())
 }
 
 /**
@@ -215,29 +215,29 @@ export function snakeToCamel(str) {
  * @returns {string} 拼音字符串
  */
 export const chineseToPinYin = l1 => {
-  const l2 = l1.length
-  let I1 = ''
-  const reg = new RegExp('[\u4e00-\u9fa5]+')
-  const arraySearch = (l1) => {
-    for (const name in pinyin) {
-      if (pinyin[name].indexOf(l1) !== -1) return ucfirst(name)
-    }
-    return false
-  }
-  const ucfirst = l1 => {
-    if (l1.length > 0) {
-      const first = l1.substr(0, 1).toUpperCase()
-      const spare = l1.substr(1)
-      return first + spare
-    }
-  }
-  for (let i = 0; i < l2; i++) {
-    const val = l1.substr(i, 1)
-    const name = arraySearch(val)
-    if (!reg.test(val)) I1 += val
-    if (name !== false) I1 += name
-  }
-  return I1.replace(/ /g, '-')
+	const l2 = l1.length
+	let I1 = ''
+	const reg = new RegExp('[\u4e00-\u9fa5]+')
+	const arraySearch = l1 => {
+		for (const name in pinyin) {
+			if (pinyin[name].indexOf(l1) !== -1) return ucfirst(name)
+		}
+		return false
+	}
+	const ucfirst = l1 => {
+		if (l1.length > 0) {
+			const first = l1.substr(0, 1).toUpperCase()
+			const spare = l1.substr(1)
+			return first + spare
+		}
+	}
+	for (let i = 0; i < l2; i++) {
+		const val = l1.substr(i, 1)
+		const name = arraySearch(val)
+		if (!reg.test(val)) I1 += val
+		if (name !== false) I1 += name
+	}
+	return I1.replace(/ /g, '-')
 }
 
 /**
@@ -246,15 +246,15 @@ export const chineseToPinYin = l1 => {
  * @returns {string} 速记码
  */
 export const createShortCode = targetData => {
-  let sx = ''
-  let vpy = chineseToPinYin(targetData)
-  for (let i = 0; i < vpy.length; i++) {
-    let c = vpy.charAt(i)
-    if (!/^[a-z]+$/.test(c)) {
-      sx += c
-    }
-  }
-  return sx
+	let sx = ''
+	let vpy = chineseToPinYin(targetData)
+	for (let i = 0; i < vpy.length; i++) {
+		let c = vpy.charAt(i)
+		if (!/^[a-z]+$/.test(c)) {
+			sx += c
+		}
+	}
+	return sx
 }
 
 /**
@@ -263,18 +263,18 @@ export const createShortCode = targetData => {
  * @returns {Object} 参数对象
  */
 export function getQueryObject(url) {
-  url = url == null ? window.location.href : url
-  const search = url.substring(url.lastIndexOf('?') + 1)
-  const obj = {}
-  const reg = /([^?&=]+)=([^?&=]*)/g
-  search.replace(reg, (rs, $1, $2) => {
-    const name = decodeURIComponent($1)
-    let val = decodeURIComponent($2)
-    val = String(val)
-    obj[name] = val
-    return rs
-  })
-  return obj
+	url = url == null ? window.location.href : url
+	const search = url.substring(url.lastIndexOf('?') + 1)
+	const obj = {}
+	const reg = /([^?&=]+)=([^?&=]*)/g
+	search.replace(reg, (rs, $1, $2) => {
+		const name = decodeURIComponent($1)
+		let val = decodeURIComponent($2)
+		val = String(val)
+		obj[name] = val
+		return rs
+	})
+	return obj
 }
 
 /**
@@ -283,10 +283,10 @@ export function getQueryObject(url) {
  * @returns {string} URL参数字符串
  */
 export function objectToQueryString(json) {
-  if (!json) return ''
-  return Object.keys(json)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(json[key])}`)
-    .join('&')
+	if (!json) return ''
+	return Object.keys(json)
+		.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(json[key])}`)
+		.join('&')
 }
 
 /**
@@ -295,19 +295,19 @@ export function objectToQueryString(json) {
  * @returns {Object} 参数对象
  */
 export function queryStringToObject(url) {
-  const search = decodeURIComponent(url.split('?')[1]).replace(/\+/g, ' ')
-  if (!search) return {}
-  const obj = {}
-  const searchArr = search.split('&')
-  searchArr.forEach(v => {
-    const index = v.indexOf('=')
-    if (index !== -1) {
-      const name = v.substring(0, index)
-      const val = v.substring(index + 1, v.length)
-      obj[name] = val
-    }
-  })
-  return obj
+	const search = decodeURIComponent(url.split('?')[1]).replace(/\+/g, ' ')
+	if (!search) return {}
+	const obj = {}
+	const searchArr = search.split('&')
+	searchArr.forEach(v => {
+		const index = v.indexOf('=')
+		if (index !== -1) {
+			const name = v.substring(0, index)
+			const val = v.substring(index + 1, v.length)
+			obj[name] = val
+		}
+	})
+	return obj
 }
 
 /**
@@ -315,13 +315,10 @@ export function queryStringToObject(url) {
  * @returns {string} 唯一字符串
  */
 export function createUniqueString() {
-  const timestamp = +new Date() + ''
-  const randomNum = parseInt((1 + Math.random()) * 65536) + ''
-  return (+(randomNum + timestamp)).toString(32)
+	const timestamp = +new Date() + ''
+	const randomNum = parseInt((1 + Math.random()) * 65536) + ''
+	return (+(randomNum + timestamp)).toString(32)
 }
-
-
-
 
 /**
  * ========================================================================
@@ -335,38 +332,38 @@ export function createUniqueString() {
  * @returns {string} 格式化后的金额字符串
  */
 export function formatMoney(value, precision = 2) {
-  // 处理空值或无效值
-  if (value === null || value === undefined || value === '') {
-    return '-'
-  }
-  // 验证小数位数参数，确保是有效的非负整数
-  const decimalDigits = Math.max(0, Math.floor(Number(precision))) ?? 2;
-  // 处理负数
-  let isNegative = false;
-  let num = Number(value);
-  if (isNaN(num)) return '-';
-  if (num < 0) {
-    isNegative = true;
-    num = Math.abs(num);
-  }
-  // 格式化数字为指定小数位数
-  const formatted = num.toFixed(decimalDigits);
-  // 分割整数和小数部分
-  const parts = formatted.split('.');
-  const integerPart = parts[0];
-  const decimalPart = parts[1] || '';
-  // 添加千分位分隔符
-  const integerWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  // 组合结果（重点修复0位小数的显示问题）
-  let result;
-  if (decimalDigits === 0) {
-    // 0位小数时不显示小数点和小数部分
-    result = integerWithCommas;
-  } else {
-    // 有小数位时才显示小数点和小数部分
-    result = `${integerWithCommas}.${decimalPart}`;
-  }
-  return isNegative ? `-${result}` : result;
+	// 处理空值或无效值
+	if (value === null || value === undefined || value === '') {
+		return '-'
+	}
+	// 验证小数位数参数，确保是有效的非负整数
+	const decimalDigits = Math.max(0, Math.floor(Number(precision))) ?? 2
+	// 处理负数
+	let isNegative = false
+	let num = Number(value)
+	if (isNaN(num)) return '-'
+	if (num < 0) {
+		isNegative = true
+		num = Math.abs(num)
+	}
+	// 格式化数字为指定小数位数
+	const formatted = num.toFixed(decimalDigits)
+	// 分割整数和小数部分
+	const parts = formatted.split('.')
+	const integerPart = parts[0]
+	const decimalPart = parts[1] || ''
+	// 添加千分位分隔符
+	const integerWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+	// 组合结果（重点修复0位小数的显示问题）
+	let result
+	if (decimalDigits === 0) {
+		// 0位小数时不显示小数点和小数部分
+		result = integerWithCommas
+	} else {
+		// 有小数位时才显示小数点和小数部分
+		result = `${integerWithCommas}.${decimalPart}`
+	}
+	return isNegative ? `-${result}` : result
 }
 
 /**
@@ -375,22 +372,21 @@ export function formatMoney(value, precision = 2) {
  * @returns {number} 转换后的数字
  */
 export function unformatMoney(formattedValue) {
-  // 如果值为空或无效，返回 0
-  if (!formattedValue || formattedValue === '-' || formattedValue === 'N/A') {
-    return 0;
-  }
-  // 移除千分位分隔符(逗号)
-  let cleanedValue = String(formattedValue).replace(/,/g, '');
-  // 转换为数字
-  const numericValue = parseFloat(cleanedValue);
-  // 如果转换结果不是数字，返回 0
-  if (isNaN(numericValue)) {
-    console.warn(`无法将 '${formattedValue}' 转换为数字`);
-    return 0;
-  }
-  return numericValue;
+	// 如果值为空或无效，返回 0
+	if (!formattedValue || formattedValue === '-' || formattedValue === 'N/A') {
+		return 0
+	}
+	// 移除千分位分隔符(逗号)
+	let cleanedValue = String(formattedValue).replace(/,/g, '')
+	// 转换为数字
+	const numericValue = parseFloat(cleanedValue)
+	// 如果转换结果不是数字，返回 0
+	if (isNaN(numericValue)) {
+		console.warn(`无法将 '${formattedValue}' 转换为数字`)
+		return 0
+	}
+	return numericValue
 }
-
 
 /**
  * 检查字符串是否为数字
@@ -398,7 +394,7 @@ export function unformatMoney(formattedValue) {
  * @returns {boolean} 是否为数字字符串
  */
 export function isNumberStr(str) {
-  return /^[+-]?(0|([1-9]\d*))(\.\d+)?$/g.test(str);
+	return /^[+-]?(0|([1-9]\d*))(\.\d+)?$/g.test(str)
 }
 
 /**
@@ -408,25 +404,25 @@ export function isNumberStr(str) {
  * @returns {number} 计算结果
  */
 export function safeAdd(num1, num2) {
-  let result = null;
-  if (!num1 && !num2) {
-    result = 0;
-  } else {
-    var baseNum, baseNum1, baseNum2;  
-    try {  
-      baseNum1 = num1.toString().split(".")[1].length;  
-    } catch (e) {  
-      baseNum1 = 0;  
-    }  
-    try {  
-      baseNum2 = num2.toString().split(".")[1].length;  
-    } catch (e) {  
-      baseNum2 = 0;  
-    }  
-    baseNum = Math.pow(10, Math.max(baseNum1, baseNum2));  
-    result = (num1 * baseNum + num2 * baseNum) / baseNum;  
-  }
-  return result;
+	let result = null
+	if (!num1 && !num2) {
+		result = 0
+	} else {
+		var baseNum, baseNum1, baseNum2
+		try {
+			baseNum1 = num1.toString().split('.')[1].length
+		} catch (e) {
+			baseNum1 = 0
+		}
+		try {
+			baseNum2 = num2.toString().split('.')[1].length
+		} catch (e) {
+			baseNum2 = 0
+		}
+		baseNum = Math.pow(10, Math.max(baseNum1, baseNum2))
+		result = (num1 * baseNum + num2 * baseNum) / baseNum
+	}
+	return result
 }
 
 /**
@@ -436,25 +432,25 @@ export function safeAdd(num1, num2) {
  * @returns {number} 计算结果
  */
 export function safeSubtract(num1, num2) {
-  let result = null;
-  if (!num1 && !num2) {
-    result = 0;
-  } else {
-    var baseNum, baseNum1, baseNum2;  
-    try {  
-      baseNum1 = num1.toString().split(".")[1].length;  
-    } catch (e) {  
-      baseNum1 = 0;  
-    }  
-    try {  
-      baseNum2 = num2.toString().split(".")[1].length;  
-    } catch (e) {  
-      baseNum2 = 0;  
-    }  
-    baseNum = Math.pow(10, Math.max(baseNum1, baseNum2));
-    result = (num1 * baseNum - num2 * baseNum) / baseNum; 
-  }
-  return result;
+	let result = null
+	if (!num1 && !num2) {
+		result = 0
+	} else {
+		var baseNum, baseNum1, baseNum2
+		try {
+			baseNum1 = num1.toString().split('.')[1].length
+		} catch (e) {
+			baseNum1 = 0
+		}
+		try {
+			baseNum2 = num2.toString().split('.')[1].length
+		} catch (e) {
+			baseNum2 = 0
+		}
+		baseNum = Math.pow(10, Math.max(baseNum1, baseNum2))
+		result = (num1 * baseNum - num2 * baseNum) / baseNum
+	}
+	return result
 }
 
 /**
@@ -465,24 +461,22 @@ export function safeSubtract(num1, num2) {
  * @returns {number} 计算结果
  */
 export function safeMultiply(num1, num2, digit) {
-  if(num1 == null || num1 == undefined) return;
-  if(num2 == null || num2 == undefined) return;
-  let result = null;
-  if (!num1 && !num2) {
-    result = 0;
-  } else {
-    var baseNum = 0;  
-    try {  
-      baseNum += num1.toString().split(".")[1].length;  
-    } catch (e) {
-    }  
-    try {  
-      baseNum += num2.toString().split(".")[1].length;  
-    } catch (e) {  
-    }  
-    result = (Number(num1.toString().replace(".", "")) * Number(num2.toString().replace(".", ""))) / Math.pow(10, baseNum);
-  }
-  return result;
+	if (num1 == null || num1 == undefined) return
+	if (num2 == null || num2 == undefined) return
+	let result = null
+	if (!num1 && !num2) {
+		result = 0
+	} else {
+		var baseNum = 0
+		try {
+			baseNum += num1.toString().split('.')[1].length
+		} catch (e) {}
+		try {
+			baseNum += num2.toString().split('.')[1].length
+		} catch (e) {}
+		result = (Number(num1.toString().replace('.', '')) * Number(num2.toString().replace('.', ''))) / Math.pow(10, baseNum)
+	}
+	return result
 }
 
 /**
@@ -491,30 +485,30 @@ export function safeMultiply(num1, num2, digit) {
  * @param {number} num2 - 除数
  * @returns {number} 计算结果
  */
-export function safeDivide(num1, num2) {  
-  let result = null;
-  if (!num1 || !num2) {
-    result = 0;
-  } else {
-    var baseNum1 = 0, baseNum2 = 0;  
-    var baseNum3, baseNum4;  
-    try {  
-      baseNum1 = num1.toString().split(".")[1].length;  
-    } catch (e) {  
-      baseNum1 = 0;  
-    }  
-    try {  
-      baseNum2 = num2.toString().split(".")[1].length;  
-    } catch (e) {  
-      baseNum2 = 0;  
-    }  
-    baseNum3 = Number(num1.toString().replace(".", ""));  
-    baseNum4 = Number(num2.toString().replace(".", ""));  
-    result = (baseNum3 / baseNum4) * Math.pow(10, baseNum2 - baseNum1);  
-  }
-  return result;
+export function safeDivide(num1, num2) {
+	let result = null
+	if (!num1 || !num2) {
+		result = 0
+	} else {
+		var baseNum1 = 0,
+			baseNum2 = 0
+		var baseNum3, baseNum4
+		try {
+			baseNum1 = num1.toString().split('.')[1].length
+		} catch (e) {
+			baseNum1 = 0
+		}
+		try {
+			baseNum2 = num2.toString().split('.')[1].length
+		} catch (e) {
+			baseNum2 = 0
+		}
+		baseNum3 = Number(num1.toString().replace('.', ''))
+		baseNum4 = Number(num2.toString().replace('.', ''))
+		result = (baseNum3 / baseNum4) * Math.pow(10, baseNum2 - baseNum1)
+	}
+	return result
 }
-
 
 /**
  * ========================================================================
@@ -527,14 +521,14 @@ export function safeDivide(num1, num2) {
  * @returns {string} 规范化后的路径
  */
 export function getNormalPath(p) {
-  if (!p || typeof p !== 'string' || p.length === 0) return p;
-  // 替换所有连续的斜杠为单个斜杠
-  let res = p.replace(/\/+/g, '/');
-  // 去除结尾的斜杠（根路径除外）
-  if (res.length > 1 && res[res.length - 1] === '/') {
-    res = res.slice(0, res.length - 1);
-  }
-  return res;
+	if (!p || typeof p !== 'string' || p.length === 0) return p
+	// 替换所有连续的斜杠为单个斜杠
+	let res = p.replace(/\/+/g, '/')
+	// 去除结尾的斜杠（根路径除外）
+	if (res.length > 1 && res[res.length - 1] === '/') {
+		res = res.slice(0, res.length - 1)
+	}
+	return res
 }
 
 /**
@@ -543,23 +537,23 @@ export function getNormalPath(p) {
  * @returns {string} 序列化后的参数字符串
  */
 export function paramsToQueryString(params) {
-  let result = '';
-  for (const propName of Object.keys(params)) {
-    const value = params[propName];
-    const part = encodeURIComponent(propName) + '=';
-    if (value !== null && value !== '' && typeof value !== 'undefined') {
-      if (typeof value === 'object') {
-        for (const key of Object.keys(value)) {
-          if (value[key] !== null && value[key] !== '' && typeof value[key] !== 'undefined') {
-            const params = propName + '[' + key + ']';
-            const subPart = encodeURIComponent(params) + '=';
-            result += subPart + encodeURIComponent(value[key]) + '&';
-          }
-        }
-      } else {
-        result += part + encodeURIComponent(value) + '&';
-      }
-    }
-  }
-  return result;
+	let result = ''
+	for (const propName of Object.keys(params)) {
+		const value = params[propName]
+		const part = encodeURIComponent(propName) + '='
+		if (value !== null && value !== '' && typeof value !== 'undefined') {
+			if (typeof value === 'object') {
+				for (const key of Object.keys(value)) {
+					if (value[key] !== null && value[key] !== '' && typeof value[key] !== 'undefined') {
+						const params = propName + '[' + key + ']'
+						const subPart = encodeURIComponent(params) + '='
+						result += subPart + encodeURIComponent(value[key]) + '&'
+					}
+				}
+			} else {
+				result += part + encodeURIComponent(value) + '&'
+			}
+		}
+	}
+	return result
 }
