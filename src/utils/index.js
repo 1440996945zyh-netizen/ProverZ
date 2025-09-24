@@ -12,7 +12,7 @@ export * from './auth/jsencrypt'
 // 导出常用工具
 export * from './common/core'
 export * from './common/data'
-export * from './common/day'
+export * from './common/date'
 export * from './common/dict'
 export * from './common/dynamicTitle'
 export * from './common/form-validation'

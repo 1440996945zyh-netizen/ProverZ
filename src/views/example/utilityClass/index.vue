@@ -12,16 +12,16 @@
 		<div class="tabs-header">
 			<div class="tab-item" :class="{ 'tab-active': activeTab === 'common' }" @click="activeTab = 'common'">common.js</div>
 			<div class="tab-item" :class="{ 'tab-active': activeTab === 'data' }" @click="activeTab = 'data'">data.js</div>
-			<div class="tab-item" :class="{ 'tab-active': activeTab === 'day' }" @click="activeTab = 'day'">day.js</div>
-			<div class="tab-item" :class="{ 'tab-active': activeTab === 'validation' }" @click="activeTab = 'validation'">validation.js</div>
-
+			<div class="tab-item" :class="{ 'tab-active': activeTab === 'day' }" @click="activeTab = 'day'">date.js</div>
+			<div class="tab-item" :class="{ 'tab-active': activeTab === 'validation' }" @click="activeTab = 'validation'">
+				validation.js
+			</div>
 		</div>
 		<!-- 关键修复：给内容区加固定高度和滚动 -->
 		<div class="tabs-content">
-
 			<CommonUtilsDemo v-if="activeTab === 'common'" class="tab-panel" />
 			<DataUtilsDemo v-if="activeTab === 'data'" class="tab-panel" />
-			<DayUtilsDemo v-if="activeTab === 'day'" class="tab-panel" />
+			<DateUtilsDemo v-if="activeTab === 'day'" class="tab-panel" />
 			<ValidationUtilsDemo v-if="activeTab === 'validation'" class="tab-panel" />
 		</div>
 	</div>
@@ -33,11 +33,8 @@ import { ref } from 'vue'
 
 import CommonUtilsDemo from './detail/CommonUtilsDemo.vue'
 import DataUtilsDemo from './detail/DataUtilsDemo.vue'
-import DayUtilsDemo from './detail/DayUtilsDemo.vue'
+import DateUtilsDemo from './detail/DateUtilsDemo.vue'
 import ValidationUtilsDemo from './detail/ValidationUtilsDemo.vue'
-
-
-
 
 // 激活的标签页（默认显示 data）
 const activeTab = ref('common')
@@ -82,7 +79,7 @@ const activeTab = ref('common')
 /* 关键修复：内容区设置固定高度 + 垂直滚动 */
 .tabs-content {
 	/* 高度计算：视口高度 - 头部高度 - 根容器上下padding（20*2）- 额外间距（10px） */
-	height: calc(100vh - 56px - 40px - 10px); 
+	height: calc(100vh - 56px - 40px - 10px);
 	overflow-y: auto; /* 垂直内容溢出时显示滚动条 */
 	overflow-x: hidden; /* 禁止横向滚动（避免内容错位） */
 	padding: 24px;

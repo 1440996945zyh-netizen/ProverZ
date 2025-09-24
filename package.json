@@ -54,6 +54,7 @@
 		"nprogress": "0.2.0",
 		"ol": "^7.4.0",
 		"pinia": "2.0.22",
+		"prismjs": "^1.30.0",
 		"sortablejs": "^1.15.0",
 		"url-polyfill": "^1.1.13",
 		"v-viewer": "^3.0.11",
