@@ -139,7 +139,7 @@ const handleCustomClose = () => {
 	--el-dialog-bg-color: #fff;
 	--el-dialog-header-color: #1d2129;
 	--el-dialog-body-color: #4e5969;
-	--el-dialog-footer-bg-color: #f2f3f5;
+	--el-dialog-footer-bg-color: #ffffff;
 
 	/* 动画效果 */
 	transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -211,6 +211,7 @@ const handleCustomClose = () => {
 	background-color: var(--el-dialog-footer-bg-color);
 	border-top: 1px solid #eee;
 	border-radius: 0 0 var(--el-dialog-border-radius) var(--el-dialog-border-radius);
+	
 }
 
 /* 深度样式穿透 */
@@ -315,5 +316,7 @@ const handleCustomClose = () => {
 :deep .el-dialog .el-dialog__footer {
 	padding: 0px !important;
 }
-	
+:deep(.el-dialog__footer){
+	background-color: var(--el-dialog-footer-bg-color);
+}
 </style>
