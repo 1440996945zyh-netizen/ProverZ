@@ -62,6 +62,9 @@ import ImagePreview from '@/components/ImagePreview'
 import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
+import hljs from 'highlight.js'
+import highlightPlugin from '@highlightjs/vue-plugin'
+import "highlight.js/styles/atom-one-dark-reasonable.css"; // 保持原样式
 
 const app = createApp(App)
 
@@ -100,7 +103,7 @@ app.use(plugins)
 app.use(hiPrintPlugin)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
-
+app.use(highlightPlugin, { hljs })
 // 在 main.js 或入口文件中
 Number.prototype._toFixed = Number.prototype.toFixed; // 备份原方法
 
