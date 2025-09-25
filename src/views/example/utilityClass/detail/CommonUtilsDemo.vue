@@ -1447,12 +1447,4 @@ pre code {
 .el-card {
 	margin-bottom: 1.5rem;
 }
-.submit-btn {
-	display: flex;
-	justify-content: end;
-	padding-bottom: 15px;
-}
-.submit1-btn {
-	margin-left: 300px;
-}
 </style>

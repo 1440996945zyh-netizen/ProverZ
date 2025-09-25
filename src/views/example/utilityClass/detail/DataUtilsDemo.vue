@@ -13,7 +13,12 @@
 		<!-- 1. 数组去重 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">1. 数组去重 (removeDuplicates)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">1. 数组去重 (removeDuplicates)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('removeDuplicates')">
+						{{ codeDisplayStatus.removeDuplicates ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始数组" label-width="100px">
@@ -31,13 +36,25 @@
 						placeholder="去重后的数组将显示在这里"
 					></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.removeDuplicates" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('removeDuplicates')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 2. 数组对象去重 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">2. 数组对象去重 (removeDuplicatesByProperty)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">2. 数组对象去重 (removeDuplicatesByProperty)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('removeDuplicatesByProperty')">
+						{{ codeDisplayStatus.removeDuplicatesByProperty ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始对象数组" label-width="100px">
@@ -63,13 +80,25 @@
 						placeholder="去重后的对象数组将显示在这里"
 					></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.removeDuplicatesByProperty" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('removeDuplicatesByProperty')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 3. 数组对象排序 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">3. 数组对象排序 (createSortComparator)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">3. 数组对象排序 (createSortComparator)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('createSortComparator')">
+						{{ codeDisplayStatus.createSortComparator ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始对象数组" label-width="100px">
@@ -101,13 +130,25 @@
 						placeholder="排序后的对象数组将显示在这里"
 					></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.createSortComparator" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('createSortComparator')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 4. 清除数组空元素 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">4. 清除数组空元素 (filterFalsyValues)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">4. 清除数组空元素 (filterFalsyValues)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('filterFalsyValues')">
+						{{ codeDisplayStatus.filterFalsyValues ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始数组" label-width="100px">
@@ -125,13 +166,25 @@
 						placeholder="清理后的数组将显示在这里"
 					></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.filterFalsyValues" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('filterFalsyValues')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 5. 深度合并对象 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">5. 深度合并对象 (deepMerge)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">5. 深度合并对象 (deepMerge)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('deepMerge')">
+						{{ codeDisplayStatus.deepMerge ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
 				<el-col :xs="24" :md="8">
@@ -151,12 +204,24 @@
 					<el-button @click="mergeObjects" type="primary" class="mt-2">合并对象</el-button>
 				</el-col>
 			</el-row>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.deepMerge" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('deepMerge')"></code></pre>
+				</el-card>
+			</div>
 		</el-card>
 
 		<!-- 6. 对象重置 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">6. 对象重置 (clearObjectValues)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">6. 对象重置 (clearObjectValues)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('clearObjectValues')">
+						{{ codeDisplayStatus.clearObjectValues ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始对象" label-width="100px">
@@ -168,13 +233,25 @@
 				<el-form-item label="重置后结果" label-width="100px">
 					<el-input type="textarea" :autosize="{ minRows: 6, maxRows: 8 }" v-model="resetObjResult" readonly></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.clearObjectValues" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('clearObjectValues')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 7. 深拷贝 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">7. 深拷贝 (deepClone)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">7. 深拷贝 (deepClone)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('deepClone')">
+						{{ codeDisplayStatus.deepClone ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始对象" label-width="100px">
@@ -189,18 +266,30 @@
 				<el-form-item label="修改拷贝对象" label-width="100px">
 					<el-input type="textarea" :autosize="{ minRows: 6, maxRows: 8 }" v-model="modifiedCloneObj" readonly></el-input>
 				</el-form-item>
-				<el-form-item label="原始对象是否被修改" label-width="100px">
-					<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="originalAfterModify" readonly></el-input>
+				<el-form-item label="修改拷贝对象后的原始对象" label-width="100px">
+					<el-input type="textarea" :autosize="{ minRows: 6, maxRows: 8 }" v-model="originalAfterModify" readonly></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.deepClone" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('deepClone')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 8. 带函数的JSON序列化与反序列化 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">
-					8. 带函数的JSON序列化与反序列化 (stringifyWithFunctions / parseWithFunctions)
-				</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">
+						8. 带函数的JSON序列化与反序列化 (stringifyWithFunctions / parseWithFunctions)
+					</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('stringifyWithFunctions')">
+						{{ codeDisplayStatus.stringifyWithFunctions ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
 				<el-col :xs="24" :md="12">
@@ -234,12 +323,24 @@
 					</el-form-item>
 				</el-col>
 			</el-row>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.stringifyWithFunctions" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('stringifyWithFunctions')"></code></pre>
+				</el-card>
+			</div>
 		</el-card>
 
 		<!-- 9. 树形结构构造 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">9. 树形结构构造 (flattenToTree)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">9. 树形结构构造 (flattenToTree)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('flattenToTree')">
+						{{ codeDisplayStatus.flattenToTree ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
 				<el-col :xs="24" :md="12">
@@ -256,40 +357,20 @@
 			</el-row>
 			<!-- 树形结构可视化 -->
 			<el-form-item label="树形结构展示" label-width="120px" class="mt-4">
-				<el-tree :data="treeData" :props="treeProps" node-key="id" default-expand-all class="w-full"></el-tree>
+				<el-tree :data="treeData" :props="treeProps" node-key="id" default-expand-all class="w-full" empty-text="暂无数据">
+					<template #empty>
+						<div class="tree-empty">
+							<p>暂无树形数据</p>
+						</div>
+					</template>
+				</el-tree>
 			</el-form-item>
-		</el-card>
 
-		<!-- 10. 可编辑表格下拉框赋值 -->
-		<el-card class="mb-8 shadow-md" border>
-			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">10. 可编辑表格下拉框赋值 (setEditTableOptions)</h2>
-			</template>
-			<div class="space-y-4 mt-4">
-				<el-form-item label-width="120px">
-					<el-button @click="setTableOptions" type="primary">为表格设置下拉选项</el-button>
-				</el-form-item>
-				<!-- 表格列配置 -->
-				<el-form-item label="表格列配置" label-width="120px">
-					<el-input
-						type="textarea"
-						:autosize="{ minRows: 4, maxRows: 6 }"
-						v-model="tableColumnsStr"
-						readonly
-						placeholder="处理后的表格列配置（含下拉选项）"
-					></el-input>
-				</el-form-item>
-				<!-- 表格展示 -->
-				<el-form-item label="可编辑表格" label-width="120px">
-          <!-- <EditTable
-            :data="tableData"
-            :tableColumns="tableColumns"
-            :border="true"
-            style="width: 100%"
-          >
-          </EditTable> -->
-					
-				</el-form-item>
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.flattenToTree" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('flattenToTree')"></code></pre>
+				</el-card>
 			</div>
 		</el-card>
 	</div>
@@ -329,9 +410,314 @@ import {
 	flattenToTree,
 	setEditTableOptions,
 } from '@/utils/common/data.js'
+import Prism from 'prismjs'
+import 'prismjs/themes/prism-coy.css'
 
+// 在组件挂载后触发高亮更新
+onMounted(() => {
+	// Prism 需要在 DOM 更新后重新渲染
+	setTimeout(() => {
+		Prism.highlightAll()
+	}, 0)
+})
 // 获取组件实例
 const instance = getCurrentInstance()
+// 代码显示状态管理
+const codeDisplayStatus = ref({
+	removeDuplicates: false,
+	removeDuplicatesByProperty: false,
+	createSortComparator: false,
+	filterFalsyValues: false,
+	deepMerge: false,
+	clearObjectValues: false,
+	deepClone: false,
+	stringifyWithFunctions: false,
+	flattenToTree: false,
+	setEditTableOptions: false,
+})
+
+// 切换代码显示
+const toggleCodeDisplay = feature => {
+	codeDisplayStatus.value[feature] = !codeDisplayStatus.value[feature]
+}
+
+// 各功能的代码示例
+const featureCodes = {
+	removeDuplicates: `<script setup>
+import { removeDuplicates } from '@/utils/common/data.js'
+
+const arrayInput = ref('1,2,2,3,3,4,5,5')
+const deduplicatedArray = ref('')
+
+const handleRemoveDuplicates = () => {
+  const arr = arrayInput.value
+    .split(',')
+    .map(item => item.trim())
+    .filter(item => item !== '')
+  const result = removeDuplicates(arr)
+  deduplicatedArray.value = JSON.stringify(result, null, 2)
+}
+<\/script>`,
+
+	removeDuplicatesByProperty: `<script setup>
+import { removeDuplicatesByProperty } from '@/utils/common/data.js'
+
+const objectArrayInput = ref('[{\"id\":1,\"name\":\"张三\"},{\"id\":2,\"name\":\"李四\"},{\"id\":1,\"name\":\"张三\"}]')
+const uniqueProperty = ref('id')
+const deduplicatedObjectArray = ref('')
+
+const handleRemoveDuplicatesByProperty = () => {
+  let arr
+  try {
+    arr = JSON.parse(objectArrayInput.value)
+  } catch (error) {
+    console.error('JSON解析错误:', error)
+    deduplicatedObjectArray.value = '输入不是有效的JSON格式，请检查格式是否正确'
+    return
+  }
+
+  const result = removeDuplicatesByProperty(arr, uniqueProperty.value)
+  deduplicatedObjectArray.value = JSON.stringify(result, null, 2)
+}
+<\/script>`,
+
+	createSortComparator: `<script setup>
+import { createSortComparator } from '@/utils/common/data.js'
+
+const sortArrayInput = ref('[{\"id\":3,\"name\":\"张三\"},{\"id\":1,\"name\":\"李四\"},{\"id\":2,\"name\":\"王五\"}]')
+const sortProperty = ref('id')
+const sortOrder = ref('asc')
+const sortedArray = ref('')
+
+const handleSortArray = () => {
+  let arr
+  try {
+    arr = JSON.parse(sortArrayInput.value)
+  } catch (error) {
+    console.error('JSON解析错误:', error)
+    sortedArray.value = '输入不是有效的JSON格式，请检查格式是否正确'
+    return
+  }
+
+  const comparator = createSortComparator(sortProperty.value, sortOrder.value)
+  const sorted = [...arr].sort(comparator)
+  sortedArray.value = JSON.stringify(sorted, null, 2)
+}
+<\/script>`,
+
+	filterFalsyValues: `<script setup>
+import { filterFalsyValues } from '@/utils/common/data.js'
+
+const falsyArrayInput = ref('1,0,null,undefined, "",false,2')
+const filteredArray = ref('')
+
+const handleFilterFalsy = () => {
+  const arr = falsyArrayInput.value.split(',').map(item => {
+    item = item.trim()
+    if (item === 'null') return null
+    if (item === 'undefined') return undefined
+    if (item === '""') return ''
+    if (item === 'false') return false
+    if (item === '0') return 0
+    return item
+  })
+  const result = filterFalsyValues(arr)
+  filteredArray.value = JSON.stringify(result, null, 2)
+}
+<\/script>`,
+
+	deepMerge: `<script setup>
+import { deepMerge } from '@/utils/common/data.js'
+
+const sourceObj = ref({
+  name: '源对象',
+  info: { a: 10, b: 20 },
+  list: [1, 2, 3],
+})
+const targetObj = ref({
+  name: '目标对象',
+  info: { b: 30, c: 40 },
+  status: 'active',
+})
+const mergedResult = ref({})
+// 字符串格式
+const sourceObjStr = ref(JSON.stringify(sourceObj.value, null, 2))
+const targetObjStr = ref(JSON.stringify(targetObj.value, null, 2))
+const mergedResultStr = ref('')
+
+const mergeObjects = () => {
+  let source, target
+  try {
+    source = JSON.parse(JSON.stringify(sourceObj.value))
+    target = JSON.parse(JSON.stringify(targetObj.value))
+  } catch (error) {
+    console.error('JSON解析错误:', error)
+    mergedResultStr.value = '输入不是有效的JSON格式，请检查格式是否正确'
+    return
+  }
+  const sourceCopy = JSON.parse(JSON.stringify(sourceObj.value))
+  const targetCopy = JSON.parse(JSON.stringify(targetObj.value))
+  mergedResult.value = deepMerge(sourceCopy, targetCopy)
+  mergedResultStr.value = JSON.stringify(mergedResult.value, null, 2)
+}
+<\/script>`,
+
+	clearObjectValues: `<script setup>
+import { clearObjectValues } from '@/utils/common/data.js'
+
+const resetObjInput = ref(
+  JSON.stringify(
+    {
+      name: '测试',
+      info: {
+        address: '北京',
+        phone: '13800138000',
+        children: [
+          { name: '孩子1', age: 5 },
+          { name: '孩子2', age: 3 },
+        ],
+      },
+      tags: ['前端', 'Vue'],
+      empty: null,
+    },
+    null,
+    2
+  )
+)
+
+const resetObjResult = ref('')
+
+const resetObject = () => {
+  const obj = JSON.parse(resetObjInput.value)
+  clearObjectValues(obj)
+  resetObjResult.value = JSON.stringify(obj, null, 2)
+}
+<\/script>`,
+
+	deepClone: `<script setup>
+import { deepClone } from '@/utils/common/data.js'
+
+const cloneObjInput = ref(
+  JSON.stringify(
+    {
+      name: '原始对象',
+      info: {
+        address: '上海',
+        phone: '13800138000',
+        children: [
+          { name: '孩子1', age: 5 },
+          { name: '孩子2', age: 3 },
+        ],
+      },
+      tags: ['前端', 'Vue'],
+      empty: null,
+    },
+    null,
+    2
+  )
+)
+
+const cloneObjResult = ref('')
+const modifiedCloneObj = ref('')
+const originalAfterModify = ref('')
+
+const cloneObjResult = ref('')
+const modifiedCloneObj = ref('')
+const originalAfterModify = ref('')
+
+const cloneObject = () => {
+	const obj = JSON.parse(cloneObjInput.value)
+	const cloned = deepClone(obj)
+	cloneObjResult.value = JSON.stringify(cloned, null, 2)
+	modifiedCloneObj.value = JSON.stringify(cloned, null, 2)	
+	modifyClone()
+	originalAfterModify.value = JSON.stringify(obj, null, 2)
+}
+// 修改克隆后的对象
+const modifyClone = () => {
+	const cloned = JSON.parse(cloneObjResult.value)
+	cloned.name = '修改后的克隆对象'
+	cloned.info.address = '北京'
+	cloned.tags.push('React')
+	cloned.info.children[0].age = 6
+	modifiedCloneObj.value = JSON.stringify(cloned, null, 2)
+}
+
+<\/script>`,
+
+	stringifyWithFunctions: `<script setup>
+import { stringifyWithFunctions, parseWithFunctions } from '@/utils/common/data.js'
+
+const funcObjInput = ref({
+  name: '带函数的对象',
+  age: 30,
+  sayHello: function() {
+    return \`Hello, my name is \${this.name}\`
+  },
+  calculate: function(a, b) {
+    return a + b
+  },
+  nested: {
+    data: [1, 2, 3],
+    func: function() {
+      return 'nested function'
+    }
+  }
+})
+
+const stringifiedResult = ref('')
+const parsedResult = ref('')
+const executedFunctionResult = ref('')
+
+const stringifyFunctionObject = () => {
+  stringifiedResult.value = stringifyWithFunctions(funcObjInput.value)
+}
+
+const parseFunctionObject = () => {
+  const parsed = parseWithFunctions(stringifiedResult.value)
+  parsedResult.value = JSON.stringify(parsed, null, 2)
+  // 保存解析后的对象以便后续使用
+  window.parsedObj = parsed
+}
+
+const executeFunction = () => {
+  if (!window.parsedObj) return
+  const result = window.parsedObj.sayHello()
+  executedFunctionResult.value = result
+}
+<\/script>`,
+
+	flattenToTree: `<script setup>
+import { flattenToTree } from '@/utils/common/data.js'
+
+const flatData = ref([
+  { id: 1, name: '一级节点1', parentId: 0 },
+  { id: 2, name: '一级节点2', parentId: 0 },
+  { id: 3, name: '二级节点1-1', parentId: 1 },
+  { id: 4, name: '二级节点1-2', parentId: 1 },
+  { id: 5, name: '三级节点1-1-1', parentId: 3 },
+  { id: 6, name: '二级节点2-1', parentId: 2 },
+])
+const treeData = ref([])
+const treeProps = { children: 'children', label: 'name' }
+// 字符串格式（用于文本域展示）
+const flatDataStr = ref(JSON.stringify(flatData.value, null, 2))
+const treeDataStr = ref('')
+
+// 转换为树形结构
+const convertToTree = () => {
+  treeData.value = flattenToTree(flatData.value, 'id', 'parentId', 'children')
+  treeDataStr.value = JSON.stringify(treeData.value, null, 2)
+}
+<\/script>`,
+}
+
+// 代码高亮
+const highlightedCode = (feature, language = 'javascript') => {
+	const code = featureCodes[feature] || ''
+	if (!code) return ''
+	return Prism.highlight(code, Prism.languages[language], language)
+}
 
 // -------------------------- 1. 数组去重 --------------------------
 const arrayInput = ref('1,2,2,3,3,4,5,5')
@@ -347,7 +733,7 @@ const handleRemoveDuplicates = () => {
 }
 
 // -------------------------- 2. 数组对象去重 --------------------------
-const objectArrayInput = ref('[{\"id\":1,\"name\":\"张三\"},{\"id\":2,\"name\":\"李四\"},{\"id\":1,\"name\":\"张三\"}]')
+const objectArrayInput = ref('[{"id":1,"name":"张三"},{"id":2,"name":"李四"},{"id":1,"name":"张三"}]')
 const uniqueProperty = ref('id')
 const deduplicatedObjectArray = ref('')
 
@@ -366,7 +752,7 @@ const handleRemoveDuplicatesByProperty = () => {
 }
 
 // -------------------------- 3. 数组对象排序 --------------------------
-const sortArrayInput = ref('[{\"id\":3,\"name\":\"张三\"},{\"id\":1,\"name\":\"李四\"},{\"id\":2,\"name\":\"王五\"}]')
+const sortArrayInput = ref('[{"id":3,"name":"张三"},{"id":1,"name":"李四"},{"id":2,"name":"王五"}]')
 const sortProperty = ref('id')
 const sortOrder = ref('asc')
 const sortedArray = ref('')
@@ -496,8 +882,11 @@ const cloneObject = () => {
 	const cloned = deepClone(obj)
 	cloneObjResult.value = JSON.stringify(cloned, null, 2)
 	modifiedCloneObj.value = JSON.stringify(cloned, null, 2)
-}
 
+	modifyClone()
+	originalAfterModify.value = JSON.stringify(obj, null, 2)
+}
+// 修改克隆后的对象
 const modifyClone = () => {
 	const cloned = JSON.parse(cloneObjResult.value)
 	cloned.name = '修改后的克隆对象'
@@ -509,20 +898,20 @@ const modifyClone = () => {
 
 // -------------------------- 8. 带函数的JSON序列化与反序列化 --------------------------
 const funcObjInput = ref({
-  name: '带函数的对象',
-  age: 30,
-  sayHello: function() {
-    return `Hello, my name is ${this.name}`
-  },
-  calculate: function(a, b) {
-    return a + b
-  },
-  nested: {
-    data: [1, 2, 3],
-    func: function() {
-      return 'nested function'
-    }
-  }
+	name: '带函数的对象',
+	age: 30,
+	sayHello: function () {
+		return `Hello, my name is ${this.name}`
+	},
+	calculate: function (a, b) {
+		return a + b
+	},
+	nested: {
+		data: [1, 2, 3],
+		func: function () {
+			return 'nested function'
+		},
+	},
 })
 
 const stringifiedResult = ref('')
@@ -530,7 +919,7 @@ const parsedResult = ref('')
 const executedFunctionResult = ref('')
 
 const stringifyFunctionObject = () => {
-  stringifiedResult.value = stringifyWithFunctions(funcObjInput.value)
+	stringifiedResult.value = stringifyWithFunctions(funcObjInput.value)
 }
 
 const parseFunctionObject = () => {
@@ -600,17 +989,17 @@ const setTableOptions = () => {
 
 // -------------------------- 初始化数据 --------------------------
 const init = () => {
-	convertToTree() // 初始化树形结构
+	// convertToTree() // 初始化树形结构
 	setTableOptions() // 初始化表格下拉选项
-	mergeObjects() // 初始化数据合并
-	cloneObject() // 初始化深拷贝
-	stringifyFunctionObject() // 初始化函数序列化
-	parseFunctionObject() // 初始化函数反序列化
-	resetObject() // 初始化对象重置
+	// mergeObjects() // 初始化数据合并
+	// cloneObject() // 初始化深拷贝
+	// stringifyFunctionObject() // 初始化函数序列化
+	// parseFunctionObject() // 初始化函数反序列化
+	// resetObject() // 初始化对象重置
 }
 
 // 页面加载时执行初始化
-init()
+// init()
 </script>
 
 <style scoped>
@@ -639,5 +1028,28 @@ init()
 /* 新增：金额演示模块样式补充 */
 .el-col :deep(.el-form-item) {
 	margin-bottom: 16px;
+}
+pre {
+	margin: 0;
+	tab-size: 4;
+	line-height: 1.5;
+}
+
+pre code {
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+	font-size: 14px;
+}
+.el-card {
+	margin-bottom: 1.5rem;
+}
+.tree-empty {
+	text-align: center;
+	color: #909399;
+	padding: 20px;
+}
+
+.tree-empty .el-icon {
+	font-size: 24px;
+	margin-bottom: 8px;
 }
 </style>
