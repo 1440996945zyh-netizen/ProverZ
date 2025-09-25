@@ -5,7 +5,12 @@
 		<!-- 1. 基本日期格式化 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">1. 基本日期格式化 (formatDate)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">1. 基本日期格式化 (formatDate)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('formatDate')">
+						{{ codeDisplayStatus.formatDate ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="日期输入" label-width="100px">
@@ -32,13 +37,25 @@
 				<el-form-item label="格式化结果" label-width="100px">
 					<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="formattedDateResult" readonly></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.formatDate" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('formatDate')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 2. 相对时间计算 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">2. 相对时间计算 (formatRelativeTime)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">2. 相对时间计算 (formatRelativeTime)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('formatRelativeTime')">
+						{{ codeDisplayStatus.formatRelativeTime ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="日期输入" label-width="100px">
@@ -55,13 +72,25 @@
 				<el-form-item label="相对时间结果" label-width="100px">
 					<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="relativeTimeResult" readonly></el-input>
 				</el-form-item>
+
+				<!-- 代码显示区域 -->
+				<div v-if="codeDisplayStatus.formatRelativeTime" class="mt-4" style="margin-left: 30px">
+					<el-card style="background-color: #f5f7fa">
+						<pre><code v-html="highlightedCode('formatRelativeTime')"></code></pre>
+					</el-card>
+				</div>
 			</div>
 		</el-card>
 
 		<!-- 3. 日期加减 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">3. 日期加减 (addDate)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">3. 日期加减 (addDate)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('addDate')">
+						{{ codeDisplayStatus.addDate ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
 				<el-col :xs="24" :md="12">
@@ -106,21 +135,33 @@
 						<el-button @click="calculateDateAddition" type="primary">计算</el-button>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="24">
 					<el-form-item label="结果" label-width="100px">
 						<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="dateAdditionResult" readonly></el-input>
 					</el-form-item>
 				</el-col>
 			</el-row>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.addDate" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('addDate')"></code></pre>
+				</el-card>
+			</div>
 		</el-card>
 
 		<!-- 4. 日期差计算 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">4. 日期差计算 (dateDiff)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">4. 日期差计算 (dateDiff)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('dateDiff')">
+						{{ codeDisplayStatus.dateDiff ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="开始日期" label-width="100px">
 						<el-date-picker
 							v-model="startDate"
@@ -130,7 +171,7 @@
 						></el-date-picker>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="结束日期" label-width="100px">
 						<el-date-picker
 							v-model="endDate"
@@ -140,7 +181,7 @@
 						></el-date-picker>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="时间单位" label-width="100px">
 						<el-select v-model="diffUnit" placeholder="选择单位" style="width: 100%">
 							<el-option label="年" value="year"></el-option>
@@ -152,23 +193,35 @@
 						</el-select>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="24">
 					<el-form-item label-width="100px">
 						<el-button @click="calculateDateDiff" type="primary">计算日期差</el-button>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="24">
 					<el-form-item label="日期差结果" label-width="100px">
 						<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="dateDiffResult" readonly></el-input>
 					</el-form-item>
 				</el-col>
 			</el-row>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.dateDiff" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('dateDiff')"></code></pre>
+				</el-card>
+			</div>
 		</el-card>
 
 		<!-- 5. 周期获取 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">5. 周期获取 (getWeekStart/getWeekEnd)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">5. 周期获取 (getWeekStart/getWeekEnd)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('weekInfo')">
+						{{ codeDisplayStatus.weekInfo ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="基准日期" label-width="100px">
@@ -178,40 +231,39 @@
 					<el-button @click="getWeekInfo" type="primary">获取周信息</el-button>
 				</el-form-item>
 				<el-row :gutter="20">
-					<el-col :xs="24" :md="12">
-						<el-form-item label="周开始日期(周一)" label-width="100px">
+					<el-col :xs="24" :md="24">
+						<el-form-item label="周开始日期(周一)" label-width="150px">
 							<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="weekStartResult" readonly></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :md="12">
-						<el-form-item label="周结束日期(周日)" label-width="100px">
+					<el-col :xs="24" :md="24">
+						<el-form-item label="周结束日期(周日)" label-width="150px">
 							<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="weekEndResult" readonly></el-input>
 						</el-form-item>
 					</el-col>
 				</el-row>
+			</div>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.weekInfo" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('weekInfo')"></code></pre>
+				</el-card>
 			</div>
 		</el-card>
 
 		<!-- 6. 当前时间前后N天 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">6. 当前时间前后N天 (getDaysBeforeAfter)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">6. 当前时间前后N天 (getDaysBeforeAfter)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('beforeAfter')">
+						{{ codeDisplayStatus.beforeAfter ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
-				<el-col :xs="24" :md="12">
-					<el-form-item label="方向" label-width="100px">
-						<el-select v-model="direction" placeholder="选择方向" style="width: 100%">
-							<el-option label="前" value="before"></el-option>
-							<el-option label="后" value="after"></el-option>
-						</el-select>
-					</el-form-item>
-				</el-col>
-				<el-col :xs="24" :md="12">
-					<el-form-item label="天数" label-width="100px">
-						<el-input v-model="days" type="number" placeholder="输入天数" clearable></el-input>
-					</el-form-item>
-				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="日期格式" label-width="100px">
 						<el-select v-model="beforeAfterFormat" placeholder="选择格式" style="width: 100%">
 							<el-option label="YYYY-MM-DD HH:mm:ss" value="YYYY-MM-DD HH:mm:ss"></el-option>
@@ -223,23 +275,49 @@
 						</el-select>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
+					<el-form-item label="方向" label-width="100px">
+						<el-select v-model="direction" placeholder="选择方向" style="width: 100%">
+							<el-option label="前" value="before"></el-option>
+							<el-option label="后" value="after"></el-option>
+						</el-select>
+					</el-form-item>
+				</el-col>
+				<el-col :xs="24" :md="8">
+					<el-form-item label="天数" label-width="100px">
+						<el-input v-model="days" type="number" placeholder="输入天数" clearable></el-input>
+					</el-form-item>
+				</el-col>
+
+				<el-col :xs="24" :md="24">
 					<el-form-item label-width="100px">
 						<el-button @click="getBeforeAfterDate" type="primary">获取日期</el-button>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="24">
 					<el-form-item label="结果" label-width="100px">
 						<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="beforeAfterResult" readonly></el-input>
 					</el-form-item>
 				</el-col>
 			</el-row>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.beforeAfter" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('beforeAfter')"></code></pre>
+				</el-card>
+			</div>
 		</el-card>
 
 		<!-- 7. 当前日期获取 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">7. 当前日期获取 (getCurrentDate)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">7. 当前日期获取 (getCurrentDate)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('currentDate')">
+						{{ codeDisplayStatus.currentDate ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="日期格式" label-width="100px">
@@ -259,20 +337,36 @@
 					<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="currentDateResult" readonly></el-input>
 				</el-form-item>
 			</div>
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.currentDate" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('currentDate')"></code></pre>
+				</el-card>
+			</div>
 		</el-card>
 
 		<!-- 8. 时间戳获取 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">8. 时间戳获取 (getTime)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">8. 时间戳获取 (getTime)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('timeStamp')">
+						{{ codeDisplayStatus.timeStamp ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
-				<el-form-item label="类型" label-width="100px">
-					<el-select v-model="timeType" placeholder="选择类型" style="width: 100%">
-						<el-option label="当前时间戳" value="current"></el-option>
-						<el-option label="90天前时间戳" value="start"></el-option>
-					</el-select>
+				<!-- 新增：指定时间选择器 -->
+				<el-form-item label="指定时间" label-width="100px">
+					<el-date-picker
+						v-model="timeStampTime"
+						type="datetime"
+						placeholder="选择日期时间"
+						style="width: 100%"
+						:shortcuts="shortcuts"
+					></el-date-picker>
 				</el-form-item>
+
 				<el-form-item label-width="100px">
 					<el-button @click="getTimeStamp" type="primary">获取时间戳</el-button>
 				</el-form-item>
@@ -280,15 +374,26 @@
 					<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="timeStampResult" readonly></el-input>
 				</el-form-item>
 			</div>
-		</el-card>
 
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.timeStamp" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('timeStamp')"></code></pre>
+				</el-card>
+			</div>
+		</el-card>
 		<!-- 9. 时间段计算 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">9. 时间段计算 (getDuration)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">9. 时间段计算 (getDuration)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('duration')">
+						{{ codeDisplayStatus.duration ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<el-row :gutter="20" class="mt-4">
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="开始时间" label-width="100px">
 						<el-date-picker
 							v-model="startTime"
@@ -298,7 +403,7 @@
 						></el-date-picker>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="结束时间" label-width="100px">
 						<el-date-picker
 							v-model="endTime"
@@ -308,7 +413,7 @@
 						></el-date-picker>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="8">
 					<el-form-item label="计算类型" label-width="100px">
 						<el-select v-model="durationType" placeholder="选择类型" style="width: 100%">
 							<el-option label="小时" value="hour"></el-option>
@@ -318,23 +423,34 @@
 						</el-select>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="24">
 					<el-form-item label-width="100px">
 						<el-button @click="calculateDuration" type="primary">计算时长</el-button>
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :md="12">
+				<el-col :xs="24" :md="24">
 					<el-form-item label="计算结果" label-width="100px">
 						<el-input type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model="durationResult" readonly></el-input>
 					</el-form-item>
 				</el-col>
 			</el-row>
-		</el-card>
 
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.duration" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('duration')"></code></pre>
+				</el-card>
+			</div>
+		</el-card>
 		<!-- 10. 添加日期范围参数 -->
 		<el-card class="mb-8 shadow-md" border>
 			<template #header>
-				<h2 class="text-xl font-semibold text-purple-600">10. 添加日期范围参数 (addDateRange)</h2>
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-semibold text-purple-600">10. 添加日期范围参数 (addDateRange)</h2>
+					<el-button type="primary" link @click="toggleCodeDisplay('dateRange')">
+						{{ codeDisplayStatus.dateRange ? '隐藏代码' : '查看代码' }}
+					</el-button>
+				</div>
 			</template>
 			<div class="space-y-4 mt-4">
 				<el-form-item label="原始参数" label-width="100px">
@@ -365,6 +481,13 @@
 				<el-form-item label="添加后参数" label-width="100px">
 					<el-input type="textarea" :autosize="{ minRows: 4, maxRows: 6 }" v-model="paramsWithDateRange" readonly></el-input>
 				</el-form-item>
+			</div>
+
+			<!-- 代码显示区域 -->
+			<div v-if="codeDisplayStatus.dateRange" class="mt-4" style="margin-left: 30px">
+				<el-card style="background-color: #f5f7fa">
+					<pre><code v-html="highlightedCode('dateRange')"></code></pre>
+				</el-card>
 			</div>
 		</el-card>
 	</div>
@@ -402,8 +525,205 @@ import {
 	addDateRange,
 } from '@/utils/common/date.js'
 
+import Prism from 'prismjs'
+import 'prismjs/themes/prism-coy.css'
+
 // 获取组件实例
 const instance = getCurrentInstance()
+
+const shortcuts = [
+	{
+		text: '今天',
+		value: new Date(),
+	},
+	{
+		text: '昨天',
+		value: () => {
+			const date = new Date()
+			date.setDate(date.getDate() - 1)
+			return date
+		},
+	},
+	{
+		text: '一周前',
+		value: () => {
+			const date = new Date()
+			date.setDate(date.getDate() - 7)
+			return date
+		},
+	},
+	{
+		text: '一月前',
+		value: () => {
+			const date = new Date()
+			date.setMonth(date.getMonth() - 1)
+			return date
+		},
+	},
+]
+// 代码显示状态管理
+const codeDisplayStatus = ref({
+	formatDate: false,
+	formatRelativeTime: false,
+	addDate: false,
+	dateDiff: false,
+	weekInfo: false,
+	beforeAfter: false,
+	currentDate: false,
+	timeStamp: false,
+	duration: false,
+	dateRange: false,
+})
+
+// 切换代码显示
+const toggleCodeDisplay = feature => {
+	codeDisplayStatus.value[feature] = !codeDisplayStatus.value[feature]
+}
+
+// 代码示例
+const featureCodes = {
+	formatDate: `<script setup>
+import { formatDate } from '@/utils/common/date.js'
+
+const dateInput = ref(new Date())
+const format = ref('L LTS')
+const formattedDateResult = ref('')
+
+const formatDateDemo = () => {
+  formattedDateResult.value = formatDate(dateInput.value, format.value)
+}
+<\/script>`,
+
+	formatRelativeTime: `<script setup>
+import { formatRelativeTime } from '@/utils/common/date.js'
+
+const relativeDateInput = ref(new Date())
+const relativeTimeResult = ref('')
+
+const calculateRelativeTime = () => {
+  relativeTimeResult.value = formatRelativeTime(relativeDateInput.value)
+}
+<\/script>`,
+
+	addDate: `<script setup>
+import { addDate } from '@/utils/common/date.js'
+
+const baseDate = ref(new Date())
+const amount = ref(1)
+const unit = ref('day')
+const addDateFormat = ref('YYYY-MM-DD HH:mm:ss')
+const dateAdditionResult = ref('')
+
+const calculateDateAddition = () => {
+  dateAdditionResult.value = addDate(baseDate.value, amount.value, unit.value, addDateFormat.value)
+}
+<\/script>`,
+
+	dateDiff: `<script setup>
+import { dateDiff } from '@/utils/common/date.js'
+
+const startDate = ref(new Date())
+const endDate = ref(new Date(new Date().getTime() + 24 * 60 * 60 * 1000))
+const diffUnit = ref('day')
+const dateDiffResult = ref('')
+
+const calculateDateDiff = () => {
+  dateDiffResult.value = dateDiff(startDate.value, endDate.value, diffUnit.value)
+}
+<\/script>`,
+
+	weekInfo: `<script setup>
+import { getWeekStart, getWeekEnd } from '@/utils/common/date.js'
+
+const weekDate = ref(new Date())
+const weekStartResult = ref('')
+const weekEndResult = ref('')
+
+const getWeekInfo = () => {
+  weekStartResult.value = getWeekStart(weekDate.value)
+  weekEndResult.value = getWeekEnd(weekDate.value)
+}
+<\/script>`,
+
+	beforeAfter: `<script setup>
+import { getDaysBeforeAfter } from '@/utils/common/date.js'
+
+const direction = ref('before')
+const days = ref(7)
+const beforeAfterFormat = ref('YYYY-MM-DD')
+const beforeAfterResult = ref('')
+
+const getBeforeAfterDate = () => {
+  beforeAfterResult.value = getDaysBeforeAfter(direction.value, days.value, beforeAfterFormat.value)
+}
+<\/script>`,
+
+	currentDate: `<script setup>
+import { getCurrentDate } from '@/utils/common/date.js'
+
+const currentDateFormat = ref('YYYY-MM-DD HH:mm:ss')
+const currentDateResult = ref('')
+
+const handleGetCurrentDate = () => {
+  currentDateResult.value = getCurrentDate(currentDateFormat.value)
+}
+<\/script>`,
+
+	timeStamp: `<script setup>
+import { getTime } from '@/utils/common/date.js'
+
+const timeType = ref('current')
+const timeStampTime = ref(new Date()) // 默认选中当前时间
+const timeStampResult = ref('')
+
+const getTimeStamp = () => {
+	timeStampResult.value = getTime(timeStampTime.value) // 直接获取当前时间戳
+}
+<\/script>`,
+
+	duration: `<script setup>
+import { getDuration } from '@/utils/common/date.js'
+
+const startTime = ref(new Date(new Date().getTime() - 24 * 60 * 60 * 1000))
+const endTime = ref(new Date())
+const durationType = ref('hour')
+const durationResult = ref('')
+
+const calculateDuration = () => {
+  durationResult.value = getDuration(durationType.value, [startTime.value, endTime.value])
+}
+<\/script>`,
+
+	dateRange: `<script setup>
+import { addDateRange } from '@/utils/common/date.js'
+
+const originalParams = ref(JSON.stringify({ page: 1, size: 10, keyword: '测试' }, null, 2))
+const dateRange = ref([new Date(), new Date(new Date().getTime() + 24 * 60 * 60 * 1000)])
+const propName = ref('')
+const paramsWithDateRange = ref('')
+
+const addDateRangeDemo = () => {
+  const params = JSON.parse(originalParams.value)
+  const result = addDateRange(params, dateRange.value, propName.value)
+  paramsWithDateRange.value = JSON.stringify(result, null, 2)
+}
+<\/script>`,
+}
+
+// 代码高亮
+const highlightedCode = (feature, language = 'javascript') => {
+	const code = featureCodes[feature] || ''
+	if (!code) return ''
+	return Prism.highlight(code, Prism.languages[language], language)
+}
+
+// 在组件挂载后触发高亮更新
+onMounted(() => {
+	// Prism 需要在 DOM 更新后重新渲染
+	setTimeout(() => {
+		Prism.highlightAll()
+	}, 0)
+})
 
 // 1. 基本日期格式化
 const dateInput = ref(new Date())
@@ -472,12 +792,11 @@ const handleGetCurrentDate = () => {
 }
 // 8. 时间戳获取
 const timeType = ref('current')
+const timeStampTime = ref(new Date()) // 默认选中当前时间
 const timeStampResult = ref('')
-
 const getTimeStamp = () => {
-	timeStampResult.value = getTime(timeType.value)
+	timeStampResult.value = getTime(timeStampTime.value) // 直接获取当前时间戳
 }
-
 // 9. 时间段计算
 const startTime = ref(new Date(new Date().getTime() - 24 * 60 * 60 * 1000))
 const endTime = ref(new Date())
@@ -514,7 +833,7 @@ const init = () => {
 	addDateRangeDemo()
 }
 
-init()
+//init()
 </script>
 
 <style scoped>
@@ -543,5 +862,18 @@ init()
 /* 新增：金额演示模块样式补充 */
 .el-col :deep(.el-form-item) {
 	margin-bottom: 16px;
+}
+pre {
+	margin: 0;
+	tab-size: 4;
+	line-height: 1.5;
+}
+
+pre code {
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+	font-size: 14px;
+}
+.el-card {
+	margin-bottom: 1.5rem;
 }
 </style>
