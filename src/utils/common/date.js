@@ -148,9 +148,9 @@ export const getCurrentDate = (format = 'YYYY-MM-DD HH:mm:ss') => {
  * getTime() // 返回当前时间戳
  * getTime('start') // 返回90天前的时间戳
  */
-export const getTime = type => {
-	if (type === 'start') {
-		return dayjs().subtract(90, 'day').valueOf()
+export const getTime = date => {
+	if (date) {
+		return dayjs(date).valueOf()
 	} else {
 		return dayjs().valueOf()
 	}
