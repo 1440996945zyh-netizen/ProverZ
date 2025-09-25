@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-09-18 18:03:43
+ * @LastEditTime: 2025-09-24 17:37:25
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\system\processManagement\index.vue
@@ -32,22 +32,16 @@
 		</div>
 
 		<!-- 流程查看对话框 -->
-		<Dialog v-model:visible="processViewVisible" :title="processViewTitle" width="65%" >
-			<processViewer :key="`designer-${processView.index}`" :xml="processView.xmlData" :style="{ height: '500px', width: '100%' }" />
+		<Dialog v-model:visible="processViewVisible" :title="processViewTitle" width="65%">
+			<processViewer
+				:key="`designer-${processView.index}`"
+				:xml="processView.xmlData"
+				:finished-info="{}"
+				:style="{ height: '500px', width: '100%' }"
+			/>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="processViewVisible = false">关闭</el-button>
-				</span>
-			</template>
-		</Dialog>
-
-		<!-- 确认操作对话框 -->
-		<Dialog v-model:visible="confirmDialogVisible" :title="confirmTitle" width="400px" :modal="true">
-			<p>{{ confirmMessage }}</p>
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="confirmDialogVisible = false">取消</el-button>
-					<el-button type="primary" @click="handleConfirmAction">确定</el-button>
 				</span>
 			</template>
 		</Dialog>
@@ -79,7 +73,7 @@
 		</Dialog>
 		<!-- 流程设计器对话框 -->
 		<Dialog v-model:visible="processDesignerVisible" :title="processDesignerTitle" :showFooter="false" isFullscreen :modal="true">
-			<processDesigner></processDesigner>
+			<processDesigner :editor="editor"></processDesigner>
 		</Dialog>
 	</div>
 </template>
@@ -101,6 +95,7 @@ import {
 	ElDropdownMenu,
 	ElDropdownItem,
 	ElMessage,
+	ElMessageBox,
 } from 'element-plus'
 
 // 2. 组件导入
@@ -109,11 +104,13 @@ import Dialog from '@/components/Dialog/index.vue'
 import DropDown from '@/components/DropDown/newIndex.vue' // 补充Dropdown组件导入
 import processDesigner from './details/processDesigner.vue'
 import processViewer from '@/components/processViewer' // 引入流程查看组件
+import TipMessage from '@/components/TipMessage/index.vue'
 
 // 3. 状态管理与假数据导入
 import tableParamsStore from '@/store/modules/tableParams'
 import { processMockData } from './details/data'
 import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete } from '@element-plus/icons-vue'
+// import { message } from 'ant-design-vue'
 
 // 4. 组件实例与基础配置
 const { proxy } = getCurrentInstance()
@@ -122,6 +119,7 @@ const processtTableRef = ref(null)
 const formConfigRef = ref(null)
 const processDesignerVisible = ref(false)
 const processDesignerTitle = ref('流程设计器')
+const editor = ref(null)
 
 // 5. 核心响应式数据
 const data = reactive({
@@ -164,10 +162,8 @@ const rowConfig = { keyField: 'id' }
 // 9. 对话框相关状态
 const dialogState = reactive({
 	processViewVisible: false,
-	confirmDialogVisible: false,
 	formConfigVisible: false,
 	processViewTitle: '流程查看',
-	confirmTitle: '操作确认',
 	formConfigTitle: '配置表单',
 	processImageUrl: '',
 	confirmMessage: '',
@@ -182,10 +178,8 @@ const processView = reactive({
 // 10. 解构对话框状态（简化调用）
 const {
 	processViewVisible,
-	confirmDialogVisible,
 	formConfigVisible,
 	processViewTitle,
-	confirmTitle,
 	formConfigTitle,
 	processImageUrl,
 	confirmMessage,
@@ -285,7 +279,8 @@ const tableColumns = ref([
 				h(
 					ElButton,
 					{
-						type: 'text',
+						type: 'link',
+						class: 'link-button',
 						onClick: () => handleProcessView(row.deploymentId),
 						permission: undefined, // 明确添加permission属性（避免props为null）
 					},
@@ -305,7 +300,8 @@ const tableColumns = ref([
 					h(
 						ElButton,
 						{
-							type: 'text',
+							type: 'link',
+							class: 'link-button',
 							onClick: () => handleCustomForm(row.formId),
 							permission: undefined,
 						},
@@ -317,7 +313,8 @@ const tableColumns = ref([
 					h(
 						ElButton,
 						{
-							type: 'text',
+							type: 'link',
+							class: 'link-button',
 							onClick: () => handleOnlineForm(row.formId, row.formName),
 							permission: undefined,
 						},
@@ -329,7 +326,8 @@ const tableColumns = ref([
 					h(
 						ElButton,
 						{
-							type: 'text',
+							type: 'link',
+							class: 'link-button',
 							onClick: () => handleForm(row.formId),
 							permission: undefined,
 						},
@@ -536,16 +534,6 @@ const getList = (params = {}) => {
 }
 
 /**
- * 分页变化处理
- * @param {Object} page 分页参数
- */
-const handlePageChange = page => {
-	queryParams.value.pageNum = page.pageNum
-	queryParams.value.pageSize = page.pageSize
-	getList()
-}
-
-/**
  * 单元格点击事件
  * @param {Object} params 行数据
  */
@@ -569,9 +557,10 @@ const handleProcessView = async deploymentId => {
 		// }
 
 		// 在真实项目中，请移除此硬编码，改用真实的 API 调用
-		const mockXml = processMockData.xmlData
+		const mockXml = deploymentId == '03500701-0bd1-11ed-8314-601895569a42' ? processMockData.xmlData : processMockData.xmlData2
 		// 设置流程查看状态
-		processView.index = deploymentId
+		// processView.index = deploymentId
+		processView.index = `${deploymentId}_${Date.now()}`
 		processView.xmlData = mockXml // 替换为真实 API 返回值
 		processViewVisible.value = true
 	} catch (error) {
@@ -585,7 +574,7 @@ const handleProcessView = async deploymentId => {
  * @param {string} formId 表单ID
  */
 const handleCustomForm = formId => {
-	proxy.$modal.msgInfo(`打开自定义表单: ${formId}`)
+	proxy.$modal.msg(`打开自定义表单: ${formId}`)
 }
 
 /**
@@ -594,7 +583,7 @@ const handleCustomForm = formId => {
  * @param {string} formName 表单名称
  */
 const handleOnlineForm = (formId, formName) => {
-	proxy.$modal.msgInfo(`打开在线表单: ${formName}`)
+	proxy.$modal.msg(`打开在线表单: ${formName}`)
 }
 
 /**
@@ -602,7 +591,7 @@ const handleOnlineForm = (formId, formName) => {
  * @param {string} formId 表单ID
  */
 const handleForm = formId => {
-	proxy.$modal.msgInfo(`打开表单: ${formId}`)
+	proxy.$modal.msg(`打开表单: ${formId}`)
 }
 
 /**
@@ -610,7 +599,10 @@ const handleForm = formId => {
  * @param {Object} row 流程数据
  */
 const handleLoadXml = row => {
-	proxy.$modal.msgInfo(`编辑流程: ${row.name}`)
+	proxy.$modal.msg(`编辑流程: ${row.name}`)
+	console.log('row =>', row);
+	processDesignerVisible.value = true
+	editor.value = row
 }
 
 /**
@@ -653,7 +645,7 @@ const handleSaveFormConfig = async () => {
  * @param {Object} row 流程数据
  */
 const SubmitApplication = row => {
-	proxy.$modal.msgInfo(`发起申请: ${row.name}`)
+	ElMessage.info(`发起申请: ${row.name}`)
 }
 
 /**
@@ -666,7 +658,17 @@ const handleUpdateSuspensionState = (row, state) => {
 	currentAction.value = 'state'
 	const actionText = state === 1 ? '激活' : '挂起'
 	confirmMessage.value = `确定要${actionText}流程【${row.name}】吗？`
-	confirmDialogVisible.value = true
+	ElMessageBox.confirm(confirmMessage.value, '确认操作', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(() => {
+			handleConfirmAction()
+		})
+		.catch(() => {
+			// 取消操作
+		})
 	currentRow.value.targetState = state
 }
 
@@ -678,18 +680,27 @@ const handleDelete = row => {
 	currentRow.value = row
 	currentAction.value = 'delete'
 	confirmMessage.value = `确定要删除流程【${row.name}】吗？此操作不可恢复！`
-	confirmDialogVisible.value = true
+
+	ElMessageBox.confirm(confirmMessage.value, '确认操作', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(() => {
+			handleConfirmAction()
+		})
+		.catch(() => {
+			// 取消操作
+		})
 }
 
 /**
  * 新增流程
  */
 const handleAddProcess = () => {
-	ElMessage({
-		message: '跳转到新增流程页面',
-		type: 'info',
-	})
+	proxy.$modal.msg('跳转到新增流程页面')
 	processDesignerVisible.value = true
+	editor.value = null
 }
 
 /**
@@ -707,7 +718,6 @@ const handleConfirmAction = () => {
 		}
 		proxy.$modal.msgSuccess('流程删除成功')
 	}
-	confirmDialogVisible.value = false
 	getList() // 刷新列表
 }
 
@@ -759,5 +769,22 @@ onMounted(() => {
 :deep .el-dialog .dialog-body {
 	height: 100% !important;
 	padding: 0px !important;
+}
+:deep(.link-button) {
+	background: transparent !important;
+	border: none !important;
+	color: #409eff !important; // 保持Element的主题蓝色
+	padding: 0 8px !important;
+	height: auto !important;
+	line-height: normal !important;
+
+	//  hover/focus/active状态都移除背景和边框
+	&:hover,
+	&:focus,
+	&:active {
+		background: transparent !important;
+		border-color: transparent !important;
+		box-shadow: none !important;
+	}
 }
 </style>

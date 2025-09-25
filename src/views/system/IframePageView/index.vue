@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:24:30
- * @LastEditTime: 2025-09-22 17:44:32
+ * @LastEditTime: 2025-09-24 11:51:17
  * @LastEditors: zhangsd
  * @Description: 积木报表设计 
  * @FilePath: \view\src\views\system\IframePageView\index.vue
@@ -53,7 +53,9 @@ function goUrl() {
 			window.open(url.value, '_blank')
 		}
 	}
-   url.value = basePath + '/jmreport/list?token=' + token
+//    url.value = basePath + '/jmreport/list?token=' + encodeURIComponent(token)
+	console.log('------token------', encodeURIComponent(token))
+
 		console.log('url =>', url)
 }
 

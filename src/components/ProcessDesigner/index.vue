@@ -1,13 +1,14 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-17 10:35:09
- * @LastEditTime: 2025-09-18 16:32:21
+ * @LastEditTime: 2025-09-24 15:10:42
  * @LastEditors: zhangsd
  * @Description: 流程设计模版
  * @FilePath: \view\src\components\ProcessDesigner\index.vue
 --> 
 <template>
   <div class="process-design" :style="`display: flex; height: ${height}`">
+    <!-- 流程设计器 -->
     <BpmnProcessDesigner
       v-model="xmlString"
       v-bind="controlForm"
@@ -25,6 +26,7 @@
       @event="handlerEvent"
       @save="onSaveProcess"
     />
+    <!-- 流程设计器右侧面板 -->
     <BmpnProcessPenal
       :bpmn-modeler="modeler" 
       :prefix="controlForm.prefix" 
@@ -44,11 +46,7 @@ import { BpmnProcessDesigner, BmpnProcessPenal } from '@/plugins/package/index';
 import CustomContentPadProvider from '@/plugins/package/designer/plugins/content-pad';
 // 自定义左侧菜单（修改 默认任务 为 用户任务）
 import CustomPaletteProvider from '@/plugins/package/designer/plugins/palette';
-// import { vuePlugin } from '@/plugins/package/highlight';
-import 'highlight.js/styles/atom-one-dark-reasonable.css';
-// import hljs from '@/plugins/package/highlight/index.js';
-// // 注册highlight插件
-// vuePlugin.install();
+
 
 // 定义组件属性
 const props = defineProps({

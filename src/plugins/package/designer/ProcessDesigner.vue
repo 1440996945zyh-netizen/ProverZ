@@ -5,11 +5,15 @@
 			<template v-if="!$slots['control-header']">
 				<el-button-group key="file-control">
 					<el-button :size="headerButtonSize" :type="headerButtonType" @click="onSave">
-						<el-icon><Edit /></el-icon>
+						<el-icon>
+							<Edit />
+						</el-icon>
 						保存流程
 					</el-button>
 					<el-button :size="headerButtonSize" :type="headerButtonType" @click="refFile.click()">
-						<el-icon><FolderOpened /></el-icon>
+						<el-icon>
+							<FolderOpened />
+						</el-icon>
 						打开文件
 					</el-button>
 					<el-tooltip effect="light">
@@ -21,7 +25,9 @@
 							<el-button :size="headerButtonSize" type="text" @click="downloadProcessAsBpmn()">下载为BPMN文件</el-button>
 						</template>
 						<el-button :size="headerButtonSize" :type="headerButtonType">
-							<el-icon><Download /></el-icon>
+							<el-icon>
+								<Download />
+							</el-icon>
 							下载文件
 						</el-button>
 					</el-tooltip>
@@ -32,13 +38,17 @@
 							<el-button :size="headerButtonSize" type="text" @click="previewProcessJson">预览JSON</el-button>
 						</template>
 						<el-button :size="headerButtonSize" :type="headerButtonType">
-							<el-icon><View /></el-icon>
+							<el-icon>
+								<View />
+							</el-icon>
 							预览
 						</el-button>
 					</el-tooltip>
 					<el-tooltip v-if="simulation" effect="light" :content="simulationStatus ? '退出模拟' : '开启模拟'">
 						<el-button :size="headerButtonSize" :type="headerButtonType" @click="processSimulation">
-							<el-icon><ScaleToOriginal /></el-icon>
+							<el-icon>
+								<ScaleToOriginal />
+							</el-icon>
 							模拟
 						</el-button>
 					</el-tooltip>
@@ -79,35 +89,47 @@
 				<el-button-group key="scale-control">
 					<el-tooltip effect="light" content="缩小视图">
 						<el-button :size="headerButtonSize" :disabled="defaultZoom < 0.2" @click="processZoomOut()">
-							<el-icon><ZoomOut /></el-icon>
+							<el-icon>
+								<ZoomOut />
+							</el-icon>
 						</el-button>
 					</el-tooltip>
 					<el-button :size="headerButtonSize">{{ Math.floor(defaultZoom * 10 * 10) + '%' }}</el-button>
 					<el-tooltip effect="light" content="放大视图">
 						<el-button :size="headerButtonSize" :disabled="defaultZoom > 4" @click="processZoomIn()">
-							<el-icon><ZoomIn /></el-icon>
+							<el-icon>
+								<ZoomIn />
+							</el-icon>
 						</el-button>
 					</el-tooltip>
 					<el-tooltip effect="light" content="重置视图并居中">
 						<el-button :size="headerButtonSize" @click="processReZoom()">
-							<el-icon><ScaleToOriginal /></el-icon>
+							<el-icon>
+								<ScaleToOriginal />
+							</el-icon>
 						</el-button>
 					</el-tooltip>
 				</el-button-group>
 				<el-button-group key="stack-control">
 					<el-tooltip effect="light" content="撤销">
 						<el-button :size="headerButtonSize" :disabled="!revocable" @click="processUndo()">
-							<el-icon><RefreshLeft /></el-icon>
+							<el-icon>
+								<RefreshLeft />
+							</el-icon>
 						</el-button>
 					</el-tooltip>
 					<el-tooltip effect="light" content="恢复">
 						<el-button :size="headerButtonSize" :disabled="!recoverable" @click="processRedo()">
-							<el-icon><RefreshRight /></el-icon>
+							<el-icon>
+								<RefreshRight />
+							</el-icon>
 						</el-button>
 					</el-tooltip>
 					<el-tooltip effect="light" content="重新绘制">
 						<el-button :size="headerButtonSize" @click="processRestart">
-							<el-icon><Refresh /></el-icon>
+							<el-icon>
+								<Refresh />
+							</el-icon>
 						</el-button>
 					</el-tooltip>
 				</el-button-group>
@@ -115,18 +137,21 @@
 			<!-- 用于打开本地文件-->
 			<input type="file" id="files" ref="refFile" style="display: none" accept=".xml, .bpmn" @change="importLocalFile" />
 		</div>
+		<!-- 设计器容器 -->
 		<div class="my-process-designer__container">
 			<div class="my-process-designer__canvas" ref="bpmnCanvas"></div>
 		</div>
-		<el-dialog title="预览" width="80%" v-model="previewModelVisible" append-to-body destroy-on-close>
+		<!-- 预览弹窗 -->
+		<Dialog title="预览" width="80%" v-model:visible="previewModelVisible" :showFooter="false">
 			<highlightjs :language="previewType" :code="previewResult" />
-		</el-dialog>
+		</Dialog>
 	</div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, defineProps, getCurrentInstance, defineEmits } from 'vue'
 import SvgIcon from '@/components/SvgIcon'
+import Dialog from '@/components/Dialog/index.vue'
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 import DefaultEmptyXML from './plugins/defaultEmpty'
 // 翻译方法
@@ -587,7 +612,7 @@ function elementsAlign(align) {
 		return
 	}
 
-	ElMessageBox.confirm( '自动对齐可能造成图形变形，是否继续？','警告', {
+	ElMessageBox.confirm('自动对齐可能造成图形变形，是否继续？', '警告', {
 		confirmButtonText: '确定',
 		cancelButtonText: '取消',
 		type: 'warning',
@@ -599,6 +624,7 @@ function elementsAlign(align) {
 // 预览XML
 function previewProcessXML() {
 	bpmnModeler.value.saveXML({ format: true }).then(({ xml }) => {
+		console.log('预览XML数据：', xml) // 关键日志，确认是否有XML字符串
 		previewResult.value = xml
 		previewType.value = 'xml'
 		previewModelVisible.value = true
@@ -609,6 +635,7 @@ function previewProcessXML() {
 function previewProcessJson() {
 	const newConvert = new X2JS()
 	bpmnModeler.value.saveXML({ format: true }).then(({ xml }) => {
+		console.log('预览XML数据：', xml) // 关键日志，确认是否有XML字符串
 		const { definitions } = newConvert.xml2js(xml)
 		if (definitions) {
 			previewResult.value = JSON.stringify(definitions, null, 4)
