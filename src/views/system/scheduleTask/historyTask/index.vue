@@ -1,56 +1,32 @@
 <template>
 	<!-- 角色管理 -->
-	<div class="app-container">
-		<BaseTable
-			ref="baseTable"
-			:showSearchHeader="true"
-			:selectData="selectData"
-			:searchClick="getList"
-			:buttonList="buttonList"
-			:tableColumns="tableColumns"
-			:tableData="tableData"
-			:cellClickEvent="cellClickEvent"
-			:total="total"
-			:defaultWidth="50"
-		/>
-		<!-- 新增，修改抽屉组件 -->
-		<Dialog v-model:visible="detailVisible" :title="title" :width="600">
-			<detail ref="detailRef" />
-			<template #footer>
-				<div style="flex: auto">
-					<el-button @click="detailVisible = false">取消</el-button>
-					<el-button type="primary" @click="save">保存</el-button>
-				</div>
-			</template>
-		</Dialog>
-		<Dialog v-model:visible="historyVisible" title="历史任务" :isFullscreen="true" :width="1000">
-			<historyTask ref="historyTaskRef" />
-			<template #footer>
-				<div style="flex: auto">
-					<el-button @click="historyVisible = false">关闭</el-button>
-				</div>
-			</template>
-		</Dialog>
-	</div>
+	<BaseTable
+		ref="baseTable"
+		:showSearchHeader="true"
+		:selectData="selectData"
+		:tableHeight="tableHeight"
+		:searchClick="getList"
+		:tableColumns="tableColumns"
+		:tableData="tableData"
+		:cellClickEvent="cellClickEvent"
+		:total="total"
+		:defaultWidth="40"
+	/>
 </template>
 
-<script setup name="role">
+<script setup>
 import BaseTable from '@/components/BaseTable/index.vue'
-import { ref, reactive, nextTick } from 'vue'
-import detail from './detail/index.vue'
+import { ref, reactive } from 'vue'
 import DropDown from '@/components/DropDown/newIndex'
-import Dialog from '@/components/Dialog/index.vue'
 import { ElTag } from 'element-plus'
 import api from '@/api/system/scheduleTask.js'
-import historyTask from './historyTask/index.vue'
 const { proxy } = getCurrentInstance()
 const clickRow = ref({}) //点击当前行
 const total = ref(0)
 const title = ref('新增')
 const detailRef = ref(null)
 const detailVisible = ref(false)
-const historyVisible = ref(false)
-const historyTaskRef = ref(null)
+const tableHeight = ref(window.innerHeight - 320)
 const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
@@ -69,21 +45,37 @@ const tableColumns = ref([
 	{ label: '下次运行时间', prop: 'nextFireTime', width: 150, align: 'center' },
 	{
 		label: '任务状态',
-		prop: 'jobStatusInfo',
+		prop: 'triggerState',
 		align: 'center',
 		width: 100,
 		fixed: 'right',
-		config: 'jobStatusInfo',
+		config: 'triggerState',
 		render: row => {
+			let stateMap = {
+				WAITING: 'info',
+				PAUSED: 'warning',
+				ACQUIRED: 'primary',
+				EXECUTING: 'primary',
+				COMPLETE: 'success',
+				ERROR: 'danger',
+			}
+			let stateNameMap = {
+				WAITING: '等待',
+				PAUSED: '暂停',
+				ACQUIRED: '已获取',
+				EXECUTING: '执行中',
+				COMPLETE: '完成',
+				ERROR: '错误',
+			}
 			return [
 				h(
 					ElTag,
 					{
-						type: 'primary',
+						type: stateMap[row.triggerState] || 'primary',
 					},
 
 					{
-						default: () => '开启',
+						default: () => stateNameMap[row.triggerState],
 					}
 				),
 			]
@@ -178,50 +170,14 @@ const selectData = reactive([
 		],
 	},
 ])
-const buttonList = reactive([
-	{
-		label: '添加任务', // 按钮名称
-		type: 'primary', // 按钮类型
-		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
-		click: () => add, // 回调函数
-		permission: 'system:role:insert', // 权限
-	},
-	{
-		label: '历史任务', // 按钮名称
-		type: 'primary', // 按钮类型
-		icon: 'View', // 按钮图标，支持element-Plus中所有图标
-		click: () => toHistoryTask, // 回调函数
-		permission: 'system:role:dispatchUser', // 权限
-	},
-])
 
 // 点击查询的事件
 const getList = e => {
 	queryParams.value = e
-	api.getJobs(queryParams.value).then(res => {
+	api.historyJobs(queryParams.value).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
-}
-/** 历史任务 */
-const toHistoryTask = () => {
-	historyVisible.value = true
-	nextTick(() => {
-		historyTaskRef.value.getList()
-	})
-}
-/** 提交按钮 */
-const save = async () => {
-	if (await detailRef.value.validate()) {
-		const params = JSON.parse(JSON.stringify(detailRef.value.formData))
-		proxy.$modal.confirm('确定保存？').then(() => {
-			api.addPostJsonJob(params).then(res => {
-				proxy.$modal.msgSuccess(res.msg)
-				detailVisible.value = false
-				getList()
-			})
-		})
-	}
 }
 function stop(row) {
 	proxy.$modal.confirm('确定暂停？').then(() => {
@@ -248,14 +204,6 @@ function handleDelete(row) {
 		})
 	})
 }
-
-const add = () => {
-	detailVisible.value = true
-	title.value = '新增'
-	nextTick(() => {
-		detailRef.value.resetForm() // 清空事件
-	})
-}
 const editCron = row => {
 	const editRow = row || clickRow.value // 拿到所编辑行的数据
 	title.value = '编辑'
@@ -265,5 +213,10 @@ const editCron = row => {
 	})
 }
 getList(queryParams.value)
+defineExpose({
+	tableData,
+	getList,
+	tableHeight,
+})
 </script>
 <style lang="less" scoped></style>
