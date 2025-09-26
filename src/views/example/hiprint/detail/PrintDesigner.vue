@@ -467,13 +467,13 @@ const confirmTemplateForm = async () => {
 		const res = await api.update(formData.value)
 		if (res.code === '0000') {
 			ElMessage.success('模板更新成功')
-			//跳转
-			router.push({
-				name: 'hiprintIndex',
-			})
 		} else {
 			ElMessage.error(`更新失败：${res.msg || '未知错误'}`)
 		}
+		//跳转
+		router.push({
+			name: 'hiprintIndex',
+		})
 	} else {
 		// 继续保存操作 - 二次确认
 		await ElMessageBox.confirm('确定新增此模板？', '新增确认', {
@@ -493,6 +493,10 @@ const confirmTemplateForm = async () => {
 		} else {
 			ElMessage.error(`保存失败：${res.msg || '未知错误'}`)
 		}
+		//跳转
+		router.push({
+			name: 'hiprintIndex',
+		})
 	}
 }
 /**
