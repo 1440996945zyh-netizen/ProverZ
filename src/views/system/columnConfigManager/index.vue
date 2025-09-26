@@ -31,7 +31,14 @@
 				:total="total"
 			/>
 		</div>
-		
+		<Dialog title="新增" v-model:visible="dialogVisible" isFullscreen>
+			<columnConfigManagerDialog ref="dialogRef" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="dialogVisible = false">关闭</el-button>
+				</span>
+			</template>
+		</Dialog>
 	</div>
 </template>
 <script setup>
@@ -39,7 +46,8 @@ import { ref } from 'vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
 import tableParamsStore from '@/store/modules/tableParams'
-
+import { ElTag } from 'element-plus'
+import columnConfigManagerDialog from './dialog/index.vue'
 const { proxy } = getCurrentInstance() // 获取当前实例，用于访问组件的属性和方法
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHight.value - 15) // 表格高度
@@ -49,77 +57,43 @@ const columnConfigTableRef = ref(null)
 const rowConfig = { keyField: 'id' } // 表格行配置，keyField为唯一标识字段
 const tableLoading = ref(false) // 表格加载状态
 const total = ref(0) // 总条数
+
+const dialogRef = ref(null)
 // 表格列配置
 const tableColumns = ref([
 	{
-		prop: 'id',
-		label: '流程定义id',
+		prop: 'tebleId',
+		label: '前端table的ID',
 		align: 'center',
 		width: 250,
 	},
 	{
-		prop: 'key',
-		label: '流程标识Key',
+		prop: 'colKey',
+		label: '后端TABLE对应标识Key',
 		align: 'center',
 		width: 250,
 	},
 	{
-		prop: 'category',
-		label: '流程分类',
+		prop: 'colLabel',
+		label: '前端TABLE的列对应的label',
 		align: 'center',
 		width: 250,
-		render: row => {
-			const option = categoryOptions.find(item => item.value === row.category)
-			// 修复：给原生span添加props对象（即使为空）
-			return [h('span', { props: {} }, option ? option.label : row.category)]
-		},
 	},
 	{
-		prop: 'name',
-		label: '流程名称',
+		prop: 'colType',
+		label: '列类型',
 		align: 'center',
-		showOverFlow: true,
-		render: row => {
-			return [
-				h(
-					ElButton,
-					{
-						type: 'link',
-						class: 'link-button',
-						onClick: () => handleProcessView(row.deploymentId),
-						permission: undefined, // 明确添加permission属性（避免props为null）
-					},
-					{ default: () => row.name }
-				),
-			]
-		},
+		width: 250,
 	},
 
 	{
-		prop: 'version',
-		label: '流程版本',
-		align: 'center',
-		render: row => {
-			return [
-				h(
-					ElTag,
-					{
-						size: 'medium',
-						permission: undefined, // 明确添加permission属性
-					},
-					{ default: () => `v${row.version}` }
-				),
-			]
-		},
-	},
-	{
-		prop: 'suspensionState',
+		prop: 'status',
 		label: '状态',
 		align: 'center',
 		render: row => {
 			const statusMap = {
-				1: { label: '激活', type: 'success' },
-				2: { label: '挂起', type: 'warning' },
+				1: { label: '启用', type: 'success' },
+				2: { label: '停用', type: 'warning' },
 			}
 			const status = statusMap[row.suspensionState] || { label: '未知', type: '' }
 			return [
