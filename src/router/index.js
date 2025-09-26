@@ -105,6 +105,20 @@ export const constantRoutes = [
 			},
 		],
 	},
+	{
+		path: '/example/hiprint/index',
+		component: Layout,
+		hidden: true,
+		redirect: 'noredirect',
+		children: [
+			{
+				path: '',
+				component: () => import('@/views/example/hiprint/index'),
+				name: 'hiprintIndex',
+				meta: { title: '打印示例', icon: '' },
+			},
+		],
+	},
 ]
 
 // 动态路由，基于用户权限动态去加载
