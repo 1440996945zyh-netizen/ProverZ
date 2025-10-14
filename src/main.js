@@ -11,11 +11,11 @@ import VxeUITable from 'vxe-table'
 import 'vxe-table/es/style.css'
 
 
-import { hiPrintPlugin } from 'vue-plugin-hiprint'
+// import { hiPrintPlugin } from 'vue-plugin-hiprint'
 // 样式
 import "./assets/styles/hiprint.css"
 import "./assets/styles/print-lock.css"
-hiPrintPlugin.disAutoConnect() // 取消自动连接直接打印客户端
+// hiPrintPlugin.disAutoConnect() // 取消自动连接直接打印客户端
 
 import '@/assets/styles/index.scss' // global css
 import './assets/newIconFonts/iconfont.css' // iconfont
@@ -62,9 +62,9 @@ import ImagePreview from '@/components/ImagePreview'
 import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
-import hljs from 'highlight.js'
-import highlightPlugin from '@highlightjs/vue-plugin'
-import "highlight.js/styles/atom-one-dark-reasonable.css"; // 保持原样式
+// import hljs from 'highlight.js'
+// import highlightPlugin from '@highlightjs/vue-plugin'
+// import "highlight.js/styles/atom-one-dark-reasonable.css"; // 保持原样式
 
 const app = createApp(App)
 
@@ -100,10 +100,10 @@ app.component('Editor', Editor)
 app.use(router)
 app.use(store)
 app.use(plugins)
-app.use(hiPrintPlugin)
+// app.use(hiPrintPlugin)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
-app.use(highlightPlugin, { hljs })
+// app.use(highlightPlugin, { hljs })
 // 在 main.js 或入口文件中
 Number.prototype._toFixed = Number.prototype.toFixed; // 备份原方法
 
