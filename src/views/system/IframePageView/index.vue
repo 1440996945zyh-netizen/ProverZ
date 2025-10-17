@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:24:30
- * @LastEditTime: 2025-09-24 11:51:17
+ * @LastEditTime: 2025-10-11 10:26:22
  * @LastEditors: zhangsd
  * @Description: 积木报表设计 
  * @FilePath: \view\src\views\system\IframePageView\index.vue
@@ -19,7 +19,7 @@ import { getToken } from '@/utils/auth/token' // 请根据你的项目结构调�
 
 // 注入关闭当前页方法（来自父组件 provide）
 const closeCurrent = inject('closeCurrent')
-const basePath = import.meta.env.VITE_APP_BASE_API
+const basePath = import.meta.env.VITE_JIMU_BASE_URL
 // 响应式数据
 const url = ref('')
 const id = ref('')
@@ -30,33 +30,15 @@ const route = useRoute()
 function goUrl() {
 	const metaUrl = route.meta.url
 	const path = route.path
-	console.log('------path------', path)
 	id.value = path
 	const token = getToken()
-	console.log('------url------', metaUrl)
-
-	if (metaUrl) {
-		// 支持 ${token} 占位符替换
-		const tokenStr = '${token}'
-		if (metaUrl.includes(tokenStr)) {
-		
-			// url.value = metaUrl.replace(tokenStr, token)
-			url.value = basePath + '/jmreport/list?token=' + token
-		} else {
-			// url.value = metaUrl
-			url.value = basePath + '/jmreport/list?token=' + token
-		}
-   
-		// 判断是否需要新窗口打开
-		if (route.meta.internalOrExternal === true) {
-			closeCurrent?.() // 安全调用
-			window.open(url.value, '_blank')
-		}
-	}
-//    url.value = basePath + '/jmreport/list?token=' + encodeURIComponent(token)
+	const tenantId = 'dev-api'
+	// url.value = metaUrl
+			url.value = basePath + '/jmreport/list?token=' + encodeURIComponent(token) + '&tenantId=' + tenantId
+	//    url.value = basePath + '/jmreport/list?token=' + encodeURIComponent(token)
 	console.log('------token------', encodeURIComponent(token))
 
-		console.log('url =>', url)
+	console.log('url =>', url.value)
 }
 
 // 初始化

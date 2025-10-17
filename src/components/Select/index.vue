@@ -38,6 +38,7 @@ import BaseTable from '../BaseTable/index.vue'
 import api from '../../api/public/index.js'
 import request from '../../utils/auth/request'
 import { removeDuplicatesByProperty } from '../../utils/common/data'
+
 const props = defineProps({
 	value: {
 		type: [Array, String],
@@ -118,6 +119,7 @@ const props = defineProps({
 const options = ref([])
 const defaultOptions = ref([])
 const mySelect = ref(null)
+
 const value = computed({
 	get() {
 		return props.value
@@ -131,6 +133,7 @@ const value = computed({
 		}
 	},
 })
+
 const label = computed({
 	get() {
 		return props.multiple ? (props.label === '' ? [] : props.label) : props.label
@@ -139,7 +142,9 @@ const label = computed({
 		emit('update:label', val)
 	},
 })
+
 const emit = defineEmits(['change', 'blur', 'focus', 'update:value', 'update:label'])
+
 // 子传父选中值
 const changeSelect = value => {
 	if (props.multiple) {
@@ -173,15 +178,18 @@ const changeSelect = value => {
 		emit('change', params)
 	}
 }
+
 const blur = () => {
 	setTimeout(() => {
 		// 关闭下拉框调用，下拉框数据初始化
 		emit('blur')
 	}, 500)
 }
+
 const focus = () => {
 	emit('focus')
 }
+
 // 如果url改变，重新调接口
 watch(
 	() => props.dataConfig,
@@ -192,6 +200,7 @@ watch(
 		}
 	}
 )
+
 // 如果数据源改变，重新赋值
 watch(
 	() => props.selectData,
@@ -202,6 +211,7 @@ watch(
 	},
 	{ deep: true, immediate: true }
 )
+
 // 根据传入url查看数据方法
 const getOptionsByUrl = async () => {
 	const params = {
@@ -217,18 +227,8 @@ const getOptionsByUrl = async () => {
 		options.value = res.data
 		defaultOptions.value = res.data // 取到初始值，便于给filter使用。
 	}
-
-	// options.value = [
-	// 	{ label: 'A', value: '1' },
-	// 	{ label: 'B', value: '2' },
-	// 	{ label: 'C', value: '3' },
-	// ]
-	// defaultOptions.value = [
-	// 	{ label: 'A', value: '1' },
-	// 	{ label: 'B', value: '2' },
-	// 	{ label: 'C', value: '3' },
-	// ]
 }
+
 onMounted(() => {
 	if (props.dataConfig && (props.dataConfig.url || props.dataConfig.params)) {
 		// 如果传入了url，则走url接口
@@ -240,8 +240,12 @@ onMounted(() => {
 		defaultOptions.value = props.selectData
 	}
 })
+
+// 暴露选项数据，供外部使用
 defineExpose({
 	options,
+	defaultOptions,
+	mySelect, // 暴露el-select的ref
 })
 </script>
 
