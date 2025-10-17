@@ -11,6 +11,9 @@
 				:tableData="tableData"
 				:cellClickEvent="cellClickEvent"
 				:total="total"
+				:id="tableId"
+				:isShowAdvancedQuery="true"
+				
 			/>
 		</div>
 		<el-drawer v-model="dictVisible" :title="title" size="35%">
@@ -55,6 +58,7 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
+const tableId = ref('dict_1760148546264')
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([

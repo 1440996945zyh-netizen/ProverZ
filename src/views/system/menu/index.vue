@@ -1,10 +1,10 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2025-08-22 16:46:35
+ * @LastEditTime: 2025-10-11 11:09:41
  * @LastEditors: zhangsd
  * @Description: 菜单管理
- * @FilePath: \ppm-view\src\views\system\menu\index.vue
+ * @FilePath: \view\src\views\system\menu\index.vue
 -->
 <template>
 	<div class="app-container">
@@ -299,7 +299,6 @@ import tableParamsStore from '@/store/modules/tableParams'
 
 import { addMenu, delMenu, getMenu, listMenu, updateMenu, getListByParentId, getContentsMenu } from '@/api/system/menu'
 const { proxy } = getCurrentInstance()
-
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHight.value) //表格高度
 const menuTableRef = ref(null) // BaseTable实例ref
@@ -648,10 +647,10 @@ const getList = params => {
 
 /**
  * @description 查询菜单下拉数结构
- */
+ */ 
 const getTreeselect = async () => {
 	menuOptions.value = []
-	listMenu().then(response => {
+	getContentsMenu().then(response => {
 		const menu = { menuId: 0, menuName: '主类目', children: [] }
 		menu.children = proxy.flattenToTree(response.data, 'menuId')
 		menuOptions.value.push(menu)

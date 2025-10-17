@@ -16,6 +16,8 @@ const usePermissionStore = defineStore('permission', {
 		defaultRoutes: [],
 		topbarRouters: [],
 		sidebarRouters: [],
+		// 新增：缓存的菜单数据
+		menuData: [],
 	}),
 	actions: {
 		setRoutes(routes) {
@@ -27,9 +29,82 @@ const usePermissionStore = defineStore('permission', {
 		},
 		setTopbarRoutes(routes) {
 			this.topbarRouters = routes
+			// 同时更新菜单数据缓存
+			this.menuData = routes
 		},
 		setSidebarRouters(routes) {
 			this.sidebarRouters = routes
+		},
+		// 新增：获取菜单数据（优先使用缓存）
+		getMenuData() {
+			// 如果sidebarRouters不为空，直接返回，否则返回缓存的menuData
+			return this.sidebarRouters.length > 0 ? this.sidebarRouters : this.menuData
+		},
+		// 新增：根据路径查找菜单项
+		findMenuByPath(targetPath) {
+			const normalizePath = (path) => {
+				if (!path) return ''
+				return path.replace(/^\/+/, '')
+			}
+
+			const buildFullPath = (parentPath, childPath) => {
+				// 如果childPath是绝对路径（以/开头），直接返回
+				if (childPath && childPath.startsWith('/')) {
+					return childPath
+				}
+
+				// 如果没有父路径，直接返回子路径
+				if (!parentPath) {
+					return childPath || ''
+				}
+
+				// 如果父路径是根路径
+				if (parentPath === '/') {
+					return childPath ? (childPath.startsWith('/') ? childPath : '/' + childPath) : '/'
+				}
+
+				// 拼接路径
+				if (childPath) {
+					return parentPath + (childPath.startsWith('/') ? '' : '/') + childPath
+				}
+
+				return parentPath
+			}
+
+			const findInMenu = (menuList, currentPath = '') => {
+				for (const item of menuList) {
+					// 计算当前菜单项的完整路径
+					const fullPath = buildFullPath(currentPath, item.path)
+
+					// 直接匹配完整路径
+					if (normalizePath(fullPath) === normalizePath(targetPath)) {
+						return item
+					}
+
+					// 如果当前菜单项有子菜单，递归查找
+					if (item.children && item.children.length) {
+						const found = findInMenu(item.children, fullPath)
+						if (found) return found
+					}
+				}
+				return null
+			}
+
+			return findInMenu(this.getMenuData())
+		},
+		// 新增：获取扁平化的菜单列表
+		getFlatMenuList(menuList = null) {
+			const flatList = []
+			const flatten = (menus) => {
+				menus.forEach(menu => {
+					flatList.push(menu)
+					if (menu.children && menu.children.length) {
+						flatten(menu.children)
+					}
+				})
+			}
+			flatten(menuList || this.getMenuData())
+			return flatList
 		},
 		generateRoutes(roles) {
 			return new Promise(resolve => {

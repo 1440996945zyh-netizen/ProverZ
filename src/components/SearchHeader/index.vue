@@ -51,14 +51,14 @@
 						:type="item.dataType"
 						@change="row => (item.change ? item.change(row) : '')"
 					/>
-            <el-date-picker
-              v-if="item.type == 'year'"
-              v-model="searchData[item.modelValue]"
-              type="year"
-              value-format="YYYY"
-              format="YYYY"
-              :placeholder="item.name"
-            ></el-date-picker>
+					<el-date-picker
+						v-if="item.type == 'year'"
+						v-model="searchData[item.modelValue]"
+						type="year"
+						value-format="YYYY"
+						format="YYYY"
+						:placeholder="item.name"
+					></el-date-picker>
 					<el-date-picker
 						v-if="item.type == 'date'"
 						v-model="searchData[item.modelValue]"
@@ -127,6 +127,8 @@
 				</el-button>
 				<el-button type="primary" icon="Search" @click="searchHandler" ref="searchDom" v-if="showSearch">查询</el-button>
 				<el-button icon="RefreshRight" @click="resetSearch" ref="searchDom" v-if="showReset">重置</el-button>
+				<!-- 高级查询 -->
+				<AdvancedQuery :isShowAdvancedQuery="isShowAdvancedQuery" :id="id"  />
 			</div>
 			<div class="right" id="right">
 				<template v-if="!showToolTip">
@@ -242,14 +244,14 @@
 						:type="item.dataType"
 						@change="row => (item.change ? item.change(row) : '')"
 					/>
-            <el-date-picker
-              v-if="item.type == 'year'"
-              v-model="searchData[item.modelValue]"
-              type="year"
-              value-format="YYYY"
-              format="YYYY"
-              :placeholder="item.name"
-            ></el-date-picker>
+					<el-date-picker
+						v-if="item.type == 'year'"
+						v-model="searchData[item.modelValue]"
+						type="year"
+						value-format="YYYY"
+						format="YYYY"
+						:placeholder="item.name"
+					></el-date-picker>
 					<el-date-picker
 						v-if="item.type == 'date'"
 						v-model="searchData[item.modelValue]"
@@ -258,14 +260,14 @@
 						format="YYYY-MM-DD"
 						:placeholder="item.name"
 					></el-date-picker>
-          <el-date-picker
-              v-if="item.type == 'month'"
-              v-model="searchData[item.modelValue]"
-              type="month"
-              value-format="YYYY-MM"
-              format="YYYY-MM"
-              :placeholder="item.name"
-          ></el-date-picker>
+					<el-date-picker
+						v-if="item.type == 'month'"
+						v-model="searchData[item.modelValue]"
+						type="month"
+						value-format="YYYY-MM"
+						format="YYYY-MM"
+						:placeholder="item.name"
+					></el-date-picker>
 					<el-date-picker
 						v-if="item.type == 'datetime'"
 						v-model="searchData[item.modelValue]"
@@ -320,6 +322,7 @@ import Select from '../Select/index.vue'
 import nvDatePicker from '../nvDatePicker/index.vue'
 import RemoteSelect from '../RemoteSelect/index.vue'
 import tableParamsStore from '../../store/modules/tableParams'
+import AdvancedQuery from '../AdvancedQuery/index.vue'
 const { proxy } = getCurrentInstance()
 const tableParams = tableParamsStore()
 
@@ -373,6 +376,19 @@ const props = defineProps({
 		type: [Number, String],
 		default: 3,
 	},
+	//是否显示高级查询筛选器
+	isShowAdvancedQuery: {
+		type: Boolean,
+		default: false,
+	},
+	    /**
+     * 表格id (用于高级查询)
+     */
+    id: {
+        type: String,
+        default: null,
+    },
+
 })
 const showSelectData = computed(() => {
 	const showData = props.selectData.filter(item => !item.isHidden)
@@ -392,20 +408,20 @@ const moreSelectData = computed(() => {
 })
 // 动态计算左侧宽度
 const leftRowWidth = computed(() => {
-  if (props.buttonList.length === 0) {
-    const len = showSelectData.value.length
-    if (len <= 1) {
-      return 'width: calc(30% - 180px);'
-    } else if (len <= 2) {
-      return 'width: calc(40% - 180px);'
-    } else if (len <= 3) {
-      return 'width: calc(50% - 180px);'
-    } else {
-      return 'width: calc(60% - 180px);'
-    }
-  } else {
-    return `width: ${props.defaultWidth}%;`
-  }
+	if (props.buttonList.length === 0) {
+		const len = showSelectData.value.length
+		if (len <= 1) {
+			return 'width: calc(30% - 180px);'
+		} else if (len <= 2) {
+			return 'width: calc(40% - 180px);'
+		} else if (len <= 3) {
+			return 'width: calc(50% - 180px);'
+		} else {
+			return 'width: calc(60% - 180px);'
+		}
+	} else {
+		return `width: ${props.defaultWidth}%;`
+	}
 })
 const getMore = () => {
 	showMore.value = !showMore.value
@@ -427,107 +443,107 @@ const filterButton = computed(() => {
 	return props.buttonList.filter(item => item.vif !== false)
 })
 const shortcuts = [
-  {
-    text: '上周',
-    value: () => {
-      const currentTimestamp = Date.now()
-      const currentDate = new Date(currentTimestamp)
-      // 获取当前日期的星期几（0表示星期日，1表示星期一，以此类推）
-      const currentDayOfWeek = currentDate.getDay()
-      // 计算上周的起始日期和结束日期的时间戳
-      const lastWeekStartDateTimestamp = currentTimestamp - (currentDayOfWeek + 6) * 24 * 60 * 60 * 1000
-      const lastWeekEndDateTimestamp = currentTimestamp - currentDayOfWeek * 24 * 60 * 60 * 1000
-      const lastWeekStartDate = new Date(lastWeekStartDateTimestamp)
-      const lastWeekEndDate = new Date(lastWeekEndDateTimestamp)
-      return [lastWeekStartDate, lastWeekEndDate]
-    },
-  },
-  {
-    text: '本周',
-    value: () => {
-      const currentDate = new Date()
-      const currentDayOfWeek = currentDate.getDay()
-      // 获取本周的起始日期和结束日期
-      const thisWeekStartDate = new Date(currentDate)
-      thisWeekStartDate.setDate(currentDate.getDate() - currentDayOfWeek + 1)
-      const thisWeekEndDate = new Date(currentDate)
-      thisWeekEndDate.setDate(currentDate.getDate() + (6 - currentDayOfWeek) + 1)
-      return [thisWeekStartDate, thisWeekEndDate]
-    },
-  },
-  {
-    text: '上月',
-    value: () => {
-      // 获取当前日期
-      const currentDate = new Date()
-      // 获取上个月的起始日期和结束日期
-      const lastMonthStartDate = new Date(currentDate)
-      lastMonthStartDate.setMonth(currentDate.getMonth() - 1, 1)
+	{
+		text: '上周',
+		value: () => {
+			const currentTimestamp = Date.now()
+			const currentDate = new Date(currentTimestamp)
+			// 获取当前日期的星期几（0表示星期日，1表示星期一，以此类推）
+			const currentDayOfWeek = currentDate.getDay()
+			// 计算上周的起始日期和结束日期的时间戳
+			const lastWeekStartDateTimestamp = currentTimestamp - (currentDayOfWeek + 6) * 24 * 60 * 60 * 1000
+			const lastWeekEndDateTimestamp = currentTimestamp - currentDayOfWeek * 24 * 60 * 60 * 1000
+			const lastWeekStartDate = new Date(lastWeekStartDateTimestamp)
+			const lastWeekEndDate = new Date(lastWeekEndDateTimestamp)
+			return [lastWeekStartDate, lastWeekEndDate]
+		},
+	},
+	{
+		text: '本周',
+		value: () => {
+			const currentDate = new Date()
+			const currentDayOfWeek = currentDate.getDay()
+			// 获取本周的起始日期和结束日期
+			const thisWeekStartDate = new Date(currentDate)
+			thisWeekStartDate.setDate(currentDate.getDate() - currentDayOfWeek + 1)
+			const thisWeekEndDate = new Date(currentDate)
+			thisWeekEndDate.setDate(currentDate.getDate() + (6 - currentDayOfWeek) + 1)
+			return [thisWeekStartDate, thisWeekEndDate]
+		},
+	},
+	{
+		text: '上月',
+		value: () => {
+			// 获取当前日期
+			const currentDate = new Date()
+			// 获取上个月的起始日期和结束日期
+			const lastMonthStartDate = new Date(currentDate)
+			lastMonthStartDate.setMonth(currentDate.getMonth() - 1, 1)
 
-      const lastMonthEndDate = new Date(currentDate)
-      lastMonthEndDate.setDate(0)
-      return [lastMonthStartDate, lastMonthEndDate]
-    },
-  },
-  {
-    text: '本月',
-    value: () => {
-      // 获取当前日期
-      const currentDate = new Date()
-      // 获取本月的起始日期和结束日期
-      const currentMonthStartDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-      const nextMonthStartDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
-      const currentMonthEndDate = new Date(nextMonthStartDate.getTime() - 24 * 60 * 60 * 1000)
-      return [currentMonthStartDate, currentMonthEndDate]
-    },
-  },
-  {
-    text: '上季',
-    value: () => {
-      // 获取当前日期
-      const currentDate = new Date()
-      // 获取上季度的起始日期和结束日期
-      const currentQuarter = Math.floor(currentDate.getMonth() / 3) // 当前季度
-      const lastQuarterStartDate = new Date(currentDate.getFullYear(), currentQuarter * 3 - 3, 1)
-      const lastQuarterEndDate = new Date(lastQuarterStartDate.getFullYear(), lastQuarterStartDate.getMonth() + 3, 0)
-      return [lastQuarterStartDate, lastQuarterEndDate]
-    },
-  },
-  {
-    text: '本季',
-    value: () => {
-      // 获取当前日期
-      const currentDate = new Date()
-      // 获取本季度的起始日期和结束日期
-      const currentQuarter = Math.floor(currentDate.getMonth() / 3) // 当前季度
-      const currentQuarterStartDate = new Date(currentDate.getFullYear(), currentQuarter * 3, 1)
-      const nextQuarterStartDate = new Date(currentDate.getFullYear(), currentQuarter * 3 + 3, 1)
-      const currentQuarterEndDate = new Date(nextQuarterStartDate.getTime() - 24 * 60 * 60 * 1000)
-      return [currentQuarterStartDate, currentQuarterEndDate]
-    },
-  },
-  {
-    text: '去年',
-    value: () => {
-      // 获取当前日期
-      const currentDate = new Date()
-      // 计算去年的起始日期和结束日期
-      const lastYearStartDate = new Date(currentDate.getFullYear() - 1, 0, 1)
-      const lastYearEndDate = new Date(currentDate.getFullYear() - 1, 11, 31)
-      return [lastYearStartDate, lastYearEndDate]
-    },
-  },
-  {
-    text: '今年',
-    value: () => {
-      // 获取当前日期
-      const currentDate = new Date()
-      // 计算今年的起始日期和结束日期
-      const currentYearStartDate = new Date(currentDate.getFullYear(), 0, 1)
-      const currentYearEndDate = new Date(currentDate.getFullYear(), 11, 31)
-      return [currentYearStartDate, currentYearEndDate]
-    },
-  },
+			const lastMonthEndDate = new Date(currentDate)
+			lastMonthEndDate.setDate(0)
+			return [lastMonthStartDate, lastMonthEndDate]
+		},
+	},
+	{
+		text: '本月',
+		value: () => {
+			// 获取当前日期
+			const currentDate = new Date()
+			// 获取本月的起始日期和结束日期
+			const currentMonthStartDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+			const nextMonthStartDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+			const currentMonthEndDate = new Date(nextMonthStartDate.getTime() - 24 * 60 * 60 * 1000)
+			return [currentMonthStartDate, currentMonthEndDate]
+		},
+	},
+	{
+		text: '上季',
+		value: () => {
+			// 获取当前日期
+			const currentDate = new Date()
+			// 获取上季度的起始日期和结束日期
+			const currentQuarter = Math.floor(currentDate.getMonth() / 3) // 当前季度
+			const lastQuarterStartDate = new Date(currentDate.getFullYear(), currentQuarter * 3 - 3, 1)
+			const lastQuarterEndDate = new Date(lastQuarterStartDate.getFullYear(), lastQuarterStartDate.getMonth() + 3, 0)
+			return [lastQuarterStartDate, lastQuarterEndDate]
+		},
+	},
+	{
+		text: '本季',
+		value: () => {
+			// 获取当前日期
+			const currentDate = new Date()
+			// 获取本季度的起始日期和结束日期
+			const currentQuarter = Math.floor(currentDate.getMonth() / 3) // 当前季度
+			const currentQuarterStartDate = new Date(currentDate.getFullYear(), currentQuarter * 3, 1)
+			const nextQuarterStartDate = new Date(currentDate.getFullYear(), currentQuarter * 3 + 3, 1)
+			const currentQuarterEndDate = new Date(nextQuarterStartDate.getTime() - 24 * 60 * 60 * 1000)
+			return [currentQuarterStartDate, currentQuarterEndDate]
+		},
+	},
+	{
+		text: '去年',
+		value: () => {
+			// 获取当前日期
+			const currentDate = new Date()
+			// 计算去年的起始日期和结束日期
+			const lastYearStartDate = new Date(currentDate.getFullYear() - 1, 0, 1)
+			const lastYearEndDate = new Date(currentDate.getFullYear() - 1, 11, 31)
+			return [lastYearStartDate, lastYearEndDate]
+		},
+	},
+	{
+		text: '今年',
+		value: () => {
+			// 获取当前日期
+			const currentDate = new Date()
+			// 计算今年的起始日期和结束日期
+			const currentYearStartDate = new Date(currentDate.getFullYear(), 0, 1)
+			const currentYearEndDate = new Date(currentDate.getFullYear(), 11, 31)
+			return [currentYearStartDate, currentYearEndDate]
+		},
+	},
 ]
 // 查询按钮事件
 const searchHandler = () => {
