@@ -13,6 +13,8 @@
 			@Status_Change="Status_Change"
 			defaultWidth="60"
 			showNum="6"
+			:id="tableId"
+			:isShowAdvancedQuery="true"
 		/>
 		<!-- 查看 抽屉组件 -->
 		<el-drawer v-model="loginVisible" :title="title" size="70%">
@@ -33,7 +35,7 @@ import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton, ElTag } from 'element-plus'
 import { ref, reactive } from 'vue'
 import tableParamsStore from '@/store/modules/tableParams'
-
+const tableId = ref('loginLog_1760153814593')
 const loginVisible = ref(false)
 const { proxy } = getCurrentInstance()
 const drawer = ref(false)

@@ -9,6 +9,9 @@
 			:buttonList="buttonList"
 			:defaultWidth="defaultWidth"
 			:showNum="showNum"
+			:isShowAdvancedQuery="isShowAdvancedQuery"
+			:id="id"
+	
 		/>
 
 		<div class="table-with-toolbar" style="position: relative">
@@ -18,6 +21,7 @@
 				stripe
 				ref="xTable"
 				:align="allAlign"
+				:id="id"
 				:data="tableData"
 				:size="size"
 				:stripe="stripe"
@@ -568,6 +572,21 @@ const props = defineProps({
 		type: Boolean,
 		default: true,
 	},
+	/**
+	 * 是否显示高级查询筛选器
+	 */
+	isShowAdvancedQuery: {
+		type: Boolean,
+		default: false,
+	},
+	/**
+	 * 表格id
+	 */
+	id: {
+		type: String,
+		default: null,
+	},
+
 })
 const emit = defineEmits(['checkbox-change', 'rowSelect-change'])
 // 表格高度

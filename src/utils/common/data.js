@@ -239,10 +239,166 @@ export function mergeDeeply(source, target) {
  */
 export const setEditTableOptions = (columns, propsObj) => {
   // 返回新数组，避免修改原数组
-  return columns.map(item => {
-    if (propsObj[item.prop]) {
-      return { ...item, selectData: propsObj[item.prop] };
-    }
-    return { ...item };
-  });
+	columns.forEach(item => {
+		if (propsObj[item.prop]) {
+			item.selectData = propsObj[item.prop]
+		}
+	})
 };
+// 基础运算符映射（通用部分）
+const baseOperatorMap = {
+  equals: '=',
+  notEquals: '!=',
+  greaterThan: '>',
+  lessThan: '<',
+  greaterEqualsThan: '>=',
+  lessEqualsThan: '<=',
+  contain: 'LIKE',
+  notContain: 'NOT LIKE',
+  containAll: 'IN',
+  containAny: 'IN',
+  interval: 'BETWEEN',
+  equalsAny: 'IN',
+  notEqualsAny: 'NOT IN'
+}
+
+// MySQL 专用运算符映射
+export const mysqlOperatorMap = {
+  ...baseOperatorMap,
+  empty: 'IS NULL',          // MySQL 中空值仅需判断 IS NULL
+  notEmpty: 'IS NOT NULL'
+}
+
+// Oracle 专用运算符映射
+export const oracleOperatorMap = {
+  ...baseOperatorMap,
+  empty: 'IS NULL OR = \'\'', // Oracle 需同时处理 NULL 和空字符串
+  notEmpty: 'IS NOT NULL AND != \'\''
+}
+/**
+ * 将查询条件转换为SQL格式
+ * @param {Array} conditions - 查询条件数组
+ * @param {String} filterType - 过滤类型 (AND/OR)
+ * @returns {String} SQL格式的查询条件字符串
+ */
+export const convertToMysql = (conditions, filterType) => {
+	const sqlParts = []
+	
+	conditions.forEach(condition => {
+		const columnName = condition.columnName
+		const operator = condition.operator
+		const sqlOperator = mysqlOperatorMap[operator]
+		
+		// 处理不同类型的运算符
+		if (operator === 'empty') {
+			// 为空: column IS NULL
+			sqlParts.push(`${columnName} IS NULL`)
+		} else if (operator === 'notEmpty') {
+			// 非空: column IS NOT NULL
+			sqlParts.push(`${columnName} IS NOT NULL`)
+		} else if (operator === 'interval' || operator === 'between') {
+			// 区间: column BETWEEN 'startValue' AND 'endValue'
+			sqlParts.push(`${columnName} BETWEEN '${condition.startValue}' AND '${condition.endValue}'`)
+		} else if (operator === 'contain' || operator === 'notContain') {
+			// 包含/不包含: column LIKE '%value%'
+			const value = `%${condition.value}%`
+			sqlParts.push(`${columnName} ${sqlOperator} '${value}'`)
+		} else if (operator === 'containAll' || operator === 'containAny' || operator === 'equalsAny' || operator === 'notEqualsAny') {
+			// 多选或单选的IN操作
+			const values = Array.isArray(condition.value) ? condition.value : [condition.value]
+			if (values.length === 0) {
+				// 如果没有选中任何值，根据操作符决定是否添加条件
+				if (operator === 'containAll' || operator === 'equalsAny') {
+					// 如果是"同时包含"或"等于任意一个"且没有选中值，则条件无法满足
+					sqlParts.push('1=0') // 永远为假
+				}
+				// 如果是"包含任意一个"或"不等于任意一个"且没有选中值，则忽略此条件
+			} else {
+				const valuesStr = values.map(v => `'${v}'`).join(',')
+				const sqlOp = sqlOperator
+				sqlParts.push(`${columnName} ${sqlOp} (${valuesStr})`)
+			}
+		} else {
+			// 普通操作符: column = 'value'
+			sqlParts.push(`${columnName} ${sqlOperator} '${condition.value}'`)
+		}
+	})
+	
+	// 根据过滤类型连接SQL片段
+	const sqlConnector = filterType.toLowerCase() === 'and' ? ' AND ' : ' OR '
+	const whereClause = sqlParts.length > 0 ? sqlParts.join(sqlConnector) : '1=1'
+	const sql = filterType.toUpperCase() + ' ' + whereClause
+  return sql
+}
+/**
+ * 将查询条件转换为Oracle SQL格式
+ * @param {Array} conditions - 查询条件数组
+ * @param {String} filterType - 过滤类型 (AND/OR)
+ * @returns {String} Oracle SQL格式的查询条件字符串
+ */
+export const convertToOracle = (conditions, filterType) => {
+  const sqlParts = []
+  
+  conditions.forEach(condition => {
+    const columnName = condition.columnName
+    const operator = condition.operator
+    const sqlOperator = oracleOperatorMap[operator]
+    
+    // 处理不同类型的运算符
+    if (operator === 'empty') {
+      // Oracle中空值判断需同时处理NULL和空字符串（根据实际业务场景调整）
+      sqlParts.push(`${columnName} IS NULL OR ${columnName} = ''`)
+    } else if (operator === 'notEmpty') {
+      // 非空判断（排除NULL和空字符串）
+      sqlParts.push(`${columnName} IS NOT NULL AND ${columnName} != ''`)
+    } else if (operator === 'interval' || operator === 'between') {
+      // 区间查询：Oracle的BETWEEN包含边界值，与MySQL一致
+      // 日期类型需用TO_DATE转换（假设前端传递的是'YYYY-MM-DD HH24:MI:SS'格式）
+      let startVal = condition.startValue
+      let endVal = condition.endValue
+      // 如果是日期类型字段，添加TO_DATE转换
+      if (condition.columnType === '4') {
+        startVal = `TO_DATE('${startVal}', 'YYYY-MM-DD HH24:MI:SS')`
+        endVal = `TO_DATE('${endVal}', 'YYYY-MM-DD HH24:MI:SS')`
+      } else {
+        // 非日期类型加单引号
+        startVal = `'${startVal}'`
+        endVal = `'${endVal}'`
+      }
+      sqlParts.push(`${columnName} BETWEEN ${startVal} AND ${endVal}`)
+    } else if (operator === 'contain' || operator === 'notContain') {
+      // 包含/不包含：Oracle使用LIKE，字符串连接用||
+      const value = `%${condition.value}%`
+      sqlParts.push(`${columnName} ${sqlOperator} '%' || '${condition.value}' || '%'`)
+    } else if (operator === 'containAll' || operator === 'containAny' || operator === 'equalsAny' || operator === 'notEqualsAny') {
+      // 多选/单选IN操作：Oracle的IN列表不支持空，需特殊处理
+      const values = Array.isArray(condition.value) ? condition.value : [condition.value]
+      if (values.length === 0) {
+        if (operator === 'containAll' || operator === 'equalsAny') {
+          sqlParts.push('1=0') // 永远为假
+        }
+      } else {
+        // 字符串类型值需加单引号，数字类型不加（这里简化处理，假设都是字符串）
+        const valuesStr = values.map(v => `'${v}'`).join(',')
+        sqlParts.push(`${columnName} ${sqlOperator} (${valuesStr})`)
+      }
+    } else {
+      // 普通操作符：处理日期类型
+      let value = condition.value
+      if (condition.columnType === '4') {
+        // 日期类型转换
+        value = `TO_DATE('${value}', 'YYYY-MM-DD HH24:MI:SS')`
+      } else {
+        // 字符串类型加单引号，数字类型自动识别（这里简化处理）
+        value = isNaN(Number(value)) ? `'${value}'` : value
+      }
+      sqlParts.push(`${columnName} ${sqlOperator} ${value}`)
+    }
+  })
+  
+  // 根据过滤类型连接SQL片段，Oracle中AND/OR大小写不敏感，这里统一大写
+  const sqlConnector = filterType.toUpperCase() === 'AND' ? ' AND ' : ' OR '
+  const whereClause = sqlParts.length > 0 ? sqlParts.join(sqlConnector) : '1=1'
+  const sql = filterType.toUpperCase() + ' ' + whereClause
+  return sql
+}

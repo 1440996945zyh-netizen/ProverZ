@@ -11,10 +11,11 @@ const api = {
 	},
 
 	// 查询单条
-	getDetail(id) {
+	getDetail(data) {
 		return request({
-			url: `/api/v1/internal/tSettingAdSearch/getDetail/${id}`,
+			url: `/api/v1/internal/tSettingAdSearch/getDetail`,
 			method: 'get',
+			params: data,
 		})
 	},
 
@@ -23,7 +24,7 @@ const api = {
 		return request({
 			url: '/api/v1/internal/tSettingAdSearch/add',
 			method: 'post',
-			data: data,
+			data,
 		})
 	},
 	// 修改
