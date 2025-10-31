@@ -1,229 +1,254 @@
-
 <template>
 	<el-button type="primary" icon="Filter" v-if="isShowAdvancedQuery" @click="advancedQuery">高级查询</el-button>
 	<!--  高级查询构造器  -->
 	<Dialog title="高级查询" v-model:visible="dialogVisible" width="50%">
 		<div class="dialog-content">
 			<el-form :model="queryForm" :rules="rules" ref="queryFormRef" label-width="120px" label-position="left">
-				<!-- 过滤条件匹配 -->
-				<el-row>
-					<el-form-item label="过滤条件匹配:" prop="filterType" style="width: 350px">
-						<el-select v-model="queryForm.filterType" placeholder="请选择过滤条件匹配">
-							<el-option label="AND(所有条件都要求匹配)" value="AND"></el-option>
-							<el-option label="OR(条件中的任意一个匹配)" value="OR"></el-option>
-						</el-select>
-					</el-form-item>
-				</el-row>
-
-				<!-- 动态查询条件行 -->
-				<div v-for="(condition, index) in conditions" :key="index">
-					<el-row :gutter="20" class="condition-row">
-						<!-- 前端表格字段 -->
-						<el-col :span="4">
-							<el-select
-								v-model="condition.columnName"
-								placeholder="请选择前端表格字段"
-								@change="handleColumnChange(condition, $event)"
-								clearable
-							>
-								<el-option v-for="item in tableColumns" :key="item.prop" :label="item.label" :value="item.prop"></el-option>
-							</el-select>
-						</el-col>
-
-						<!-- 运算符 -->
-						<el-col :span="5">
-							<Select
-								:selectData="getFilteredOperatorOptions(condition.columnType)"
-								v-model:value="condition.operator"
-								v-model:label="condition.operatorLabel"
-								:placeholder="'请选择运算符'"
-								:disabled="!condition.columnName"
-								@change="handleOperatorChange(condition, $event)"
-							/>
-						</el-col>
-
-						<!-- 条件值 -->
-						<el-col :span="getConditionValueSpan(condition)">
-							<!-- 条件值 - 根据字段类型动态显示 -->
-							<template v-if="condition.columnType">
-								<!-- 区间类型（当运算符为 'interval' 或 'between' 时） -->
-								<template v-if="condition.operator === 'interval' || condition.operator === 'between'">
-									<!-- 文本类型的区间 -->
-									<template v-if="condition.columnType === '1'">
-										<el-row :gutter="5" style="width: 100%">
-											<el-col :span="11">
-												<el-input v-model="condition.startValue" placeholder="开始值" />
-											</el-col>
-											<el-col :span="2" style="text-align: center; line-height: 32px">-</el-col>
-											<el-col :span="11">
-												<el-input v-model="condition.endValue" placeholder="结束值" />
-											</el-col>
-										</el-row>
-									</template>
-
-									<!-- 数字类型的区间 -->
-									<template v-else-if="condition.columnType === '3'">
-										<el-row :gutter="5" style="width: 100%">
-											<el-col :span="11">
-												<el-input-number v-model="condition.startValue" placeholder="开始值" style="width: 100%" />
-											</el-col>
-											<el-col :span="2" style="text-align: center; line-height: 32px">-</el-col>
-											<el-col :span="11">
-												<el-input-number v-model="condition.endValue" placeholder="结束值" style="width: 100%" />
-											</el-col>
-										</el-row>
-									</template>
-
-									<!-- 日期类型的区间 -->
-									<template v-else-if="condition.columnType === '4'">
-										<el-row :gutter="5" style="width: 100%">
-											<el-col :span="11">
-												<el-date-picker
-													v-model="condition.startValue"
-													type="datetime"
-													placeholder="开始时间"
-													format="YYYY-MM-DD HH:mm:ss"
-													value-format="YYYY-MM-DD HH:mm:ss"
-													style="width: 100%"
-												/>
-											</el-col>
-											<el-col :span="2" style="text-align: center; line-height: 32px">-</el-col>
-											<el-col :span="11">
-												<el-date-picker
-													v-model="condition.endValue"
-													type="datetime"
-													placeholder="结束时间"
-													format="YYYY-MM-DD HH:mm:ss"
-													value-format="YYYY-MM-DD HH:mm:ss"
-													style="width: 100%"
-												/>
-											</el-col>
-										</el-row>
-									</template>
-
-									<!-- 下拉框类型的区间 -->
-									<template v-else-if="condition.columnType === '5' || condition.columnType === '6'">
-										<el-row :gutter="5" style="width: 100%">
-											<el-col :span="11">
-												<Select
-													:dataConfig="{
-														url: '/api/internal/public/getSelectData',
-														params: {
-															type: 'DYNAMIC',
-															selectKey: condition.colSelectKey,
-														},
-													}"
-													v-model:value="condition.startValue"
-													v-model:label="condition.startValueLabel"
-													:placeholder="'开始值'"
-													style="width: 100%"
-												/>
-											</el-col>
-											<el-col :span="2" style="text-align: center; line-height: 32px">-</el-col>
-											<el-col :span="11">
-												<Select
-													:dataConfig="{
-														url: '/api/internal/public/getSelectData',
-														params: {
-															type: 'DYNAMIC',
-															selectKey: condition.colSelectKey,
-														},
-													}"
-													v-model:value="condition.endValue"
-													v-model:label="condition.endValueLabel"
-													:placeholder="'结束值'"
-													style="width: 100%"
-												/>
-											</el-col>
-										</el-row>
-									</template>
-
-									<!-- 其他类型的区间（默认为文本输入） -->
-									<template v-else>
-										<el-row :gutter="5" style="width: 100%">
-											<el-col :span="11">
-												<el-input v-model="condition.startValue" placeholder="开始值" />
-											</el-col>
-											<el-col :span="2" style="text-align: center; line-height: 32px">-</el-col>
-											<el-col :span="11">
-												<el-input v-model="condition.endValue" placeholder="结束值" />
-											</el-col>
-										</el-row>
-									</template>
-								</template>
-
-								<!-- 非区间类型（运算符不是 'interval' 或 'between'） -->
-								<template v-else>
-									<!-- 文本类型 -->
-									<el-input v-if="condition.columnType === '1'" v-model="condition.value" placeholder="请输入文本" />
-
-									<!-- 数字类型 -->
-									<el-input-number
-										v-else-if="condition.columnType === '3'"
-										v-model="condition.value"
-										placeholder="请输入数字"
-									/>
-
-									<!-- 日期类型 -->
-									<el-date-picker
-										v-else-if="condition.columnType === '4'"
-										v-model="condition.value"
-										type="datetime"
-										placeholder="请选择日期时间"
-										format="YYYY-MM-DD HH:mm:ss"
-										value-format="YYYY-MM-DD HH:mm:ss"
-									/>
-
-									<!-- 单选下拉框类型 -->
-									<Select
-										v-else-if="condition.columnType === '5'"
-										:dataConfig="{
-											url: '/api/internal/public/getSelectData',
-											params: {
-												type: 'DYNAMIC',
-												selectKey: condition.colSelectKey,
-											},
-										}"
-										v-model:value="condition.value"
-										v-model:label="condition.valueLabel"
-										:placeholder="'请选择'"
-									/>
-
-									<!-- 多选下拉框类型 -->
-									<Select
-										v-else-if="condition.columnType === '6'"
-										:dataConfig="{
-											url: '/api/internal/public/getSelectData',
-											params: {
-												type: 'DYNAMIC',
-												selectKey: condition.colSelectKey,
-											},
-										}"
-										v-model:value="condition.value"
-										v-model:label="condition.valueLabel"
-										:placeholder="'请选择'"
-										mode="multiple"
-									/>
-
-									<!-- 其他类型默认显示文本框 -->
-									<el-input v-else v-model="condition.value" placeholder="请输入值" />
-								</template>
-							</template>
-							<el-input v-else v-model="condition.value" placeholder="请先选择字段" disabled />
-						</el-col>
-						<!-- 空白col保持样式统一 -->
-						<el-col :span="5" v-if="getConditionValueSpan(condition) === 6"></el-col>
-						<!-- 操作按钮 -->
-						<el-col :span="4">
-							<el-button type="primary" @click="addCondition" icon="Plus" :disabled="conditions.length >= 5"></el-button>
+				<!-- 查询条件组列表 -->
+				<div v-for="(group, groupIndex) in queryForm.groups" :key="group.id" class="query-group">
+					<div class="group-header">
+						<span class="group-title">条件组 {{ groupIndex + 1 }}</span>
+						<div class="group-actions">
+							<el-button type="primary" @click="addConditionToGroup(group)" icon="Plus">添加条件</el-button>
 							<el-button
 								type="danger"
 								icon="Minus"
-								@click="removeCondition(index)"
-								:disabled="conditions.length <= 1"
+								@click="removeGroup(groupIndex)"
+								:disabled="queryForm.groups.length <= 1"
 							></el-button>
+						</div>
+					</div>
+
+					<!-- 组间连接条件 -->
+					<el-row :gutter="10" class="group-filter-row">
+						<el-col :span="24">
+							<el-form-item label="连接条件:" :prop="`groups[${groupIndex}].connectType`" :rules="groupFilterRules">
+								<el-select v-model="group.connectType" placeholder="请选择连接条件">
+									<el-option label="AND(与前一个条件组连接)" value="AND"></el-option>
+									<el-option label="OR(或前一个条件组连接)" value="OR"></el-option>
+								</el-select>
+							</el-form-item>
 						</el-col>
 					</el-row>
+
+					<!-- 组内过滤条件匹配 -->
+					<el-row :gutter="10" class="group-filter-row">
+						<el-col :span="24">
+							<el-form-item label="组内匹配:" :prop="`groups[${groupIndex}].filterType`" :rules="groupFilterRules">
+								<el-select v-model="group.filterType" placeholder="请选择组内匹配">
+									<el-option label="AND(组内所有条件都要求匹配)" value="AND"></el-option>
+									<el-option label="OR(组内条件中的任意一个匹配)" value="OR"></el-option>
+								</el-select>
+							</el-form-item>
+						</el-col>
+					</el-row>
+
+					<!-- 组内条件列表 -->
+					<div v-for="(condition, conditionIndex) in group.conditions" :key="condition.id" class="condition-wrapper">
+						<el-row :gutter="10" class="condition-row">
+							<!-- 前端表格字段 -->
+							<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item">
+								<el-select
+									v-model="condition.columnName"
+									placeholder="请选择前端表格字段"
+									@change="handleColumnChange(condition, $event)"
+									clearable
+									class="full-width"
+								>
+									<el-option
+										v-for="item in tableColumns"
+										:key="item.prop"
+										:label="item.label"
+										:value="item.prop"
+									></el-option>
+								</el-select>
+							</el-col>
+
+							<!-- 运算符 -->
+							<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item">
+								<Select
+									:selectData="getFilteredOperatorOptions(condition.columnType)"
+									v-model:value="condition.operator"
+									v-model:label="condition.operatorLabel"
+									:placeholder="'请选择运算符'"
+									:disabled="!condition.columnName"
+									@change="handleOperatorChange(condition, $event)"
+									class="full-width"
+								/>
+							</el-col>
+
+							<!-- 条件值 -->
+							<el-col :span="8" :md="8" :sm="8" :xs="24" class="condition-item">
+								<!-- 条件值 - 根据字段类型动态显示 -->
+								<template v-if="condition.columnType">
+									<!-- 区间类型（当运算符为 'interval' 或 'between' 时） -->
+									<template v-if="condition.operator === 'interval' || condition.operator === 'between'">
+										<!-- 文本类型的区间 -->
+										<template v-if="condition.columnType === '1'">
+											<el-row :gutter="5" class="interval-row">
+												<el-col :span="11">
+													<el-input v-model="condition.startValue" placeholder="开始值" />
+												</el-col>
+												<el-col :span="2" class="interval-separator">-</el-col>
+												<el-col :span="11">
+													<el-input v-model="condition.endValue" placeholder="结束值" />
+												</el-col>
+											</el-row>
+										</template>
+
+										<!-- 数字类型的区间 -->
+										<template v-else-if="condition.columnType === '3'">
+											<el-row :gutter="5" class="interval-row">
+												<el-col :span="11">
+													<el-input-number
+														v-model="condition.startValue"
+														placeholder="开始值"
+														class="full-width"
+													/>
+												</el-col>
+												<el-col :span="2" class="interval-separator">-</el-col>
+												<el-col :span="11">
+													<el-input-number v-model="condition.endValue" placeholder="结束值" class="full-width" />
+												</el-col>
+											</el-row>
+										</template>
+
+										<!-- 日期类型的区间 -->
+										<template v-else-if="condition.columnType === '4'">
+											<el-row :gutter="5" class="interval-row">
+												<el-col :span="11">
+													<el-date-picker
+														v-model="condition.startValue"
+														type="datetime"
+														placeholder="开始时间"
+														:format="getDateFormat(condition.dateFormat)"
+														:value-format="getDateFormat(condition.dateFormat)"
+														class="full-width"
+													/>
+												</el-col>
+												<el-col :span="2" class="interval-separator">-</el-col>
+												<el-col :span="11">
+													<el-date-picker
+														v-model="condition.endValue"
+														type="datetime"
+														placeholder="结束时间"
+														:format="getDateFormat(condition.dateFormat)"
+														:value-format="getDateFormat(condition.dateFormat)"
+														class="full-width"
+													/>
+												</el-col>
+											</el-row>
+										</template>
+
+										<!-- 下拉框类型的区间 -->
+										<!-- <template v-else-if="condition.columnType === '5' || condition.columnType === '6'">
+											<el-row :gutter="5" class="interval-row">
+												<el-col :span="11">
+													<Select
+														:dataConfig="getSelectDataConfig(condition)"
+														v-model:value="condition.startValue"
+														v-model:label="condition.startValueLabel"
+														:placeholder="'开始值'"
+														class="full-width"
+													/>
+												</el-col>
+												<el-col :span="2" class="interval-separator">-</el-col>
+												<el-col :span="11">
+													<Select
+														:dataConfig="getSelectDataConfig(condition)"
+														v-model:value="condition.endValue"
+														v-model:label="condition.endValueLabel"
+														:placeholder="'结束值'"
+														class="full-width"
+													/>
+												</el-col>
+											</el-row>
+										</template> -->
+
+										<!-- 其他类型的区间（默认为文本输入） -->
+										<template v-else>
+											<el-row :gutter="5" class="interval-row">
+												<el-col :span="11">
+													<el-input v-model="condition.startValue" placeholder="开始值" />
+												</el-col>
+												<el-col :span="2" class="interval-separator">-</el-col>
+												<el-col :span="11">
+													<el-input v-model="condition.endValue" placeholder="结束值" />
+												</el-col>
+											</el-row>
+										</template>
+									</template>
+
+									<!-- 非区间类型（运算符不是 'interval' 或 'between'） -->
+									<template v-else>
+										<!-- 文本类型 -->
+										<el-input v-if="condition.columnType === '1'" v-model="condition.value" placeholder="请输入文本" />
+
+										<!-- 数字类型 -->
+										<el-input-number
+											v-else-if="condition.columnType === '3'"
+											v-model="condition.value"
+											placeholder="请输入数字"
+											class="full-width"
+										/>
+
+										<!-- 日期类型 -->
+										<el-date-picker
+											v-else-if="condition.columnType === '4'"
+											v-model="condition.value"
+											type="datetime"
+											placeholder="请选择日期时间"
+											:format="getDateFormat(condition.dateFormat)"
+											:value-format="getDateFormat(condition.dateFormat)"
+											class="full-width"
+										/>
+
+										<!-- 单选下拉框类型 -->
+										<Select
+											v-else-if="condition.columnType === '5'"
+											:dataConfig="getSelectDataConfig(condition)"
+											v-model:value="condition.value"
+											v-model:label="condition.valueLabel"
+											:placeholder="'请选择'"
+											class="full-width"
+										/>
+
+										<!-- 多选下拉框类型 -->
+										<Select
+											v-else-if="condition.columnType === '6'"
+											:dataConfig="getSelectDataConfig(condition)"
+											v-model:value="condition.value"
+											v-model:label="condition.valueLabel"
+											:placeholder="'请选择'"
+											multiple
+											class="full-width"
+										/>
+
+										<!-- 其他类型默认显示文本框 -->
+										<el-input v-else v-model="condition.value" placeholder="请输入值" />
+									</template>
+								</template>
+								<el-input v-else v-model="condition.value" placeholder="请先选择字段" disabled />
+							</el-col>
+
+							<!-- 操作按钮 -->
+							<el-col :span="2" :md="2" :sm="24" :xs="24" class="condition-actions">
+								<div class="action-buttons">
+									<el-button
+										type="danger"
+										icon="Minus"
+										@click="removeConditionFromGroup(group, conditionIndex)"
+										:disabled="group.conditions.length <= 1"
+									></el-button>
+								</div>
+							</el-col>
+						</el-row>
+					</div>
+				</div>
+
+				<!-- 添加新组按钮 -->
+				<div class="add-group-container">
+					<el-button type="primary" @click="addGroup" icon="Plus">添加条件组</el-button>
 				</div>
 			</el-form>
 		</div>
@@ -243,15 +268,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, onMounted, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import Dialog from '@/components/Dialog/index.vue'
 import Select from '@/components/Select/index.vue'
 import api from '@/api/system/columnConfigManager'
 import { convertToMysql, convertToOracle } from '@/utils/common/data'
 import usePermissionStore from '@/store/modules/permission'
 import { inject } from 'vue'
+import { useRoute } from 'vue-router'
+
 const permissionStore = usePermissionStore()
+const route = useRoute()
 const props = defineProps({
 	// 是否显示查询条件
 	isShowAdvancedQuery: {
@@ -264,37 +292,37 @@ const props = defineProps({
 		default: null,
 	},
 })
+
 const onQuery = inject('onQuery') // 注入父组件提供的方法
-const { proxy } = getCurrentInstance()
+
 // 对话框显示状态
 const dialogVisible = ref(false)
+
 // 查询表单数据
 const queryForm = ref({
-	filterType: 'AND',
+	groups: [],
 })
+
 const advancedQuery = () => {
 	getTableColumns()
 	dialogVisible.value = true
 }
+
 //菜单id
 const menuId = ref('')
+
 // 表格列配置
 const tableColumns = ref([])
 
-// 条件列表
-const conditions = ref([createNewCondition()])
-
-// 所有运算符选项
-const allOperatorOptions = ref([])
-
-const route = useRoute()
 // 表单验证规则
-const rules = ref({
-	filterType: [{ required: true, message: '请选择过滤条件匹配', trigger: 'blur' }],
-})
+const rules = ref({})
+
+// 组内过滤条件验证规则
+const groupFilterRules = [{ required: true, message: '请选择连接条件', trigger: 'blur' }]
 
 // 表单引用
 const queryFormRef = ref(null)
+
 //菜单id
 const menuDataList = ref([])
 
@@ -326,6 +354,56 @@ const operatorLabelMap = {
 	notEqualsAny: '不等于任意一个',
 }
 
+// 日期格式映射
+const dateFormatMap = ref([])
+const getDateFormatOptions = async () => {
+	// 获取日期格式
+	const dateRes = await publicApi.getLocalSelect({ type: 'CONSTANT', types: 'AD_SEARCH_COL_DATE_FORMAT' })
+	dateFormatMap.value = dateRes.data.map(item => ({
+		value: item.value,
+		label: item.label,
+	}))
+}
+
+/**
+ * 获取下拉框数据配置
+ */
+const getSelectDataConfig = (condition) => {
+	if (!condition.colSelectSource || !condition.colSelectKey) {
+		return {
+			url: '/api/internal/public/getLocalSelect',
+			params: {}
+		}
+	}
+
+	// 根据 colSelectSource 的不同值设置不同的参数
+	if (condition.colSelectSource === 'DICT') {
+		return {
+			url: '/api/internal/public/getLocalSelect',
+			params: {
+				type: condition.colSelectSource,
+				dictType: condition.colSelectKey,
+			},
+		}
+	} else if (condition.colSelectSource === 'CONSTANT') {
+		return {
+			url: '/api/internal/public/getLocalSelect',
+			params: {
+				type: condition.colSelectSource,
+				types: condition.colSelectKey,
+			},
+		}
+	} else {
+		// 其他情况默认使用 type 和 types 参数
+		return {
+			url: '/api/internal/public/getLocalSelect',
+			params: {
+				type: condition.colSelectSource,
+				types: condition.colSelectKey,
+			},
+		}
+	}
+}
 
 /**
  * 获取过滤后的运算符选项
@@ -342,20 +420,6 @@ const getFilteredOperatorOptions = columnType => {
 	}))
 }
 
-/**
- * 获取条件值的span宽度
- * @param condition 查询条件对象
- * @returns 条件值的span宽度
- */
-const getConditionValueSpan = condition => {
-	// 如果是区间运算符，返回11（为两个输入框留出足够空间）
-	if (condition.operator === 'interval' || condition.operator === 'between') {
-		return 11
-	}
-	// 否则返回较小的值，比如6或8（根据实际需要调整）
-	return 6
-}
-
 // 创建新的查询条件对象
 function createNewCondition() {
 	return {
@@ -369,7 +433,25 @@ function createNewCondition() {
 		startValueLabel: null,
 		endValueLabel: null,
 		valueLabel: null,
+		dateFormat: '1', // 默认日期格式code
 	}
+}
+
+// 创建新的查询组
+function createNewGroup() {
+	return {
+		id: Date.now() + Math.floor(Math.random() * 1000),
+		connectType: 'AND', // 连接条件 - 与前一个条件组的连接方式
+		filterType: 'AND', // 组内匹配
+		conditions: [createNewCondition()],
+	}
+}
+
+/**
+ * 获取日期格式
+ */
+const getDateFormat = dateFormatCode => {
+	return dateFormatMap.value.find(item => item.value == dateFormatCode)?.label || ''
 }
 
 /**
@@ -378,7 +460,6 @@ function createNewCondition() {
  * @param selectedValue 选择的运算符值
  */
 const handleOperatorChange = (condition, selectedValue) => {
-	console.log('condition, selectedValue =>', condition, selectedValue)
 	// 如果从区间运算符切换到非区间运算符，清空区间值
 	if (selectedValue !== 'interval' && selectedValue !== 'between') {
 		condition.startValue = null
@@ -392,21 +473,35 @@ const handleOperatorChange = (condition, selectedValue) => {
 	}
 }
 
-// 添加查询条件
-const addCondition = () => {
-	if (conditions.value.length < 5) {
-		conditions.value.push(createNewCondition())
+// 添加查询条件到组
+const addConditionToGroup = group => {
+	if (group.conditions.length < 5) {
+		group.conditions.push(createNewCondition())
 	} else {
 		ElMessage.warning('最多只能添加5个查询条件')
 	}
 }
 
-// 移除查询条件
-const removeCondition = index => {
-	if (conditions.value.length > 1) {
-		conditions.value.splice(index, 1)
+// 从组中移除查询条件
+const removeConditionFromGroup = (group, index) => {
+	if (group.conditions.length > 1) {
+		group.conditions.splice(index, 1)
 	} else {
 		ElMessage.warning('至少保留一个查询条件')
+	}
+}
+
+// 添加新组
+const addGroup = () => {
+	queryForm.value.groups.push(createNewGroup())
+}
+
+// 移除组
+const removeGroup = index => {
+	if (queryForm.value.groups.length > 1) {
+		queryForm.value.groups.splice(index, 1)
+	} else {
+		ElMessage.warning('至少保留一个条件组')
 	}
 }
 
@@ -418,6 +513,12 @@ const handleColumnChange = (condition, selectedValue) => {
 	if (selectedCol) {
 		condition.columnType = selectedCol.colType
 		condition.colSelectKey = selectedCol.colSelectKey
+		condition.colSelectSource = selectedCol.colSelectSource
+		condition.dateFormat = selectedCol.dateFormat || ''
+		// 设置日期格式
+		if (selectedCol.colType === '4' && selectedCol.dateFormat) {
+			condition.dateFormat = selectedCol.dateFormat
+		}
 		// 清空之前的值和运算符
 		condition.value = null
 		condition.valueLabel = null
@@ -439,35 +540,57 @@ const getColumnLabel = columnKey => {
 
 // 验证当前查询条件
 const validateConditions = (isSubmit = true) => {
-	for (const condition of conditions.value) {
-		if (!condition.columnName) {
-			isSubmit && ElMessage.error('请选择前端表格字段')
+	if (queryForm.value.groups.length === 0) {
+		isSubmit && ElMessage.error('至少需要一个查询条件组')
+		return false
+	}
+
+	for (let groupIndex = 0; groupIndex < queryForm.value.groups.length; groupIndex++) {
+		const group = queryForm.value.groups[groupIndex]
+
+		if (!group.connectType) {
+			isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组请选择连接条件`)
 			return false
 		}
 
-		if (!condition.operator) {
-			isSubmit && ElMessage.error(`请为【${getColumnLabel(condition.columnName)}】选择运算符`)
+		if (!group.filterType) {
+			isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组请选择组内匹配`)
 			return false
 		}
 
-		// 不需要值的运算符
-		if (['is null', 'is not null'].includes(condition.operator)) {
-			continue
-		}
+		for (let conditionIndex = 0; conditionIndex < group.conditions.length; conditionIndex++) {
+			const condition = group.conditions[conditionIndex]
 
-		// 区间运算符需要两个值
-		if (condition.operator === 'interval' || condition.operator === 'between') {
-			if (condition.startValue === null || condition.endValue === null) {
-				isSubmit && ElMessage.error(`请为【${getColumnLabel(condition.columnName)}】设置完整的区间值`)
+			if (!condition.columnName) {
+				isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请选择前端表格字段`)
+				return false
+			}
+
+			if (!condition.operator) {
+				isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请选择运算符`)
+				return false
+			}
+
+			// 不需要值的运算符
+			if (['is null', 'is not null'].includes(condition.operator)) {
+				continue
+			}
+
+			// 区间运算符需要两个值
+			if (condition.operator === 'interval' || condition.operator === 'between') {
+				if (condition.startValue === null || condition.endValue === null) {
+					isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请设置完整的区间值`)
+					return false
+				}
+			}
+			// 其他运算符需要一个值
+			else if (!condition.value) {
+				isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请设置条件值`)
 				return false
 			}
 		}
-		// 其他运算符需要一个值
-		else if (!condition.value) {
-			isSubmit && ElMessage.error(`请为【${getColumnLabel(condition.columnName)}】设置条件值`)
-			return false
-		}
 	}
+
 	return true
 }
 
@@ -475,35 +598,37 @@ const validateConditions = (isSubmit = true) => {
 const handleQuery = () => {
 	if (validateConditions()) {
 		// 构建查询参数
-		const queryParams = {
-			filterType: queryForm.value.filterType,
-			conditions: conditions.value.map(cond => {
-				const column = tableColumns.value.find(item => item.prop === cond.columnName)
-				return {
-					columnName: cond.columnName,
-					columnLabel: getColumnLabel(cond.columnName),
-					operator: cond.operator,
-					operatorLabel: cond.operatorLabel,
-					value: cond.value,
-					startValue: cond.startValue,
-					endValue: cond.endValue,
-					fieldType: column ? column.fieldType : '',
-				}
-			}),
-		}
+		const queryParams = queryForm.value.groups.map(group => {
+			return {
+				connectType: group.connectType, // 连接条件
+				filterType: group.filterType, // 组内匹配
+				conditions: group.conditions.map(cond => {
+					const column = tableColumns.value.find(item => item.prop === cond.columnName)
+					return {
+						columnName: cond.columnName,
+						columnLabel: getColumnLabel(cond.columnName),
+						operator: cond.operator,
+						operatorLabel: cond.operatorLabel,
+						value: cond.value,
+						startValue: cond.startValue,
+						endValue: cond.endValue,
+						colType: column ? column.colType : '',
+						dateFormat: getDateFormat(cond.dateFormat), // 日期格式code
+					}
+				}),
+			}
+		})
 
-		// 转换为SQL格式
-		const sql = convertToMysql(conditions.value, queryForm.value.filterType)
-		const oracleSql = convertToOracle(conditions.value, queryForm.value.filterType)
-		queryParams.sql = sql
-		queryParams.filterType = queryForm.value.filterType // 添加filterType到返回结果中
+		// 转换为SQL格式（这里需要根据新的数据结构调整）
+		// const sql = convertToMysql(conditions.value, queryForm.value.filterType)
+		// const oracleSql = convertToOracle(conditions.value, queryForm.value.filterType)
+		// queryParams.sql = sql
 
 		console.log('queryParams =>', queryParams)
-		console.log('Generated SQL =>', queryParams.sql)
-		console.log('Generated Oracle SQL =>', oracleSql)
+		// console.log('Generated SQL =>', queryParams.sql)
+		// console.log('Generated Oracle SQL =>', oracleSql)
 
 		// 触发查询事件
-		// emit('query', queryParams)
 		onQuery(queryParams)
 
 		ElMessage.success('查询条件已应用')
@@ -518,8 +643,7 @@ const saveQueryConditions = () => {
 	}
 
 	const queryData = {
-		filterType: queryForm.value.filterType,
-		conditions: JSON.parse(JSON.stringify(conditions.value)),
+		groups: JSON.parse(JSON.stringify(queryForm.value.groups)),
 		updatedAt: new Date().toISOString(),
 	}
 
@@ -527,7 +651,6 @@ const saveQueryConditions = () => {
 	localStorage.setItem(storageKey, JSON.stringify(queryData))
 
 	ElMessage.success('查询条件保存成功')
-	// dialogVisible.value = false
 }
 
 // 从本地存储加载查询条件
@@ -538,19 +661,16 @@ const loadQueryConditions = () => {
 	if (stored) {
 		try {
 			const queryData = JSON.parse(stored)
-			queryForm.value.filterType = queryData.filterType || 'AND'
-			conditions.value = queryData.conditions || [createNewCondition()]
+			queryForm.value.groups = queryData.groups || [createNewGroup()]
 		} catch (e) {
 			console.error('加载查询条件失败', e)
 			localStorage.removeItem(storageKey)
 			// 使用默认值
-			queryForm.value.filterType = 'AND'
-			conditions.value = [createNewCondition()]
+			queryForm.value.groups = [createNewGroup()]
 		}
 	} else {
 		// 没有保存的查询条件，使用默认值
-		queryForm.value.filterType = 'AND'
-		conditions.value = [createNewCondition()]
+		queryForm.value.groups = [createNewGroup()]
 	}
 }
 
@@ -574,8 +694,10 @@ const getTableColumns = () => {
 		tableColumns.value = res.data.map(item => ({
 			prop: item.colKey,
 			label: item.colLabel,
-			fieldType: item.colSelectKey,
+			colSelectKey: item.colSelectKey,
+			colSelectSource: item.colSelectSource,
 			colType: item.colType,
+			dateFormat: item.dateFormat || '1', // 默认日期格式code
 			...item,
 		}))
 	})
@@ -583,11 +705,13 @@ const getTableColumns = () => {
 
 // 重置所有条件
 const resetAll = () => {
-	proxy.$modal
-		.confirm('确定要重置查询条件并清空本地保存的查询配置吗？')
+	ElMessageBox.confirm('确定要重置查询条件并清空本地保存的查询配置吗？', '确认重置', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
 		.then(() => {
-			conditions.value = [createNewCondition()]
-			queryForm.value.filterType = 'AND'
+			queryForm.value.groups = [createNewGroup()]
 
 			// 清空本地存储中对应的查询条件
 			if (props.id) {
@@ -608,6 +732,9 @@ onMounted(async () => {
 	// 只有在表格ID存在时才加载查询条件
 	if (props.id) {
 		loadQueryConditions()
+	} else {
+		// 如果没有ID，初始化一个空的组
+		queryForm.value.groups = [createNewGroup()]
 	}
 })
 
@@ -620,13 +747,94 @@ const emit = defineEmits(['query'])
 	padding: 10px 0;
 }
 
+.query-group {
+	border: 1px solid #dcdfe6;
+	border-radius: 10px;
+	padding: 15px;
+	margin-bottom: 15px;
+	background-color: #fafafa;
+}
+
+.group-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #ebeef5;
+}
+
+.group-title {
+	font-weight: bold;
+	color: #303133;
+	font-size: 14px;
+}
+
+.group-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.group-filter-row {
+	margin-bottom: 15px;
+}
+
+.condition-wrapper {
+	margin-bottom: 10px;
+}
+
 .condition-row {
 	padding: 8px 0;
 	border-bottom: 1px dashed #eee;
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
 }
 
 .condition-row:last-child {
 	border-bottom: none;
+}
+
+.condition-item {
+	min-width: 0; /* 允许flex item收缩 */
+}
+
+.interval-row {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.interval-separator {
+	text-align: center;
+	line-height: 32px;
+	flex-shrink: 0;
+}
+
+.full-width {
+	width: 100%;
+}
+
+.condition-actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.action-buttons {
+	display: flex;
+	gap: 8px;
+	flex-wrap: nowrap;
+}
+
+.action-buttons .el-button {
+	flex-shrink: 0;
+}
+
+.add-group-container {
+	text-align: center;
+	margin-top: 10px;
 }
 
 .footer-box {
@@ -634,5 +842,85 @@ const emit = defineEmits(['query'])
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.footer-left,
+.footer-right {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+	.condition-row {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.condition-item,
+	.condition-actions {
+		width: 100%;
+	}
+
+	.action-buttons {
+		justify-content: flex-start;
+	}
+
+	.footer-box {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.footer-left,
+	.footer-right {
+		justify-content: center;
+		width: 100%;
+	}
+
+	.interval-row {
+		flex-direction: column;
+		gap: 5px;
+	}
+
+	.interval-row .el-col {
+		width: 100%;
+	}
+
+	.interval-separator {
+		line-height: 1.5;
+	}
+
+	.group-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.group-actions {
+		align-self: flex-end;
+	}
+}
+
+@media (max-width: 480px) {
+	.action-buttons {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.footer-left,
+	.footer-right {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.footer-left .el-button,
+	.footer-right .el-button {
+		width: 100%;
+		margin-bottom: 5px;
+	}
 }
 </style>
