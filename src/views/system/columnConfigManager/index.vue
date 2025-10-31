@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-25 14:07:02
- * @LastEditTime: 2025-10-17 17:06:28
+ * @LastEditTime: 2025-10-31 16:34:55
  * @LastEditors: zhangsd
  * @Description: 高级查询表格列配置管理
  * @FilePath: \view\src\views\system\ColumnConfigManager\index.vue
@@ -131,17 +131,12 @@ const dialogTitle = ref('新增')
 // 查询条件
 const selectData = reactive([
 	{
-		name: '字典类型名称', // 搜索框name
+		name: '前端ID', // 搜索框name
 		type: 'input', // 搜索框类型
-		modelValue: 'dictName', // 绑定字段
-		span: 12, // 占位，共24
+		modelValue: 'tableId', // 绑定字段
+		span: 24, // 占位，共24
 	},
-	{
-		name: '字典类型编号', // 搜索框name
-		type: 'input', // 搜索框类型
-		modelValue: 'dictType', // 绑定字段
-		span: 12, // 占位，共24
-	},
+
 ])
 const editRow = ref({})
 // 按钮列表
@@ -157,9 +152,10 @@ const buttonList = reactive([
 // 表格数据
 const tableData = ref([])
 const menuDataList = ref([])
-
+const  advancedQuery = ref([])
 provide('onQuery', (data) => {
   console.log('父组件收到数据：', data)
+  advancedQuery.value  = JSON.parse(JSON.stringify(data))
   // 处理数据...
   getList()
 })
@@ -194,6 +190,8 @@ const saveTableColumns = () => {
 			status: item.status,
 			colSelectKey: item.colSelectKey,
 			sortNum: item.sortNum,
+			dateFormat: item.dateFormat,
+			colSelectSource: item.colSelectSource,
 			remark: columnConfigManagerDialogRef.value.columnConfigForm.remark,
 		}))
 		const param = {
@@ -217,17 +215,14 @@ const saveTableColumns = () => {
 		})
 	})
 }
-/**
- * @description 查询菜单下拉数结构
- */
-const getTreeselect = async () => {
-	getContentsMenu().then(response => {
-		menuDataList.value = response.data
-	})
-}
+
 const getList = e => {
 	// tableLoading.value = true
-	api.getList()
+	let params = {
+		advancedQuery:JSON.stringify(advancedQuery.value),
+		...e
+	}
+	api.getList(params)
 		.then(response => {
 			tableData.value = response.data.pages
 			total.value = response.data.totalNum
@@ -240,19 +235,10 @@ const getList = e => {
 			// tableLoading.value = false
 		})
 }
-/**
- * 高级查询
- * @description: 高级查询
- */
-const queryForm = reactive({
-	filterType: 'and', //过滤条件匹配
-	fieldKey: '', // 字段key (前端)
-	operator: '', // 运算符
-	value: '', // 值
-})
 
 onMounted(() => {
 	// getTreeselect()
+	getList()
 })
 </script>
 

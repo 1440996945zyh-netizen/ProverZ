@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-26 10:09:37
- * @LastEditTime: 2025-10-11 10:10:50
+ * @LastEditTime: 2025-10-31 15:45:32
  * @LastEditors: zhangsd
  * @Description: 
  * @FilePath: \view\src\views\system\columnConfigManager\dialogDetail\index.vue
@@ -135,7 +135,9 @@ const tableColumns = reactive([
 		editRender: {},
 		align: 'left',
 	},
+	{ prop: 'colSelectSource', label: '下拉框数据源', minWidth: 120, editType: 'select', editRender: {}, align: 'left' },
 	{ prop: 'colSelectKey', label: '下拉框key', minWidth: 120, editType: 'input', editRender: {}, align: 'left' },
+	{ prop: 'dateFormat', label: '日期格式', minWidth: 120, editType: 'select', editRender: {}, align: 'left' },
 	{
 		prop: 'status',
 		label: '状态',
@@ -193,6 +195,8 @@ const addTableData = e => {
 			colKey: '',
 			colType: '',
 			colSelectKey: '',
+			colSelectSource: '',
+			dateFormat: '', // 默认日期格式
 			status: '1',
 			sortNum: tableData.value.length + 1,
 		})
@@ -226,8 +230,10 @@ const getTreeselect = async () => {
 	}
 }
 
+
 const getColumnTypeOptions = async () => {
 	try {
+		// 获取列类型
 		const res = await publicApi.getLocalSelect({ type: 'CONSTANT', types: 'AD_SEARCH_COL_TYPE' })
 		proxy.setEditTableOptions(tableColumns, {
 			colType: res.data.map(item => ({
@@ -235,6 +241,23 @@ const getColumnTypeOptions = async () => {
 				label: item.label,
 			})),
 		})
+		// 获取下拉框数据源
+		const sourceRes = await publicApi.getLocalSelect({ type: 'CONSTANT', types: 'AD_SEARCH_COL_SOURCE' })
+		proxy.setEditTableOptions(tableColumns, {
+			colSelectSource: sourceRes.data.map(item => ({
+				value: item.value,
+				label: item.label,
+			})),
+		})
+		// 获取日期格式
+		const dateRes = await publicApi.getLocalSelect({ type: 'CONSTANT', types: 'AD_SEARCH_COL_DATE_FORMAT' })
+		proxy.setEditTableOptions(tableColumns, {
+			dateFormat: dateRes.data.map(item => ({
+				value: item.value,
+				label: item.label,
+			})),
+		})
+	
 	} catch (error) {
 		console.error('获取列类型失败', error)
 		proxy.$modal.msgError('获取列类型失败，请稍后重试')
@@ -357,6 +380,8 @@ onMounted(() => {
 			colKey: '',
 			colType: '',
 			colSelectKey: '',
+			colSelectSource: '',
+			dateFormat: '', // 默认日期格式
 			status: '1',
 			sortNum: 1,
 		})
