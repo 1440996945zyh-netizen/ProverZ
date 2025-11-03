@@ -51,7 +51,7 @@
 								:rules="groupFilterRules"
 								class="filter-form-item"
 							>
-								<el-select v-model="group.filterType" placeholder="请选择组内匹配" class="filter-select">
+								<el-select v-model="group.filterType" placeholder="请选择组内匹配" class="filter-select" :disabled="group.conditions.length === 1">
 									<el-option label="AND(组内所有条件都要求匹配)" value="AND"></el-option>
 									<el-option label="OR(组内条件中的任意一个匹配)" value="OR"></el-option>
 								</el-select>
