@@ -295,6 +295,8 @@ import Select from '@/components/Select/index.vue'
 import api from '@/api/system/columnConfigManager'
 import { convertToMysql, convertToOracle } from '@/utils/common/data'
 import usePermissionStore from '@/store/modules/permission'
+import publicApi from '@/api/public'
+
 import { inject } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -471,6 +473,8 @@ function createNewGroup() {
  * 获取日期格式
  */
 const getDateFormat = dateFormatCode => {
+	console.log('dateFormatCode =>', dateFormatCode);
+	console.log('dateFormatMap.value.find(item => item.value == dateFormatCode)?.label =>', dateFormatMap.value.find(item => item.value == dateFormatCode)?.label);
 	return dateFormatMap.value.find(item => item.value == dateFormatCode)?.label || ''
 }
 
@@ -767,6 +771,7 @@ const resetAll = () => {
 
 // 组件挂载时加载保存的查询条件
 onMounted(async () => {
+	getDateFormatOptions()
 	await getTreeselect()
 	// 只有在表格ID存在时才加载查询条件
 	if (props.id) {
