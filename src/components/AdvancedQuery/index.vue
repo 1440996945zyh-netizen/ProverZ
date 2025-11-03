@@ -1,15 +1,38 @@
 <template>
 	<el-button type="primary" icon="Filter" v-if="isShowAdvancedQuery" @click="advancedQuery">高级查询</el-button>
 	<!--  高级查询构造器  -->
-	<Dialog title="高级查询" v-model:visible="dialogVisible" width="50%">
+	<Dialog title="高级查询" v-model:visible="dialogVisible" width="60%">
 		<div class="dialog-content">
+			<!-- 添加新组按钮 -->
+			<div class="add-group-container">
+				<el-button type="primary" @click="addGroup" icon="Plus">添加条件组</el-button>
+			</div>
+
 			<el-form :model="queryForm" :rules="rules" ref="queryFormRef" label-width="120px" label-position="left">
 				<!-- 查询条件组列表 -->
 				<div v-for="(group, groupIndex) in queryForm.groups" :key="group.id" class="query-group">
 					<div class="group-header">
-						<span class="group-title">条件组 {{ groupIndex + 1 }}</span>
+						<div class="group-header-content">
+							<el-row :gutter="10" class="group-connect-row">
+								<el-col :span="3" style="display: flex; align-items: center">
+									<span class="group-title">条件组 {{ groupIndex + 1 }}</span>
+								</el-col>
+								<el-col :span="18">
+									<el-form-item
+										label="连接条件:"
+										:prop="`groups[${groupIndex}].connectType`"
+										:rules="groupFilterRules"
+										class="connect-form-item"
+									>
+										<el-select v-model="group.connectType" placeholder="请选择连接条件" class="connect-select">
+											<el-option label="AND(与前一个条件组连接)" value="AND"></el-option>
+											<el-option label="OR(或前一个条件组连接)" value="OR"></el-option>
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+						</div>
 						<div class="group-actions">
-							<el-button type="primary" @click="addConditionToGroup(group)" icon="Plus">添加条件</el-button>
 							<el-button
 								type="danger"
 								icon="Minus"
@@ -19,27 +42,25 @@
 						</div>
 					</div>
 
-					<!-- 组间连接条件 -->
-					<el-row :gutter="10" class="group-filter-row">
-						<el-col :span="24">
-							<el-form-item label="连接条件:" :prop="`groups[${groupIndex}].connectType`" :rules="groupFilterRules">
-								<el-select v-model="group.connectType" placeholder="请选择连接条件">
-									<el-option label="AND(与前一个条件组连接)" value="AND"></el-option>
-									<el-option label="OR(或前一个条件组连接)" value="OR"></el-option>
-								</el-select>
-							</el-form-item>
-						</el-col>
-					</el-row>
-
 					<!-- 组内过滤条件匹配 -->
 					<el-row :gutter="10" class="group-filter-row">
-						<el-col :span="24">
-							<el-form-item label="组内匹配:" :prop="`groups[${groupIndex}].filterType`" :rules="groupFilterRules">
-								<el-select v-model="group.filterType" placeholder="请选择组内匹配">
+						<el-col :span="18">
+							<el-form-item
+								label="组内匹配:"
+								:prop="`groups[${groupIndex}].filterType`"
+								:rules="groupFilterRules"
+								class="filter-form-item"
+							>
+								<el-select v-model="group.filterType" placeholder="请选择组内匹配" class="filter-select">
 									<el-option label="AND(组内所有条件都要求匹配)" value="AND"></el-option>
 									<el-option label="OR(组内条件中的任意一个匹配)" value="OR"></el-option>
 								</el-select>
 							</el-form-item>
+						</el-col>
+						<el-col :span="6">
+							<el-button type="primary" @click="addConditionToGroup(group)" icon="Plus" class="add-condition-btn">
+								添加条件
+							</el-button>
 						</el-col>
 					</el-row>
 
@@ -80,9 +101,18 @@
 							<!-- 条件值 -->
 							<el-col :span="8" :md="8" :sm="8" :xs="24" class="condition-item">
 								<!-- 条件值 - 根据字段类型动态显示 -->
-								<template v-if="condition.columnType">
+								<template v-if="condition.columnName && condition.operator">
+									<!-- 不需要值的运算符 -->
+									<template v-if="['empty', 'notEmpty'].includes(condition.operator)">
+										<el-input
+											v-model="condition.value"
+											placeholder="该运算符无需输入值"
+											disabled
+											class="disabled-input"
+										/>
+									</template>
 									<!-- 区间类型（当运算符为 'interval' 或 'between' 时） -->
-									<template v-if="condition.operator === 'interval' || condition.operator === 'between'">
+									<template v-else-if="condition.operator === 'interval' || condition.operator === 'between'">
 										<!-- 文本类型的区间 -->
 										<template v-if="condition.columnType === '1'">
 											<el-row :gutter="5" class="interval-row">
@@ -95,8 +125,7 @@
 												</el-col>
 											</el-row>
 										</template>
-
-										<!-- 数字类型的区间 -->
+										<!-- 其他区间类型保持不变 -->
 										<template v-else-if="condition.columnType === '3'">
 											<el-row :gutter="5" class="interval-row">
 												<el-col :span="11">
@@ -104,16 +133,20 @@
 														v-model="condition.startValue"
 														placeholder="开始值"
 														class="full-width"
+														:controls="false"
 													/>
 												</el-col>
 												<el-col :span="2" class="interval-separator">-</el-col>
 												<el-col :span="11">
-													<el-input-number v-model="condition.endValue" placeholder="结束值" class="full-width" />
+													<el-input-number
+														v-model="condition.endValue"
+														placeholder="结束值"
+														class="full-width"
+														:controls="false"
+													/>
 												</el-col>
 											</el-row>
 										</template>
-
-										<!-- 日期类型的区间 -->
 										<template v-else-if="condition.columnType === '4'">
 											<el-row :gutter="5" class="interval-row">
 												<el-col :span="11">
@@ -139,9 +172,7 @@
 												</el-col>
 											</el-row>
 										</template>
-
-										<!-- 下拉框类型的区间 -->
-										<!-- <template v-else-if="condition.columnType === '5' || condition.columnType === '6'">
+										<template v-else-if="condition.columnType === '5' || condition.columnType === '6'">
 											<el-row :gutter="5" class="interval-row">
 												<el-col :span="11">
 													<Select
@@ -163,9 +194,7 @@
 													/>
 												</el-col>
 											</el-row>
-										</template> -->
-
-										<!-- 其他类型的区间（默认为文本输入） -->
+										</template>
 										<template v-else>
 											<el-row :gutter="5" class="interval-row">
 												<el-col :span="11">
@@ -178,20 +207,18 @@
 											</el-row>
 										</template>
 									</template>
-
 									<!-- 非区间类型（运算符不是 'interval' 或 'between'） -->
 									<template v-else>
 										<!-- 文本类型 -->
 										<el-input v-if="condition.columnType === '1'" v-model="condition.value" placeholder="请输入文本" />
-
 										<!-- 数字类型 -->
 										<el-input-number
 											v-else-if="condition.columnType === '3'"
 											v-model="condition.value"
 											placeholder="请输入数字"
 											class="full-width"
+											:controls="false"
 										/>
-
 										<!-- 日期类型 -->
 										<el-date-picker
 											v-else-if="condition.columnType === '4'"
@@ -202,7 +229,6 @@
 											:value-format="getDateFormat(condition.dateFormat)"
 											class="full-width"
 										/>
-
 										<!-- 单选下拉框类型 -->
 										<Select
 											v-else-if="condition.columnType === '5'"
@@ -212,7 +238,6 @@
 											:placeholder="'请选择'"
 											class="full-width"
 										/>
-
 										<!-- 多选下拉框类型 -->
 										<Select
 											v-else-if="condition.columnType === '6'"
@@ -223,12 +248,11 @@
 											multiple
 											class="full-width"
 										/>
-
 										<!-- 其他类型默认显示文本框 -->
 										<el-input v-else v-model="condition.value" placeholder="请输入值" />
 									</template>
 								</template>
-								<el-input v-else v-model="condition.value" placeholder="请先选择字段" disabled />
+								<el-input v-else v-model="condition.value" placeholder="请先选择字段和运算符" disabled />
 							</el-col>
 
 							<!-- 操作按钮 -->
@@ -239,16 +263,12 @@
 										icon="Minus"
 										@click="removeConditionFromGroup(group, conditionIndex)"
 										:disabled="group.conditions.length <= 1"
+										plain
 									></el-button>
 								</div>
 							</el-col>
 						</el-row>
 					</div>
-				</div>
-
-				<!-- 添加新组按钮 -->
-				<div class="add-group-container">
-					<el-button type="primary" @click="addGroup" icon="Plus">添加条件组</el-button>
 				</div>
 			</el-form>
 		</div>
@@ -368,11 +388,11 @@ const getDateFormatOptions = async () => {
 /**
  * 获取下拉框数据配置
  */
-const getSelectDataConfig = (condition) => {
+const getSelectDataConfig = condition => {
 	if (!condition.colSelectSource || !condition.colSelectKey) {
 		return {
 			url: '/api/internal/public/getLocalSelect',
-			params: {}
+			params: {},
 		}
 	}
 
@@ -460,19 +480,31 @@ const getDateFormat = dateFormatCode => {
  * @param selectedValue 选择的运算符值
  */
 const handleOperatorChange = (condition, selectedValue) => {
-	// 如果从区间运算符切换到非区间运算符，清空区间值
-	if (selectedValue !== 'interval' && selectedValue !== 'between') {
+	// 如果是不需要值的运算符，清空所有值
+	if (['empty', 'notEmpty'].includes(selectedValue)) {
+		condition.value = null
+		condition.valueLabel = null
 		condition.startValue = null
 		condition.endValue = null
 		condition.startValueLabel = null
 		condition.endValueLabel = null
-	} else {
-		// 如果从非区间运算符切换到区间运算符，清空单值
+	}
+	// 如果从不需要值的运算符切换到区间运算符
+	else if (selectedValue === 'interval' || selectedValue === 'between') {
 		condition.value = null
 		condition.valueLabel = null
+		// 如果区间值未设置，初始化为空
+		if (condition.startValue === undefined) condition.startValue = null
+		if (condition.endValue === undefined) condition.endValue = null
+	}
+	// 如果从不需要值或区间运算符切换到普通运算符
+	else {
+		condition.startValue = null
+		condition.endValue = null
+		condition.startValueLabel = null
+		condition.endValueLabel = null
 	}
 }
-
 // 添加查询条件到组
 const addConditionToGroup = group => {
 	if (group.conditions.length < 5) {
@@ -538,7 +570,11 @@ const getColumnLabel = columnKey => {
 	return column ? column.label : columnKey
 }
 
-// 验证当前查询条件
+/**
+ * @description 验证当前查询条件
+ * @param isSubmit 是否提交查询
+ */
+
 const validateConditions = (isSubmit = true) => {
 	if (queryForm.value.groups.length === 0) {
 		isSubmit && ElMessage.error('至少需要一个查询条件组')
@@ -571,8 +607,8 @@ const validateConditions = (isSubmit = true) => {
 				return false
 			}
 
-			// 不需要值的运算符
-			if (['is null', 'is not null'].includes(condition.operator)) {
+			// 不需要值的运算符，跳过验证
+			if (['empty', 'notEmpty'].includes(condition.operator)) {
 				continue
 			}
 
@@ -593,7 +629,6 @@ const validateConditions = (isSubmit = true) => {
 
 	return true
 }
-
 // 处理查询
 const handleQuery = () => {
 	if (validateConditions()) {
@@ -676,6 +711,7 @@ const loadQueryConditions = () => {
 
 /**
  * @description 查询菜单下拉数结构
+ * @param {*} route 当前路由信息
  */
 const getTreeselect = async () => {
 	// 从store中获取菜单数据，而不是调用接口
@@ -685,7 +721,10 @@ const getTreeselect = async () => {
 	const currentMenu = permissionStore.findMenuByPath(route.path)
 	menuId.value = currentMenu?.id || ''
 }
-
+/**
+ * @description 查询表格下拉数结构
+ * @param {*} props 组件属性
+ */
 const getTableColumns = () => {
 	api.getDetail({
 		menuId: menuId.value,
@@ -742,53 +781,98 @@ onMounted(async () => {
 const emit = defineEmits(['query'])
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .dialog-content {
 	padding: 10px 0;
 }
 
 .query-group {
-	border: 1px solid #dcdfe6;
-	border-radius: 10px;
-	padding: 15px;
-	margin-bottom: 15px;
-	background-color: #fafafa;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 16px;
+	margin-bottom: 16px;
+	background-color: #ffffff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	transition: all 0.3s ease;
+}
+
+.query-group:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	border-color: #dcdfe6;
 }
 
 .group-header {
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 10px;
-	padding-bottom: 10px;
-	border-bottom: 1px solid #ebeef5;
+	align-items: flex-start;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.group-header-content {
+	flex: 1;
 }
 
 .group-title {
-	font-weight: bold;
+	font-weight: 600;
 	color: #303133;
 	font-size: 14px;
+	// margin-bottom: 8px;
+	display: block;
+}
+
+.group-connect-row {
+	margin-bottom: 0;
+}
+
+.connect-form-item {
+	margin-bottom: 0;
+}
+
+.connect-select {
+	width: 100%;
 }
 
 .group-actions {
 	display: flex;
 	gap: 8px;
+	align-self: flex-start;
+	margin-left: 12px;
 }
 
 .group-filter-row {
-	margin-bottom: 15px;
+	margin-bottom: 16px;
+	padding: 0 8px;
+}
+
+.filter-form-item {
+	margin-bottom: 0;
+}
+
+.filter-select {
+	width: 100%;
+}
+
+.add-condition-btn {
+	width: 100%;
 }
 
 .condition-wrapper {
-	margin-bottom: 10px;
+	margin-bottom: 8px;
 }
 
 .condition-row {
-	padding: 8px 0;
-	border-bottom: 1px dashed #eee;
+	padding: 10px 0;
+	border-bottom: 1px solid #f5f7fa;
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
+	transition: background-color 0.2s ease;
+}
+
+.condition-row:hover {
+	background-color: #f9f9f9;
 }
 
 .condition-row:last-child {
@@ -809,6 +893,8 @@ const emit = defineEmits(['query'])
 	text-align: center;
 	line-height: 32px;
 	flex-shrink: 0;
+	font-weight: bold;
+	color: #909399;
 }
 
 .full-width {
@@ -824,7 +910,7 @@ const emit = defineEmits(['query'])
 
 .action-buttons {
 	display: flex;
-	gap: 8px;
+	gap: 6px;
 	flex-wrap: nowrap;
 }
 
@@ -834,7 +920,11 @@ const emit = defineEmits(['query'])
 
 .add-group-container {
 	text-align: center;
-	margin-top: 10px;
+	margin: 0px 0 10px 0;
+}
+
+.add-group-container .el-button {
+	padding: 8px 20px;
 }
 
 .footer-box {
@@ -844,6 +934,8 @@ const emit = defineEmits(['query'])
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 10px;
+	padding-top: 10px;
+	border-top: 1px solid #ebeef5;
 }
 
 .footer-left,
@@ -853,12 +945,55 @@ const emit = defineEmits(['query'])
 	flex-wrap: wrap;
 	justify-content: flex-start;
 }
+.disabled-input {
+	:deep(.el-input__wrapper) {
+		background-color: #f5f7fa;
+		cursor: not-allowed;
+		opacity: 0.7;
+	}
 
+	:deep(.el-input__inner) {
+		color: #909399;
+	}
+}
+
+.condition-item {
+	transition: all 0.3s ease;
+}
+
+/* 隐藏不需要的输入框时的动画效果 */
+.condition-item[style*='display: none'] {
+	opacity: 0;
+	transform: scale(0.95);
+	transition: all 0.2s ease;
+}
 /* 响应式调整 */
 @media (max-width: 768px) {
+	.dialog-content {
+		padding: 5px 0;
+	}
+
+	.query-group {
+		padding: 12px;
+		margin-bottom: 12px;
+	}
+
+	.group-header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+	}
+
+	.group-actions {
+		align-self: flex-end;
+		margin-left: 0;
+		margin-top: 8px;
+	}
+
 	.condition-row {
 		flex-direction: column;
 		gap: 8px;
+		padding: 8px 0;
 	}
 
 	.condition-item,
@@ -866,13 +1001,23 @@ const emit = defineEmits(['query'])
 		width: 100%;
 	}
 
-	.action-buttons {
-		justify-content: flex-start;
+	.interval-row {
+		flex-direction: row;
+		gap: 5px;
+	}
+
+	.interval-row .el-col {
+		flex: 1;
+	}
+
+	.interval-separator {
+		flex-shrink: 0;
 	}
 
 	.footer-box {
 		flex-direction: column;
 		align-items: stretch;
+		gap: 8px;
 	}
 
 	.footer-left,
@@ -893,16 +1038,6 @@ const emit = defineEmits(['query'])
 	.interval-separator {
 		line-height: 1.5;
 	}
-
-	.group-header {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 10px;
-	}
-
-	.group-actions {
-		align-self: flex-end;
-	}
 }
 
 @media (max-width: 480px) {
@@ -921,6 +1056,15 @@ const emit = defineEmits(['query'])
 	.footer-right .el-button {
 		width: 100%;
 		margin-bottom: 5px;
+	}
+
+	.interval-row {
+		flex-direction: column;
+		gap: 5px;
+	}
+
+	.interval-separator {
+		text-align: center;
 	}
 }
 </style>
