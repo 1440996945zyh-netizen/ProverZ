@@ -184,6 +184,29 @@ const api = {
       method:'get',
     })
   },
+  /**
+	 * 设置每页数量
+	 * @param {Object} query 筛选条件
+	 */
+	updatePageNum(data) {
+		return request({
+			url: 'api/v1/internal/tMySpecialInfo/updatePageNum',
+			method: 'post',
+			data,
+		})
+	},
+	/**
+	 * 查询每页数量
+	 * @param {Object} query 筛选条件
+	 */
+	getPageNum(params) {
+		return request({
+			url: 'api/v1/internal/tMySpecialInfo/getPageNum',
+			method: 'get',
+			params,
+			loading: false,
+		})
+	},
 }
 export default api
 

@@ -1,7 +1,7 @@
 import { login, logout, getInfo } from '../../api/login'
 import { getToken, setToken, removeToken } from '../../utils/auth/token'
 import { defineStore } from 'pinia'
-
+import api from '@/api/system/user'
 import useWebSocketStore from './webSocket'; // 引入WebSocket Store
 const useUserStore = defineStore('user', {
 	state: () => ({
@@ -56,6 +56,9 @@ const useUserStore = defineStore('user', {
 						} else {
 							this.roles = ['ROLE_DEFAULT']
 						}
+							api.getPageNum().then(res => {
+							this.pageNum = res.data ? (res.data.pageNum ? res.data.pageNum : '20') : '20'
+						})
 						this.name = res.data.userName
 						this.userId = res.data.userId
 						this.userAccount = res.data.userAccount
