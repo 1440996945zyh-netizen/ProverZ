@@ -1,7 +1,9 @@
 <template>
-	<el-link type="warning" style="font-size: 12px; margin-bottom: 10px">
+	<!-- <el-link type="warning" style="font-size: 12px; margin-bottom: 10px">
 		密码必须包含大写字母、小写字母、数字和特殊字符，长度8~16位
-	</el-link>
+	</el-link> -->
+	
+	<TipMessage type="Warning" style="font-size: 12px; margin-bottom: 10px">密码必须包含大写字母、小写字母、数字和特殊字符，长度8~16位</TipMessage>
 	<el-form ref="ruleForm" :model="formData" :rules="rules" label-width="80px">
 		<el-form-item label="旧密码" prop="oldPassword">
 			<el-input v-model="formData.oldPassword" placeholder="请输入旧密码" type="password" show-password />
@@ -16,6 +18,7 @@
 </template>
 
 <script setup name="change">
+import TipMessage from '@/components/TipMessage/index.vue'
 const { proxy } = getCurrentInstance()
 
 const formData = reactive({

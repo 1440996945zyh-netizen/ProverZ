@@ -1,123 +1,142 @@
 <template>
-	<div class="user">
-		<div class="information">
-			<div class="avatar">
-				<img style="width: 6.25rem; height: 6.25rem" src="../../../assets/images/dili.jpeg" />
+	<div class="user-container">
+		<!-- 个人信息卡片 -->
+		<div class="user-info-card">
+			<div class="avatar-wrapper">
+				<img class="avatar" src="../../../assets/images/dili.jpeg" alt="用户头像" />
 			</div>
-			<div>
-				<div class="info">
-					<span>用户姓名：</span>
-					<span>{{ userStore.name }}</span>
+			<div class="user-base-info">
+				<div class="info-item">
+					<span class="info-label">用户姓名：</span>
+					<span class="info-value">{{ userStore.name }}</span>
 				</div>
-				<div class="info">
-					<span>所属部门：</span>
-					<span>{{ userStore.user.deptName }}</span>
+				<div class="info-item">
+					<span class="info-label">所属部门：</span>
+					<span class="info-value">{{ userStore.user.deptName }}</span>
 				</div>
-				<div class="info">
-					<span>岗位：</span>
-					<span>{{ userStore.user.postName }}</span>
+				<div class="info-item">
+					<span class="info-label">岗位：</span>
+					<span class="info-value">{{ userStore.user.postName }}</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- 基础设置区域 -->
+		<div class="setting-section">
+			<el-divider content-position="left"><span class="divider-title">基础设置</span></el-divider>
+			<div class="setting-grid">
+				<div class="setting-card" @click="changePassWord">
+					<div class="setting-icon">
+						<svg-icon icon-class="password"></svg-icon>
+					</div>
+					<span class="setting-text">登录密码</span>
+					<el-button type="text" class="setting-btn">修改密码</el-button>
+				</div>
+				<div class="setting-card">
+					<div class="setting-icon">
+						<svg-icon icon-class="phone"></svg-icon>
+					</div>
+					<span class="setting-text">手机号</span>
+					<el-button type="text" class="setting-btn">修改手机号</el-button>
+				</div>
+				<div class="setting-card">
+					<div class="setting-icon">
+						<svg-icon icon-class="email"></svg-icon>
+					</div>
+					<span class="setting-text">邮箱</span>
+					<el-button type="text" class="setting-btn">修改邮箱</el-button>
 				</div>
 			</div>
 		</div>
-		<div class="change">
-			<div class="change_content">
-				<div class="icon">
-					<svg-icon icon-class="password"></svg-icon>
+
+		<!-- 个性化设置区域 -->
+		<div class="setting-section">
+			<el-divider content-position="left"><span class="divider-title">个性化</span></el-divider>
+			<div class="setting-grid">
+				<div class="setting-card" @click="changePageSize">
+					<div class="setting-icon">
+						<svg-icon icon-class="pagination"></svg-icon>
+					</div>
+					<span class="setting-text">分页</span>
+					<el-button type="text" class="setting-btn">列表条数设置</el-button>
 				</div>
-				<span class="text">登录密码</span>
-				<el-button @click="changePassWord">修改密码</el-button>
-			</div>
-			<div class="change_content">
-				<div class="icon">
-					<svg-icon icon-class="phone"></svg-icon>
+				<div class="setting-card" @click="setFollow">
+					<div class="setting-icon">
+						<svg-icon icon-class="project"></svg-icon>
+					</div>
+					<span class="setting-text">关注项目</span>
+					<el-button type="text" class="setting-btn">关注项目设置</el-button>
 				</div>
-				<span class="text">手机号</span>
-				<el-button>修改手机号</el-button>
-			</div>
-			<div class="change_content">
-				<div class="icon">
-					<svg-icon icon-class="email"></svg-icon>
+				<div class="setting-card">
+					<div class="setting-icon">
+						<svg-icon icon-class="special"></svg-icon>
+					</div>
+					<span class="setting-text">个性化</span>
+					<el-button type="text" class="setting-btn">个性化设置</el-button>
 				</div>
-				<span class="text">邮箱</span>
-				<el-button>修改邮箱</el-button>
-			</div>
-		</div>
-		<!-- <el-divider><span style="color: #606266">个性化</span></el-divider> -->
-		<div class="change">
-			<div class="change_content">
-				<div class="icon">
-					<svg-icon icon-class="pagination"></svg-icon>
-				</div>
-				<span class="text">分页</span>
-				<el-button @click="changePageSize">列表条数设置</el-button>
-			</div>
-			<div class="change_content">
-				<div class="icon">
-					<svg-icon icon-class="project"></svg-icon>
-				</div>
-				<span class="text">关注项目</span>
-				<el-button @click="setFollow">关注项目设置</el-button>
-			</div>
-			<div class="change_content">
-				<div class="icon">
-					<svg-icon icon-class="special"></svg-icon>
-				</div>
-				<span class="text">个性化</span>
-				<el-button>个性化设置</el-button>
 			</div>
 		</div>
+
+		<!-- 弹窗组件（逻辑不变，保留原功能） -->
+		<Dialog v-model:visible="changeVisible" :title="title" width="30%">
+			<change ref="changeRef" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="changeVisible = false">取消</el-button>
+					<el-button type="primary" @click="save">保存</el-button>
+				</span>
+			</template>
+		</Dialog>
+		<Dialog v-model:visible="pageVisible" title="每页数量" width="20%">
+			<page ref="pageRef" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="pageVisible = false">取消</el-button>
+					<el-button type="primary" @click="savePage">保存</el-button>
+				</span>
+			</template>
+		</Dialog>
+		<Dialog v-model:visible="followVisible" title="关注项目" width="60%" appendToBody>
+			<follow ref="followRef" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="followVisible = false">关闭</el-button>
+				</span>
+			</template>
+		</Dialog>
 	</div>
-	<Dialog v-model:visible="changeVisible" :title="title" width="30%">
-		<change ref="changeRef" />
-		<template #footer>
-			<span class="dialog-footer">
-				<el-button @click="changeVisible = false">取消</el-button>
-				<el-button type="primary" @click="save">保存</el-button>
-			</span>
-		</template>
-	</Dialog>
-	<Dialog v-model:visible="pageVisible" title="每页数量" width="20%">
-		<page ref="pageRef" />
-		<template #footer>
-			<span class="dialog-footer">
-				<el-button @click="pageVisible = false">取消</el-button>
-				<el-button type="primary" @click="savePage">保存</el-button>
-			</span>
-		</template>
-	</Dialog>
-	<Dialog v-model:visible="followVisible" title="关注项目" width="60%" appendToBody>
-		<follow ref="followRef" />
-		<template #footer>
-			<span class="dialog-footer">
-				<el-button @click="followVisible = false">关闭</el-button>
-			</span>
-		</template>
-	</Dialog>
 </template>
+
 <script setup>
+// 原有逻辑不变，直接保留
 import change from './change/index.vue'
 import page from './page/index.vue'
 import follow from './follow/index.vue'
 import useUserStore from '@/store/modules/user'
 import Dialog from '@/components/Dialog/index.vue'
 import api from '@/api/system/user'
-import { nextTick, getCurrentInstance } from 'vue'
+import { nextTick, getCurrentInstance, ref } from 'vue'
+
 const { proxy } = getCurrentInstance()
 const userStore = useUserStore()
 const title = ref('修改密码')
 const changeVisible = ref(false)
+const changeRef = ref()
+const pageVisible = ref(false)
+const pageRef = ref(false)
+const followVisible = ref(false)
+
 const changePassWord = () => {
 	changeVisible.value = true
 	title.value = '修改密码'
 	nextTick(() => {
-		changeRef.value.resetForm()
+		changeRef.value?.resetForm()
 	})
 }
 
-const changeRef = ref()
 const save = async () => {
-	if (await changeRef.value.validate()) {
-		const params = JSON.parse(JSON.stringify(changeRef.value.formData)) // 取到子组件的formData
+	if (await changeRef.value?.validate()) {
+		const params = JSON.parse(JSON.stringify(changeRef.value.formData))
 		proxy.$modal.confirm('确定保存？').then(() => {
 			api.updateUserPwd(params.oldPassword, params.newPassword).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
@@ -126,15 +145,14 @@ const save = async () => {
 		})
 	}
 }
-const pageVisible = ref(false)
-const pageRef = ref(false)
+
 const changePageSize = () => {
 	pageVisible.value = true
 }
-// 保存
+
 const savePage = async () => {
-	if (await pageRef.value.validate()) {
-		const params = JSON.parse(JSON.stringify(pageRef.value.formData)) // 取到子组件的formData
+	if (await pageRef.value?.validate()) {
+		const params = JSON.parse(JSON.stringify(pageRef.value.formData))
 		proxy.$modal.confirm('确定保存？').then(() => {
 			api.updatePageNum(params).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
@@ -146,61 +164,147 @@ const savePage = async () => {
 		})
 	}
 }
-const followVisible = ref(false)
+
 const setFollow = () => {
 	followVisible.value = true
 }
 </script>
+
 <style lang="scss" scoped>
-.user {
+// 全局容器样式
+.user-container {
 	width: 100%;
-	height: 100%;
-	padding: 1.25rem;
+	min-height: 100%;
+	padding: 1rem;
+	box-sizing: border-box;
 }
-.information {
-	width: 100%;
-	height: 11.5rem;
+
+// 个人信息卡片
+.user-info-card {
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	color: #606266;
+	padding: 2rem;
 	background: #f5f7fa;
-	position: relative;
-	.info {
-		margin-bottom: 0.625rem;
-	}
-	.avatar {
-		border-radius: 6.25rem;
-		overflow: hidden;
-		position: absolute;
-		top: 3.125rem;
-		left: 3.125rem;
+	border-radius: 0.75rem;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+	margin-bottom: 2rem;
+}
+
+.avatar-wrapper {
+	width: 8rem;
+	height: 8rem;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-right: 2.5rem;
+	border: 4px solid #f5f7fa;
+}
+
+.avatar {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+
+.user-base-info {
+	color: #303133;
+}
+
+.info-item {
+	margin-bottom: 1rem;
+	font-size: 1rem;
+}
+
+.info-label {
+	color: #606266;
+	margin-right: 0.5rem;
+}
+
+.info-value {
+	font-weight: 500;
+}
+
+// 设置区域通用样式
+.setting-section {
+	margin-bottom: 2.5rem;
+}
+
+.divider-title {
+	font-size: 1.1rem;
+	font-weight: 500;
+	color: #303133;
+}
+
+// 设置项网格布局
+.setting-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.5rem;
+	margin-top: 1rem;
+}
+
+// 设置项卡片样式
+.setting-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem 1rem;
+	background: #f5f7fa;
+	border-radius: 0.75rem;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	transition: all 0.3s ease;
+	cursor: pointer;
+
+	&:hover {
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+		transform: translateY(-2px);
 	}
 }
-.change {
-	width: 100%;
-	height: 13.75rem;
-	display: flex;
-	justify-content: space-between;
-	margin-top: 1.25rem;
-	color: #606266;
-	.change_content {
-		width: 30%;
+
+.setting-icon {
+	color: #409eff;
+	width: 3.5rem;
+	height: 3.5rem;
+	margin-bottom: 1rem;
+
+	.svg-icon {
+		width: 100%;
 		height: 100%;
-		background: #f5f7fa;
-		display: flex;
+	}
+}
+
+.setting-text {
+	font-size: 1rem;
+	color: #303133;
+	margin-bottom: 1rem;
+}
+
+.setting-btn {
+	color: #409eff !important;
+	font-size: 0.9rem;
+}
+
+// 响应式适配
+@media (max-width: 1200px) {
+	.setting-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 768px) {
+	.user-info-card {
 		flex-direction: column;
-		align-items: center;
-		justify-content: space-around;
-		.icon {
-			color: rgb(51, 153, 255);
-			width: 3.75rem;
-			height: 3.75rem;
-			.svg-icon {
-				width: 100%;
-				height: 100%;
-			}
-		}
+		text-align: center;
+	}
+
+	.avatar-wrapper {
+		margin-right: 0;
+		margin-bottom: 1.5rem;
+	}
+
+	.setting-grid {
+		grid-template-columns: 1fr;
 	}
 }
 </style>
