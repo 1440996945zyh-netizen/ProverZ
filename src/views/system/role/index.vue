@@ -11,6 +11,8 @@
 			:tableData="tableData"
 			:cellClickEvent="cellClickEvent"
 			:total="total"
+			:id="tableId"
+			:isShowAdvancedQuery="true"
 		/>
 		<!-- 新增，修改抽屉组件 -->
 		<el-drawer v-model="roleVisible" :title="drawerTitle" size="65%">
@@ -37,7 +39,7 @@
 <script setup name="role">
 import BaseTable from '@/components/BaseTable/index.vue'
 import { addRole, changeRoleStatus, delRole, getRole, listRole, updateRole } from '@/api/system/role'
-import { ref, reactive } from 'vue'
+import { ref, reactive,provide } from 'vue'
 import Drawer from './drawer/index.vue'
 import Dialog from './dialog/index.vue'
 import { ElButton, ElSwitch } from 'element-plus'
@@ -54,6 +56,7 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
+const tableId = ref('role_1762244958298')
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
@@ -175,12 +178,22 @@ const buttonList = reactive([
 		permission: 'system:role:dispatchUser', // 权限
 	},
 ])
-
+const advancedQuery = ref([])
+provide('onQuery', data => {
+	console.log('父组件收到数据：', data)
+	advancedQuery.value = JSON.parse(JSON.stringify(data))
+	// 处理数据...
+	getList()
+})
 // 点击查询的事件
 const getList = e => {
 	buttonList[1].disabled = true
 	queryParams.value = e
-	listRole(queryParams.value).then(res => {
+	let params = {
+		...queryParams.value,
+		advancedQuery:JSON.stringify(advancedQuery.value),
+	}
+	listRole(params).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
