@@ -13,7 +13,6 @@
 				:total="total"
 				:id="tableId"
 				:isShowAdvancedQuery="true"
-				
 			/>
 		</div>
 		<el-drawer v-model="dictVisible" :title="title" size="35%">
@@ -38,14 +37,20 @@
 
 <script setup name="dict">
 import BaseTable from '@/components/BaseTable/index.vue'
-import { ref, reactive } from 'vue'
+import { ref, reactive, provide } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import api from '@/api/master/dict/index.js'
 import detail from './detail/index.vue'
 import drawerList from './drawerList/index.vue'
 
 const { proxy } = getCurrentInstance()
-
+const advancedQuery = ref([])
+provide('onQuery', data => {
+	console.log('父组件收到数据：', data)
+	advancedQuery.value = JSON.parse(JSON.stringify(data))
+	// 处理数据...
+	getList()
+})
 const baseTable = ref() // table的ref
 const detailRef = ref() // 明细组件ref
 const drawerListRef = ref() //明细列表
@@ -168,7 +173,11 @@ const cellClickEvent = ({ row }) => {
 /** 查询字典类型列表 */
 const getList = e => {
 	queryParams.value = e
-	api.getAllDictTypeList(queryParams.value).then(response => {
+	let params ={
+		...queryParams.value,
+		advancedQuery:JSON.stringify(advancedQuery.value),
+	}
+	api.getAllDictTypeList(params).then(response => {
 		tableData.value = response.data.pages
 		total.value = response.data.totalNum
 	})
