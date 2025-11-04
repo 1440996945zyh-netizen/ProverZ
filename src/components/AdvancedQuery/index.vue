@@ -415,8 +415,7 @@ const getSelectDataConfig = condition => {
 				types: condition.colSelectKey,
 			},
 		}
-	} else {
-		// 其他情况默认使用 type 和 types 参数
+	} else if (condition.colSelectSource === 'USER') {
 		return {
 			url: '/api/internal/public/getLocalSelect',
 			params: {
