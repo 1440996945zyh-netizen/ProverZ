@@ -643,14 +643,34 @@ const handleQuery = () => {
 				filterType: group.filterType, // 组内匹配
 				conditions: group.conditions.map(cond => {
 					const column = tableColumns.value.find(item => item.prop === cond.columnName)
+					
+					// 处理多选类型的值
+					let processedValue = cond.value
+					let processedStartValue = cond.startValue
+					let processedEndValue = cond.endValue
+					
+					if (column && column.colType === '6') {
+						// 如果是多选类型且值是数组，转换为逗号分隔的字符串
+						if (Array.isArray(cond.value)) {
+							processedValue = cond.value.join(',')
+						}
+						// 如果区间值也是数组
+						if (Array.isArray(cond.startValue)) {
+							processedStartValue = cond.startValue.join(',')
+						}
+						if (Array.isArray(cond.endValue)) {
+							processedEndValue = cond.endValue.join(',')
+						}
+					}
+					
 					return {
 						columnName: cond.columnName,
 						columnLabel: getColumnLabel(cond.columnName),
 						operator: cond.operator,
 						operatorLabel: cond.operatorLabel,
-						value: cond.value,
-						startValue: cond.startValue,
-						endValue: cond.endValue,
+						value: processedValue, // 使用处理后的值
+						startValue: processedStartValue, // 使用处理后的值
+						endValue: processedEndValue, // 使用处理后的值
 						colType: column ? column.colType : '',
 						dateFormat: getDateFormat(cond.dateFormat), // 日期格式code
 					}
