@@ -51,7 +51,12 @@
 								:rules="groupFilterRules"
 								class="filter-form-item"
 							>
-								<el-select v-model="group.filterType" placeholder="请选择组内匹配" class="filter-select" :disabled="group.conditions.length === 1">
+								<el-select
+									v-model="group.filterType"
+									placeholder="请选择组内匹配"
+									class="filter-select"
+									:disabled="group.conditions.length === 1"
+								>
 									<el-option label="AND(组内所有条件都要求匹配)" value="AND"></el-option>
 									<el-option label="OR(组内条件中的任意一个匹配)" value="OR"></el-option>
 								</el-select>
@@ -472,8 +477,11 @@ function createNewGroup() {
  * 获取日期格式
  */
 const getDateFormat = dateFormatCode => {
-	console.log('dateFormatCode =>', dateFormatCode);
-	console.log('dateFormatMap.value.find(item => item.value == dateFormatCode)?.label =>', dateFormatMap.value.find(item => item.value == dateFormatCode)?.label);
+	console.log('dateFormatCode =>', dateFormatCode)
+	console.log(
+		'dateFormatMap.value.find(item => item.value == dateFormatCode)?.label =>',
+		dateFormatMap.value.find(item => item.value == dateFormatCode)?.label
+	)
 	return dateFormatMap.value.find(item => item.value == dateFormatCode)?.label || ''
 }
 
@@ -583,7 +591,6 @@ const validateConditions = (isSubmit = true) => {
 		isSubmit && ElMessage.error('至少需要一个查询条件组')
 		return false
 	}
-
 	for (let groupIndex = 0; groupIndex < queryForm.value.groups.length; groupIndex++) {
 		const group = queryForm.value.groups[groupIndex]
 
@@ -599,7 +606,7 @@ const validateConditions = (isSubmit = true) => {
 
 		for (let conditionIndex = 0; conditionIndex < group.conditions.length; conditionIndex++) {
 			const condition = group.conditions[conditionIndex]
-
+			console.log('condition =>', condition);
 			if (!condition.columnName) {
 				isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请选择前端表格字段`)
 				return false
@@ -623,7 +630,7 @@ const validateConditions = (isSubmit = true) => {
 				}
 			}
 			// 其他运算符需要一个值
-			else if (!condition.value) {
+			else if (condition.value === null || condition.value === undefined || condition.value === '') {
 				isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请设置条件值`)
 				return false
 			}
@@ -642,12 +649,12 @@ const handleQuery = () => {
 				filterType: group.filterType, // 组内匹配
 				conditions: group.conditions.map(cond => {
 					const column = tableColumns.value.find(item => item.prop === cond.columnName)
-					
+
 					// 处理多选类型的值
 					let processedValue = cond.value
 					let processedStartValue = cond.startValue
 					let processedEndValue = cond.endValue
-					
+
 					if (column && column.colType === '6') {
 						// 如果是多选类型且值是数组，转换为逗号分隔的字符串
 						if (Array.isArray(cond.value)) {
@@ -661,7 +668,7 @@ const handleQuery = () => {
 							processedEndValue = cond.endValue.join(',')
 						}
 					}
-					
+
 					return {
 						columnName: cond.columnName,
 						columnLabel: getColumnLabel(cond.columnName),
