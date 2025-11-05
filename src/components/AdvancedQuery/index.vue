@@ -679,6 +679,7 @@ const handleQuery = () => {
 						endValue: processedEndValue, // 使用处理后的值
 						colType: column ? column.colType : '',
 						dateFormat: getDateFormat(cond.dateFormat), // 日期格式code
+						isBusinessMultiSelect: column?.isBusinessMultiSelect || 0,
 					}
 				}),
 			}
