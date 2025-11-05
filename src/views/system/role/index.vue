@@ -90,7 +90,7 @@ const tableColumns = ref([
 		},
 	},
 	{ label: '备注', prop: 'remark' },
-	{ label: '修改人', prop: 'updateName' },
+	{ label: '修改人', prop: 'updateByName' },
 	{ label: '修改时间', prop: 'updateTime', align: 'center', width: 'time' },
 	{
 		prop: '',
