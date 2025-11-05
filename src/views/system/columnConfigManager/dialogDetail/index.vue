@@ -138,6 +138,7 @@ const tableColumns = reactive([
 	{ prop: 'colSelectSource', label: '下拉框数据源', minWidth: 120, editType: 'select', editRender: {}, align: 'left' },
 	{ prop: 'colSelectKey', label: '下拉框key', minWidth: 120, editType: 'input', editRender: {}, align: 'left' },
 	{ prop: 'dateFormat', label: '日期格式', minWidth: 120, editType: 'select', editRender: {}, align: 'left' },
+	{ prop: 'isBusinessMultiSelect', label: '业务是否多选', minWidth: 120, editType: 'select', editRender: {}, align: 'left' },
 	{
 		prop: 'status',
 		label: '状态',
@@ -196,6 +197,7 @@ const addTableData = e => {
 			colType: '',
 			colSelectKey: '',
 			colSelectSource: '',
+			isBusinessMultiSelect: '0',
 			dateFormat: '', // 默认日期格式
 			status: '1',
 			sortNum: tableData.value.length + 1,
@@ -230,7 +232,6 @@ const getTreeselect = async () => {
 	}
 }
 
-
 const getColumnTypeOptions = async () => {
 	try {
 		// 获取列类型
@@ -249,6 +250,7 @@ const getColumnTypeOptions = async () => {
 				label: item.label,
 			})),
 		})
+
 		// 获取日期格式
 		const dateRes = await publicApi.getLocalSelect({ type: 'CONSTANT', types: 'AD_SEARCH_COL_DATE_FORMAT' })
 		proxy.setEditTableOptions(tableColumns, {
@@ -257,7 +259,20 @@ const getColumnTypeOptions = async () => {
 				label: item.label,
 			})),
 		})
-	
+
+		// 获取业务是否多选
+		proxy.setEditTableOptions(tableColumns, {
+			isBusinessMultiSelect: [
+				{
+					value: '0',
+					label: '否',
+				},
+				{
+					value: '1',
+					label: '是',
+				},
+			],
+		})
 	} catch (error) {
 		console.error('获取列类型失败', error)
 		proxy.$modal.msgError('获取列类型失败，请稍后重试')
@@ -381,6 +396,7 @@ onMounted(() => {
 			colType: '',
 			colSelectKey: '',
 			colSelectSource: '',
+			isBusinessMultiSelect: '0',
 			dateFormat: '', // 默认日期格式
 			status: '1',
 			sortNum: 1,

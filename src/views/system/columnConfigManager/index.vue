@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-25 14:07:02
- * @LastEditTime: 2025-10-31 16:34:55
+ * @LastEditTime: 2025-11-05 16:38:23
  * @LastEditors: zhangsd
  * @Description: 高级查询表格列配置管理
  * @FilePath: \view\src\views\system\ColumnConfigManager\index.vue
@@ -55,9 +55,9 @@ import DialogDetail from '../columnConfigManager/dialogDetail/index'
 import api from '@/api/system/columnConfigManager'
 import { getContentsMenu } from '@/api/system/menu'
 import { useRoute } from 'vue-router'
-import usePermissionStore from '@/store/modules/permission'
+
 import { provide } from 'vue'
-const permissionStore = usePermissionStore()
+
 const { proxy } = getCurrentInstance() // 获取当前实例，用于访问组件的属性和方法
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHight.value - 15) // 表格高度
@@ -130,11 +130,17 @@ const dialogVisible = ref(false) // 弹窗是否可见
 const dialogTitle = ref('新增')
 // 查询条件
 const selectData = reactive([
+	
 	{
+		name: '菜单名称', // 搜索框name
+		type: 'input', // 搜索框类型
+		modelValue: 'menuName', // 绑定字段
+		span: 12, // 占位，共24
+	},{
 		name: '前端ID', // 搜索框name
 		type: 'input', // 搜索框类型
 		modelValue: 'tableId', // 绑定字段
-		span: 24, // 占位，共24
+		span: 12, // 占位，共24
 	},
 
 ])
@@ -191,6 +197,7 @@ const saveTableColumns = () => {
 			colSelectKey: item.colSelectKey,
 			sortNum: item.sortNum,
 			dateFormat: item.dateFormat,
+			isBusinessMultiSelect: item.isBusinessMultiSelect,
 			colSelectSource: item.colSelectSource,
 			remark: columnConfigManagerDialogRef.value.columnConfigForm.remark,
 		}))
@@ -226,10 +233,7 @@ const getList = e => {
 		.then(response => {
 			tableData.value = response.data.pages
 			total.value = response.data.totalNum
-			tableData.value.forEach(item => {
-				const currentMenu = permissionStore.getFlatMenuList().find(menu => menu.id === item.menuId)
-				item.menuName = currentMenu?.meta?.title || ''
-			})
+		
 		})
 		.catch(() => {
 			// tableLoading.value = false
