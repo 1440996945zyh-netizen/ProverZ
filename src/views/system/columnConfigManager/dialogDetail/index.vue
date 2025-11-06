@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-26 10:09:37
- * @LastEditTime: 2025-10-31 15:45:32
+ * @LastEditTime: 2025-11-06 10:43:54
  * @LastEditors: zhangsd
  * @Description: 
  * @FilePath: \view\src\views\system\columnConfigManager\dialogDetail\index.vue
@@ -62,7 +62,7 @@
 				:loading="false"
 				:showFooter="true"
 				:editRules="editRules"
-				:hasAdd="true"
+				
 				:headerCellClickEvent="addTableData"
 				:headerCellClassName="headerCellClassName"
 				sync-resize
@@ -119,6 +119,8 @@ const editRules = reactive({
 	colType: [{ required: true, message: '请选择列类型', trigger: 'blur' }],
 	status: [{ required: true, message: '请选择状态', trigger: 'blur' }],
 })
+const DEFAULT_IS_BUSINESS_MULTI_SELECT = '0'
+const DEFAULT_STATUS = '1'
 //表格列
 const tableColumns = reactive([
 	{ prop: 'sortNum', label: '序号', width: 100, type: 'seq', align: 'center' },
@@ -151,8 +153,6 @@ const tableColumns = reactive([
 						changeStatus(row)
 					},
 					modelValue: row.status,
-					'active-text': '启用',
-					'inactive-text': '停用',
 					'active-value': '1',
 					'inactive-value': '0',
 				}),
@@ -190,22 +190,25 @@ const editTableRef = ref()
 //点击新增表头新增
 const addTableData = e => {
 	if (e.column.title == '添加') {
-		tableData.value.push({
+		const newRow = {
 			row_id: Date.now(), // 添加唯一标识
 			colLabel: '',
 			colKey: '',
 			colType: '',
 			colSelectKey: '',
 			colSelectSource: '',
-			isBusinessMultiSelect: '0',
+			isBusinessMultiSelect: DEFAULT_IS_BUSINESS_MULTI_SELECT, // 明确使用默认值 '0'
 			dateFormat: '', // 默认日期格式
-			status: '1',
+			status: DEFAULT_STATUS, // 明确使用默认值 '1'
 			sortNum: tableData.value.length + 1,
+		}
+		nextTick(() => {
+			tableData.value.push(newRow)
 		})
 	}
 }
 const changeStatus = row => {
-	row.status = row.status === '0' ? '1' : '0'
+	row.status = row.status == '0' ? '1' : '0'
 }
 
 //鼠标掠过新增表头变手
@@ -396,9 +399,9 @@ onMounted(() => {
 			colType: '',
 			colSelectKey: '',
 			colSelectSource: '',
-			isBusinessMultiSelect: '0',
+			isBusinessMultiSelect: DEFAULT_IS_BUSINESS_MULTI_SELECT,
 			dateFormat: '', // 默认日期格式
-			status: '1',
+			status: DEFAULT_STATUS,
 			sortNum: 1,
 		})
 	}

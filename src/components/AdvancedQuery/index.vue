@@ -12,12 +12,12 @@
 				<!-- 查询条件组列表 -->
 				<div v-for="(group, groupIndex) in queryForm.groups" :key="group.id" class="query-group">
 					<div class="group-header">
-						<div class="group-header-content">
+						<div class="group-header-content" style="padding: 0 8px">
 							<el-row :gutter="10" class="group-connect-row">
-								<el-col :span="3" style="display: flex; align-items: center">
+								<el-col :span="2" style="display: flex; align-items: center">
 									<span class="group-title">条件组 {{ groupIndex + 1 }}</span>
 								</el-col>
-								<el-col :span="18">
+								<el-col :span="19">
 									<el-form-item
 										label="连接条件:"
 										:prop="`groups[${groupIndex}].connectType`"
@@ -30,249 +30,256 @@
 										</el-select>
 									</el-form-item>
 								</el-col>
-							</el-row>
-						</div>
-						<div class="group-actions">
-							<el-button
-								type="danger"
-								icon="Minus"
-								@click="removeGroup(groupIndex)"
-								:disabled="queryForm.groups.length <= 1"
-							></el-button>
-						</div>
-					</div>
-
-					<!-- 组内过滤条件匹配 -->
-					<el-row :gutter="10" class="group-filter-row">
-						<el-col :span="18">
-							<el-form-item
-								label="组内匹配:"
-								:prop="`groups[${groupIndex}].filterType`"
-								:rules="groupFilterRules"
-								class="filter-form-item"
-							>
-								<el-select
-									v-model="group.filterType"
-									placeholder="请选择组内匹配"
-									class="filter-select"
-									:disabled="group.conditions.length === 1"
-								>
-									<el-option label="AND(组内所有条件都要求匹配)" value="AND"></el-option>
-									<el-option label="OR(组内条件中的任意一个匹配)" value="OR"></el-option>
-								</el-select>
-							</el-form-item>
-						</el-col>
-						<el-col :span="6">
-							<el-button type="primary" @click="addConditionToGroup(group)" icon="Plus" class="add-condition-btn">
-								添加条件
-							</el-button>
-						</el-col>
-					</el-row>
-
-					<!-- 组内条件列表 -->
-					<div v-for="(condition, conditionIndex) in group.conditions" :key="condition.id" class="condition-wrapper">
-						<el-row :gutter="10" class="condition-row">
-							<!-- 前端表格字段 -->
-							<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item">
-								<el-select
-									v-model="condition.columnName"
-									placeholder="请选择前端表格字段"
-									@change="handleColumnChange(condition, $event)"
-									clearable
-									class="full-width"
-								>
-									<el-option
-										v-for="item in tableColumns"
-										:key="item.prop"
-										:label="item.label"
-										:value="item.prop"
-									></el-option>
-								</el-select>
-							</el-col>
-
-							<!-- 运算符 -->
-							<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item">
-								<Select
-									:selectData="getFilteredOperatorOptions(condition.columnType)"
-									v-model:value="condition.operator"
-									v-model:label="condition.operatorLabel"
-									:placeholder="'请选择运算符'"
-									:disabled="!condition.columnName"
-									@change="handleOperatorChange(condition, $event)"
-									class="full-width"
-								/>
-							</el-col>
-
-							<!-- 条件值 -->
-							<el-col :span="8" :md="8" :sm="8" :xs="24" class="condition-item">
-								<!-- 条件值 - 根据字段类型动态显示 -->
-								<template v-if="condition.columnName && condition.operator">
-									<!-- 不需要值的运算符 -->
-									<template v-if="['empty', 'notEmpty'].includes(condition.operator)">
-										<el-input
-											v-model="condition.value"
-											placeholder="该运算符无需输入值"
-											disabled
-											class="disabled-input"
-										/>
-									</template>
-									<!-- 区间类型（当运算符为 'interval' 或 'between' 时） -->
-									<template v-else-if="condition.operator === 'interval' || condition.operator === 'between'">
-										<!-- 文本类型的区间 -->
-										<template v-if="condition.columnType === '1'">
-											<el-row :gutter="5" class="interval-row">
-												<el-col :span="11">
-													<el-input v-model="condition.startValue" placeholder="开始值" />
-												</el-col>
-												<el-col :span="2" class="interval-separator">-</el-col>
-												<el-col :span="11">
-													<el-input v-model="condition.endValue" placeholder="结束值" />
-												</el-col>
-											</el-row>
-										</template>
-										<!-- 其他区间类型保持不变 -->
-										<template v-else-if="condition.columnType === '3'">
-											<el-row :gutter="5" class="interval-row">
-												<el-col :span="11">
-													<el-input-number
-														v-model="condition.startValue"
-														placeholder="开始值"
-														class="full-width"
-														:controls="false"
-													/>
-												</el-col>
-												<el-col :span="2" class="interval-separator">-</el-col>
-												<el-col :span="11">
-													<el-input-number
-														v-model="condition.endValue"
-														placeholder="结束值"
-														class="full-width"
-														:controls="false"
-													/>
-												</el-col>
-											</el-row>
-										</template>
-										<template v-else-if="condition.columnType === '4'">
-											<el-row :gutter="5" class="interval-row">
-												<el-col :span="11">
-													<el-date-picker
-														v-model="condition.startValue"
-														type="datetime"
-														placeholder="开始时间"
-														:format="getDateFormat(condition.dateFormat)"
-														:value-format="getDateFormat(condition.dateFormat)"
-														class="full-width"
-													/>
-												</el-col>
-												<el-col :span="2" class="interval-separator">-</el-col>
-												<el-col :span="11">
-													<el-date-picker
-														v-model="condition.endValue"
-														type="datetime"
-														placeholder="结束时间"
-														:format="getDateFormat(condition.dateFormat)"
-														:value-format="getDateFormat(condition.dateFormat)"
-														class="full-width"
-													/>
-												</el-col>
-											</el-row>
-										</template>
-										<template v-else-if="condition.columnType === '5' || condition.columnType === '6'">
-											<el-row :gutter="5" class="interval-row">
-												<el-col :span="11">
-													<Select
-														:dataConfig="getSelectDataConfig(condition)"
-														v-model:value="condition.startValue"
-														v-model:label="condition.startValueLabel"
-														:placeholder="'开始值'"
-														class="full-width"
-													/>
-												</el-col>
-												<el-col :span="2" class="interval-separator">-</el-col>
-												<el-col :span="11">
-													<Select
-														:dataConfig="getSelectDataConfig(condition)"
-														v-model:value="condition.endValue"
-														v-model:label="condition.endValueLabel"
-														:placeholder="'结束值'"
-														class="full-width"
-													/>
-												</el-col>
-											</el-row>
-										</template>
-										<template v-else>
-											<el-row :gutter="5" class="interval-row">
-												<el-col :span="11">
-													<el-input v-model="condition.startValue" placeholder="开始值" />
-												</el-col>
-												<el-col :span="2" class="interval-separator">-</el-col>
-												<el-col :span="11">
-													<el-input v-model="condition.endValue" placeholder="结束值" />
-												</el-col>
-											</el-row>
-										</template>
-									</template>
-									<!-- 非区间类型（运算符不是 'interval' 或 'between'） -->
-									<template v-else>
-										<!-- 文本类型 -->
-										<el-input v-if="condition.columnType === '1'" v-model="condition.value" placeholder="请输入文本" />
-										<!-- 数字类型 -->
-										<el-input-number
-											v-else-if="condition.columnType === '3'"
-											v-model="condition.value"
-											placeholder="请输入数字"
-											class="full-width"
-											:controls="false"
-										/>
-										<!-- 日期类型 -->
-										<el-date-picker
-											v-else-if="condition.columnType === '4'"
-											v-model="condition.value"
-											type="datetime"
-											placeholder="请选择日期时间"
-											:format="getDateFormat(condition.dateFormat)"
-											:value-format="getDateFormat(condition.dateFormat)"
-											class="full-width"
-										/>
-										<!-- 单选下拉框类型 -->
-										<Select
-											v-else-if="condition.columnType === '5'"
-											:dataConfig="getSelectDataConfig(condition)"
-											v-model:value="condition.value"
-											v-model:label="condition.valueLabel"
-											:placeholder="'请选择'"
-											class="full-width"
-										/>
-										<!-- 多选下拉框类型 -->
-										<Select
-											v-else-if="condition.columnType === '6'"
-											:dataConfig="getSelectDataConfig(condition)"
-											v-model:value="condition.value"
-											v-model:label="condition.valueLabel"
-											:placeholder="'请选择'"
-											multiple
-											class="full-width"
-										/>
-										<!-- 其他类型默认显示文本框 -->
-										<el-input v-else v-model="condition.value" placeholder="请输入值" />
-									</template>
-								</template>
-								<el-input v-else v-model="condition.value" placeholder="请先选择字段和运算符" disabled />
-							</el-col>
-
-							<!-- 操作按钮 -->
-							<el-col :span="2" :md="2" :sm="24" :xs="24" class="condition-actions">
-								<div class="action-buttons">
+								<el-col :span="3" style="display: flex; justify-content: flex-end">
 									<el-button
 										type="danger"
 										icon="Minus"
-										@click="removeConditionFromGroup(group, conditionIndex)"
-										:disabled="group.conditions.length <= 1"
-										plain
+										@click="removeGroup(groupIndex)"
+										:disabled="queryForm.groups.length <= 1"
 									></el-button>
-								</div>
+								</el-col>
+							</el-row>
+						</div>
+					</div>
+
+					<div class="group-header-content">
+						<!-- 组内过滤条件匹配 -->
+						<el-row :gutter="10" class="group-filter-row">
+							<el-col :span="2"></el-col>
+							<el-col :span="19">
+								<el-form-item
+									label="组内匹配:"
+									:prop="`groups[${groupIndex}].filterType`"
+									:rules="groupFilterRules"
+									class="filter-form-item"
+								>
+									<el-select
+										v-model="group.filterType"
+										placeholder="请选择组内匹配"
+										class="filter-select"
+										:disabled="group.conditions.length === 1"
+									>
+										<el-option label="AND(组内所有条件都要求匹配)" value="AND"></el-option>
+										<el-option label="OR(组内条件中的任意一个匹配)" value="OR"></el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="3" style="display: flex; justify-content: flex-end">
+								<el-button type="primary" @click="addConditionToGroup(group)" icon="Plus"></el-button>
 							</el-col>
 						</el-row>
+					</div>
+					<div class="group-header-content">
+						<!-- 组内条件列表 -->
+						<div v-for="(condition, conditionIndex) in group.conditions" :key="condition.id" class="condition-wrapper">
+							<el-row  class="condition-row">
+								<el-col :span="2"></el-col>
+								<!-- 前端表格字段 -->
+								<el-col :span="5" :md="5" :sm="8" :xs="24" class="condition-item">
+									<el-select
+										v-model="condition.columnName"
+										placeholder="请选择前端表格字段"
+										@change="handleColumnChange(condition, $event)"
+										clearable
+										class="full-width"
+									>
+										<el-option
+											v-for="item in tableColumns"
+											:key="item.prop"
+											:label="item.label"
+											:value="item.prop"
+										></el-option>
+									</el-select>
+								</el-col>
+
+								<!-- 运算符 -->
+								<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item" style="padding:0px 2px ;">
+									<Select
+										:selectData="getFilteredOperatorOptions(condition.columnType)"
+										v-model:value="condition.operator"
+										v-model:label="condition.operatorLabel"
+										:placeholder="'请选择运算符'"
+										:disabled="!condition.columnName"
+										@change="handleOperatorChange(condition, $event)"
+										class="full-width"
+									/>
+								</el-col>
+
+								<!-- 条件值 -->
+								<el-col :span="8" :md="8" :sm="8" :xs="24" class="condition-item" >
+									<!-- 条件值 - 根据字段类型动态显示 -->
+									<template v-if="condition.columnName && condition.operator">
+										<!-- 不需要值的运算符 -->
+										<template v-if="['empty', 'notEmpty'].includes(condition.operator)">
+											<el-input
+												v-model="condition.value"
+												placeholder="该运算符无需输入值"
+												disabled
+												class="disabled-input"
+											/>
+										</template>
+										<!-- 区间类型（当运算符为 'interval' 或 'between' 时） -->
+										<template v-else-if="condition.operator === 'interval' || condition.operator === 'between'">
+											<!-- 文本类型的区间 -->
+											<template v-if="condition.columnType === '1'">
+												<el-row :gutter="5" class="interval-row">
+													<el-col :span="11">
+														<el-input v-model="condition.startValue" placeholder="开始值" />
+													</el-col>
+													<el-col :span="2" class="interval-separator">-</el-col>
+													<el-col :span="11">
+														<el-input v-model="condition.endValue" placeholder="结束值" />
+													</el-col>
+												</el-row>
+											</template>
+											<!-- 其他区间类型保持不变 -->
+											<template v-else-if="condition.columnType === '3'">
+												<el-row :gutter="5" class="interval-row">
+													<el-col :span="11">
+														<el-input-number
+															v-model="condition.startValue"
+															placeholder="开始值"
+															class="full-width"
+															:controls="false"
+														/>
+													</el-col>
+													<el-col :span="2" class="interval-separator">-</el-col>
+													<el-col :span="11">
+														<el-input-number
+															v-model="condition.endValue"
+															placeholder="结束值"
+															class="full-width"
+															:controls="false"
+														/>
+													</el-col>
+												</el-row>
+											</template>
+											<template v-else-if="condition.columnType === '4'">
+												<el-row :gutter="5" class="interval-row">
+													<el-col :span="11">
+														<el-date-picker
+															v-model="condition.startValue"
+															type="datetime"
+															placeholder="开始时间"
+															:format="getDateFormat(condition.dateFormat)"
+															:value-format="getDateFormat(condition.dateFormat)"
+															class="full-width"
+														/>
+													</el-col>
+													<el-col :span="2" class="interval-separator">-</el-col>
+													<el-col :span="11">
+														<el-date-picker
+															v-model="condition.endValue"
+															type="datetime"
+															placeholder="结束时间"
+															:format="getDateFormat(condition.dateFormat)"
+															:value-format="getDateFormat(condition.dateFormat)"
+															class="full-width"
+														/>
+													</el-col>
+												</el-row>
+											</template>
+											<template v-else-if="condition.columnType === '5' || condition.columnType === '6'">
+												<el-row :gutter="5" class="interval-row">
+													<el-col :span="11">
+														<Select
+															:dataConfig="getSelectDataConfig(condition)"
+															v-model:value="condition.startValue"
+															v-model:label="condition.startValueLabel"
+															:placeholder="'开始值'"
+															class="full-width"
+														/>
+													</el-col>
+													<el-col :span="2" class="interval-separator">-</el-col>
+													<el-col :span="11">
+														<Select
+															:dataConfig="getSelectDataConfig(condition)"
+															v-model:value="condition.endValue"
+															v-model:label="condition.endValueLabel"
+															:placeholder="'结束值'"
+															class="full-width"
+														/>
+													</el-col>
+												</el-row>
+											</template>
+											<template v-else>
+												<el-row :gutter="5" class="interval-row">
+													<el-col :span="11">
+														<el-input v-model="condition.startValue" placeholder="开始值" />
+													</el-col>
+													<el-col :span="2" class="interval-separator">-</el-col>
+													<el-col :span="11">
+														<el-input v-model="condition.endValue" placeholder="结束值" />
+													</el-col>
+												</el-row>
+											</template>
+										</template>
+										<!-- 非区间类型（运算符不是 'interval' 或 'between'） -->
+										<template v-else>
+											<!-- 文本类型 -->
+											<el-input
+												v-if="condition.columnType === '1'"
+												v-model="condition.value"
+												placeholder="请输入文本"
+											/>
+											<!-- 数字类型 -->
+											<el-input-number
+												v-else-if="condition.columnType === '3'"
+												v-model="condition.value"
+												placeholder="请输入数字"
+												class="full-width"
+												:controls="false"
+											/>
+											<!-- 日期类型 -->
+											<el-date-picker
+												v-else-if="condition.columnType === '4'"
+												v-model="condition.value"
+												type="datetime"
+												placeholder="请选择日期时间"
+												:format="getDateFormat(condition.dateFormat)"
+												:value-format="getDateFormat(condition.dateFormat)"
+												class="full-width"
+											/>
+											<!-- 单选下拉框类型 -->
+											<Select
+												v-else-if="condition.columnType === '5'"
+												:dataConfig="getSelectDataConfig(condition)"
+												v-model:value="condition.value"
+												v-model:label="condition.valueLabel"
+												:placeholder="'请选择'"
+												class="full-width"
+											/>
+											<!-- 多选下拉框类型 -->
+											<Select
+												v-else-if="condition.columnType === '6'"
+												:dataConfig="getSelectDataConfig(condition)"
+												v-model:value="condition.value"
+												v-model:label="condition.valueLabel"
+												:placeholder="'请选择'"
+												multiple
+												class="full-width"
+											/>
+											<!-- 其他类型默认显示文本框 -->
+											<el-input v-else v-model="condition.value" placeholder="请输入值" />
+										</template>
+									</template>
+									<el-input v-else v-model="condition.value" placeholder="请先选择字段和运算符" disabled />
+								</el-col>
+
+								<!-- 操作按钮 -->
+								<el-col :span="3" :md="3" :sm="24" :xs="24" class="condition-actions">
+									<div class="action-buttons">
+										<el-button
+											type="danger"
+											icon="Minus"
+											@click="removeConditionFromGroup(group, conditionIndex)"
+											:disabled="group.conditions.length <= 1"
+											plain
+										></el-button>
+									</div>
+								</el-col>
+							</el-row>
+						</div>
 					</div>
 				</div>
 			</el-form>
@@ -492,7 +499,7 @@ const getDateFormat = dateFormatCode => {
  */
 const handleOperatorChange = (condition, selectedValue) => {
 	// 如果是不需要值的运算符，清空所有值
-	if (['empty', 'notEmpty'].includes(selectedValue)) {
+	if (['empty', 'notEmpty'].includes(selectedValue.value)) {
 		condition.value = null
 		condition.valueLabel = null
 		condition.startValue = null
@@ -501,7 +508,7 @@ const handleOperatorChange = (condition, selectedValue) => {
 		condition.endValueLabel = null
 	}
 	// 如果从不需要值的运算符切换到区间运算符
-	else if (selectedValue === 'interval' || selectedValue === 'between') {
+	else if (selectedValue.value === 'interval' || selectedValue.value === 'between') {
 		condition.value = null
 		condition.valueLabel = null
 		// 如果区间值未设置，初始化为空
@@ -529,6 +536,7 @@ const addConditionToGroup = group => {
 const removeConditionFromGroup = (group, index) => {
 	if (group.conditions.length > 1) {
 		group.conditions.splice(index, 1)
+		group.filterType = 'AND'
 	} else {
 		ElMessage.warning('至少保留一个查询条件')
 	}
@@ -606,7 +614,7 @@ const validateConditions = (isSubmit = true) => {
 
 		for (let conditionIndex = 0; conditionIndex < group.conditions.length; conditionIndex++) {
 			const condition = group.conditions[conditionIndex]
-			console.log('condition =>', condition);
+			console.log('condition =>', condition)
 			if (!condition.columnName) {
 				isSubmit && ElMessage.error(`第${groupIndex + 1}个条件组的第${conditionIndex + 1}个条件请选择前端表格字段`)
 				return false
@@ -895,11 +903,11 @@ const emit = defineEmits(['query'])
 }
 
 .condition-row {
-	padding: 10px 0;
+	// padding: 10px 0;
 	border-bottom: 1px solid #f5f7fa;
 	display: flex;
 	align-items: flex-start;
-	gap: 10px;
+	// gap: 10px;
 	transition: background-color 0.2s ease;
 }
 
@@ -936,8 +944,9 @@ const emit = defineEmits(['query'])
 .condition-actions {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-end;
 	flex-shrink: 0;
+	padding: 0 8px;
 }
 
 .action-buttons {
@@ -951,7 +960,7 @@ const emit = defineEmits(['query'])
 }
 
 .add-group-container {
-	text-align: center;
+	// text-align: center;
 	margin: 0px 0 10px 0;
 }
 

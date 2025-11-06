@@ -56,7 +56,7 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-const tableId = ref('role_1762244958298')
+
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
@@ -178,6 +178,15 @@ const buttonList = reactive([
 		permission: 'system:role:dispatchUser', // 权限
 	},
 ])
+/**
+ * 表格id
+ * @description: 表格id
+ */
+const tableId = ref('role_1762244958298')
+/**
+ * 高级查询
+ * @description: 高级查询
+ */
 const advancedQuery = ref([])
 provide('onQuery', data => {
 	console.log('父组件收到数据：', data)

@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-25 14:07:02
- * @LastEditTime: 2025-11-05 16:38:23
+ * @LastEditTime: 2025-11-06 09:52:39
  * @LastEditors: zhangsd
  * @Description: 高级查询表格列配置管理
  * @FilePath: \view\src\views\system\ColumnConfigManager\index.vue
@@ -180,6 +180,7 @@ const add = () => {
 const edit = row => {
 	editRow.value = JSON.parse(JSON.stringify(row))
 	dialogVisible.value = true
+	dialogTitle.value = '编辑'
 }
 
 /**
