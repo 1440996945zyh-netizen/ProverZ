@@ -16,14 +16,14 @@
 
 		/>
 		<!-- 查看 抽屉组件 -->
-		<el-drawer v-model="loginVisible" :title="title" size="70%">
+		<Drawer v-model="loginVisible" :title="title" size="70%">
 			<Drawer ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="loginVisible = false">关闭</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -34,7 +34,7 @@ import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton, ElTag } from 'element-plus'
 import { ref, reactive } from 'vue'
 import tableParamsStore from '@/store/modules/tableParams'
-
+import Drawer from '@/components/Drawer/index.vue'
 const loginVisible = ref(false)
 const { proxy } = getCurrentInstance()
 const drawer = ref(false)

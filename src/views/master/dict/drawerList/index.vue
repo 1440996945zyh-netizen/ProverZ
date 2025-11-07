@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<div class="app-container">
+	<div  class="app-container">
+		<div>
 			<BaseTable
 				ref="baseTable"
 				:showSearchHeader="true"
@@ -14,7 +14,7 @@
 				:tableHeight="'drawerPageTableHeight'"
 			/>
 		</div>
-		<el-drawer v-model="drawerVisible" :title="title" size="30%">
+		<Drawer v-model="drawerVisible" :title="title" size="30%">
 			<detail ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
@@ -22,7 +22,7 @@
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -32,7 +32,7 @@ import detail from './detail/index.vue'
 import api from '@/api/master/dict/index'
 import { ref, reactive, nextTick } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
-
+import Drawer from '@/components/Drawer/index.vue'
 const { proxy } = getCurrentInstance() // 相当于vue2里的this
 const baseTable = ref() // table的ref
 const drawerRef = ref(null) // 明细组件ref

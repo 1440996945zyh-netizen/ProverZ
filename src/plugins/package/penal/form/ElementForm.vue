@@ -142,8 +142,8 @@
       </div> 
     </el-drawer>-->
 
-    <el-dialog 
-      v-model="fieldOptionModelVisible" 
+    <Dialog 
+      v-model:visible="fieldOptionModelVisible" 
       :title="optionModelTitle" 
       width="600px" 
       append-to-body 
@@ -167,7 +167,7 @@
         <el-button size="mini" @click="fieldOptionModelVisible = false">取 消</el-button>
         <el-button size="mini" type="primary" @click="saveFieldOption">确 定</el-button>
       </template>
-    </el-dialog>
+    </Dialog>
   </div>
 </template>
 
@@ -197,7 +197,8 @@ import 'element-plus/theme-chalk/el-divider.css'
 import 'element-plus/theme-chalk/el-table.css'
 import 'element-plus/theme-chalk/el-table-column.css'
 import 'element-plus/theme-chalk/el-drawer.css'
-
+import Drawer from '@/components/Drawer/index.vue'
+import Dialog from '@/components/Dialog/index.vue'
 import { ref, watch, nextTick, reactive, inject } from 'vue';
 // import { listForm } from "@/api/form";
 

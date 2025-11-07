@@ -12,7 +12,7 @@
 			:total="total"
 		/>
 		<!-- 新增，修改抽屉组件 -->
-		<el-drawer v-model="versionVisiable" :title="title" size="60%">
+		<Drawer v-model="versionVisiable" :title="title" size="60%">
 			<versionDrawer ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
@@ -20,7 +20,7 @@
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -28,6 +28,7 @@
 import versionDrawer from './detail/index.vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import api from '@/api/system/version'
+import Drawer from '@/components/Drawer/index.vue'
 import tableParamsStore from '@/store/modules/tableParams'
 import { ElButton, ElSwitch, ElTag } from 'element-plus'
 import { ref } from 'vue'

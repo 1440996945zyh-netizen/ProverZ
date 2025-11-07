@@ -14,7 +14,7 @@
 			:total="30"
 		/>
 	</div>
-	<el-drawer v-model="xxxVisible" title="标题" size="50%">
+	<Drawer v-model="xxxVisible" title="标题" size="50%">
 		<detail ref="detailRef" />
 		<template #footer>
 			<div style="flex: auto">
@@ -22,7 +22,7 @@
 				<el-button type="primary" @click="save">保存</el-button>
 			</div>
 		</template>
-	</el-drawer>
+	</Drawer>
 </template>
 
 <script setup name="xxx">
@@ -30,7 +30,7 @@ import BaseTable from '@/components/BaseTable/index.vue'
 import detail from './detail.vue'
 import { ref, reactive, nextTick, onMounted, h, computed, getCurrentInstance } from 'vue'
 import { ElButton } from 'element-plus'
-
+import Drawer from '@/components/Drawer/index.vue'
 const { proxy } = getCurrentInstance() // 相当于vue2里的this
 // header--------------------------------------------------------
 const selectData = reactive([

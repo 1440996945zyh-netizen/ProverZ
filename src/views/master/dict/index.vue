@@ -15,7 +15,7 @@
 				:isShowAdvancedQuery="true"
 			/>
 		</div>
-		<el-drawer v-model="dictVisible" :title="title" size="35%">
+		<Drawer v-model="dictVisible" :title="title" size="35%">
 			<detail ref="detailRef" />
 			<template #footer>
 				<div style="flex: auto">
@@ -23,15 +23,15 @@
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
-		</el-drawer>
-		<el-drawer v-model="drawerVisible" title="列表" size="60%">
+		</Drawer>
+		<Drawer v-model="drawerVisible" title="列表" :size="'60%'">
 			<drawerList ref="drawerListRef" />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="drawerVisible = false">关闭</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -42,7 +42,7 @@ import { ElButton, ElTag } from 'element-plus'
 import api from '@/api/master/dict/index.js'
 import detail from './detail/index.vue'
 import drawerList from './drawerList/index.vue'
-
+import Drawer from '@/components/Drawer/index.vue'
 const { proxy } = getCurrentInstance()
 const advancedQuery = ref([])
 provide('onQuery', data => {

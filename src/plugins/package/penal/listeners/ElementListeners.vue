@@ -22,7 +22,7 @@
     </div>
 
     <!-- 监听器 编辑/创建 部分 -->
-    <el-drawer
+    <Drawer
       v-model="listenerFormModelVisible"
       title="执行监听器"
       :size="`${width}px`"
@@ -168,15 +168,13 @@
         <el-button size="mini" @click="listenerFormModelVisible = false">取 消</el-button>
         <el-button size="mini" type="primary" @click="saveListenerConfig">保 存</el-button>
       </div>
-    </el-drawer>
+    </Drawer>
 
     <!-- 注入字段 编辑/创建 部分 -->
-    <el-dialog
-      v-model="listenerFieldFormModelVisible"
+    <Dialog
+      v-model:visible="listenerFieldFormModelVisible"
       title="字段配置"
       width="600px"
-      append-to-body
-      destroy-on-close
     >
       <el-form
         :model="listenerFieldForm"
@@ -225,7 +223,7 @@
         <el-button size="mini" @click="listenerFieldFormModelVisible = false">取 消</el-button>
         <el-button size="mini" type="primary" @click="saveListenerFiled">确 定</el-button>
       </template>
-    </el-dialog>
+    </Dialog>
   </div>
 </template>
 
@@ -246,7 +244,8 @@ import 'element-plus/theme-chalk/el-dialog.css';
 import { createListenerObject, updateElementExtensions } from '../../utils';
 import { initListenerType, initListenerForm, listenerType, fieldType } from './utilSelf';
 import { Menu } from '@element-plus/icons-vue';
-
+import Dialog from "@/components/Dialog/index"
+import Drawer from '@/components/Drawer/index.vue'
 // 先定义Props，解决引用顺序问题
 const props = defineProps({
   id: String,

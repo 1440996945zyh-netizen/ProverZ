@@ -83,14 +83,14 @@
 				</el-dropdown>
 			</div>
 		</div>
-		<el-drawer v-model="userVisible" title="个人中心" size="50%" append-to-body>
+		<Drawer v-model="userVisible" title="个人中心" size="50%" append-to-body>
 			<User />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="userVisible = false">关闭</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 <script setup>
@@ -104,7 +104,7 @@ import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import User from './userProfile/index.vue'
 import { Promotion } from '@element-plus/icons-vue'
-
+import Drawer from '@/components/Drawer/index.vue'
 // 新增：导入 MoreMenuDropdown 组件
 import MoreMenuDropdown from '@/components/MoreMenuDropdown/index.vue' // 路径根据您的文件结构调整
 

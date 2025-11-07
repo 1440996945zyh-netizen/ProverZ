@@ -91,13 +91,16 @@ onMounted(() => {
 ::deep(.el-dialog) {
 	--el-dialog-padding-primary: 0px !important;
 }
-::deep(.el-dialog .el-dialog__header){
-	padding:15px ;
-	margin:0px !important;
-	
+::deep(.el-dialog .el-dialog__header) {
+	padding: 15px;
+	margin: 0px !important;
 }
-::deep(.el-dialog .el-dialog__footer){
-	padding:15px ;
-	margin:0px !important;
+::deep(.el-dialog .el-dialog__footer) {
+	padding: 15px;
+	margin: 0px !important;
 }
+::deep(.el-drawer) {
+	--el-drawer-padding-primary: 0px !important;
+}
+
 </style>

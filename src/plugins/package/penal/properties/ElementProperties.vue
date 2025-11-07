@@ -16,12 +16,11 @@
 			<el-button size="mini" type="primary" icon="CirclePlus" @click="openAttributesForm(null, -1)">添加属性</el-button>
 		</div>
 
-		<el-dialog
-			v-model="propertyFormModelVisible"
+		<Dialog
+			v-model:visible="propertyFormModelVisible"
 			title="属性配置"
 			width="600px"
-			append-to-body
-			destroy-on-close
+			
 		>
 			<el-form
 				:model="propertyForm"
@@ -41,14 +40,14 @@
 				<el-button size="mini" @click="propertyFormModelVisible = false">取 消</el-button>
 				<el-button size="mini" type="primary" @click="saveAttribute">确 定</el-button>
 			</template>
-		</el-dialog>
+		</Dialog>
 	</div>
 </template>
 
 <script setup>
 import { ref, watch, inject, nextTick } from 'vue'
 import { ElMessageBox } from 'element-plus'
-
+import Dialog from "@/components/Dialog/index"
 // Props
 const props = defineProps({
 	id: String,

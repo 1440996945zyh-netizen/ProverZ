@@ -20,13 +20,10 @@
       <el-table-column label="信号名称" prop="name" max-width="300px" show-overflow-tooltip />
     </el-table>
 
-    <el-dialog 
-      v-model="modelVisible" 
+    <Dialog
+      v-model:visible="modelVisible" 
       :title="modelConfig.title" 
-      :close-on-click-modal="false" 
       width="400px" 
-      append-to-body 
-      destroy-on-close
     >
       <el-form :model="modelObjectForm" size="mini" label-width="90px" @submit.prevent>
         <el-form-item :label="modelConfig.idLabel">
@@ -40,7 +37,7 @@
         <el-button size="mini" @click="modelVisible = false">取 消</el-button>
         <el-button size="mini" type="primary" @click="addNewObject">保 存</el-button>
       </template>
-    </el-dialog>
+    </Dialog>
   </div>
 </template>
 
@@ -55,6 +52,7 @@ import 'element-plus/theme-chalk/el-form.css';
 import 'element-plus/theme-chalk/el-form-item.css';
 import 'element-plus/theme-chalk/el-input.css';
 import { Menu } from '@element-plus/icons-vue'
+import Dialog from "@/components/Dialog/index"
 
 // 响应式变量
 const signalList = ref([]);
