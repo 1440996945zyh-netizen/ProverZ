@@ -35,7 +35,7 @@
 			</el-col>
 		</el-row>
 		<!-- 新增，修改抽屉组件 -->
-		<el-drawer v-model="userVisible" :title="title" size="60%">
+		<Drawer v-model="userVisible" :title="title" size="60%">
 			<userDrawer ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
@@ -43,7 +43,7 @@
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -51,6 +51,8 @@
 import userDrawer from './detail/index.vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import api from '@/api/system/user'
+import Drawer from '@/components/Drawer/index.vue'
+
 import tableParamsStore from '@/store/modules/tableParams'
 import { ElButton, ElSwitch, ElTag } from 'element-plus'
 import { ref } from 'vue'

@@ -103,9 +103,10 @@
 /**------自定义-----------------------------------*/
 .el-drawer.ltr,
 .el-drawer.rtl {
-	height: calc(100% - 0px) !important;
-	top: 0px !important;
-	bottom: 0;
+	height: calc(100% - 50px) !important;
+	top: 50px !important;
+	bottom: 0 !important;
+	border-radius: 5px !important;
 }
 .el-drawer__header {
 	align-items: center;
@@ -113,7 +114,8 @@
 	display: flex;
 	margin-bottom: -1px !important;
 	/* padding-bottom: 31px; */
-	padding: var(--el-drawer-padding-primary);
+	// padding: var(--el-drawer-padding-primary);
+	padding: 15px !important;
 	//padding-bottom: 31px !important;
 	background-color: #f5f7fa;
 	border-bottom: 1px solid #c8cfde;
@@ -127,7 +129,7 @@
 .el-drawer__footer {
 	background-color: #f5f7fa;
 	border-top: 1px solid #c8cfde;
-	padding-top: 20px !important;
+	padding: 15px !important;
 }
 
 .el-dialog__header {

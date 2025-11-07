@@ -13,14 +13,14 @@
 			@Status_Change="Status_Change"
 		/>
 
-		<el-drawer v-model="operVisible" :title="title" size="70%">
+		<Drawer v-model="operVisible" :title="title" size="70%">
 			<Drawer ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="operVisible = false">关闭</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -30,6 +30,7 @@ import { listOperLog, getById } from '@/api/system/operLog'
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton, ElMessage } from 'element-plus'
 import { ref, reactive, toRefs } from 'vue'
+import Drawer from '@/components/Drawer/index.vue'
 import tableParamsStore from '@/store/modules/tableParams'
 const router = useRouter()
 const { proxy } = getCurrentInstance()

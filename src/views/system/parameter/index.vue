@@ -22,14 +22,14 @@
 			:tableHeight="'normalTableHeight'"
 			:hasAdd="true"
 		/>
-    <el-drawer v-model="parameterLogVis" :title="'日志查看'" size="70%">
+    <Drawer v-model="parameterLogVis" :title="'日志查看'" size="70%">
       <parameterLogDetail ref="parameterLogDetailRef" />
       <template #footer>
         <div>
           <el-button @click="parameterLogVis = false">取消</el-button>
         </div>
       </template>
-    </el-drawer>
+    </Drawer>
 	</div>
 </template>
 
@@ -39,7 +39,7 @@ import { ElButton } from 'element-plus'
 import api from '@/api/system/parameter/index.js'
 import parameterLogDetail from '@/views/system/parameter/parameterLogDetail/index'
 import {ref} from "vue";
-
+import Drawer from '@/components/Drawer/index.vue'
 const editConfig = reactive({ trigger: 'click', mode: 'cell' })
 const radioConfig = {
 	highlight: true, // 选中高亮行

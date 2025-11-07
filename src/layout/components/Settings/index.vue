@@ -1,5 +1,5 @@
 <template>
-	<el-drawer v-model="showSettings" :withHeader="false" direction="rtl" size="300px">
+	<Drawer v-model="showSettings" :withHeader="false" direction="rtl" size="300px">
 		<div class="setting-drawer-title">
 			<h3 class="drawer-title">主题风格设置</h3>
 		</div>
@@ -96,10 +96,11 @@
 
 		<el-button type="primary" plain icon="DocumentAdd" @click="saveSetting">保存配置</el-button>
 		<el-button plain icon="Refresh" @click="resetSetting">重置配置</el-button>
-	</el-drawer>
+	</Drawer>
 </template>
 
 <script setup>
+import Drawer from '@/components/Drawer/index.vue'
 import variables from '@/assets/styles/variables.module.scss'
 // import originElementPlus from 'element-plus/theme-chalk/index.css'
 import axios from 'axios'

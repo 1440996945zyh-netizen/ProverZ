@@ -15,24 +15,24 @@
 			:isShowAdvancedQuery="true"
 		/>
 		<!-- 新增，修改抽屉组件 -->
-		<el-drawer v-model="roleVisible" :title="drawerTitle" size="65%">
-			<Drawer ref="roleRef" />
+		<Drawer v-model="roleVisible" :title="drawerTitle" size="65%">
+			<DrawerDetail ref="roleRef" />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="roleVisible = false">取消</el-button>
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 		<!-- 分配角色数据权限对话框 -->
-		<el-dialog v-model="dialogVisible" title="人员分配" width="60%" :before-close="handleClose">
-			<Dialog ref="dialogRef" />
+		<Dialog v-model:visible="dialogVisible" title="人员分配" width="60%" :before-close="handleClose">
+			<DialogDetail ref="dialogRef" />
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="closeDialog">关闭</el-button>
 				</span>
 			</template>
-		</el-dialog>
+		</Dialog>
 	</div>
 </template>
 
@@ -40,9 +40,11 @@
 import BaseTable from '@/components/BaseTable/index.vue'
 import { addRole, changeRoleStatus, delRole, getRole, listRole, updateRole } from '@/api/system/role'
 import { ref, reactive,provide } from 'vue'
-import Drawer from './drawer/index.vue'
-import Dialog from './dialog/index.vue'
+import DrawerDetail from './drawer/index.vue'
+import DialogDetail from './dialog/index.vue'
 import { ElButton, ElSwitch } from 'element-plus'
+import Drawer from '@/components/Drawer/index.vue'
+import Dialog from '@/components/Dialog/index.vue'
 const { proxy } = getCurrentInstance()
 const ids = ref([])
 const clickRow = ref({}) //点击当前行

@@ -82,7 +82,7 @@
 		</el-table>
 
 		<!-- 添加或修改部门对话框 -->
-		<el-drawer :title="title" v-model="open" size="40%" append-to-body>
+		<Drawer :title="title" v-model="open" size="40%" append-to-body>
 			<div class="formData">
 				<el-form ref="deptRef" :model="form" :rules="rules" label-width="auto">
 					<el-row>
@@ -210,7 +210,7 @@
 					<el-button type="primary" @click="submitForm">确 定</el-button>
 				</div>
 			</template>
-		</el-drawer>
+		</Drawer>
 	</div>
 </template>
 
@@ -222,7 +222,7 @@ import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton } from 'element-plus'
 import Select from "@/components/Select/index.vue";
 const { proxy } = getCurrentInstance()
-
+import Drawer from '@/components/Drawer/index.vue'
 let storeHight = computed(() => tableParamsStore().normalTableHeight)
 const deptLevelList = ref([])
 const deptList = ref([])
