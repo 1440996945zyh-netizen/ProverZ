@@ -37,10 +37,11 @@ const api = {
 	},
 
 	//删除
-	delete(id) {
+	delete(data) {
 		return request({
-			url: `/api/v1/internal/tSettingAdSearch/delete/${id}`,
+			url: `/api/v1/internal/tSettingAdSearch/delete`,
 			method: 'delete',
+			params: data, // 注意：DELETE请求用params而不是data
 		})
 	},
 }

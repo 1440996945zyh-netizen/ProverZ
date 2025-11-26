@@ -207,7 +207,6 @@ const props = defineProps({
     description: '是否禁用 ID 编辑功能（如只读模式）'
   }
 })
-
 // ========== 提供依赖给子组件 ==========
 // 将 prefix 和 width 注入到所有子组件中，避免重复传递 props
 provide('prefix', props.prefix)
@@ -353,7 +352,7 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* 主容器：高度占满，允许纵向滚动 */
 .process-panel__container {
   height: 100%;

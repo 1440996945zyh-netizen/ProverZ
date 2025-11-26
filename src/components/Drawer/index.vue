@@ -1,4 +1,12 @@
-<!-- components/CustomDrawer.vue -->
+<!--
+ * @Author: zhangsd
+ * @Date: 2025-11-07 11:04:12
+ * @LastEditTime: 2025-11-07 15:30:54
+ * @LastEditors: zhangsd
+ * @Description: 抽屉组件
+ * @FilePath: \view\src\components\Drawer\index.vue
+-->
+
 <template>
 	<el-drawer
 		v-model="visible"
@@ -16,7 +24,7 @@
 		:resizable="resizable"
 		:before-close="handleBeforeClose"
 		:append-to-body="appendToBody"
-		:z-index="zIndex"
+		:z-index="zIndex" 
 		:class="customClass"
 		@open="onOpen"
 		@opened="onOpened"
@@ -55,7 +63,7 @@
 import { ref, watch } from 'vue'
 import { ElDrawer, ElMessageBox, ElButton } from 'element-plus'
 
-// Props 定义
+// Props 定义（z-index默认值调整为2000，无需过高）
 const props = defineProps({
 	modelValue: Boolean,
 	title: String,
@@ -109,7 +117,7 @@ const props = defineProps({
 	},
 	zIndex: {
 		type: Number,
-		default: 2000,
+		default: 2000, // 合理默认值，比普通弹窗高，比内部Dialog低
 	},
 	customClass: String,
 	showFooter: {
@@ -154,7 +162,7 @@ watch(
 
 // 同步内部状态到外部
 watch(visible, newVal => {
-		emit('update:modelValue', newVal)
+	emit('update:modelValue', newVal)
 })
 
 // 事件处理
@@ -203,5 +211,6 @@ const handleConfirm = () => emit('confirm')
 	justify-content: flex-end;
 	gap: 12px;
 }
-</style>
 
+
+</style>

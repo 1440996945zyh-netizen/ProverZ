@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-22 20:29:45
- * @LastEditTime: 2025-11-05 10:49:46
+ * @LastEditTime: 2025-11-10 17:12:31
  * @LastEditors: zhangsd
  * @Description: 积木报表设计 
  * @FilePath: \view\src\views\system\IframePageView\index.vue
@@ -73,6 +73,7 @@ const getOpeningMethod = async () => {
 const openInNewWindow = () => {
 	const token = getToken()
 	const tenantId = 'dev-api'
+	// const tenantId = 'localhost'
 	const newUrl = basePath + '/jmreport/list?token=' + encodeURIComponent(token) + '&tenantId=' + tenantId
 
 	console.log('外部打开报表URL:', newUrl)

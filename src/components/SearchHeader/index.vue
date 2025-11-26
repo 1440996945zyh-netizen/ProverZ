@@ -128,7 +128,7 @@
 				<el-button type="primary" icon="Search" @click="searchHandler" ref="searchDom" v-if="showSearch">查询</el-button>
 				<el-button icon="RefreshRight" @click="resetSearch" ref="searchDom" v-if="showReset">重置</el-button>
 				<!-- 高级查询 -->
-				<AdvancedQuery :isShowAdvancedQuery="isShowAdvancedQuery" :id="id"  />
+				<AdvancedQuery :isShowAdvancedQuery="isShowAdvancedQuery" :id="id"  :queryAdvancedParams="queryAdvancedParams" />
 			</div>
 			<div class="right" id="right">
 				<template v-if="!showToolTip">
@@ -387,6 +387,13 @@ const props = defineProps({
     id: {
         type: String,
         default: null,
+    },
+    /**
+     * 高级查询参数
+     */
+    queryAdvancedParams: {
+        type: Object,
+        default: () => {},
     },
 
 })

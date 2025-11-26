@@ -26,9 +26,13 @@ const useUserStore = defineStore('user', {
 			return new Promise((resolve, reject) => {
 				login(userAccount, passwd, code, uuid)
 					.then(res => {
-						// update by yy
-						// setToken(res.headers.token)
-						// this.token = res.headers.token
+						const token = res.headers.token;
+						if (token) {
+							// 2. 将 Token 保存到 Pinia 的 state 中
+							this.token = token;
+							// 3. 将 Token 持久化到 localStorage 中
+							setToken(token);
+						}
 						this.user = res.data
 						localStorage.setItem('userInfo', JSON.stringify(res.data))
 						this.deptName = res.data.deptName
@@ -56,7 +60,7 @@ const useUserStore = defineStore('user', {
 						} else {
 							this.roles = ['ROLE_DEFAULT']
 						}
-							api.getPageNum().then(res => {
+						api.getPageNum().then(res => {
 							this.pageNum = res.data ? (res.data.pageNum ? res.data.pageNum : '20') : '20'
 						})
 						this.name = res.data.userName
@@ -106,7 +110,7 @@ const useUserStore = defineStore('user', {
 						} catch (error) {
 							console.error('关闭WebSocket失败:', error);
 						}
-						
+
 						this.token = ''
 						this.roles = []
 						this.permissions = []

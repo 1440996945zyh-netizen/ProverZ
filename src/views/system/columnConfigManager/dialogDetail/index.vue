@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-26 10:09:37
- * @LastEditTime: 2025-11-06 10:43:54
+ * @LastEditTime: 2025-11-24 11:27:08
  * @LastEditors: zhangsd
  * @Description: 
  * @FilePath: \view\src\views\system\columnConfigManager\dialogDetail\index.vue
@@ -54,7 +54,7 @@
 		<div class="table-wrapper">
 			<EditTable
 				ref="editTableRef"
-				:tableHeight="300"
+				:tableHeight="tableHeight"
 				:tableColumns="tableColumns"
 				:tableData="tableData"
 				:border="true"
@@ -62,7 +62,6 @@
 				:loading="false"
 				:showFooter="true"
 				:editRules="editRules"
-				
 				:headerCellClickEvent="addTableData"
 				:headerCellClassName="headerCellClassName"
 				sync-resize
@@ -78,6 +77,7 @@ import { ElButton, ElInput, ElTreeSelect, ElRow, ElCol, ElForm, ElFormItem, ElSw
 import { getContentsMenu } from '@/api/system/menu'
 import publicApi from '@/api/public'
 import api from '@/api/system/columnConfigManager'
+import tableParamsStore from '@/store/modules/tableParams'
 
 const props = defineProps({
 	editRow: {
@@ -85,6 +85,10 @@ const props = defineProps({
 		default: () => {},
 	},
 })
+// 表格高度
+const storeHight = computed(() => tableParamsStore().normalTableHeight)
+const tableHeight = computed(() => storeHight.value - 75) //
+console.log('tableHeight =>',storeHight.value, tableHeight);
 // 上级菜单下拉树数据
 const menuOptions = ref([])
 // 保存原始的菜单数据方便遍历
@@ -125,7 +129,7 @@ const DEFAULT_STATUS = '1'
 const tableColumns = reactive([
 	{ prop: 'sortNum', label: '序号', width: 100, type: 'seq', align: 'center' },
 	{ prop: 'colLabel', label: '前端label', minWidth: 120, editType: 'input', editRender: {}, align: 'left' },
-	{ prop: 'colKey', label: '后端key', minWidth: 120, editType: 'input', editRender: {}, align: 'left' },
+	{ prop: 'colKey', label: '数据库字段名', minWidth: 120, editType: 'input', editRender: {}, align: 'left' },
 	{
 		prop: 'colType',
 		label: '列类型',
@@ -144,8 +148,8 @@ const tableColumns = reactive([
 	{
 		prop: 'status',
 		label: '状态',
-		minWidth: 120,
-		align: 'left',
+		minWidth: 20,
+		align: 'center',
 		render: row => {
 			return [
 				h(ElSwitch, {
@@ -268,11 +272,11 @@ const getColumnTypeOptions = async () => {
 			isBusinessMultiSelect: [
 				{
 					value: '0',
-					label: '否',
+					label: '业务数据不使用逗号分隔',
 				},
 				{
 					value: '1',
-					label: '是',
+					label: '业务数据使用逗号分隔',
 				},
 			],
 		})
