@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-17 10:35:09
- * @LastEditTime: 2025-09-24 15:10:42
+ * @LastEditTime: 2025-11-07 13:50:58
  * @LastEditors: zhangsd
  * @Description: 流程设计模版
  * @FilePath: \view\src\components\ProcessDesigner\index.vue
@@ -94,6 +94,8 @@ function handleResize() {
 onMounted(() => {
   window.addEventListener('resize', handleResize);
   
+
+});
   // 监听designerForm变化，更新controlForm
   watch(() => props.designerForm, (newVal) => {
     controlForm.users = newVal.users;
@@ -101,14 +103,12 @@ onMounted(() => {
     controlForm.categorys = newVal.categorys;
     controlForm.processId = newVal.processKey || '';
     controlForm.processName = newVal.processName || '';
-  }, { deep: true });
+  }, { deep: true ,immediate: true});
   
   // 监听bpmnXml变化，更新xmlString
   watch(() => props.bpmnXml, (newVal) => {
     xmlString.value = newVal;
   });
-});
-
 // 元素点击事件
 function elementClick(el) {
   element.value = el;

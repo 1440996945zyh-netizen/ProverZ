@@ -11,10 +11,6 @@ const tableParamsStore = defineStore('tableParams', {
 		drawerSearchTableHeight: window.innerHeight - 300, // 抽屉里带查询+table
 		drawerHeaderPageTableHeight: window.innerHeight - 370, // 抽屉里带header + 分页
 		drawerTableHeight: window.innerHeight - 600, // 抽屉里带header +table
-		priceHeight: window.innerHeight - 500, // 单价录入穿梭框高度
-		carHeight: window.innerHeight - 560, // 采购派车高度
-		carSaleHeight: window.innerHeight - 400, // 销售派车高度
-		kingdeeCheckHeight: window.innerHeight - 450, // 对账单审核高度
 	}),
 	actions: {
 		setTableHeight(tempHeight) {
@@ -28,10 +24,7 @@ const tableParamsStore = defineStore('tableParams', {
 			this.drawerPageTableHeight = window.innerHeight - 350 + tempHeight
 			this.drawerHeaderPageTableHeight = window.innerHeight - 370 + tempHeight
 			this.drawerTableHeight = window.innerHeight - 600 + tempHeight
-			this.priceHeight = window.innerHeight - 500 + tempHeight
-			this.carHeight = window.innerHeight - 540 + tempHeight
-			this.carSaleHeight = window.innerHeight - 400 + tempHeight
-			this.kingdeeCheckHeight = window.innerHeight - 450 + tempHeight
+		
 		},
 	},
 })

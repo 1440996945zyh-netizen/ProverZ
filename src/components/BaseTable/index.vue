@@ -11,17 +11,15 @@
 			:showNum="showNum"
 			:isShowAdvancedQuery="isShowAdvancedQuery"
 			:id="id"
-	
+			:queryAdvancedParams="queryAdvancedParams"
 		/>
 
 		<div class="table-with-toolbar" style="position: relative">
 			<vxe-toolbar ref="xToolbar" :custom="{ immediate: true }" v-if="showToolBar && name"></vxe-toolbar>
 			<vxe-table
 				v-if="showBase"
-				stripe
 				ref="xTable"
 				:align="allAlign"
-				:id="id"
 				:data="tableData"
 				:size="size"
 				:stripe="stripe"
@@ -133,7 +131,7 @@
 	</div>
 </template>
 <script setup name="BaseTable">
-import { ref, reactive, nextTick, watch, computed, getCurrentInstance, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, nextTick, watch, computed, getCurrentInstance, onMounted, onUnmounted,provide } from 'vue'
 import RenderDom from '../RenderDom/index.vue'
 import SearchHeader from '../../components/SearchHeader/index.vue'
 import useAppStore from '../../store/modules/app'
@@ -355,7 +353,7 @@ const props = defineProps({
 	 */
 	border: {
 		type: [String, Boolean],
-		default: null,
+		default: true,
 	},
 	/**
 	 * 是否使用圆角边框
@@ -572,7 +570,7 @@ const props = defineProps({
 		type: Boolean,
 		default: true,
 	},
-	/**
+		/**
 	 * 是否显示高级查询筛选器
 	 */
 	isShowAdvancedQuery: {
@@ -586,9 +584,16 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
-
+	/**
+	 * 查询参数 业务类型业务URL的时候传参
+	 */
+	queryAdvancedParams: {
+		type: Object,
+		default: () => {},
+	},
 })
 const emit = defineEmits(['checkbox-change', 'rowSelect-change'])
+
 // 表格高度
 const tableParams = tableParamsStore()
 const normalTableHeight = computed(() => tableParams.normalTableHeight)
@@ -652,19 +657,35 @@ const tableData = computed({
 // header----------------------------------------------------------------
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
+})
+/**
+ * 高级查询
+ * @description: 高级查询
+ */
+const advancedQuery = ref([])
+provide('onQuery', data => {
+	console.log('父组件收到数据：', data)
+	advancedQuery.value = JSON.parse(JSON.stringify(data))
+	const paramsForImmediateQuery = {
+		...queryParams.value,
+		...seachData.value,   
+		advancedQuery: JSON.stringify(advancedQuery.value)
+	};
+	console.log('高级查询触发，立即查询参数：', paramsForImmediateQuery);
+	props.searchClick(paramsForImmediateQuery); // 直接调用父组件传递的查询回调
 })
 const seachData = ref({})
 const searchClickB = e => {
 	if (e.pagination) {
 		if (queryParams.value.startPage !== 1 || queryParams.value.pageSize !== 10) {
-			const params = Object.assign(e, seachData.value, queryParams.value)
+			const params = Object.assign(e, seachData.value, queryParams.value,advancedQuery.value)
 			props.searchClick(params)
 			return
 		} else {
 			seachData.value.startPage = queryParams.value.startPage
 			seachData.value.pageSize = queryParams.value.pageSize
-			const params = Object.assign(queryParams.value, e, seachData.value)
+			const params = Object.assign(queryParams.value, e, seachData.value,advancedQuery.value)
 			seachData.value = JSON.parse(JSON.stringify(queryParams.value))
 			props.searchClick(params)
 			return
@@ -677,8 +698,8 @@ const searchClickB = e => {
 		e.startPage = queryParams.value.startPage
 		e.pageSize = queryParams.value.pageSize
 
-		const params = Object.assign(queryParams.value, e)
-		// console.log('组件params', params)
+		const params = Object.assign(queryParams.value, e,advancedQuery.value)
+		console.log('组件params', params)
 		props.searchClick(params)
 	}
 }
@@ -814,7 +835,7 @@ const colDrop = () => {
 }
 // 工具栏方法
 const custom = params => {
-	const removeDuplicatesByProperty = (arr, uniId) => {
+	const uniqueFunc = (arr, uniId) => {
 		const res = new Map()
 		return arr.filter(item => !res.has(item[uniId]) && res.set(item[uniId], 1))
 	}

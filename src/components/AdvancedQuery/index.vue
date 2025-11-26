@@ -325,10 +325,15 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
+	// 查询参数 业务类型业务URL的时候传参
+	queryAdvancedParams: {
+		type: Object,
+		default: () => {},
+	},
 })
 
 const onQuery = inject('onQuery') // 注入父组件提供的方法
-
+const advancedQueryParams = ref({ ...props.queryAdvancedParams });
 // 对话框显示状态
 const dialogVisible = ref(false)
 
@@ -427,7 +432,8 @@ const getSelectDataConfig = condition => {
 				types: condition.colSelectKey,
 			},
 		}
-	} else if (condition.colSelectSource === 'USER') {
+	} else if (condition.colSelectSource === 'BUSINESS') {
+		// 业务类型：使用 colSelectKey 作为 URL，添加额外参数
 		return {
 			url: '/api/internal/public/getLocalSelect',
 			params: {
@@ -436,22 +442,29 @@ const getSelectDataConfig = condition => {
 			},
 		}
 	}
+	else if (condition.colSelectSource === 'OTHER') {
+		// 其他类型：使用 colSelectKey 作为 URL，添加额外参数
+		console.log('props.queryAdvancedParams =>', advancedQueryParams.value);
+		return {
+			url: condition.colSelectKey,
+			params: advancedQueryParams.value || {},
+		}
+	}
 }
 
 /**
  * 获取过滤后的运算符选项
  */
-const getFilteredOperatorOptions = columnType => {
-	if (!columnType) {
-		return []
-	}
-
-	const allowedOperators = operatorTypeMap[columnType] || []
-	return allowedOperators.map(op => ({
-		value: op,
-		label: operatorLabelMap[op] || op,
-	}))
-}
+const getFilteredOperatorOptions = computed(() => {
+  return (columnType) => {
+    if (!columnType) return []
+    const allowedOperators = operatorTypeMap[columnType] || []
+    return allowedOperators.map(op => ({
+      value: op,
+      label: operatorLabelMap[op] || op,
+    }))
+  }
+})
 
 // 创建新的查询条件对象
 function createNewCondition() {
@@ -803,7 +816,18 @@ const resetAll = () => {
 			// 用户取消操作
 		})
 }
-
+watch(
+	() => props.queryAdvancedParams, // 监听 props 的变化
+	(newVal) => {
+		console.log('props.queryAdvancedParams changed to:', newVal);
+		// 当 props 变化时，更新 ref 的值
+		advancedQueryParams.value = { ...newVal };
+	},
+	{
+		deep: true, // 深度监听，确保对象内部属性变化也能被捕获
+		immediate: true, // 立即执行一次，确保初始状态正确
+	}
+);
 // 组件挂载时加载保存的查询条件
 onMounted(async () => {
 	getDateFormatOptions()

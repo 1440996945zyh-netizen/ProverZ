@@ -1,10 +1,10 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-25 14:07:02
- * @LastEditTime: 2025-11-06 09:52:39
+ * @LastEditTime: 2025-11-24 14:11:52
  * @LastEditors: zhangsd
  * @Description: 高级查询表格列配置管理
- * @FilePath: \view\src\views\system\ColumnConfigManager\index.vue
+ * @FilePath: \view\src\views\system\columnConfigManager\index.vue
 -->
 <template>
 	<div class="app-container">
@@ -29,8 +29,7 @@
 				:showNum="5"
 				defaultWidth="20"
 				:total="total"
-				:id="tableId"
-				:isShowAdvancedQuery="true"
+				
 			/>
 		</div>
 		<!-- 新增/编辑弹窗 -->
@@ -61,7 +60,7 @@ import { provide } from 'vue'
 const { proxy } = getCurrentInstance() // 获取当前实例，用于访问组件的属性和方法
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHight.value - 15) // 表格高度
-const tableId = ref('columnConfigManager_1758870615101')
+
 
 // 表格实例
 const columnConfigTableRef = ref(null)
@@ -121,6 +120,20 @@ const tableColumns = ref([
 						default: () => '编辑',
 					}
 				),
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							deleteRow(row)
+						},
+						type: 'danger',
+						link: true,
+						icon: 'Delete',
+					},
+					{
+						default: () => '删除',
+					}
+				),
 			]
 		},
 	},
@@ -130,19 +143,18 @@ const dialogVisible = ref(false) // 弹窗是否可见
 const dialogTitle = ref('新增')
 // 查询条件
 const selectData = reactive([
-	
 	{
 		name: '菜单名称', // 搜索框name
 		type: 'input', // 搜索框类型
 		modelValue: 'menuName', // 绑定字段
 		span: 12, // 占位，共24
-	},{
+	},
+	{
 		name: '前端ID', // 搜索框name
 		type: 'input', // 搜索框类型
 		modelValue: 'tableId', // 绑定字段
 		span: 12, // 占位，共24
 	},
-
 ])
 const editRow = ref({})
 // 按钮列表
@@ -158,12 +170,12 @@ const buttonList = reactive([
 // 表格数据
 const tableData = ref([])
 const menuDataList = ref([])
-const  advancedQuery = ref([])
-provide('onQuery', (data) => {
-  console.log('父组件收到数据：', data)
-  advancedQuery.value  = JSON.parse(JSON.stringify(data))
-  // 处理数据...
-  getList()
+const advancedQuery = ref([])
+provide('onQuery', data => {
+	console.log('父组件收到数据：', data)
+	advancedQuery.value = JSON.parse(JSON.stringify(data))
+	// 处理数据...
+	getList()
 })
 /**
  * 新增
@@ -181,6 +193,44 @@ const edit = row => {
 	editRow.value = JSON.parse(JSON.stringify(row))
 	dialogVisible.value = true
 	dialogTitle.value = '编辑'
+}
+// 删除方法
+const deleteRow = row => {
+    proxy
+        .$confirm('确认删除吗？', '删除', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+        })
+        .then(() => {
+            api.delete({ 
+                tableId: row.tableId, 
+                menuId: row.menuId 
+            }).then(res => {
+                if (res.code === '0000') {
+                    proxy.$message({
+                        message: '删除成功',
+                        type: 'success',
+                    })
+                    getList() // 重新获取列表数据
+                } else {
+                    proxy.$message({
+                        message: res.message || '删除失败',
+                        type: 'error',
+                    })
+                }
+            }).catch(error => {
+                console.error('删除失败:', error)
+                proxy.$message({
+                    message: '删除失败，请重试',
+                    type: 'error',
+                })
+            })
+        })
+        .catch(() => {
+            // 用户取消删除
+            console.log('用户取消删除')
+        })
 }
 
 /**
@@ -227,14 +277,13 @@ const saveTableColumns = () => {
 const getList = e => {
 	// tableLoading.value = true
 	let params = {
-		advancedQuery:JSON.stringify(advancedQuery.value),
-		...e
+		advancedQuery: JSON.stringify(advancedQuery.value),
+		...e,
 	}
 	api.getList(params)
 		.then(response => {
 			tableData.value = response.data.pages
 			total.value = response.data.totalNum
-		
 		})
 		.catch(() => {
 			// tableLoading.value = false

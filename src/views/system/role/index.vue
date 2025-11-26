@@ -13,6 +13,7 @@
 			:total="total"
 			:id="tableId"
 			:isShowAdvancedQuery="true"
+			:queryAdvancedParams="queryAdvancedParams"
 		/>
 		<!-- 新增，修改抽屉组件 -->
 		<Drawer v-model="roleVisible" :title="drawerTitle" size="65%">
@@ -58,7 +59,10 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-
+const queryAdvancedParams = ref({
+	startPage: 1,
+	pageSize: 10,
+})
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
@@ -185,24 +189,24 @@ const buttonList = reactive([
  * @description: 表格id
  */
 const tableId = ref('role_1762244958298')
-/**
- * 高级查询
- * @description: 高级查询
- */
-const advancedQuery = ref([])
-provide('onQuery', data => {
-	console.log('父组件收到数据：', data)
-	advancedQuery.value = JSON.parse(JSON.stringify(data))
-	// 处理数据...
-	getList()
-})
+// /**
+//  * 高级查询
+//  * @description: 高级查询
+//  */
+// const advancedQuery = ref([])
+// provide('onQuery', data => {
+// 	console.log('父组件收到数据：', data)
+// 	advancedQuery.value = JSON.parse(JSON.stringify(data))
+// 	// 处理数据...
+// 	getList()
+// })
 // 点击查询的事件
 const getList = e => {
+	console.log('e =>', e);
 	buttonList[1].disabled = true
 	queryParams.value = e
 	let params = {
 		...queryParams.value,
-		advancedQuery:JSON.stringify(advancedQuery.value),
 	}
 	listRole(params).then(res => {
 		tableData.value = res.data.pages

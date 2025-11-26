@@ -11,6 +11,7 @@
 			class="custom-dialog"
 			:draggable="draggable"
 			:show-close="false" 
+			:z-index="zIndex"
 		>
 			<template #title>
 				<div class="dialog-header">
@@ -90,6 +91,10 @@ const props = defineProps({
 	draggable: {
 		type: Boolean,
 		default: true,
+	},
+	zIndex: {
+		type: Number,
+		default: 2000,
 	},
 })
 const emit = defineEmits(['update:visible', 'close'])  // 添加close事件
