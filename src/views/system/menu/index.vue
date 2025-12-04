@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2025-10-11 11:09:41
+ * @LastEditTime: 2025-12-02 17:05:10
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -46,12 +46,32 @@
 							/>
 						</el-form-item>
 					</el-col>
-					<el-col :span="24">
+					<el-col :span="12">
 						<el-form-item label="菜单类型" prop="menuType">
 							<el-radio-group v-model="form.menuType">
 								<el-radio label="M">目录</el-radio>
 								<el-radio label="C">菜单</el-radio>
 								<el-radio label="F">按钮</el-radio>
+							</el-radio-group>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="显示方式" prop="isFrame" >
+							<template #label>
+								<span>
+									<el-tooltip
+										  content="内部：在系统内置页面打开；外部链接内部显示：嵌入当前系统窗口打开外部链接；外部链接外部显示：新浏览器标签页打开外部链接"
+										placement="top"
+									>
+										<el-icon><question-filled /></el-icon>
+									</el-tooltip>
+									显示方式
+								</span>
+							</template>
+							<el-radio-group v-model="form.isFrame">
+								<el-radio label="0">内部</el-radio>
+								<el-radio label="1">外部链接内部显示</el-radio>
+								<el-radio label="2">外部链接外部显示</el-radio>
 							</el-radio-group>
 						</el-form-item>
 					</el-col>
@@ -248,7 +268,7 @@
 							</el-radio-group>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12" v-if="form.menuType == 'C'">
+					<!-- <el-col :span="12" v-if="form.menuType == 'C'">
 						<el-form-item>
 							<template #label>
 								<span>
@@ -263,8 +283,8 @@
 								<el-radio label="1">否</el-radio>
 							</el-radio-group>
 						</el-form-item>
-					</el-col>
-					<el-col :span="12" v-if="form.menuType == 'C'">
+					</el-col> -->
+					<!-- <el-col :span="12" v-if="form.menuType == 'C'">
 						<el-form-item prop="link">
 							<template #label>
 								<span>
@@ -276,7 +296,7 @@
 							</template>
 							<el-input v-model="form.link" placeholder="请输入外链地址" />
 						</el-form-item>
-					</el-col>
+					</el-col> -->
 				</el-row>
 			</el-form>
 			<template #footer>
@@ -320,6 +340,7 @@ const data = reactive({
 	},
 	rules: {
 		menuName: [{ required: true, message: '菜单名称不能为空', trigger: 'blur' }],
+		isFrame: [{ required: true, message: '显示方式不能为空', trigger: 'blur' }],
 		orderNum: [{ required: true, message: '菜单顺序不能为空', trigger: 'blur' }],
 		dataType: [{ required: true, message: '数据类别不能为空', trigger: 'blur' }],
 	},
@@ -354,7 +375,7 @@ const reset = () => {
 		icon: undefined,
 		menuType: 'M',
 		orderNum: undefined,
-		isFrame: '1',
+		isFrame: '0',
 		isCache: '0',
 		visible: '0',
 		status: '0',
@@ -729,12 +750,20 @@ const submitForm = () => {
 	proxy.$refs['menuRef'].validate(valid => {
 		if (valid) {
 			if (form.value.id != undefined) {
+				// 当是外部链接时，移除路径中的前导斜杠
+				if(form.value.isFrame == '1' || form.value.isFrame == '2'){
+					form.value.link = form.value.path.replace(/^\/+/, '')
+				}
 				updateMenu(form.value).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					open.value = false
 					getList()
 				})
 			} else {
+				// 当是外部链接时，移除路径中的前导斜杠
+				if(form.value.isFrame == '1' || form.value.isFrame == '2'){
+					form.value.link = form.value.path.replace(/^\/+/, '')
+				}
 				addMenu(form.value).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					open.value = false

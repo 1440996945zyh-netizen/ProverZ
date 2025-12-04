@@ -2,7 +2,11 @@
 	<section class="app-main">
 		<router-view v-slot="{ Component, route }">
 			<keep-alive :include="tagsViewStore.cachedViews">
-				<component v-if="!route.meta.link" :is="Component" :key="route.path" />
+				<component 
+					v-if="!isIframeRoute(route)" 
+					:is="Component" 
+					:key="route.path" 
+				/>
 			</keep-alive>
 		</router-view>
 		<iframe-toggle />
@@ -12,31 +16,18 @@
 <script setup>
 import iframeToggle from './IframeToggle/index'
 import useTagsViewStore from '@/store/modules/tagsView'
- 
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 const tagsViewStore = useTagsViewStore()
+
+// 判断是否是 iframe 路由
+const isIframeRoute = (route) => {
+  // 检查路径是否以 /iframe/ 开头
+  return route.path.startsWith('/iframe/') && 
+         tagsViewStore.iframeViews.some(v => v.path === route.path)
+}
+
+console.log('Current route:', route.path, 'meta:', route.meta, 'is iframe:', isIframeRoute(route));
+console.log('All iframe views:', tagsViewStore.iframeViews);
 </script>
-
-<style lang="scss" scoped>
-.app-main {
-	// /* 50= navbar  50  */
-	min-height: calc(100vh - 50px);
-	width: 100%;
-	position: relative;
-	overflow: hidden;
-}
-
-.fixed-header + .app-main {
-	padding-top: 50px;
-}
-
-.hasTagsView {
-	.app-main {
-		// /* 84 = navbar + tags-view = 50 + 34 */
-		min-height: calc(100vh - 50px);
-	}
-
-	.fixed-header + .app-main {
-		padding-top: 50px;
-	}
-}
-</style>

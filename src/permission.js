@@ -8,7 +8,7 @@ import { isRelogin } from '@/utils/auth/request'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
-
+import useTagsViewStore from '@/store/modules/tagsView'
 NProgress.configure({ showSpinner: false })
 
 const whiteList = ['/login', '/register', '/tools/demo', '/tools/lowcode']
@@ -16,6 +16,21 @@ const whiteList = ['/login', '/register', '/tools/demo', '/tools/lowcode']
 router.beforeEach((to, from, next) => {
 	NProgress.start()
 	if (getToken()) {
+		// 检查是否是 iframe 路由且路径包含完整 URL
+		if (to.path.startsWith('/iframe/') && to.path.includes('http://')) {
+			// 修复路径 - 提取 id 部分
+			const pathParts = to.path.split('/')
+			const id = pathParts[pathParts.length - 1]
+
+			// 重定向到正确的路径
+			next({
+				path: `/iframe/${id}`,
+				query: to.query,
+				meta: to.meta
+			})
+			return
+		}
+
 		// debugger
 		to.meta.title && useSettingsStore().setTitle(to.meta.title)
 		/* has token*/
