@@ -77,7 +77,7 @@ import request from '@/utils/auth/request'
 import usePermissionStore from '@/store/modules/permission'
 import Star from '@/assets/icons/star.png'
 import FullStar from '@/assets/icons/full-star.png'
-
+import useTagsViewStore from '@/store/modules/tagsView'
 const permissionStore = usePermissionStore()
 const sidebarRouters = computed(() => permissionStore.sidebarRouters.filter(i => i.hidden == false))
 
@@ -102,6 +102,7 @@ const ITEM_BASE_HEIGHT = 50 // 基础高度(标题高度)
 const ITEM_ROW_HEIGHT = 45 // 每个三级菜单项高度
 const COLUMN_COUNT = 3 // 列数
 
+const tagsViewStore = useTagsViewStore()
 // 二级菜单数据
 const secondLevelMenus = ref([])
 
@@ -174,6 +175,14 @@ const processMenuData = () => {
 		item.meta.collect = item.isQuickEnter == 1
 		item.meta.hover = false
 		item.parent = props.item
+		// 确保 isFrame 是字符串，与条件判断一致
+		if (item.isFrame !== undefined) {
+			item.isFrame = String(item.isFrame)
+		}
+		// 将 link 字段复制到 meta 中，确保系统能识别
+		if (item.link && !item.meta.link) {
+			item.meta.link = item.link
+		}
 		// 处理三级菜单
 		if (item.children && item.children.length) {
 			item.children.forEach(child => {
@@ -210,13 +219,13 @@ const handleMouseLeave = menuItem => {
 
 // 选择菜单处理方法
 const handleMenuSelect = menuItem => {
-	console.log('选中的菜单:', menuItem)
+	// console.log('选中的菜单:', menuItem)
 
 	// 路由跳转逻辑
 	const path = resolvePath(menuItem.path, menuItem.meta?.query)
-	console.log(path)
+	// console.log(path)
 	if (path) {
-		if (menuItem.isFrame == 0) {
+		if (menuItem.isFrame == 2) {
 			// 构建完整的URL，包含noLayout参数
 			const fullUrl = new URL(path, window.location.origin)
 			fullUrl.searchParams.set('noLayout', 'true')
@@ -227,11 +236,46 @@ const handleMenuSelect = menuItem => {
 				newWindow.focus()
 				proxy.$bus.emit('closeMask')
 			}
+		} else if (menuItem.isFrame == '1') {
+			// 处理 iframe 内部显示的情况
+			handleIframeMenuSelect(menuItem, menuItem.path)
 		} else {
 			proxy.$router.push(path)
 			proxy.$bus.emit('closeMask')
 		}
 	}
+}
+
+/**
+ * 处理 iframe 菜单选择
+ * @param menuItem 选中的菜单项
+ * @param path 菜单项的路径
+ */
+const handleIframeMenuSelect = (menuItem, path) => {
+	// 确保 meta 对象存在并包含 link 字段
+	const routeMeta = {
+		...menuItem.meta,
+		title: menuItem.meta.title || menuItem.name,
+		link: menuItem.link || menuItem.meta.link || menuItem.path, // 确保有值
+	}
+	// 添加到 iframeViews
+	const iframeView = {
+		...menuItem,
+		link: menuItem.path,
+		path: `/iframe/${menuItem.id || menuItem.path.replace(/\//g, '_')}`, // 使用 id 或路径的替代形式
+		meta: routeMeta,
+	}
+
+	tagsViewStore.addIframeView(iframeView)
+	tagsViewStore.addVisitedView(iframeView)
+
+	// 跳转到该路径
+	proxy.$router.push({
+		path: iframeView.path,
+		meta: routeMeta,
+	})
+
+	proxy.$bus.emit('closeMask')
 }
 /**
  * 三级菜单点击事件
@@ -251,15 +295,19 @@ const handleMenuThirdSelect = (secondLevel, menuItem) => {
 // 跳转的路径
 function resolvePath(routePath, routeQuery) {
 	if (isExternal(routePath)) {
+		// 对于外部链接，返回原始路径，但不作为路由路径
 		return routePath
 	}
+
 	if (isExternal(props.basePath)) {
 		return props.basePath
 	}
+
 	if (routeQuery) {
 		let query = JSON.parse(routeQuery)
 		return { path: getNormalPath(props.basePath + '/' + routePath), query: query }
 	}
+
 	return getNormalPath(props.basePath + '/' + routePath)
 }
 

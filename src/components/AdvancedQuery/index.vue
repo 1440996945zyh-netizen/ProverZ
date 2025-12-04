@@ -72,7 +72,7 @@
 					<div class="group-header-content">
 						<!-- 组内条件列表 -->
 						<div v-for="(condition, conditionIndex) in group.conditions" :key="condition.id" class="condition-wrapper">
-							<el-row  class="condition-row">
+							<el-row class="condition-row">
 								<el-col :span="2"></el-col>
 								<!-- 前端表格字段 -->
 								<el-col :span="5" :md="5" :sm="8" :xs="24" class="condition-item">
@@ -93,7 +93,7 @@
 								</el-col>
 
 								<!-- 运算符 -->
-								<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item" style="padding:0px 2px ;">
+								<el-col :span="6" :md="6" :sm="8" :xs="24" class="condition-item" style="padding: 0px 2px">
 									<Select
 										:selectData="getFilteredOperatorOptions(condition.columnType)"
 										v-model:value="condition.operator"
@@ -106,7 +106,7 @@
 								</el-col>
 
 								<!-- 条件值 -->
-								<el-col :span="8" :md="8" :sm="8" :xs="24" class="condition-item" >
+								<el-col :span="8" :md="8" :sm="8" :xs="24" class="condition-item">
 									<!-- 条件值 - 根据字段类型动态显示 -->
 									<template v-if="condition.columnName && condition.operator">
 										<!-- 不需要值的运算符 -->
@@ -333,7 +333,7 @@ const props = defineProps({
 })
 
 const onQuery = inject('onQuery') // 注入父组件提供的方法
-const advancedQueryParams = ref({ ...props.queryAdvancedParams });
+const advancedQueryParams = ref({ ...props.queryAdvancedParams })
 // 对话框显示状态
 const dialogVisible = ref(false)
 
@@ -441,10 +441,9 @@ const getSelectDataConfig = condition => {
 				types: condition.colSelectKey,
 			},
 		}
-	}
-	else if (condition.colSelectSource === 'OTHER') {
+	} else if (condition.colSelectSource === 'OTHER') {
 		// 其他类型：使用 colSelectKey 作为 URL，添加额外参数
-		console.log('props.queryAdvancedParams =>', advancedQueryParams.value);
+		console.log('props.queryAdvancedParams =>', advancedQueryParams.value)
 		return {
 			url: condition.colSelectKey,
 			params: advancedQueryParams.value || {},
@@ -456,14 +455,14 @@ const getSelectDataConfig = condition => {
  * 获取过滤后的运算符选项
  */
 const getFilteredOperatorOptions = computed(() => {
-  return (columnType) => {
-    if (!columnType) return []
-    const allowedOperators = operatorTypeMap[columnType] || []
-    return allowedOperators.map(op => ({
-      value: op,
-      label: operatorLabelMap[op] || op,
-    }))
-  }
+	return columnType => {
+		if (!columnType) return []
+		const allowedOperators = operatorTypeMap[columnType] || []
+		return allowedOperators.map(op => ({
+			value: op,
+			label: operatorLabelMap[op] || op,
+		}))
+	}
 })
 
 // 创建新的查询条件对象
@@ -497,11 +496,6 @@ function createNewGroup() {
  * 获取日期格式
  */
 const getDateFormat = dateFormatCode => {
-	console.log('dateFormatCode =>', dateFormatCode)
-	console.log(
-		'dateFormatMap.value.find(item => item.value == dateFormatCode)?.label =>',
-		dateFormatMap.value.find(item => item.value == dateFormatCode)?.label
-	)
 	return dateFormatMap.value.find(item => item.value == dateFormatCode)?.label || ''
 }
 
@@ -739,7 +733,32 @@ const saveQueryConditions = () => {
 
 	ElMessage.success('查询条件保存成功')
 }
+/**
+ * 静默清空所有查询条件（无确认弹窗，供父组件调用）
+ * 用于父组件重置时同步清空高级查询，不打扰用户
+ */
+const clearAllConditions = () => {
+	try {
+		// 重置查询条件组为初始状态（单个空条件组）
+		queryForm.value.groups = [createNewGroup()]
 
+		// 清空本地存储的查询配置
+		if (props.id) {
+			const storageKey = `advancedQuery_${props.id}`
+			localStorage.removeItem(storageKey)
+		}
+
+		// 关闭对话框（避免用户看到旧数据）
+		dialogVisible.value = false
+
+		console.log('高级查询条件已静默清空')
+		return true // 清空成功返回true
+	} catch (error) {
+		console.error('高级查询清空失败：', error)
+		ElMessage.error('高级查询条件清空失败')
+		return false // 清空失败返回false
+	}
+}
 // 从本地存储加载查询条件
 const loadQueryConditions = () => {
 	const storageKey = `advancedQuery_${props.id}`
@@ -809,7 +828,7 @@ const resetAll = () => {
 				const storageKey = `advancedQuery_${props.id}`
 				localStorage.removeItem(storageKey)
 			}
-
+			onQuery()
 			ElMessage.success('查询条件已重置')
 		})
 		.catch(() => {
@@ -818,16 +837,16 @@ const resetAll = () => {
 }
 watch(
 	() => props.queryAdvancedParams, // 监听 props 的变化
-	(newVal) => {
-		console.log('props.queryAdvancedParams changed to:', newVal);
+	newVal => {
+		console.log('props.queryAdvancedParams changed to:', newVal)
 		// 当 props 变化时，更新 ref 的值
-		advancedQueryParams.value = { ...newVal };
+		advancedQueryParams.value = { ...newVal }
 	},
 	{
 		deep: true, // 深度监听，确保对象内部属性变化也能被捕获
 		immediate: true, // 立即执行一次，确保初始状态正确
 	}
-);
+)
 // 组件挂载时加载保存的查询条件
 onMounted(async () => {
 	getDateFormatOptions()
@@ -840,7 +859,11 @@ onMounted(async () => {
 		queryForm.value.groups = [createNewGroup()]
 	}
 })
-
+defineExpose({
+	resetAll, // 原有带确认弹窗的重置方法
+	clearAllConditions, // 新增无弹窗静默清空方法（供父组件调用）
+	dialogVisible, // 保留对话框状态，方便父组件控制
+})
 // 定义组件事件
 const emit = defineEmits(['query'])
 </script>

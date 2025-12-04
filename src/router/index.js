@@ -119,6 +119,14 @@ export const constantRoutes = [
 			},
 		],
 	},
+	{
+		path: '/iframe/:id',
+		component: () => import('@/layout/index.vue'), // 或者空组件
+		meta: {
+			title: '外部系统',
+			isIframe: true // 标记为 iframe 页面
+		}
+	},
 ]
 
 // 动态路由，基于用户权限动态去加载

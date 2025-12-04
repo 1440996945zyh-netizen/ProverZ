@@ -128,7 +128,12 @@
 				<el-button type="primary" icon="Search" @click="searchHandler" ref="searchDom" v-if="showSearch">查询</el-button>
 				<el-button icon="RefreshRight" @click="resetSearch" ref="searchDom" v-if="showReset">重置</el-button>
 				<!-- 高级查询 -->
-				<AdvancedQuery :isShowAdvancedQuery="isShowAdvancedQuery" :id="id"  :queryAdvancedParams="queryAdvancedParams" />
+				<AdvancedQuery
+					ref="advancedQueryRef"
+					:isShowAdvancedQuery="isShowAdvancedQuery"
+					:id="id"
+					:queryAdvancedParams="queryAdvancedParams"
+				/>
 			</div>
 			<div class="right" id="right">
 				<template v-if="!showToolTip">
@@ -317,7 +322,7 @@
 	</div>
 </template>
 <script setup name="SearchHeader">
-import { reactive, ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
+import { reactive, ref, computed, onMounted, watch, getCurrentInstance, nextTick,inject } from 'vue'
 import Select from '../Select/index.vue'
 import nvDatePicker from '../nvDatePicker/index.vue'
 import RemoteSelect from '../RemoteSelect/index.vue'
@@ -331,7 +336,8 @@ const searchData = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-
+// 高级查询
+const advancedQueryRef = ref(null)
 const showMore = ref(false)
 const props = defineProps({
 	// 搜索框集合
@@ -381,21 +387,20 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
-	    /**
-     * 表格id (用于高级查询)
-     */
-    id: {
-        type: String,
-        default: null,
-    },
-    /**
-     * 高级查询参数
-     */
-    queryAdvancedParams: {
-        type: Object,
-        default: () => {},
-    },
-
+	/**
+	 * 表格id (用于高级查询)
+	 */
+	id: {
+		type: String,
+		default: null,
+	},
+	/**
+	 * 高级查询参数
+	 */
+	queryAdvancedParams: {
+		type: Object,
+		default: () => {},
+	},
 })
 const showSelectData = computed(() => {
 	const showData = props.selectData.filter(item => !item.isHidden)
@@ -566,10 +571,11 @@ const handleChange = (i, data) => {
 const buttonClick = (i, e) => {
 	i()()
 }
+const onQuery = inject('onQuery') // 注入父组件提供的方法
 /**
  * 重置事件
  */
-const resetSearch = keys => {
+const resetSearch = async keys => {
 	if (typeof keys === 'string') {
 		searchData.value[keys] = ''
 	} else if (keys instanceof Array) {
@@ -595,6 +601,12 @@ const resetSearch = keys => {
 			}
 			searchData.value = Object.assign(searchData.value, JSON.parse(JSON.stringify(resetSearchData.value)))
 		}
+	}
+	// 2. 高级查询清空：调用静默清空方法（无弹窗）
+	if (props.isShowAdvancedQuery && advancedQueryRef.value) {
+		await advancedQueryRef.value.clearAllConditions()
+			// 触发查询事件
+		onQuery()
 	}
 }
 const resetSearchData = ref({}) // 重置的对象
