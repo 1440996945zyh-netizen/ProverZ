@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-17 10:35:09
- * @LastEditTime: 2025-12-12 10:17:08
+ * @LastEditTime: 2025-12-12 15:18:55
  * @LastEditors: zhangsd
  * @Description: 流程设计模版
  * @FilePath: \view\src\components\ProcessDesigner\index.vue
@@ -11,6 +11,7 @@
 		<!-- 流程设计器 -->
 		<BpmnProcessDesigner
 			v-model="xmlString"
+			:value="xmlString"
 			v-bind="controlForm"
 			keyboard
 			ref="processDesigner"

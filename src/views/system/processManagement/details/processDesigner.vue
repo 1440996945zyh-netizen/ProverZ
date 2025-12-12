@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:36
- * @LastEditTime: 2025-12-12 10:10:42
+ * @LastEditTime: 2025-12-12 16:12:20
  * @LastEditors: zhangsd
  * @Description: 流程模版设计
  * @FilePath: \view\src\views\system\processManagement\details\processDesigner.vue
@@ -84,7 +84,7 @@ const assignEditorToDesignerData = () => {
 
 	// 2. 通过editor是否有值判断新增/编辑
 	if (props.editor && Object.keys(props.editor).length > 0) {
-				designerData.bpmnXml = props.editor.bpmnXml || '' // 核心：加载已有XML
+		designerData.bpmnXml = props.editor.bpmnXml || '' // 核心：加载已有XML
 		designerData.title = `编辑流程图 - ${props.editor.name || ''}`
 		designerData.processId = props.editor.id || ''
 		designerData.deploymentId = props.editor.deploymentId || ''
@@ -189,7 +189,7 @@ const save = async data => {
 			try {
 				const saveData = {
 					processId: designerData.processId,
-					deploymentId: designerData.deploymentId,// 编辑时传递部署ID
+					deploymentId: designerData.deploymentId, // 编辑时传递部署ID
 					//xml: 对应流程XML
 					xml: data.xml,
 					// name: 对应流程名称
@@ -207,7 +207,7 @@ const save = async data => {
 					designerData.processId = saveData.processId
 					designerData.deploymentId = saveData.deploymentId
 					designerData.title = saveData.title
-					designerData.description = saveData.description     
+					designerData.description = saveData.description
 					designerData.category = saveData.category
 
 					// 更新表单数据
@@ -216,8 +216,8 @@ const save = async data => {
 					// 重置未保存状态
 					initialXml.value = designerData.bpmnXml
 					hasUnsavedChanges.value = false
-							// 刷新父组件列表（通过父组件重新调用getList）
-			emit('save', res.data)
+					// 刷新父组件列表（通过父组件重新调用getList）
+					emit('save', res.data)
 				} else {
 					ElMessage.error('保存失败: ' + (res.msg || '未知错误'))
 				}
@@ -250,10 +250,10 @@ const checkUnsavedChanges = async () => {
 
 // 组件卸载前检查
 onBeforeUnmount(async () => {
-	const canLeave = await checkUnsavedChanges()
-	if (!canLeave) {
-		console.log('用户选择继续编辑')
-	}
+	// const canLeave = await checkUnsavedChanges()
+	// if (!canLeave) {
+	// 	console.log('用户选择继续编辑')
+	// }
 })
 
 // 监听editor变化：先初始化数据，完成后再同步到designerData

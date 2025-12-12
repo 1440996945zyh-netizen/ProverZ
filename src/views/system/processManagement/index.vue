@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-12-12 10:08:13
+ * @LastEditTime: 2025-12-12 16:13:29
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\system\processManagement\index.vue
@@ -73,7 +73,7 @@
 		</Dialog>
 		<!-- 流程设计器对话框 -->
 		<Dialog v-model:visible="processDesignerVisible" :title="processDesignerTitle" :showFooter="false" isFullscreen :modal="true">
-			<processDesigner :editor="editor"></processDesigner>
+			<processDesigner :editor="editor" @save="doSaveXml"></processDesigner>
 		</Dialog>
 	</div>
 </template>
@@ -645,6 +645,20 @@ const handleLoadXml = async (row) => {
 	} catch (error) {
 		console.error('加载流程XML失败:', error)
 		ElMessage.error('加载流程XML失败，请重试')
+	}
+}
+/**
+ * 保存流程XML
+ * @param {Object} params 保存参数
+ */
+const doSaveXml = async (params) => {
+	try {
+		
+		processDesignerVisible.value = false
+		getList() // 刷新列表
+	} catch (error) {
+		console.error('保存流程XML失败:', error)
+		ElMessage.error('保存流程XML失败，请重试')
 	}
 }
 
