@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-09-24 17:37:25
+ * @LastEditTime: 2025-12-12 10:08:13
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\system\processManagement\index.vue
@@ -80,7 +80,7 @@
 
 <script setup name="ProcessManagement">
 // 1. 基础依赖导入
-import { ref, reactive, computed, getCurrentInstance, onMounted, h } from 'vue'
+import { ref, reactive, computed, getCurrentInstance, onMounted, h, nextTick } from 'vue'
 import {
 	ElButton,
 	ElTag,
@@ -111,7 +111,7 @@ import tableParamsStore from '@/store/modules/tableParams'
 import { processMockData } from './details/data'
 import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete } from '@element-plus/icons-vue'
 // import { message } from 'ant-design-vue'
-
+import flowableApi from '@/api/system/processManagement'
 // 4. 组件实例与基础配置
 const { proxy } = getCurrentInstance()
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
@@ -489,10 +489,33 @@ const canSubmit = row => {
 
 // 16. 核心业务方法
 /**
- * 获取流程列表（使用假数据）
+ * 获取流程列表
  * @param {Object} params 搜索参数
  */
 const getList = (params = {}) => {
+	tableLoading.value = true
+	flowableApi
+		.getFLowAbleList(params)
+		.then(res => {
+			if (res.code == '0000') {
+				tableData.value = res.data.pages
+
+				console.log('tableData.value =>', tableData.value)
+				total.value = res.data.totalNum
+				tableLoading.value = false
+			}
+		})
+		.catch(error => {
+			tableLoading.value = false
+			console.error('获取流程列表失败:', error)
+			proxy.$modal.msgError('获取流程列表失败，请重试')
+		})
+}
+/**
+ * 获取流程列表
+ * @param {Object} params 搜索参数
+ */
+const getList1 = (params = {}) => {
 	tableLoading.value = true
 	// 模拟接口延迟
 	setTimeout(() => {
@@ -546,23 +569,21 @@ const cellClickEvent = ({ row }) => {
  * @param {string} deploymentId 部署ID
  */
 const handleProcessView = async deploymentId => {
+	console.log('deploymentId =>', deploymentId)
 	try {
 		// 模拟调用接口获取XML（实际项目中替换为真实API）
-		// const res = await getBpmnXml(deploymentId) // 示例：import { getBpmnXml } from '@/api/flowable'
-		// if (res.success) {
-		//   processView.xmlData = res.result
-		// } else {
-		//   ElMessage.error('获取流程图失败')
-		//   return
-		// }
+		const res = await flowableApi.readFlowableXml(deploymentId)
+		if (res.code == '0000') {
+			processView.xmlData = res.data
+			// 设置流程查看状态
+			processView.index = deploymentId
+			processView.index = `${deploymentId}_${Date.now()}`
 
-		// 在真实项目中，请移除此硬编码，改用真实的 API 调用
-		const mockXml = deploymentId == '03500701-0bd1-11ed-8314-601895569a42' ? processMockData.xmlData : processMockData.xmlData2
-		// 设置流程查看状态
-		// processView.index = deploymentId
-		processView.index = `${deploymentId}_${Date.now()}`
-		processView.xmlData = mockXml // 替换为真实 API 返回值
-		processViewVisible.value = true
+			processViewVisible.value = true
+		} else {
+			ElMessage.error('获取流程图失败')
+			return
+		}
 	} catch (error) {
 		console.error('获取流程图失败:', error)
 		ElMessage.error('获取流程图失败，请重试')
@@ -593,16 +614,38 @@ const handleOnlineForm = (formId, formName) => {
 const handleForm = formId => {
 	proxy.$modal.msg(`打开表单: ${formId}`)
 }
-
 /**
- * 编辑流程
- * @param {Object} row 流程数据
+ * 加载流程XML 编辑
+ * @param row 行数据
  */
-const handleLoadXml = row => {
-	proxy.$modal.msg(`编辑流程: ${row.name}`)
-	console.log('row =>', row);
-	processDesignerVisible.value = true
-	editor.value = row
+const handleLoadXml = async (row) => {
+	if (!row || !row.deploymentId) {
+		ElMessage.warning('流程数据异常')
+		return
+	}
+	try {
+		// 1. 加载中状态
+		ElMessage.info(`加载流程【${row.name}】中...`)
+		// 2. 调用接口获取流程XML
+		const res = await flowableApi.readFlowableXml(row.deploymentId)
+		if (res.code === '0000') {
+			// 3. 组装编辑所需的流程数据（传递给设计器）
+			editor.value = {
+				...row,
+				bpmnXml: res.data, // 核心：XML数据
+				processName: row.name,
+				processKey: row.key,
+				category: row.category,
+			}
+			// 4. 打开设计器弹窗
+			processDesignerVisible.value = true
+		} else {
+			ElMessage.error('加载流程XML失败：' + (res.msg || '未知错误'))
+		}
+	} catch (error) {
+		console.error('加载流程XML失败:', error)
+		ElMessage.error('加载流程XML失败，请重试')
+	}
 }
 
 /**
@@ -698,7 +741,7 @@ const handleDelete = row => {
  * 新增流程
  */
 const handleAddProcess = () => {
-	proxy.$modal.msg('跳转到新增流程页面')
+	// proxy.$modal.msg('跳转到新增流程页面')
 	processDesignerVisible.value = true
 	editor.value = null
 }
@@ -708,17 +751,34 @@ const handleAddProcess = () => {
  */
 const handleConfirmAction = () => {
 	if (currentAction.value === 'state') {
-		// 模拟状态更新
-		proxy.$modal.msgSuccess(`流程${currentRow.value.targetState === 1 ? '激活' : '挂起'}成功`)
+		console.log('currentRow.value =>', currentRow.value)
+		flowableApi
+			.updateFlowState({
+				deployId: currentRow.value.deploymentId,
+				state: currentRow.value.targetState,
+			})
+			.then(res => {
+				if (res.code == '0000') {
+					proxy.$modal.msgSuccess(`流程${currentRow.value.targetState === 1 ? '激活' : '挂起'}成功`)
+					getList()
+				} else {
+					ElMessage.error('更新流程状态失败')
+				}
+			})
 	} else if (currentAction.value === 'delete') {
-		// 模拟删除（从假数据中移除）
-		const index = processMockData.tableList.findIndex(item => item.id === currentRow.value.id)
-		if (index !== -1) {
-			processMockData.tableList.splice(index, 1)
-		}
-		proxy.$modal.msgSuccess('流程删除成功')
+		flowableApi
+			.deleteFlow({
+				deployId: currentRow.value.deploymentId,
+			})
+			.then(res => {
+				if (res.code == '0000') {
+					proxy.$modal.msgSuccess('流程删除成功')
+					getList()
+				} else {
+					ElMessage.error('删除流程失败')
+				}
+			})
 	}
-	getList() // 刷新列表
 }
 
 // 17. 页面初始化
@@ -766,7 +826,7 @@ onMounted(() => {
 	padding: 10px;
 }
 
-:deep .el-dialog .dialog-body {
+:deep(.el-dialog .dialog-body) {
 	height: 100% !important;
 	padding: 0px !important;
 }

@@ -1,8 +1,17 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2025-09-19 09:17:50
+ * @LastEditTime: 2025-12-09 17:07:41
+ * @LastEditors: zhangsd
+ * @Description: 多实例组件
+ * @FilePath: \view\src\plugins\package\penal\multi-instance\ElementMultiInstance.vue
+-->
+
 <template>
   <div class="panel-tab__content">
-    <el-form size="mini" label-width="90px" @submit.prevent>
+    <el-form  label-width="90px" @submit.prevent size="default">
       <el-form-item label="回路特性">
-        <el-select v-model="loopCharacteristics" @change="changeLoopCharacteristicsType">
+        <el-select v-model="loopCharacteristics"  @change="changeLoopCharacteristicsType" style="width: 200px;">
           <!-- bpmn:MultiInstanceLoopCharacteristics -->
           <el-option label="并行多重事件" value="ParallelMultiInstance" />
           <el-option label="时序多重事件" value="SequentialMultiInstance" />
@@ -14,15 +23,15 @@
 
       <template v-if="loopCharacteristics === 'ParallelMultiInstance' || loopCharacteristics === 'SequentialMultiInstance'">
         <el-form-item label="集合" key="collection">
-          <el-input v-model="loopInstanceForm.collection" clearable @change="updateLoopBase" />
+          <el-input v-model="loopInstanceForm.collection" clearable  @change="updateLoopBase"   />
         </el-form-item>
 
         <el-form-item label="元素变量" key="elementVariable">
-          <el-input v-model="loopInstanceForm.elementVariable" clearable @change="updateLoopBase" />
+          <el-input v-model="loopInstanceForm.elementVariable" clearable  @change="updateLoopBase"   />
         </el-form-item>
 
         <el-form-item label="完成条件" key="completionCondition">
-          <el-input v-model="loopInstanceForm.completionCondition" clearable @change="updateLoopCondition" />
+          <el-input v-model="loopInstanceForm.completionCondition" clearable  @change="updateLoopCondition"   />
         </el-form-item>
       </template>
     </el-form>
@@ -31,6 +40,14 @@
 
 <script setup>
 import { ref, reactive, watch, onBeforeUnmount, inject } from 'vue';
+
+// 定义组件属性和事件
+const props = defineProps({
+  businessObject: Object,
+  type: String
+});
+
+const emit = defineEmits(['multiInsEvent']);
 
 // 注入全局配置
 const prefix = inject('prefix');
@@ -56,16 +73,7 @@ const defaultLoopInstanceForm = {
 
 const loopInstanceForm = reactive({ ...defaultLoopInstanceForm });
 
-// 监听 businessObject 变化
-watch(
-  () => props.businessObject,
-  (val) => {
-    if (val) {
-      getElementLoop(val);
-    }
-  },
-  { immediate: true }
-);
+
 
 // 从 BPMN 对象读取多实例配置
 const getElementLoop = (businessObject) => {
@@ -246,31 +254,22 @@ const updateLoopAsync = (key) => {
 
   window.bpmnInstances.modeling.updateModdleProperties(bpmnElement, multiLoopInstance, asyncAttr);
 };
-
-// 组件销毁前清理
-onBeforeUnmount(() => {
-  multiLoopInstance = null;
-  bpmnElement = null;
-});
-
-// Props & Emit
-const props = defineProps({
-  businessObject: Object,
-  type: String
-});
-
-const emit = defineEmits(['multiInsEvent']);
-
 // 初始化 BPMN 元素（在 watch 中由 businessObject 触发）
 watch(
   () => props.businessObject,
   (val) => {
     if (val) {
       bpmnElement = window.bpmnInstances?.bpmnElement;
+      getElementLoop(val);
     }
   },
   { immediate: true }
 );
+// 组件销毁前清理
+onBeforeUnmount(() => {
+  multiLoopInstance = null;
+  bpmnElement = null;
+});
 </script>
 
 <style scoped>

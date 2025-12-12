@@ -1,3 +1,12 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2025-09-19 09:17:49
+ * @LastEditTime: 2025-12-11 10:51:57
+ * @LastEditors: zhangsd
+ * @Description: 流程设计器
+ * @FilePath: \view\src\plugins\package\designer\ProcessDesigner.vue
+-->
+
 <template>
 	<div class="my-process-designer">
 		<div class="my-process-designer__header">
@@ -16,39 +25,42 @@
 						</el-icon>
 						打开文件
 					</el-button>
-					<el-tooltip effect="light">
-						<template #content>
+					<el-popover placement="bottom" trigger="click">
+						<template #default>
 							<el-button :size="headerButtonSize" type="text" @click="downloadProcessAsXml()">下载为XML文件</el-button>
 							<br />
 							<el-button :size="headerButtonSize" type="text" @click="downloadProcessAsSvg()">下载为SVG文件</el-button>
 							<br />
 							<el-button :size="headerButtonSize" type="text" @click="downloadProcessAsBpmn()">下载为BPMN文件</el-button>
 						</template>
-						<el-button :size="headerButtonSize" :type="headerButtonType">
-							<el-icon>
-								<Download />
-							</el-icon>
-							下载文件
-						</el-button>
-					</el-tooltip>
-					<el-tooltip effect="light">
-						<template #content>
+						<template #reference>
+							<el-button :size="headerButtonSize" :type="headerButtonType">
+								<el-icon>
+									<Download />
+								</el-icon>
+								下载文件
+							</el-button>
+						</template>
+					</el-popover>
+					<el-popover placement="bottom" trigger="click" ref="previewPopover">
+						<template #default>
 							<el-button :size="headerButtonSize" type="text" @click="previewProcessXML">预览XML</el-button>
 							<br />
 							<el-button :size="headerButtonSize" type="text" @click="previewProcessJson">预览JSON</el-button>
 						</template>
-						<el-button :size="headerButtonSize" :type="headerButtonType">
-							<el-icon>
-								<View />
-							</el-icon>
-							预览
-						</el-button>
-					</el-tooltip>
+						<template #reference>
+							<el-button :size="headerButtonSize" :type="headerButtonType">
+								<el-icon>
+									<View />
+								</el-icon>
+								预览
+							</el-button>
+						</template>
+					</el-popover>
 					<el-tooltip v-if="simulation" effect="light" :content="simulationStatus ? '退出模拟' : '开启模拟'">
 						<el-button :size="headerButtonSize" :type="headerButtonType" @click="processSimulation">
-							<el-icon>
-								<ScaleToOriginal />
-							</el-icon>
+						
+							<el-icon><Cpu /></el-icon>
 							模拟
 						</el-button>
 					</el-tooltip>
@@ -143,15 +155,15 @@
 		</div>
 		<!-- 预览弹窗 -->
 		<Dialog title="预览" width="80%" v-model:visible="previewModelVisible" :showFooter="false">
-			<highlightjs :language="previewType" :code="previewResult" />
+			<Highlightjs :language="previewType" :code="previewResult" />
 		</Dialog>
 	</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, defineProps, getCurrentInstance, defineEmits } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, defineProps, defineEmits } from 'vue'
 import SvgIcon from '@/components/SvgIcon'
-import Dialog from '@/components/Dialog/index.vue'
+import Dialog from '@/components/Dialog'
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 import DefaultEmptyXML from './plugins/defaultEmpty'
 // 翻译方法
@@ -167,26 +179,25 @@ import flowableModdleDescriptor from './plugins/descriptor/flowableDescriptor.js
 import camundaModdleExtension from './plugins/extension-moddle/camunda'
 import activitiModdleExtension from './plugins/extension-moddle/activiti'
 import flowableModdleExtension from './plugins/extension-moddle/flowable'
+// 引入高亮组件（关键）
+import Highlightjs from '@/components/Highlight/index.vue'
+
 // 引入json转换与高亮
 import X2JS from 'x2js'
 // 引入Element Plus组件 + 图标组件（核心新增）
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElButton, ElButtonGroup, ElTooltip, ElPopover, ElDialog, ElIcon } from 'element-plus'
 import {
 	Edit,
 	FolderOpened,
 	Download,
 	View,
-	ScaleToOriginal,
+	Cpu,
 	ZoomOut,
 	ZoomIn,
-	Tickets,
 	RefreshLeft,
 	RefreshRight,
 	Refresh,
 } from '@element-plus/icons-vue'
-
-// 获取全局实例
-const { proxy } = getCurrentInstance()
 
 // 定义事件
 const emit = defineEmits(() => {
@@ -205,7 +216,7 @@ const emit = defineEmits(() => {
 	const dynamicEvents = props.events.map(event => event.replace(/\./g, '-'))
 	return [...baseEvents, ...dynamicEvents]
 })
-
+const previewPopover = ref(null)
 // 定义Props
 const props = defineProps({
 	value: String, // xml 字符串
@@ -541,6 +552,7 @@ function downloadProcessAsSvg() {
 
 // 流程模拟
 function processSimulation() {
+	console.log('是否会执行 =>', );
 	simulationStatus.value = !simulationStatus.value
 	if (props.simulation) {
 		bpmnModeler.value.get('toggleMode').toggleMode()
@@ -622,19 +634,23 @@ function elementsAlign(align) {
 }
 
 // 预览XML
-function previewProcessXML() {
-	bpmnModeler.value.saveXML({ format: true }).then(({ xml }) => {
+async function previewProcessXML() {
+	bpmnModeler.value.saveXML({ format: true }).then(async ({ xml }) => {
 		console.log('预览XML数据：', xml) // 关键日志，确认是否有XML字符串
 		previewResult.value = xml
 		previewType.value = 'xml'
+		if (previewPopover.value) {
+			previewPopover.value.hide()
+		}
+		await nextTick() // 等待数据更新到DOM
 		previewModelVisible.value = true
 	})
 }
 
 // 预览JSON
-function previewProcessJson() {
+async function previewProcessJson() {
 	const newConvert = new X2JS()
-	bpmnModeler.value.saveXML({ format: true }).then(({ xml }) => {
+	bpmnModeler.value.saveXML({ format: true }).then(async ({ xml }) => {
 		console.log('预览XML数据：', xml) // 关键日志，确认是否有XML字符串
 		const { definitions } = newConvert.xml2js(xml)
 		if (definitions) {
@@ -644,6 +660,10 @@ function previewProcessJson() {
 		}
 
 		previewType.value = 'json'
+		if (previewPopover.value) {
+			previewPopover.value.hide()
+		}
+		await nextTick() // 等待数据更新到DOM
 		previewModelVisible.value = true
 	})
 }
@@ -676,3 +696,43 @@ defineExpose({
 	processRestart,
 })
 </script>
+
+<style>
+/* 重置Token Simulation核心控件（bts-toggle-mode）尺寸 */
+.bts-toggle-mode {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: unset !important;
+  min-height: unset !important;
+}
+
+/* 重置模拟插件所有内置按钮/控件尺寸 */
+.bts-token-simulation .bts-button,
+.bts-token-simulation svg,
+.bts-token-simulation path {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+}
+
+/* 修复Element Plus模拟按钮尺寸（与插件样式隔离） */
+.my-process-designer .el-button--default.size-default {
+  padding: 8px 15px !important;
+  font-size: 14px !important;
+  height: 32px !important;
+  line-height: 1 !important;
+}
+
+/* 确保模拟按钮内的ElIcon尺寸适配 */
+.my-process-designer .el-button .el-icon {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* 隔离bpmn画布内的模拟控件，避免影响外部按钮 */
+.my-process-designer__canvas .bts-token-simulation {
+  --bts-button-size: 28px !important; /* 统一模拟控件基础尺寸 */
+}
+</style>

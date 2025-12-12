@@ -17,7 +17,7 @@
 		/>
 		<!-- 查看 抽屉组件 -->
 		<Drawer v-model="loginVisible" :title="title" size="70%">
-			<Drawer ref="drawerRef" />
+			<DrawerDetail ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="loginVisible = false">关闭</el-button>
@@ -28,7 +28,7 @@
 </template>
 
 <script setup name="loginLog">
-import Drawer from './drawer/index'
+import DrawerDetail from './drawer/index'
 import { listOperLog } from '@/api/system/LoginLog'
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton, ElTag } from 'element-plus'

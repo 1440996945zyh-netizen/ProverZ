@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:36
- * @LastEditTime: 2025-11-07 14:03:27
+ * @LastEditTime: 2025-12-12 10:10:42
  * @LastEditors: zhangsd
  * @Description: 流程模版设计
  * @FilePath: \view\src\views\system\processManagement\details\processDesigner.vue
@@ -26,7 +26,7 @@ import { ref, reactive, onBeforeUnmount, watch, onMounted } from 'vue'
 import BpmnProcessDesigner from '@/components/ProcessDesigner'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import publicApi from '@/api/public'
-
+import flowableApi from '@/api/system/processManagement'
 // 接收父组件传递的参数
 const props = defineProps({
 	editor: {
@@ -49,7 +49,7 @@ const users = ref([])
 const groups = ref([]) // 若有加载逻辑，后续可补充到initDesignerData
 const categorys = ref([])
 const xmlFrame = ref({ width: '' })
-
+const emit = defineEmits(['save'])
 // 设计器核心数据对象
 const designerData = reactive({
 	loading: false,
@@ -84,26 +84,15 @@ const assignEditorToDesignerData = () => {
 
 	// 2. 通过editor是否有值判断新增/编辑
 	if (props.editor && Object.keys(props.editor).length > 0) {
-		// 编辑状态：从editor同步数据
-		designerData.bpmnXml = props.editor.bpmnXml || ''
-		designerData.title = `流程设计 - ${props.editor.processName || ''}`
-		designerData.processId = props.editor.processId || ''
+				designerData.bpmnXml = props.editor.bpmnXml || '' // 核心：加载已有XML
+		designerData.title = `编辑流程图 - ${props.editor.name || ''}`
+		designerData.processId = props.editor.id || ''
 		designerData.deploymentId = props.editor.deploymentId || ''
-		designerData.description = props.editor.description || ''
-		// designerData.category = props.editor.category || ''
-
-		// 补充表单中的流程名称和标识
-		designerData.form.processName = props.editor.processName || ''
-		designerData.form.processKey = props.editor.processKey || ''
-
-		// 有部署ID时标记为编辑流程图
-		if (props.editor.deploymentId) {
-			designerData.loading = true
-			handleReadImage(props.editor.deploymentId) // 假设存在此方法，用于加载图片
-			designerData.title = "编辑流程图"
-		}
-
-		// 初始化基准XML用于比较
+		designerData.category = props.editor.category || ''
+		// 补充流程名称/Key
+		designerData.form.processName = props.editor.name || ''
+		designerData.form.processKey = props.editor.key || ''
+		// 标记初始XML（用于对比是否修改）
 		initialXml.value = designerData.bpmnXml
 		hasUnsavedChanges.value = false
 	} else {
@@ -185,9 +174,12 @@ const handleXmlChanged = xml => {
 
 // 保存流程设计
 const save = async data => {
-	console.log('保存的数据:', data)
+	if (!data || !data.xml) {
+		ElMessage.warning('流程XML不能为空')
+		return
+	}
 	designerData.loading = true
-
+	console.log('designerData =>', designerData)
 	ElMessageBox.confirm('是否保存当前流程？', '提示', {
 		confirmButtonText: '保存',
 		cancelButtonText: '取消',
@@ -197,23 +189,35 @@ const save = async data => {
 			try {
 				const saveData = {
 					processId: designerData.processId,
-					deploymentId: designerData.deploymentId,
-					bpmnXml: data.bpmnXml || designerData.bpmnXml,
-					form: { ...designerData.form, ...data.form },
-					title: designerData.title,
+					deploymentId: designerData.deploymentId,// 编辑时传递部署ID
+					//xml: 对应流程XML
+					xml: data.xml,
+					// name: 对应流程名称
+					name: data?.process?.name || '默认流程名称',
 					description: designerData.description,
-					category: designerData.category,
+					// category: 对应流程类型
+					category: data?.process?.category,
+					processCategory: data?.process?.category,
 				}
 
-				const res = await modelDesigner.value.save(saveData)
+				const res = await flowableApi.doSaveFlowable(saveData)
 
-				if (res.code === 200) {
-					ElMessage.success('保存成功')
-					designerData.bpmnXml = res.data.bpmnXml
-					designerData.form = res.data.form
-					initialXml.value = res.data.bpmnXml
+				if (res.code === '0000') {
+					designerData.bpmnXml = saveData.bpmnXml
+					designerData.processId = saveData.processId
+					designerData.deploymentId = saveData.deploymentId
+					designerData.title = saveData.title
+					designerData.description = saveData.description     
+					designerData.category = saveData.category
+
+					// 更新表单数据
+					designerData.form.processName = saveData.processName
+					designerData.form.processKey = saveData.processKey
+					// 重置未保存状态
+					initialXml.value = designerData.bpmnXml
 					hasUnsavedChanges.value = false
-					designerOpen.value = false
+							// 刷新父组件列表（通过父组件重新调用getList）
+			emit('save', res.data)
 				} else {
 					ElMessage.error('保存失败: ' + (res.msg || '未知错误'))
 				}
@@ -255,7 +259,7 @@ onBeforeUnmount(async () => {
 // 监听editor变化：先初始化数据，完成后再同步到designerData
 watch(
 	() => props.editor,
-	async (newVal) => {
+	async newVal => {
 		console.log('editor发生变化，开始初始化数据...')
 		// 等待初始化完成后再执行赋值
 		await initDesignerData()
@@ -272,10 +276,21 @@ onMounted(async () => {
 })
 
 // 补充：假设存在的加载图片方法（如果需要）
-const handleReadImage = (deploymentId) => {
-	// 根据实际业务实现，例如：
-	// publicApi.getImage(deploymentId).then(res => { ... })
+const handleReadImage = async deploymentId => {
 	console.log('加载图片，deploymentId:', deploymentId)
+	try {
+		const res = await flowableApi.readFlowableXml(deploymentId)
+		if (res.code == '0000') {
+			designerData.bpmnXml = res.data
+			designerData.loading = false
+		} else {
+			ElMessage.error('获取流程图失败')
+			return
+		}
+	} catch (error) {
+		console.error('获取流程图失败:', error)
+		ElMessage.error('获取流程图失败，请重试')
+	}
 }
 </script>
 

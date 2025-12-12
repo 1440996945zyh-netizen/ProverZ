@@ -19,6 +19,12 @@ export default defineConfig(({ mode, command }) => {
 				'~': path.resolve(__dirname, './'),
 				// 设置别名
 				'@': path.resolve(__dirname, './src'),
+				'bpmn-js-token-simulation': path.resolve(__dirname, 'node_modules/bpmn-js-token-simulation'),
+				'diagram-js-minimap': path.resolve(__dirname, 'node_modules/diagram-js-minimap'),
+				'bpmn-js': path.resolve(__dirname, 'node_modules/bpmn-js'),
+				// 新增：font-awesome别名（关键）
+				'font-awesome': path.resolve(__dirname, 'node_modules/font-awesome'),
+				'bpmn-js-token-simulation/assets/css/font-awesome.min.css': path.resolve(__dirname, 'node_modules/font-awesome/css/font-awesome.min.css'),
 			},
 			// https://cn.vitejs.dev/config/#resolve-extensions
 			extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
