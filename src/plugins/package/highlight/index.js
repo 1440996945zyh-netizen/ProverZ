@@ -7,5 +7,5 @@ import json from 'highlight.js/lib/languages/json';
 hljs.registerLanguage('xml', xml);
 hljs.registerLanguage('json', json);
 
-// 改为 ES 模块的默认导出
+// 导出 hljs 实例（兼容 Vue 插件）
 export default hljs;
