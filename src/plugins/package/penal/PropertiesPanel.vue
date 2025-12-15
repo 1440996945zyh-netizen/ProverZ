@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:17:50
- * @LastEditTime: 2025-12-09 17:01:27
+ * @LastEditTime: 2025-12-12 17:09:05
  * @LastEditors: zhangsd
  * @Description: 
  * @FilePath: \view\src\plugins\package\penal\PropertiesPanel.vue
@@ -34,7 +34,7 @@
 			<el-collapse-item name="condition" v-if="elementType === 'Process'" key="message">
 				<template #title>
 					<div class="panel-tab__title">
-            <el-icon><Comment /></el-icon>
+						<el-icon><Comment /></el-icon>
 						消息与信号
 					</div>
 				</template>
@@ -58,7 +58,7 @@
 			<el-collapse-item name="form" v-if="formVisible" key="form">
 				<template #title>
 					<div class="panel-tab__title">
-            <el-icon><List /></el-icon>
+						<el-icon><List /></el-icon>
 						表单
 					</div>
 				</template>
@@ -130,7 +130,7 @@
 			<el-collapse-item name="extensions" key="extensions">
 				<template #title>
 					<div class="panel-tab__title">
-            <el-icon><CirclePlusFilled /></el-icon>
+						<el-icon><CirclePlusFilled /></el-icon>
 						扩展属性
 					</div>
 				</template>
@@ -183,7 +183,7 @@ import {
 	VideoCameraFilled,
 	CirclePlusFilled,
 	Checked,
-  List
+	List,
 } from '@element-plus/icons-vue'
 
 // ========== Props 定义 ==========
@@ -376,7 +376,7 @@ onBeforeUnmount(() => {
 	overflow-y: auto;
 	// padding: 8px;
 	box-sizing: border-box;
-  border-radius: 10px;
+	border-radius: 10px;
 }
 
 /* 标题样式：图标与文字居中对齐，加粗 */

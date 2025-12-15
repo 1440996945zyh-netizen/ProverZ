@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:36
- * @LastEditTime: 2025-12-12 16:12:20
+ * @LastEditTime: 2025-12-12 16:52:25
  * @LastEditors: zhangsd
  * @Description: 流程模版设计
  * @FilePath: \view\src\views\system\processManagement\details\processDesigner.vue
@@ -27,6 +27,7 @@ import BpmnProcessDesigner from '@/components/ProcessDesigner'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import publicApi from '@/api/public'
 import flowableApi from '@/api/system/processManagement'
+import { id } from 'element-plus/es/locale/index.mjs'
 // 接收父组件传递的参数
 const props = defineProps({
 	editor: {
@@ -120,11 +121,15 @@ const initDesignerData = () => {
 	const getUserPromise = publicApi
 		.getLocalSelect({
 			type: 'USER',
-			types: 'roles',
+			
 		})
 		.then(res => {
 			if (res.code === '0000') {
-				users.value = res.data || []
+				users.value =
+					res.data.map(item => ({
+						name: item.label,
+						id: item.value,
+					})) || []
 			} else {
 				ElMessage.warning('用户数据加载失败')
 				users.value = []
@@ -154,9 +159,31 @@ const initDesignerData = () => {
 			console.error('流程类型数据请求失败:', err)
 			categorys.value = []
 		})
+	// 封装获取用户的请求为Promise
+	const getGroupPromise = publicApi
+		.getLocalSelect({
+			type: 'USER',
+			
+		})
+		.then(res => {
+			if (res.code === '0000') {
+				groups.value =
+					res.data.map(item => ({
+						name: item.label,
+						id: item.value,
+					})) || []
+			} else {
+				ElMessage.warning('用户数据加载失败')
+				groups.value = []
+			}
+		})
+		.catch(err => {
+			console.error('用户数据请求失败:', err)
+			groups.value = []
+		})
 
 	// 等待所有异步请求完成后返回
-	return Promise.all([getUserPromise, getCategoryPromise])
+	return Promise.all([getUserPromise, getCategoryPromise, getGroupPromise])
 }
 
 // 监听编辑事件 - 元素变更

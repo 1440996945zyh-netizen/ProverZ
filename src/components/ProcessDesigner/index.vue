@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-17 10:35:09
- * @LastEditTime: 2025-12-12 15:18:55
+ * @LastEditTime: 2025-12-12 16:21:14
  * @LastEditors: zhangsd
  * @Description: 流程设计模版
  * @FilePath: \view\src\components\ProcessDesigner\index.vue
@@ -103,6 +103,7 @@ watch(
 		controlForm.categorys = newVal.categorys
 		controlForm.processId = newVal.processKey || ''
 		controlForm.processName = newVal.processName || ''
+		console.log('controlForm =>', controlForm);
 	},
 	{ deep: true, immediate: true }
 )
@@ -127,6 +128,7 @@ function elementClick(el) {
 function initModeler(bpmnModeler) {
 	setTimeout(() => {
 		modeler.value = bpmnModeler
+		console.log('modeler.value =>', modeler.value);
 		// 手动注册自定义插件（兜底）
 		// modeler.value.registerModule([CustomContentPadProvider, CustomPaletteProvider])
 	}, 10)
