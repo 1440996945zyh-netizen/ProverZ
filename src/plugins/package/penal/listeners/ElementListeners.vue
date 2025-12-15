@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:17:50
- * @LastEditTime: 2025-11-17 09:53:32
+ * @LastEditTime: 2025-12-12 17:32:52
  * @LastEditors: zhangsd
  * @Description: 元素监听器 -- 执行监听器
  * @FilePath: \view\src\plugins\package\penal\listeners\ElementListeners.vue
@@ -27,19 +27,11 @@
 		</el-table>
 
 		<div class="element-drawer__button">
-			<el-button size="mini" type="primary" icon="CirclePlus" @click="openListenerForm(null)">添加监听器</el-button>
+			<el-button size="mini" type="primary" :icon="CirclePlus" @click="openListenerForm(null)">添加监听器</el-button>
 		</div>
 
 		<!-- 监听器 编辑/创建 部分 -->
-		<el-drawer
-			v-model="listenerFormModelVisible"
-			title="执行监听器"
-			:size="`${width}px`"
-			append-to-body
-			destroy-on-close
-			:z-index="2050"
-			class="listener-drawer"
-		>
+		<Drawer v-model="listenerFormModelVisible" title="执行监听器" :size="`${width}px`" >
 			<div class="drawer-content">
 				<el-form size="mini" :model="listenerForm" label-width="96px" ref="listenerFormRef" @submit.prevent class="listener-form">
 					<el-form-item label="事件类型" prop="event" :rules="{ required: true, trigger: ['blur', 'change'] }">
@@ -147,7 +139,9 @@
 							注入字段：
 						</span>
 					</div>
-					<el-button type="primary" size="mini" @click="openListenerFieldForm(null)" style="width: 100px">添加字段</el-button>
+					<el-button type="primary" size="mini" @click="openListenerFieldForm(null)" :icon="CirclePlus" style="width: 100px">
+						添加字段
+					</el-button>
 				</div>
 
 				<el-table :data="fieldsListOfListener" size="mini" max-height="240" border fit class="fields-table">
@@ -177,10 +171,10 @@
 				<el-button size="mini" @click="listenerFormModelVisible = false">取 消</el-button>
 				<el-button size="mini" type="primary" @click="saveListenerConfig">保 存</el-button>
 			</template>
-		</el-drawer>
+		</Drawer>
 
 		<!-- 注入字段 编辑/创建 部分 -->
-		<Dialog v-model:visible="listenerFieldFormModelVisible" title="字段配置" width="600px" class="field-dialog" :z-index="2500">
+		<Dialog v-model:visible="listenerFieldFormModelVisible" title="字段配置" width="600px">
 			<el-form
 				:model="listenerFieldForm"
 				size="mini"
@@ -232,37 +226,13 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, inject, nextTick } from 'vue'
-import {
-	ElMessageBox,
-	ElMessage,
-	ElTable,
-	ElTableColumn,
-	ElButton,
-	ElDivider,
-	ElDrawer,
-	ElForm,
-	ElFormItem,
-	ElSelect,
-	ElOption,
-	ElInput,
-	ElDialog,
-} from 'element-plus'
-import 'element-plus/theme-chalk/el-table.css'
-import 'element-plus/theme-chalk/el-table-column.css'
-import 'element-plus/theme-chalk/el-button.css'
-import 'element-plus/theme-chalk/el-divider.css'
-import 'element-plus/theme-chalk/el-drawer.css'
-import 'element-plus/theme-chalk/el-form.css'
-import 'element-plus/theme-chalk/el-form-item.css'
-import 'element-plus/theme-chalk/el-select.css'
-import 'element-plus/theme-chalk/el-option.css'
-import 'element-plus/theme-chalk/el-input.css'
-import 'element-plus/theme-chalk/el-dialog.css'
+
 import { createListenerObject, updateElementExtensions } from '../../utils'
 import { initListenerType, initListenerForm, listenerType, fieldType } from './utilSelf'
 import { Menu } from '@element-plus/icons-vue'
 import Dialog from '@/components/Dialog/index'
 import Drawer from '@/components/Drawer/index.vue'
+import { CirclePlus } from '@element-plus/icons-vue'
 // 先定义Props，解决引用顺序问题
 const props = defineProps({
 	id: String,
@@ -555,6 +525,6 @@ onMounted(() => {
 
 // 字段表单样式
 .field-form {
-	margin-bottom: 10px;
+	margin: 10px;
 }
 </style>
