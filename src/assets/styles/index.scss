@@ -217,3 +217,8 @@ aside {
 .justify-between {
 	justify-content: space-between;
 }
+.fc-designer .el-aside._fc-r {
+	width: 500px !important;
+	flex: 0 0 500px !important;
+	overflow-x: hidden;
+}

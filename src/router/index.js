@@ -120,6 +120,29 @@ export const constantRoutes = [
 		],
 	},
 	{
+		path: '/bpmModel',
+		component: Layout,
+		hidden: true,
+		redirect: 'noredirect',
+		name: 'bpmModel',
+		children: [
+			{
+				path: 'bpmModel/processManagement/CreateProcess',
+				component: () => import('@/views/bpmModel/processManagement/components/CreateProcess.vue'),
+				name: 'CreateProcess',
+				meta: { title: '创建流程', icon: '' },
+			},
+			{
+				path: 'bpmModel/formdesigner/editor',
+				component: () => import('@/views/bpmModel/formdesigner/editor/index.vue'),
+				name: 'BpmFormEditor',
+				meta: {
+					title: '设计流程表单',
+				}
+			},
+		],
+	},
+	{
 		path: '/iframe/:id',
 		component: () => import('@/layout/index.vue'), // 或者空组件
 		meta: {

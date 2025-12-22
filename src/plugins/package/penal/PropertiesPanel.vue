@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:17:50
- * @LastEditTime: 2025-12-12 17:09:05
+ * @LastEditTime: 2025-12-18 15:34:52
  * @LastEditors: zhangsd
  * @Description: 
  * @FilePath: \view\src\plugins\package\penal\PropertiesPanel.vue
