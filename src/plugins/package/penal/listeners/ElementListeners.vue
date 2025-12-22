@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:17:50
- * @LastEditTime: 2025-12-12 17:32:52
+ * @LastEditTime: 2025-12-18 17:10:16
  * @LastEditors: zhangsd
  * @Description: 元素监听器 -- 执行监听器
  * @FilePath: \view\src\plugins\package\penal\listeners\ElementListeners.vue
@@ -27,7 +27,7 @@
 		</el-table>
 
 		<div class="element-drawer__button">
-			<el-button size="mini" type="primary" :icon="CirclePlus" @click="openListenerForm(null)">添加监听器</el-button>
+			<el-button size="mini" type="primary" icon="CirclePlus" @click="openListenerForm(null)">添加监听器</el-button>
 		</div>
 
 		<!-- 监听器 编辑/创建 部分 -->

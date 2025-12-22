@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-12-12 16:13:29
+ * @LastEditTime: 2025-12-16 11:41:12
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\system\processManagement\index.vue
@@ -72,13 +72,14 @@
 			</template>
 		</Dialog>
 		<!-- 流程设计器对话框 -->
-		<Dialog v-model:visible="processDesignerVisible" :title="processDesignerTitle" :showFooter="false" isFullscreen :modal="true">
+		<!-- <Dialog v-model:visible="processDesignerVisible" :title="processDesignerTitle" :showFooter="false" isFullscreen :modal="true">
 			<processDesigner :editor="editor" @save="doSaveXml"></processDesigner>
-		</Dialog>
+		</Dialog> -->
 	</div>
 </template>
 
-<script setup name="ProcessManagement">
+<script setup >
+defineOptions({ name: 'ProcessManagement' })
 // 1. 基础依赖导入
 import { ref, reactive, computed, getCurrentInstance, onMounted, h, nextTick } from 'vue'
 import {
@@ -112,6 +113,10 @@ import { processMockData } from './details/data'
 import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete } from '@element-plus/icons-vue'
 // import { message } from 'ant-design-vue'
 import flowableApi from '@/api/system/processManagement'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
 // 4. 组件实例与基础配置
 const { proxy } = getCurrentInstance()
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
@@ -233,14 +238,14 @@ const buttonList = reactive([
 		type: 'primary',
 		icon: 'Plus',
 		click: () => handleAddProcess,
-		permission: 'system:process:insert',
+		permission: 'bpm:process:insert',
 	},
 	// {
 	// 	label: '刷新',
 	// 	type: 'default',
 	// 	icon: 'Refresh',
 	// 	click: () => getList,
-	// 	permission: 'system:process:query',
+	// 	permission: 'bpm:process:query',
 	// },
 ])
 
@@ -398,7 +403,7 @@ const tableColumns = ref([
 					name: '编辑',
 					command: '编辑',
 					click: () => handleLoadXml(row),
-					permission: 'system:process:update',
+					permission: 'bpm:process:update',
 					icon: Edit, // 添加图标组件
 				},
 				// 仅当无表单时显示配置表单按钮
@@ -408,7 +413,7 @@ const tableColumns = ref([
 								name: '配置表单',
 								command: '配置表单',
 								click: () => handleAddForm(row),
-								permission: 'system:process:config',
+								permission: 'bpm:process:config',
 								icon: Setting, // 添加图标组件
 							},
 					  ]
@@ -420,7 +425,7 @@ const tableColumns = ref([
 								name: '发起申请',
 								command: '发起申请',
 								click: () => SubmitApplication(row),
-								permission: 'system:process:submit',
+								permission: 'bpm:process:submit',
 								icon: Promotion, // 添加图标组件
 							},
 					  ]
@@ -432,7 +437,7 @@ const tableColumns = ref([
 								name: '挂起',
 								command: '挂起',
 								click: () => handleUpdateSuspensionState(row, 2),
-								permission: 'system:process:state',
+								permission: 'bpm:process:state',
 								icon: VideoPause, // 添加图标组件
 							},
 					  ]
@@ -441,7 +446,7 @@ const tableColumns = ref([
 								name: '激活',
 								command: '激活',
 								click: () => handleUpdateSuspensionState(row, 1),
-								permission: 'system:process:state',
+								permission: 'bpm:process:state',
 								icon: VideoPlay, // 添加图标组件
 							},
 					  ]),
@@ -451,7 +456,7 @@ const tableColumns = ref([
 					command: '删除',
 					click: () => handleDelete(row),
 					type: 'danger',
-					permission: 'system:process:delete',
+					permission: 'bpm:process:delete',
 					icon: Delete, // 添加图标组件
 				},
 			]
@@ -618,7 +623,7 @@ const handleForm = formId => {
  * 加载流程XML 编辑
  * @param row 行数据
  */
-const handleLoadXml = async (row) => {
+const handleLoadXml = async row => {
 	if (!row || !row.deploymentId) {
 		ElMessage.warning('流程数据异常')
 		return
@@ -651,9 +656,8 @@ const handleLoadXml = async (row) => {
  * 保存流程XML
  * @param {Object} params 保存参数
  */
-const doSaveXml = async (params) => {
+const doSaveXml = async params => {
 	try {
-		
 		processDesignerVisible.value = false
 		getList() // 刷新列表
 	} catch (error) {
@@ -756,8 +760,14 @@ const handleDelete = row => {
  */
 const handleAddProcess = () => {
 	// proxy.$modal.msg('跳转到新增流程页面')
-	processDesignerVisible.value = true
-	editor.value = null
+	// processDesignerVisible.value = true
+	// editor.value = null
+	router.push({
+		name: 'CreateProcess',
+		query:{
+			type:'instance'
+		}
+	})
 }
 
 /**

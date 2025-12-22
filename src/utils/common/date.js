@@ -36,7 +36,7 @@ dayjs.locale('zh-cn')
  */
 export const formatDate = (date, format = 'L LTS') => {
 	if (!date) return ''
-	return dayjs(date).format(format)
+	return date ? dayjs(date).format(format ?? 'YYYY-MM-DD HH:mm:ss') : ""
 }
 
 /**
@@ -213,4 +213,43 @@ export const addDateRange = (params, dateRange, propName) => {
 		search[`end${propName.charAt(0).toUpperCase() + propName.slice(1)}`] = dateRange[1]
 	}
 	return search
+}
+
+
+/**
+ * element plus 的时间 Formatter 实现，使用 YYYY-MM-DD HH:mm:ss 格式
+ *
+ * @param row 行数据
+ * @param column 字段
+ * @param cellValue 字段值
+ */
+export const dateFormatter = (_row, _column, cellValue) => {
+	return cellValue ? formatDate(cellValue) : ''
+}
+
+/**
+ * 将毫秒，转换成时间字符串。例如说，xx 分钟
+ *
+ * @param ms 毫秒
+ * @returns {string} 字符串
+ */
+export const formatPast2 = ms => {
+  const day = Math.floor(ms / (24 * 60 * 60 * 1000))
+  const hour = Math.floor(ms / (60 * 60 * 1000) - day * 24)
+  const minute = Math.floor(ms / (60 * 1000) - day * 24 * 60 - hour * 60)
+  const second = Math.floor(ms / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - minute * 60)
+  if (day > 0) {
+    return day + ' 天' + hour + ' 小时 ' + minute + ' 分钟'
+  }
+  if (hour > 0) {
+    return hour + ' 小时 ' + minute + ' 分钟'
+  }
+  if (minute > 0) {
+    return minute + ' 分钟'
+  }
+  if (second > 0) {
+    return second + ' 秒'
+  } else {
+    return 0 + ' 秒'
+  }
 }
