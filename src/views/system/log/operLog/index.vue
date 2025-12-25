@@ -14,7 +14,7 @@
 		/>
 
 		<Drawer v-model="operVisible" :title="title" size="70%">
-			<Drawer ref="drawerRef" />
+			<DrawerDetail ref="drawerRef" />
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="operVisible = false">关闭</el-button>
@@ -25,7 +25,7 @@
 </template>
 
 <script setup name="operLog">
-import Drawer from './drawer/index'
+import DrawerDetail from './drawer/index'
 import { listOperLog, getById } from '@/api/system/operLog'
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton, ElMessage } from 'element-plus'
