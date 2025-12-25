@@ -1,0 +1,761 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2025-12-22 11:10:21
+ * @LastEditTime: 2025-12-23 11:13:32
+ * @LastEditors: zhangsd
+ * @Description: 流程实例管理
+ * @FilePath: \view\src\views\bpmModel\processInstance\manager\index.vue
+-->
+
+<template>
+	<!-- 流程实例管理 -->
+	<div class="app-container">
+		<BaseTable
+			ref="baseTableRef"
+			:showSearchHeader="true"
+			:selectData="selectData"
+			:searchClick="getList"
+			:buttonList="buttonList"
+			:tableColumns="tableColumns"
+			:tableData="tableData"
+			:cellClickEvent="cellClickEvent"
+			:total="total"
+			:loading="loading"
+			:tableHeight="tableHeight"
+			name="processInstanceTable"
+			:showPagination="true"
+			:showToolBar="false"
+			:showNum="5"
+			defaultWidth="60"
+		/>
+	</div>
+</template>
+
+<script setup>
+// 定义组件名称
+defineOptions({
+	name: 'BpmProcessInstanceManager',
+})
+
+// 导入依赖
+import { ref, reactive, onMounted, onActivated, nextTick, h } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+// 组件
+import BaseTable from '@/components/BaseTable/index.vue'
+// 工具函数
+// import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter, formatPast2, formatDate } from '@/utils/common/date'
+// API 接口
+// import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
+// import { CategoryApi } from '@/api/system/bpm/category'
+// import * as UserApi from '@/api/system/bpm/user'
+
+import { useMessage } from '@/plugins/useMessage'
+import { BPM_PROCESS_INSTANCE_STATUS } from '@/utils/bpm/constantEnumeration'
+import tableParamsStore from '@/store/modules/tableParams'
+// 初始化全局实例
+const route = useRoute()
+const router = useRouter()
+const message = useMessage() // 消息提示实例
+const baseTableRef = ref(null) // BaseTable 引用
+
+// 响应式数据
+const loading = ref(false) // 列表加载状态
+const total = ref(0) // 列表总条数
+const tableData = ref([]) // 表格数据
+const clickRow = ref({}) // 点击的当前行数据
+const categoryList = ref([]) // 流程分类列表
+const userList = ref([]) // 用户列表
+const processStatusDict = ref([]) // 流程状态字典
+const storeHight = computed(() => tableParamsStore().normalTableHeight)
+
+const tableHeight = computed(() => storeHight.value - 15)
+// 查询参数
+const queryParams = ref({
+	pageNo: 1,
+	pageSize: 10,
+	startUserId: undefined,
+	name: '',
+	processDefinitionId: undefined,
+	category: undefined,
+	status: undefined,
+	createTime: [],
+})
+
+/**
+ * 搜索配置（对应原搜索栏）
+ */
+const selectData = reactive([
+	{
+		name: '发起人', // 搜索框名称
+		type: 'select', // 搜索框类型
+		modelValue: 'startUserId', // 绑定字段
+		span: 4, // 栅格占位（共24）
+		selectData: userList, // 下拉数据源
+		placeholder: '请选择发起人',
+	},
+	{
+		name: '流程名称', // 搜索框名称
+		type: 'input', // 搜索框类型
+		modelValue: 'name', // 绑定字段
+		span: 5, // 栅格占位
+		placeholder: '请输入流程名称',
+	},
+	{
+		name: '所属流程', // 搜索框名称
+		type: 'input', // 搜索框类型
+		modelValue: 'processDefinitionId', // 绑定字段
+		span: 5, // 栅格占位
+		placeholder: '请输入流程定义的编号',
+	},
+	{
+		name: '流程分类', // 搜索框名称
+		type: 'select', // 搜索框类型
+		modelValue: 'category', // 绑定字段
+		span: 5, // 栅格占位
+		selectData: categoryList,
+		placeholder: '请选择流程分类',
+	},
+	{
+		name: '流程状态', // 搜索框名称
+		type: 'select', // 搜索框类型
+		modelValue: 'status', // 绑定字段
+		span: 5, // 栅格占位
+		selectData: BPM_PROCESS_INSTANCE_STATUS, // 下拉数据源
+		selectValue: 'value',
+		selectLabel: 'label',
+		placeholder: '请选择流程状态',
+	},
+
+	{
+		type: 'daterange', // 搜索框类型
+		modelValue: 'createTime', // 绑定字段
+		span: 4, // 占位，共24
+		name: '发起时间',
+		shortcuts: [],
+	},
+])
+
+/**
+ * 顶部操作按钮配置（原页面无额外操作按钮，暂留空，可按需添加）
+ */
+const buttonList = reactive([
+	// 示例：如需添加导出按钮可在此配置
+	// {
+	//   label: '导出',
+	//   type: 'primary',
+	//   icon: 'Download',
+	//   click: () => handleExport(),
+	//   permission: 'bpm:process-instance:export'
+	// }
+])
+
+/**
+ * 表格列配置（对应原el-table列）
+ */
+const tableColumns = ref([
+	{
+		label: '流程名称',
+		prop: 'name',
+		minWidth: 200,
+		fixed: 'left',
+		align: 'center',
+	},
+	{
+		label: '流程分类',
+		prop: 'categoryName',
+		minWidth: 100,
+		fixed: 'left',
+		align: 'center',
+	},
+	{
+		label: '流程发起人',
+		prop: 'startUser.nickname',
+		width: 120,
+		align: 'center',
+	},
+	{
+		label: '发起部门',
+		prop: 'startUser.deptName',
+		width: 120,
+		align: 'center',
+	},
+	{
+		label: '流程状态',
+		prop: 'status',
+		width: 120,
+		align: 'center',
+		render: row => {
+			return [
+				h(
+					ElTag,
+					{
+						type: BPM_PROCESS_INSTANCE_STATUS.find(item => item.value === row.status)?.type || 'info',
+					},
+					{
+						default: () => BPM_PROCESS_INSTANCE_STATUS.find(item => item.value === row.status)?.label || '-',
+					}
+				),
+			]
+		},
+	},
+	{
+		label: '发起时间',
+		prop: 'startTime',
+		width: 200,
+		align: 'center',
+		formatter: (row, column, cellValue) => {
+			console.log('row.row', row.row.startTime)
+			return formatDate(row.row.startTime)
+		},
+	},
+	{
+		label: '结束时间',
+		prop: 'endTime',
+		width: 200,
+		align: 'center',
+		formatter: (row, column, cellValue) => {
+			return formatDate(row.row.endTime)
+		},
+	},
+	{
+		label: '耗时',
+		prop: 'durationInMillis',
+		width: 120,
+		align: 'center',
+		render: row => {
+			return [h(ElTag, { type: 'primary' }, { default: () => formatPast2(row.durationInMillis) })]
+		},
+	},
+	{
+		label: '当前审批任务',
+		prop: 'tasks',
+		minWidth: 120,
+		align: 'center',
+		render: row => {
+			const taskContainer = []
+			if (!row.tasks || !Array.isArray(row.tasks) || row.tasks.length === 0) {
+				taskContainer.push(h('span', '-'))
+			} else {
+				// 遍历任务，生成按钮（添加唯一key）
+				row.tasks.forEach(task => {
+					taskContainer.push(
+						h(
+							ElButton,
+							{
+								key: `task_${task.id}`, // 唯一key，避免vnode冲突
+								type: 'text',
+								class: 'link-button',
+								onClick: () => handleProcessView(row, task),
+							},
+							{ default: () => task.name }
+						)
+					)
+				})
+			}
+			// 用div包裹所有子元素，返回单个VNode
+			return h('div', { style: { display: 'flex', gap: '4px', justifyContent: 'center' } }, taskContainer)
+		},
+	},
+	{
+		label: '流程编号',
+		prop: 'id',
+		minWidth: '320px',
+		align: 'center',
+	},
+	{
+		prop: '',
+		label: '操作',
+		width: 200,
+		fixed: 'right',
+		align: 'center',
+		render: row => {
+			const buttons = [
+				h(
+					ElButton,
+					{
+						onClick: () => handleDetail(row),
+						type: 'primary',
+						link: true,
+						icon: 'Document',
+					},
+					{ default: () => '详情' }
+				),
+			]
+
+			// 只有当status === 1时才显示取消按钮
+			if (row.status === 1) {
+				buttons.push(
+					h(
+						ElButton,
+						{
+							onClick: () => handleCancel(row.id),
+							type: 'danger',
+							link: true,
+							icon: 'DocumentDelete',
+						},
+						{ default: () => '取消' }
+					)
+				)
+			}
+
+			return buttons
+		},
+	},
+])
+
+/**
+ * 查询列表数据
+ * @param {Object} params 搜索参数
+ */
+const getList = async (params = queryParams.value) => {
+	loading.value = true
+	try {
+		// 合并查询参数
+		// const query = { ...queryParams.value, ...params }
+		// const data = await ProcessInstanceApi.getProcessInstanceManagerPage(query)
+		// tableData.value = data.list
+		// total.value = data.total
+		tableData.value =[
+    {
+        "id": "f98de4bd-dfac-11f0-bc4a-00ff3e31cab8",
+        "name": "通用表单",
+        "summary": [
+            {
+                "key": "结束时间",
+                "value": "2025-12-24"
+            },
+            {
+                "key": "请假类型",
+                "value": "10"
+            },
+            {
+                "key": "请假原因",
+                "value": ""
+            }
+        ],
+        "category": "OA",
+        "categoryName": "OA",
+        "status": 1,
+        "startTime": 1766459446268,
+        "endTime": null,
+        "durationInMillis": null,
+        "formVariables": {
+            "F8nhmjcjnzk1b4c": "2025-12-24",
+            "PROCESS_START_USER_ID": 1,
+            "_FLOWABLE_SKIP_EXPRESSION_ENABLED": true,
+            "PROCESS_STATUS": 1,
+            "Fjtmmjcjcm5fakc": "10",
+            "Fb8fmjcjnevtb1c": "2025-12-23"
+        },
+        "businessKey": null,
+        "startUser": {
+            "id": 1,
+            "nickname": "芋道源码",
+            "avatar": "http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png",
+            "deptId": 103,
+            "deptName": "研发部门"
+        },
+        "processDefinitionId": "common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8",
+        "processDefinition": {
+            "icon": null,
+            "description": null,
+            "type": null,
+            "formType": null,
+            "formId": null,
+            "formCustomCreatePath": null,
+            "formCustomViewPath": null,
+            "visible": null,
+            "startUserIds": null,
+            "startDeptIds": null,
+            "managerUserIds": null,
+            "sort": null,
+            "allowCancelRunningProcess": null,
+            "allowWithdrawTask": null,
+            "processIdRule": null,
+            "autoApprovalType": null,
+            "titleSetting": null,
+            "summarySetting": null,
+            "processBeforeTriggerSetting": null,
+            "processAfterTriggerSetting": null,
+            "taskBeforeTriggerSetting": null,
+            "taskAfterTriggerSetting": null,
+            "printTemplateSetting": null,
+            "id": "common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8",
+            "version": 4,
+            "name": "通用表单",
+            "key": "common-form",
+            "category": "OA",
+            "categoryName": null,
+            "modelType": null,
+            "modelId": null,
+            "formConf": null,
+            "formFields": null,
+            "formName": null,
+            "suspensionState": 1,
+            "deploymentTime": null,
+            "bpmnXml": null,
+            "simpleModel": null
+        },
+        "tasks": [
+            {
+                "id": "f9a75f43-dfac-11f0-bc4a-00ff3e31cab8",
+                "name": "部门领导审批",
+                "assigneeUser": {
+                    "id": 1,
+                    "nickname": "芋道源码",
+                    "avatar": "http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png",
+                    "deptId": 103,
+                    "deptName": "研发部门"
+                }
+            }
+        ]
+    },
+    {
+        "id": "3fa5193f-dcae-11f0-b9e4-00ff3e31cab8",
+        "name": "通用表单",
+        "summary": [
+            {
+                "key": "结束时间",
+                "value": "2025-12-19"
+            },
+            {
+                "key": "请假类型",
+                "value": "20"
+            },
+            {
+                "key": "请假原因",
+                "value": "有病"
+            }
+        ],
+        "category": "OA",
+        "categoryName": "OA",
+        "status": 2,
+        "startTime": 1766130139869,
+        "endTime": 1766130396756,
+        "durationInMillis": 256887,
+        "formVariables": {
+            "F8nhmjcjnzk1b4c": "2025-12-19",
+            "PROCESS_START_USER_ID": 104,
+            "_FLOWABLE_SKIP_EXPRESSION_ENABLED": true,
+            "PROCESS_STATUS": 2,
+            "Fjtmmjcjcm5fakc": "20",
+            "F58dmjcjg2vfanc": "有病",
+            "Fb8fmjcjnevtb1c": "2025-12-18"
+        },
+        "businessKey": null,
+        "startUser": {
+            "id": 104,
+            "nickname": "测试号",
+            "avatar": null,
+            "deptId": 107,
+            "deptName": "运维部门"
+        },
+        "processDefinitionId": "common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8",
+        "processDefinition": {
+            "icon": null,
+            "description": null,
+            "type": null,
+            "formType": null,
+            "formId": null,
+            "formCustomCreatePath": null,
+            "formCustomViewPath": null,
+            "visible": null,
+            "startUserIds": null,
+            "startDeptIds": null,
+            "managerUserIds": null,
+            "sort": null,
+            "allowCancelRunningProcess": null,
+            "allowWithdrawTask": null,
+            "processIdRule": null,
+            "autoApprovalType": null,
+            "titleSetting": null,
+            "summarySetting": null,
+            "processBeforeTriggerSetting": null,
+            "processAfterTriggerSetting": null,
+            "taskBeforeTriggerSetting": null,
+            "taskAfterTriggerSetting": null,
+            "printTemplateSetting": null,
+            "id": "common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8",
+            "version": 4,
+            "name": "通用表单",
+            "key": "common-form",
+            "category": "OA",
+            "categoryName": null,
+            "modelType": null,
+            "modelId": null,
+            "formConf": null,
+            "formFields": null,
+            "formName": null,
+            "suspensionState": 1,
+            "deploymentTime": null,
+            "bpmnXml": null,
+            "simpleModel": null
+        },
+        "tasks": null
+    },
+    {
+        "id": "16f0defc-dcae-11f0-b9e4-00ff3e31cab8",
+        "name": "通用表单",
+        "summary": [
+            {
+                "key": "结束时间",
+                "value": "2025-12-19"
+            },
+            {
+                "key": "请假类型",
+                "value": "10"
+            },
+            {
+                "key": "请假原因",
+                "value": "有事请假"
+            }
+        ],
+        "category": "OA",
+        "categoryName": "OA",
+        "status": 4,
+        "startTime": 1766130071579,
+        "endTime": 1766130097828,
+        "durationInMillis": 26249,
+        "formVariables": {
+            "F8nhmjcjnzk1b4c": "2025-12-19",
+            "PROCESS_START_USER_ID": 104,
+            "_FLOWABLE_SKIP_EXPRESSION_ENABLED": true,
+            "PROCESS_STATUS": 4,
+            "Fjtmmjcjcm5fakc": "10",
+            "F58dmjcjg2vfanc": "有事请假",
+            "PROCESS_REASON": "用户主动取消流程，原因：333",
+            "Fb8fmjcjnevtb1c": "2025-12-18"
+        },
+        "businessKey": null,
+        "startUser": {
+            "id": 104,
+            "nickname": "测试号",
+            "avatar": null,
+            "deptId": 107,
+            "deptName": "运维部门"
+        },
+        "processDefinitionId": "common-form:3:07c8b6aa-dcae-11f0-b9e4-00ff3e31cab8",
+        "processDefinition": {
+            "icon": null,
+            "description": null,
+            "type": null,
+            "formType": null,
+            "formId": null,
+            "formCustomCreatePath": null,
+            "formCustomViewPath": null,
+            "visible": null,
+            "startUserIds": null,
+            "startDeptIds": null,
+            "managerUserIds": null,
+            "sort": null,
+            "allowCancelRunningProcess": null,
+            "allowWithdrawTask": null,
+            "processIdRule": null,
+            "autoApprovalType": null,
+            "titleSetting": null,
+            "summarySetting": null,
+            "processBeforeTriggerSetting": null,
+            "processAfterTriggerSetting": null,
+            "taskBeforeTriggerSetting": null,
+            "taskAfterTriggerSetting": null,
+            "printTemplateSetting": null,
+            "id": "common-form:3:07c8b6aa-dcae-11f0-b9e4-00ff3e31cab8",
+            "version": 3,
+            "name": "通用表单",
+            "key": "common-form",
+            "category": "OA",
+            "categoryName": null,
+            "modelType": null,
+            "modelId": null,
+            "formConf": null,
+            "formFields": null,
+            "formName": null,
+            "suspensionState": 2,
+            "deploymentTime": null,
+            "bpmnXml": null,
+            "simpleModel": null
+        },
+        "tasks": null
+    },
+    {
+        "id": "cea43ae7-dca1-11f0-b9e4-00ff3e31cab8",
+        "name": "test",
+        "summary": [
+            {
+                "key": "输入框",
+                "value": "12412"
+            },
+            {
+                "key": "多行输入框",
+                "value": "1424"
+            },
+            {
+                "key": "多选框",
+                "value": "[1]"
+            }
+        ],
+        "category": "OA",
+        "categoryName": "OA",
+        "status": 1,
+        "startTime": 1766124796320,
+        "endTime": null,
+        "durationInMillis": null,
+        "formVariables": {
+            "PROCESS_START_USER_ID": 1,
+            "_FLOWABLE_SKIP_EXPRESSION_ENABLED": true,
+            "PROCESS_STATUS": 1,
+            "Fgyomj6yl6fnabc": "12412",
+            "Fpvwmj6yl7giaec": "1424",
+            "Ft94mj6yl8amahc": [
+                "1"
+            ]
+        },
+        "businessKey": null,
+        "startUser": {
+            "id": 1,
+            "nickname": "芋道源码",
+            "avatar": "http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png",
+            "deptId": 103,
+            "deptName": "研发部门"
+        },
+        "processDefinitionId": "test:3:7a40d609-dca1-11f0-b9e4-00ff3e31cab8",
+        "processDefinition": {
+            "icon": null,
+            "description": null,
+            "type": null,
+            "formType": null,
+            "formId": null,
+            "formCustomCreatePath": null,
+            "formCustomViewPath": null,
+            "visible": null,
+            "startUserIds": null,
+            "startDeptIds": null,
+            "managerUserIds": null,
+            "sort": null,
+            "allowCancelRunningProcess": null,
+            "allowWithdrawTask": null,
+            "processIdRule": null,
+            "autoApprovalType": null,
+            "titleSetting": null,
+            "summarySetting": null,
+            "processBeforeTriggerSetting": null,
+            "processAfterTriggerSetting": null,
+            "taskBeforeTriggerSetting": null,
+            "taskAfterTriggerSetting": null,
+            "printTemplateSetting": null,
+            "id": "test:3:7a40d609-dca1-11f0-b9e4-00ff3e31cab8",
+            "version": 3,
+            "name": "test",
+            "key": "test",
+            "category": "OA",
+            "categoryName": null,
+            "modelType": null,
+            "modelId": null,
+            "formConf": null,
+            "formFields": null,
+            "formName": null,
+            "suspensionState": 1,
+            "deploymentTime": null,
+            "bpmnXml": null,
+            "simpleModel": null
+        },
+        "tasks": [
+            {
+                "id": "cea636cf-dca1-11f0-b9e4-00ff3e31cab8",
+                "name": "经理审批",
+                "assigneeUser": {
+                    "id": 1,
+                    "nickname": "芋道源码",
+                    "avatar": "http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png",
+                    "deptId": 103,
+                    "deptName": "研发部门"
+                }
+            }
+        ]
+    }
+]
+		total.value = tableData.value.length
+		// 更新查询参数
+		// queryParams.value = { ...query }
+		loading.value = false
+	} finally {
+		loading.value = false
+	}
+	loading.value = false
+}
+
+/**
+ * 表格行点击事件
+ * @param {Object} param 行数据对象
+ */
+const cellClickEvent = ({ row }) => {
+	clickRow.value = row
+}
+
+/**
+ * 查看流程详情
+ * @param {Object} row 行数据
+ */
+const handleDetail = row => {
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		query: {
+			id: row.id,
+		},
+	})
+}
+
+/**
+ * 取消流程操作
+ * @param {Object} row 行数据
+ */
+const handleCancel = async row => {
+	// 二次确认弹窗
+	const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
+		confirmButtonText: '确认',
+		cancelButtonText: '取消',
+		inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 非空且非纯空格校验
+		inputErrorMessage: '取消原因不能为空',
+	})
+	// 发起取消请求
+	await ProcessInstanceApi.cancelProcessInstanceByAdmin(row.id, value)
+	message.success('取消成功')
+	// 刷新列表
+	await getList()
+}
+
+/**
+ * 加载初始化数据（分类、用户、字典）
+ */
+const loadInitData = async () => {
+	// 获取流程分类列表
+	//   categoryList.value = await CategoryApi.getCategorySimpleList()
+	// 获取用户列表
+	//   userList.value = await UserApi.getSimpleUserList()
+	// 获取流程状态字典
+	//   processStatusDict.value = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)
+}
+
+/**
+ * 组件激活时（keep-alive 缓存后激活）
+ */
+onActivated(() => {
+	getList()
+})
+
+/**
+ * 组件挂载时
+ */
+onMounted(async () => {
+	// 加载初始化数据源
+	await loadInitData()
+	// 初始化查询列表
+	await getList()
+})
+</script>
+
+<style lang="scss" scoped>
+.app-container {
+}
+</style>

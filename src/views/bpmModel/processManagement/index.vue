@@ -1,10 +1,10 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-12-16 11:41:12
+ * @LastEditTime: 2025-12-25 16:50:18
  * @LastEditors: zhangsd
  * @Description: 流程管理
- * @FilePath: \view\src\views\system\processManagement\index.vue
+ * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
 --> 
 <template>
 	<div>
@@ -82,22 +82,6 @@
 defineOptions({ name: 'ProcessManagement' })
 // 1. 基础依赖导入
 import { ref, reactive, computed, getCurrentInstance, onMounted, h, nextTick } from 'vue'
-import {
-	ElButton,
-	ElTag,
-	ElInput,
-	ElRow,
-	ElCol,
-	ElSelect,
-	ElOption,
-	ElForm,
-	ElFormItem,
-	ElDropdown,
-	ElDropdownMenu,
-	ElDropdownItem,
-	ElMessage,
-	ElMessageBox,
-} from 'element-plus'
 
 // 2. 组件导入
 import BaseTable from '@/components/BaseTable/index.vue'
@@ -112,9 +96,9 @@ import tableParamsStore from '@/store/modules/tableParams'
 import { processMockData } from './details/data'
 import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete } from '@element-plus/icons-vue'
 // import { message } from 'ant-design-vue'
-import flowableApi from '@/api/system/processManagement'
+import { getProcessInstanceMyPage } from '@/api/system/bpm/processInstance'
 import { useRoute, useRouter } from 'vue-router'
-
+import BpmModelApi from '@/api/system/bpm/model'
 const route = useRoute()
 const router = useRouter()
 // 4. 组件实例与基础配置
@@ -240,13 +224,6 @@ const buttonList = reactive([
 		click: () => handleAddProcess,
 		permission: 'bpm:process:insert',
 	},
-	// {
-	// 	label: '刷新',
-	// 	type: 'default',
-	// 	icon: 'Refresh',
-	// 	click: () => getList,
-	// 	permission: 'bpm:process:query',
-	// },
 ])
 
 // 14. 表格列配置（修复操作列逻辑，匹配流程业务）
@@ -499,8 +476,7 @@ const canSubmit = row => {
  */
 const getList = (params = {}) => {
 	tableLoading.value = true
-	flowableApi
-		.getFLowAbleList(params)
+	BpmModelApi.getModelList(params)
 		.then(res => {
 			if (res.code == '0000') {
 				tableData.value = res.data.pages
@@ -515,50 +491,6 @@ const getList = (params = {}) => {
 			console.error('获取流程列表失败:', error)
 			proxy.$modal.msgError('获取流程列表失败，请重试')
 		})
-}
-/**
- * 获取流程列表
- * @param {Object} params 搜索参数
- */
-const getList1 = (params = {}) => {
-	tableLoading.value = true
-	// 模拟接口延迟
-	setTimeout(() => {
-		try {
-			// 合并参数并筛选假数据
-			const query = { ...queryParams.value, ...params }
-			let filteredList = [...processMockData.tableList]
-
-			// 搜索条件过滤
-			if (query.processName) {
-				filteredList = filteredList.filter(item => item.name.includes(query.processName))
-			}
-			if (query.processKey) {
-				filteredList = filteredList.filter(item => item.key.includes(query.processKey))
-			}
-			if (query.category) {
-				filteredList = filteredList.filter(item => item.category === query.category)
-			}
-			if (query.status) {
-				filteredList = filteredList.filter(item => item.suspensionState === Number(query.status))
-			}
-
-			// 分页处理（模拟）
-			const startIndex = (query.pageNum - 1) * query.pageSize
-			const paginatedList = filteredList.slice(startIndex, startIndex + query.pageSize)
-
-			// 赋值数据
-			tableData.value = paginatedList
-			console.log('tableData.value =>', tableData.value)
-			total.value = filteredList.length
-			tableLoading.value = false
-		} catch (error) {
-			console.error('获取流程列表失败:', error)
-			proxy.$modal.msgError('获取流程列表失败，请重试')
-		} finally {
-			tableLoading.value = false
-		}
-	}, 300)
 }
 
 /**
@@ -577,18 +509,17 @@ const handleProcessView = async deploymentId => {
 	console.log('deploymentId =>', deploymentId)
 	try {
 		// 模拟调用接口获取XML（实际项目中替换为真实API）
-		const res = await flowableApi.readFlowableXml(deploymentId)
-		if (res.code == '0000') {
-			processView.xmlData = res.data
-			// 设置流程查看状态
-			processView.index = deploymentId
-			processView.index = `${deploymentId}_${Date.now()}`
-
-			processViewVisible.value = true
-		} else {
-			ElMessage.error('获取流程图失败')
-			return
-		}
+		// const res = await flowableApi.readFlowableXml(deploymentId)
+		// if (res.code == '0000') {
+		// 	processView.xmlData = res.data
+		// 	// 设置流程查看状态
+		// 	processView.index = deploymentId
+		// 	processView.index = `${deploymentId}_${Date.now()}`
+		// 	processViewVisible.value = true
+		// } else {
+		// 	ElMessage.error('获取流程图失败')
+		// 	return
+		// }
 	} catch (error) {
 		console.error('获取流程图失败:', error)
 		ElMessage.error('获取流程图失败，请重试')
@@ -764,9 +695,9 @@ const handleAddProcess = () => {
 	// editor.value = null
 	router.push({
 		name: 'CreateProcess',
-		query:{
-			type:'instance'
-		}
+		query: {
+			type: 'instance',
+		},
 	})
 }
 

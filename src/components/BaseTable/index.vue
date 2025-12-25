@@ -665,43 +665,60 @@ const queryParams = ref({
  */
 const advancedQuery = ref([])
 provide('onQuery', data => {
-	console.log('父组件收到数据：', data)
-	advancedQuery.value = data ? JSON.parse(JSON.stringify(data)) : []
-	const paramsForImmediateQuery = {
-		...queryParams.value,
-		...seachData.value,
-		advancedQuery: advancedQuery.value ? JSON.stringify(advancedQuery.value) : [],
-	}
-	console.log('高级查询触发，立即查询参数：', paramsForImmediateQuery)
-	props.searchClick(paramsForImmediateQuery) // 直接调用父组件传递的查询回调
+    console.log('父组件收到数据：', data)
+    advancedQuery.value = data ? JSON.parse(JSON.stringify(data)) : []
+    
+    // 构建基础参数
+    const baseParams = {
+        ...queryParams.value,
+        ...seachData.value
+    }
+    
+    // 只有当 advancedQuery 有数据时才添加该字段
+    const paramsForImmediateQuery = advancedQuery.value && advancedQuery.value.length > 0 
+        ? { ...baseParams, advancedQuery: JSON.stringify(advancedQuery.value) }
+        : baseParams
+        
+    console.log('高级查询触发，立即查询参数：', paramsForImmediateQuery)
+    props.searchClick(paramsForImmediateQuery) // 直接调用父组件传递的查询回调
 })
+
 const seachData = ref({})
+
 const searchClickB = e => {
-	if (e.pagination) {
-		if (queryParams.value.startPage !== 1 || queryParams.value.pageSize !== 10) {
-			const params = Object.assign(e, seachData.value, queryParams.value, advancedQuery.value)
-			props.searchClick(params)
-			return
-		} else {
-			seachData.value.startPage = queryParams.value.startPage
-			seachData.value.pageSize = queryParams.value.pageSize
-			const params = Object.assign(queryParams.value, e, seachData.value, advancedQuery.value)
-			seachData.value = JSON.parse(JSON.stringify(queryParams.value))
-			props.searchClick(params)
-			return
-		}
-	} else {
-		// console.log('组件e', e)
-		// console.log('组件queryParams.value', queryParams.value)
-
-		seachData.value = JSON.parse(JSON.stringify(e))
-		e.startPage = queryParams.value.startPage
-		e.pageSize = queryParams.value.pageSize
-
-		const params = Object.assign(queryParams.value, e, { advancedQuery: JSON.stringify(advancedQuery.value) })
-		console.log('组件params', params)
-		props.searchClick(params)
-	}
+    // 构建基础参数
+    const buildBaseParams = () => {
+        const base = { ...queryParams.value, ...seachData.value }
+        // 只有当 advancedQuery 有数据时才添加该字段
+        if (advancedQuery.value && advancedQuery.value.length > 0) {
+            base.advancedQuery = JSON.stringify(advancedQuery.value)
+        }
+        return base
+    }
+    
+    if (e.pagination) {
+        if (queryParams.value.startPage !== 1 || queryParams.value.pageSize !== 10) {
+            const params = { ...e, ...buildBaseParams() }
+            props.searchClick(params)
+            return
+        } else {
+            seachData.value.startPage = queryParams.value.startPage
+            seachData.value.pageSize = queryParams.value.pageSize
+            
+            const params = { ...e, ...buildBaseParams() }
+            seachData.value = JSON.parse(JSON.stringify(queryParams.value))
+            props.searchClick(params)
+            return
+        }
+    } else {
+        seachData.value = JSON.parse(JSON.stringify(e))
+        e.startPage = queryParams.value.startPage
+        e.pageSize = queryParams.value.pageSize
+        
+        const params = { ...e, ...buildBaseParams() }
+        console.log('组件params', params)
+        props.searchClick(params)
+    }
 }
 const SearchHeaderRef = ref()
 const xTable = ref()

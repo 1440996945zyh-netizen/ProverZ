@@ -838,7 +838,6 @@ const resetAll = () => {
 watch(
 	() => props.queryAdvancedParams, // 监听 props 的变化
 	newVal => {
-		console.log('props.queryAdvancedParams changed to:', newVal)
 		// 当 props 变化时，更新 ref 的值
 		advancedQueryParams.value = { ...newVal }
 	},

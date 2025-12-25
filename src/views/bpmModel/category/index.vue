@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-17 10:24:11
- * @LastEditTime: 2025-12-17 16:07:07
+ * @LastEditTime: 2025-12-25 14:46:28
  * @LastEditors: zhangsd
  * @Description: 流程分类
  * @FilePath: \view\src\views\bpmModel\category\index.vue
@@ -33,7 +33,7 @@
 				:showPagination="true"
 				:showToolBar="false"
 				:showNum="6"
-				defaultWidth="50"
+				defaultWidth="55"
 				:total="total"
 			/>
 		</div>
@@ -75,12 +75,11 @@
 
 <script setup>
 defineOptions({ name: 'BpmCategory' })
-import { ref, reactive, onMounted, computed, getCurrentInstance } from 'vue'
+import { ref, reactive, onMounted, computed, getCurrentInstance, h } from 'vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
-import { ElButton, ElRadio, ElRadioGroup, ElInput, ElInputNumber, ElForm, ElFormItem } from 'element-plus'
 import tableParamsStore from '@/store/modules/tableParams'
-import { dateFormatter } from '@/utils/common/date'
+import { formatDate } from '@/utils/common/date'
 import { CommonStatusEnum, CommonStatusEnumLabel } from '@/utils/bpm/constantEnumeration'
 import { CategoryApi } from '@/api/system/bpm/category'
 
@@ -106,20 +105,25 @@ const selectData = reactive([
 		name: '分类名',
 		type: 'input',
 		modelValue: 'name',
-		span: 6,
+		span: 5,
 	},
 	{
 		name: '分类标志',
 		type: 'input',
 		modelValue: 'code',
-		span: 6,
+		span: 5,
 	},
 	{
 		name: '分类状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 6,
-		options: CommonStatusEnumLabel,
+		span: 5,
+		selectData: [
+			{ dictLabel: '开启', dictValue: '0' },
+			{ dictLabel: '禁用', dictValue: '1' },
+		],
+		selectLabel: 'dictLabel', // 下拉选项的文本字段
+		selectValue: 'dictValue', // 下拉选项的value字段
 	},
 
 	{
@@ -158,7 +162,16 @@ const tableColumns = ref([
 		label: '分类状态',
 		align: 'center',
 		render: row => {
-			return proxy.$dictTag({ type: DICT_TYPE.COMMON_STATUS, value: row.status })
+			const statusItem = CommonStatusEnumLabel.find(item => item.value == row.status)
+			return h(
+				ElTag,
+				{
+					type: statusItem?.type || 'info',
+				},
+				{
+					default: () => statusItem?.label || '未知状态',
+				}
+			)
 		},
 	},
 	{
@@ -171,7 +184,9 @@ const tableColumns = ref([
 		label: '创建时间',
 		align: 'center',
 		width: 180,
-		render: row => dateFormatter(row.createTime),
+		formatter: (row, column, cellValue) => {
+			return formatDate(row.row.createTime)
+		},
 	},
 	{
 		prop: '',
@@ -257,9 +272,9 @@ const edit = row => {
 
 	// 加载编辑数据
 	formLoading.value = true
-	CategoryApi.getCategory(row.id)
+	CategoryApi.getCategoryDetail(row.id)
 		.then(res => {
-			formData.value = res
+			formData.value = res.data || {}
 		})
 		.finally(() => {
 			formLoading.value = false
@@ -275,11 +290,10 @@ const handleDelete = id => {
 			type: 'warning',
 		})
 		.then(() => {
-			return CategoryApi.deleteCategory(id)
-		})
-		.then(() => {
-			message.success('删除成功')
-			getList()
+			CategoryApi.deleteCategory(id).then(() => {
+				message.success('删除成功')
+				getList()
+			})
 		})
 		.catch(() => {
 			// 取消删除不做处理
@@ -329,15 +343,14 @@ const getList = (params = {}) => {
 	tableLoading.value = true
 	// 构造查询参数（兼容BaseTable的搜索参数）
 	const queryParams = {
-		pageNo: params.page || 1,
-		pageSize: params.limit || 10,
 		...params,
 	}
 
+	tableLoading.value = false
 	CategoryApi.getCategoryPage(queryParams)
 		.then(res => {
-			tableData.value = res.list
-			total.value = res.total
+			tableData.value = res.data.pages || []
+			total.value = res.data.totalNum
 		})
 		.finally(() => {
 			tableLoading.value = false

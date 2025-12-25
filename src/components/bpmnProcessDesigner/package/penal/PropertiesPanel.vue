@@ -1,14 +1,14 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:47:56
- * @LastEditTime: 2025-12-19 17:07:38
+ * @LastEditTime: 2025-12-25 15:47:15
  * @LastEditors: zhangsd
  * @Description: 属性面板
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\penal\PropertiesPanel.vue
 -->
 
 <template>
-	<div class="process-panel__container" :style="{ width: `${width}px` ,borderRadius: '10px',maxHeight:'600px' }">
+	<div class="process-panel__container" :style="{ width: `${width}px`, borderRadius: '10px', maxHeight: '600px' }">
 		<!-- 属性面板 -->
 		<el-collapse v-model="activeTab" v-if="isReady">
 			<!-- ==================== 常规配置 ==================== -->
@@ -68,7 +68,7 @@
 			<el-collapse-item name="task" v-if="isTaskCollapseItemShow(elementType)" key="task">
 				<template #title>
 					<div class="panel-tab__title">
-            <el-icon><Checked /></el-icon>
+						<el-icon><Checked /></el-icon>
 						<!-- <el-icon><CircleCheck /></el-icon> -->
 						{{ getTaskCollapseItemName(elementType) }}
 					</div>
@@ -166,19 +166,6 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick, provide } from 'vue'
-import {
-	InfoFilled,
-	ChatLineRound,
-	Promotion,
-	List,
-	CircleCheck,
-	HelpFilled,
-  Checked,
-	BellFilled,
-	CirclePlusFilled,
-	Tools,
-	Timer,
-} from '@element-plus/icons-vue'
 
 // 导入组件
 import ElementBaseInfo from './base/ElementBaseInfo.vue'

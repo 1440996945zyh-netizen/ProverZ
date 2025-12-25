@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 16:30:08
- * @LastEditTime: 2025-12-22 10:21:24
+ * @LastEditTime: 2025-12-25 15:57:44
  * @LastEditors: zhangsd
  * @Description: 额外设置
  * @FilePath: \view\src\views\bpmModel\processManagement\components\ExtraSettings.vue
@@ -287,9 +287,9 @@
 import { ref, computed, watch, provide, defineExpose } from 'vue'
 import dayjs from 'dayjs'
 import { BpmAutoApproveType, BpmModelFormType } from '@/utils/bpm/constantEnumeration'
-import * as FormApi from '@/api/system/bpm/form'
+import {getDetail} from '@/api/system/bpm/form'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
-// import { ProcessVariableEnum } from '@/components/SimpleProcessDesignerV2/src/consts'
+// import { ProcessVariableEnum } from '@/components/bpmnProcessDesigner/package/penal/consts'
 import HttpRequestSetting from './HttpRequestSetting.vue'
 // import PrintTemplate from './PrintTemplate/Index.vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
@@ -506,7 +506,7 @@ watch(
   () => modelData.value.formId,
   async (newFormId) => {
     if (newFormId && modelData.value.formType === BpmModelFormType.NORMAL) {
-      const data = await FormApi.getForm(newFormId)
+      const {data} = await getDetail(newFormId)
       const result = []
       if (data.fields) {
         unParsedFormFields.value = data.fields

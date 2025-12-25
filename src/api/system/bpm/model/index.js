@@ -1,93 +1,140 @@
 import request from '@/utils/auth/request'
 
-/**
- * 查询流程模型分页
- * @param {*} params 
- * @returns 
- */
-export const getModelList = async (name) => {
-  return await request.get({ url: '/bpm/model/list', params: { name } })
-}
-/**
- * 查询流程模型详情
- * @param {*} id 
- * @returns 
- */
-export const getModel = async (id) => {
-  return await request.get({ url: '/bpm/model/get?id=' + id })
-}
-/**
- * 更新流程模型
- * @param {*} data 
- * @returns 
- */
-export const updateModel = async (data) => {
-  return await request.put({ url: '/bpm/model/update', data: data })
-}
-/**
- * 批量修改流程模型排序
- * @param {*} ids 
- * @returns 
- */
-export const updateModelSortBatch = async (ids) => {
-  return await request.put({
-    url: `/bpm/model/update-sort-batch`,
-    params: {
-      ids: ids.join(',')
+// 统一封装 BPM 流程模型 API 对象
+const BpmModelApi = {
+  /**
+   * 查询流程模型分页
+   * @param {*} name 
+   * @returns 
+   */
+  getModelList: async (name) => {
+    return request({
+      url: '/bpm/model/list',
+      method: 'get',
+      params: { name }
+    })
+  },
+
+  /**
+   * 查询流程模型详情
+   * @param {*} id 
+   * @returns 
+   */
+  getModel: async (id) => {
+    return request({
+      url: '/bpm/model/get?id=' + id,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 更新流程模型
+   * @param {*} data 
+   * @returns 
+   */
+  updateModel: async (data) => {
+    return request({
+      url: '/bpm/model/update',
+      method: 'put',
+      data // 简化对象属性简写，等价于 data: data
+    })
+  },
+
+  /**
+   * 批量修改流程模型排序
+   * @param {*} ids 
+   * @returns 
+   */
+  updateModelSortBatch: async (ids) => {
+    return request({
+      url: `/bpm/model/update-sort-batch`,
+      method: 'put',
+      params: {
+        ids: ids.join(',')
+      }
+    })
+  },
+
+  /**
+   * 更新流程模型 BPMN 定义
+   * @param {*} data 
+   * @returns 
+   */
+  updateModelBpmn: async (data) => {
+    return request({
+      url: '/bpm/model/update-bpmn',
+      method: 'put',
+      data // 简化对象属性简写
+    })
+  },
+
+  /**
+   * 更新流程模型状态
+   * @param {*} id 
+   * @param {*} state 
+   * @returns 
+   */
+  updateModelState: async (id, state) => {
+    const data = {
+      id, // 简化对象属性简写
+      state // 简化对象属性简写
     }
-  })
-}
-/**
- * 更新流程模型 BPMN 定义
- * @param {*} data 
- * @returns 
- */
-export const updateModelBpmn = async (data) => {
-  return await request.put({ url: '/bpm/model/update-bpmn', data: data })
+    return request({
+      url: '/bpm/model/update-state',
+      method: 'put',
+      data
+    })
+  },
+
+  /**
+   * 创建流程模型
+   * @param {*} data 
+   * @returns 
+   */
+  createModel: async (data) => {
+    return request({
+      url: '/bpm/model/insert',
+      method: 'post',
+      data // 简化对象属性简写
+    })
+  },
+
+  /**
+   * 删除流程模型
+   * @param {*} id 
+   * @returns 
+   */
+  deleteModel: async (id) => {
+    return request({
+      url: `/bpm/model/delete/${id}`,
+      method: 'delete'
+    })
+  },
+
+  /**
+   * 部署流程模型
+   * @param {*} id 
+   * @returns 
+   */
+  deployModel: async (id) => {
+    return request({
+      url: '/bpm/model/deploy?id=' + id,
+      method: 'post'
+    })
+  },
+
+  /**
+   * 清除流程模型部署
+   * @param {*} id 
+   * @returns 
+   */
+  cleanModel: async (id) => {
+    return request({
+      url: '/bpm/model/clean?id=' + id,
+      method: 'delete'
+    })
+  }
 }
 
-/**
- * 更新流程模型状态
- * @param {*} id 
- * @param {*} state 
- * @returns 
- */
-export const updateModelState = async (id, state) => {
-  const data = {
-    id: id,
-    state: state
-  }
-  return await request.put({ url: '/bpm/model/update-state', data: data })
-}
-/**
- * 创建流程模型
- * @param {*} data 
- * @returns 
- */
-export const createModel = async (data) => {
-  return await request.post({ url: '/bpm/model/create', data: data })
-}
-/**
- * 删除流程模型
- * @param {*} id 
- * @returns 
- */
-export const deleteModel = async (id) => {
-  return await request.delete({ url: '/bpm/model/delete?id=' + id })
-}
-/**
- * 部署流程模型
- * @param {*} id 
- * @returns 
- */
-export const deployModel = async (id) => {
-  return await request.post({ url: '/bpm/model/deploy?id=' + id })
-}
-/**
- * 清除流程模型部署
- * @param {*} id 
- * @returns 
- */
-export const cleanModel = async (id) => {
-  return await request.delete({ url: '/bpm/model/clean?id=' + id })
-}
+// 导出统一的 API 对象（默认导出，方便页面导入）
+export default BpmModelApi

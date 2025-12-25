@@ -55,6 +55,7 @@ for (const path in modules1) {
   icons.push(iconName);
 }
 
+
 // 导入第二个目录（同上）
 const modules2 = import.meta.glob('./../../assets/icons/systemSvg/*.svg', {
   query: { raw: true },
@@ -74,6 +75,10 @@ for (const path in modules2) {
     icons.push(iconName);
   }
 }
-
+const modules3 = import.meta.glob('./../../assets/icons/bpm/*.svg');
+for (const path in modules3) {
+  const iconName = path.split('assets/icons/bpm/')[1].split('.svg')[0];
+  icons.push(iconName);
+}
 export default icons;
     
