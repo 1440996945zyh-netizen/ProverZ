@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-17 11:44:57
- * @LastEditTime: 2025-12-17 15:35:20
+ * @LastEditTime: 2025-12-25 14:21:27
  * @LastEditors: zhangsd
  * @Description: 表单设计器
  * @FilePath: \view\src\views\bpmModel\formdesigner\editor\index.vue
@@ -52,21 +52,18 @@ defineOptions({ name: 'BpmFormEditor' })
 import Dialog from '@/components/Dialog'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Plus, Right } from '@element-plus/icons-vue' // 导入Element Plus图标
 import { CommonStatusEnum, CommonStatusEnumLabel } from '@/utils/bpm/constantEnumeration.js'
-import * as FormApi from '@/api/system/bpm/form'
 import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/bpm/formCreate'
 import { useFormCreateDesigner } from '@/components/FormCreate'
 import { useMessage } from '@/plugins/useMessage'
-// 国际化、消息提示、路由、状态管理
+import {  getDetail, updateForm, insertForm } from '@/api/system/bpm/form'
 
 const message = useMessage()
 const route = useRoute()
 const router = useRouter()
-const { push, currentRoute } = router
+
 const { query } = route
-// const { delView } = useTagsViewStore()
 
 // 表单设计器配置
 const designerConfig = ref({
@@ -99,7 +96,7 @@ const designerConfig = ref({
 	showDevice: true, // 是否显示多端适配选项
 	appendConfigData: [], // 定义渲染规则所需的formData
 	showAi: false, // 是否显示智能助手
-    showLanguage: false, // 是否显示语言选项
+	showLanguage: false, // 是否显示语言选项
 })
 
 const designer = ref() // 表单设计器实例
@@ -124,7 +121,7 @@ const formRef = ref() // 表单实例
 
 /** 处理保存按钮点击 */
 const handleSave = () => {
-    console.log(designer.value,'designer.value点击了流程表单的保存按钮')
+	console.log(designer.value, 'designer.value点击了流程表单的保存按钮')
 	dialogVisible.value = true
 }
 
@@ -141,13 +138,11 @@ const submitForm = async () => {
 		const data = { ...formData.value }
 		data.conf = encodeConf(designer) // 表单配置
 		data.fields = encodeFields(designer) // 表单字段
-
 		if (!data.id) {
-			await FormApi.createForm(data)
-			// message.success(t('common.createSuccess'))
+			await insertForm(data)
 			message.success('提交成功')
 		} else {
-			await FormApi.updateForm(data)
+			await updateForm(data)
 			message.success('更新成功')
 		}
 
@@ -160,8 +155,8 @@ const submitForm = async () => {
 
 /** 关闭当前标签页并返回列表 */
 const close = () => {
-	// delView(unref(currentRoute))
-	push('/bpmModel/formdesigner/index')
+
+	router.push({ path: '/bpmModel/FormDesigner' })
 }
 
 /** 初始化逻辑 */
@@ -173,7 +168,8 @@ onMounted(async () => {
 	}
 
 	// 场景二：编辑表单（有ID）
-	const data = await FormApi.getForm(id)
+	const { data } = await getDetail(id)
+
 	formData.value = data
 	setConfAndFields(designer, data.conf, data.fields)
 
@@ -190,10 +186,9 @@ onMounted(async () => {
 ::deep(.my-designer) {
 	._fc-l, /* 左侧菜单 */
 	._fc-m, /* 中间画布 */
-	._fc-r { /* 右侧配置 */
+	._fc-r {
+		/* 右侧配置 */
 		border-top: none;
 	}
 }
-
-
 </style>

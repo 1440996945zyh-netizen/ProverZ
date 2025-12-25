@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:47:56
- * @LastEditTime: 2025-12-18 15:51:10
+ * @LastEditTime: 2025-12-25 15:58:33
  * @LastEditors: zhangsd
  * @Description: 元素表单
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\penal\form\ElementForm.vue
@@ -230,8 +230,8 @@
 
 <script setup>
 import { ref, watch, nextTick, inject, toRaw, onMounted, defineProps, defineOptions } from 'vue'
-import * as FormApi from '@/api/system/bpm/form'
-
+import {  getDetail } from '@/api/system/bpm/form'
+import publicApi from '@/api/public'
 // 组件名称定义
 defineOptions({ name: 'ElementForm' })
 
@@ -504,19 +504,26 @@ const formList = ref([])
 
 // 挂载时加载表单列表
 onMounted(async () => {
-  // formList.value = await FormApi.getFormSimpleList()
-  	// 获取表单列表
-	formList.value = [
-		{
-			id: '15463138461384313',
-			name: '测试表单',
-		},
-		{
-			id: '15463138461384314',
-			name: '测试表单2',
-		}
-	]
-  console.log('elementForm formKey.value =>', formKey.value);
+// 获取表单列表
+	await publicApi
+		.getLocalSelect({
+			type: 'BPM_FORM',
+		})
+		.then(res => {
+			if (res.code === '0000') {
+				formList.value =
+					res.data.map(item => ({
+						id: item.value,
+						name: item.name,
+					})) || []
+			} else {
+				formList.value = []
+			}
+		})
+		.catch(err => {
+			formList.value = []
+		})
+
   formKey.value = parseInt(formKey.value)
 })
 

@@ -1,24 +1,28 @@
 import request from '@/utils/auth/request'
+
 /**
  * 创建工作流的表单定义
  * @param {*} data 
  * @returns 
  */
-export const createForm = async (data) => {
-  return await request.post({
-    url: '/bpm/form/create',
-    data: data
+export const insertForm = async (data) => {
+  return request({
+    url: '/bpm/form/insert',
+    method: 'post',
+    data // 简化对象属性简写，等价于 data: data
   })
 }
+
 /**
  * 更新工作流的表单定义
  * @param {*} data 
  * @returns 
  */
 export const updateForm = async (data) => {
-  return await request.put({
+  return request({
     url: '/bpm/form/update',
-    data: data
+    method: 'put',
+    data // 简化对象属性简写
   })
 }
 
@@ -28,8 +32,9 @@ export const updateForm = async (data) => {
  * @returns 
  */
 export const deleteForm = async (id) => {
-  return await request.delete({
-    url: '/bpm/form/delete?id=' + id
+  return request({
+    url: `/bpm/form/delete/${id}`, 
+    method: 'delete'
   })
 }
 
@@ -38,19 +43,22 @@ export const deleteForm = async (id) => {
  * @param {*} id 
  * @returns 
  */
-export const getForm = async (id) => {
-  return await request.get({
-    url: '/bpm/form/get?id=' + id
+export const getDetail = async (id) => {
+  return request({
+    url: '/bpm/form/getDetail?id=' + id,
+    method: 'get'
   })
 }
+
 /**
  * 获得工作流的表单定义分页
  * @param {*} params 
  * @returns 
  */
 export const getFormPage = async (params) => {
-  return await request.get({
-    url: '/bpm/form/page',
+  return request({
+    url: '/bpm/form/getList',
+    method: 'get',
     params
   })
 }
@@ -60,7 +68,8 @@ export const getFormPage = async (params) => {
  * @returns 
  */
 export const getFormSimpleList = async () => {
-  return await request.get({
-    url: '/bpm/form/simple-list'
+  return request({
+    url: '/bpm/form/simple-list',
+    method: 'get'
   })
 }

@@ -7,6 +7,14 @@ export default function createAutoImport() {
             'vue-router',
             'pinia'
         ],
-        dts: false
+        dts: false,
+        // 添加Element Plus的自动导入配置
+        resolvers: [
+            (name) => {
+                if (name.startsWith('El')) {
+                    return { name, from: 'element-plus' }
+                }
+            }
+        ]
     })
 }

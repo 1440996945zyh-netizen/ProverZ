@@ -1,34 +1,41 @@
 import request from '@/utils/auth/request'
 
-
-
 // BPM 流程分类 API
 export const CategoryApi = {
-  /***
+  /**
    * 查询流程分类分页
    * @param {*} params 
    * @returns 
    */
   getCategoryPage: async (params) => {
-    return await request.get({ url: `/bpm/category/page`, params })
+    return request({
+      url: `/bpm/category/getList`,
+      method: 'get',
+      params
+    })
   },
 
- /**
-  * 
-  * 查询简单流程分类列表
-  * @returns 
-  */
+  /**
+   * 查询简单流程分类列表
+   * @returns 
+   */
   getCategorySimpleList: async () => {
-    return await request.get({ url: `/bpm/category/simple-list` })
+    return request({
+      url: `/bpm/category/simple-list`,
+      method: 'get'
+    })
   },
 
-/**
- * 查询流程分类详情
- * @param {*} id 
- * @returns 
- */
-  getCategory: async (id) => {
-    return await request.get({ url: `/bpm/category/get?id=` + id })
+  /**
+   * 查询流程分类详情
+   * @param {*} id 
+   * @returns 
+   */
+  getCategoryDetail: async (id) => {
+    return request({
+      url: `/bpm/category/getDetail?id=` + id,
+      method: 'get'
+    })
   },
 
   /**
@@ -37,7 +44,11 @@ export const CategoryApi = {
    * @returns 
    */
   createCategory: async (data) => {
-    return await request.post({ url: `/bpm/category/create`, data })
+    return request({
+      url: `/bpm/category/insert`,
+      method: 'post',
+      data
+    })
   },
 
   /**
@@ -46,18 +57,22 @@ export const CategoryApi = {
    * @returns 
    */
   updateCategory: async (data) => {
-    return await request.put({ url: `/bpm/category/update`, data })
+    return request({
+      url: `/bpm/category/update`,
+      method: 'put',
+      data
+    })
   },
 
   /**
-   * 
    * 批量修改流程分类的排序
    * @param {*} ids 
    * @returns 
    */
   updateCategorySortBatch: async (ids) => {
-    return await request.put({
+    return request({
       url: `/bpm/category/update-sort-batch`,
+      method: 'put',
       params: {
         ids: ids.join(',')
       }
@@ -70,6 +85,9 @@ export const CategoryApi = {
    * @returns 
    */
   deleteCategory: async (id) => {
-    return await request.delete({ url: `/bpm/category/delete?id=` + id })
+    return request({
+      url: `/bpm/category/delete/${id}`,
+      method: 'delete'
+    })
   }
 }

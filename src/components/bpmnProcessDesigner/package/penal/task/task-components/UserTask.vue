@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:47:56
- * @LastEditTime: 2025-12-19 13:44:10
+ * @LastEditTime: 2025-12-25 16:03:10
  * @LastEditors: zhangsd
  * @Description: 用户任务配置
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\penal\task\task-components\UserTask.vue
@@ -370,19 +370,25 @@ watch(
 onMounted(async () => {
 	// 加载角色列表
 
-	// roleOptions.value = await RoleApi.getSimpleRoleList()
+	const roleResData = await publicApi.getLocalSelect({ type: 'ROLE' })
+	roleOptions.value =
+		roleResData.data.map(item => ({
+			name: item.label,
+			id: item.value,
+		})) || []
 	// 加载部门树
 	// const deptOptions = await DeptApi.getSimpleDeptList()
-  const deptResData = await publicApi.getDeptList()
-  deptTreeOptions.value = flattenToTree(deptResData.data, 'id')
+	const deptResData = await publicApi.getDeptList()
+	deptTreeOptions.value = flattenToTree(deptResData.data, 'id')
 	// 加载岗位列表
 	// postOptions.value = await PostApi.getSimplePostList()
 	// 加载用户列表
 	const userResData = await publicApi.getLocalSelect({ type: 'USER' })
-	userOptions.value = userResData.data.map(item => ({
-		nickname: item.label,
-		id: item.value,
-	})) || []
+	userOptions.value =
+		userResData.data.map(item => ({
+			nickname: item.label,
+			id: item.value,
+		})) || []
 	// userOptions.value = await UserApi.getSimpleUserList()
 	// 加载用户组列表
 	// userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()

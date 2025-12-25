@@ -1,143 +1,132 @@
+// ==================== 基础依赖导入 ====================
 import { createApp } from 'vue'
-
 import Cookies from 'js-cookie'
 
+// ==================== UI框架导入 ====================
 import ElementPlus from 'element-plus'
 import locale from 'element-plus/dist/locale/zh-cn.mjs'
 import 'element-plus/dist/index.css'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 import VxeUIAll from 'vxe-pc-ui'
 import 'vxe-pc-ui/es/style.css'
 import VxeUITable from 'vxe-table'
 import 'vxe-table/es/style.css'
 
-
-// import { hiPrintPlugin } from 'vue-plugin-hiprint'
-// 样式
+// ==================== 样式文件导入 ====================
+import '@/assets/styles/index.scss' // 全局样式
 import "./assets/styles/hiprint.css"
 import "./assets/styles/print-lock.css"
-// hiPrintPlugin.disAutoConnect() // 取消自动连接直接打印客户端
+import './assets/newIconFonts/iconfont.css'
+import './assets/home_icon/font_icon/iconfont.css'
+import './assets/home_icon/iconfont.css'
+import './assets/wficonfont/iconfont.css'
+import './assets/wficonfont/iconfont.js'
 
-import '@/assets/styles/index.scss' // global css
-import './assets/newIconFonts/iconfont.css' // iconfont
-import './assets/home_icon/font_icon/iconfont.css' // iconfont
-import './assets/home_icon/iconfont.css' // iconfont
-import './assets/wficonfont/iconfont.css' // wficonfont
-import './assets/wficonfont/iconfont.js' // wficonfont
-
+// ==================== 应用核心模块导入 ====================
 import App from './App'
 import store from './store'
 import router from './router'
-import directive from './directive' // directive
+import directive from './directive'
+import plugins from './plugins'
+import './permission'
 
-// 注册指令
-import plugins from './plugins' // plugins
-import { download } from '@/utils/auth/request'
-import request from '@/utils/auth/request'
-
-// svg图标
+// ==================== SVG图标相关 ====================
 import 'virtual:svg-icons-register'
 import SvgIcon from '@/components/SvgIcon'
 import elementIcons from '@/components/SvgIcon/svgicon'
+
+// ==================== 工具函数导入 ====================
+import { download } from '@/utils/auth/request'
+import request from '@/utils/auth/request'
 import { ElMessage } from 'element-plus'
-
-import './permission' // permission control
 import {
-  useDict, deepClone, clearObjectValues, flattenToTree, setEditTableOptions, formatDate, addDateRange, selectDictLabel,
-  selectDictLabels, getRules, resetForm, setFormData, filterInput
+  useDict, deepClone, clearObjectValues, flattenToTree, setEditTableOptions, 
+  formatDate, addDateRange, selectDictLabel, selectDictLabels, getRules, 
+  resetForm, setFormData, filterInput
 } from '@/utils'
-
-
 import $bus from '@/utils/bus.js'
-// 分页组件
+
+// ==================== 全局组件导入 ====================
 import Pagination from '@/components/Pagination'
-// 自定义表格工具组件
 import RightToolbar from '@/components/RightToolbar'
-// 富文本组件
 import Editor from '@/components/Editor'
-// 图片上传组件
 import ImageUpload from '@/components/ImageUpload'
-// 图片预览组件
 import ImagePreview from '@/components/ImagePreview'
-// 自定义树选择组件
 import TreeSelect from '@/components/TreeSelect'
-// 字典标签组件
 import DictTag from '@/components/DictTag'
 
-
-
-// 引入 form-create
+// ==================== 插件导入 ====================
 import { setupFormCreate } from '@/plugins/formCreate'
-// import hljs from 'highlight.js'
-// import highlightPlugin from '@highlightjs/vue-plugin'
-// import "highlight.js/styles/atom-one-dark-reasonable.css"; // 保持原样式
-
+import print from 'vue3-print-nb' // 打印插件
+// ==================== 应用初始化 ====================
 const app = createApp(App)
 
-// 全局方法挂载
-app.config.globalProperties.useDict = useDict
-app.config.globalProperties.download = download
-app.config.globalProperties.parseTime = formatDate
-app.config.globalProperties.resetForm = resetForm
-app.config.globalProperties.flattenToTree = flattenToTree
-app.config.globalProperties.addDateRange = addDateRange
-app.config.globalProperties.selectDictLabel = selectDictLabel
-app.config.globalProperties.selectDictLabels = selectDictLabels
-app.config.globalProperties.verify = filterInput // 正则匹配
-app.config.globalProperties.getRules = getRules // 校验rules封装
-app.config.globalProperties.setFormData = setFormData // 修改详情的form
-app.config.globalProperties.setEditTableOptions = setEditTableOptions // 可编辑表格中的下拉框赋值方法
-app.config.globalProperties.clearObjectValues = clearObjectValues // 清空对象方法
-app.config.globalProperties.deepClone = deepClone // 深拷贝
+// ==================== 全局方法挂载 ====================
+app.config.globalProperties.useDict = useDict // 全局字典函数
+app.config.globalProperties.download = download // 全局下载函数
+app.config.globalProperties.parseTime = formatDate // 全局时间格式化函数
+app.config.globalProperties.resetForm = resetForm // 全局重置表单函数
+app.config.globalProperties.flattenToTree = flattenToTree // 全局树状结构转换函数
+app.config.globalProperties.addDateRange = addDateRange // 全局日期范围添加函数
+app.config.globalProperties.selectDictLabel = selectDictLabel // 全局字典标签函数
+app.config.globalProperties.selectDictLabels = selectDictLabels // 全局字典标签数组函数
+app.config.globalProperties.verify = filterInput // 全局表单验证函数
+app.config.globalProperties.getRules = getRules // 全局表单规则函数
+app.config.globalProperties.setFormData = setFormData // 全局设置表单数据函数
+app.config.globalProperties.setEditTableOptions = setEditTableOptions // 全局设置编辑表格选项函数
+app.config.globalProperties.clearObjectValues = clearObjectValues // 全局清除对象值函数
+app.config.globalProperties.deepClone = deepClone // 全局深拷贝函数
 app.config.globalProperties.$bus = $bus // 全局事件总线
-app.config.globalProperties.$message = ElMessage
-app.config.globalProperties.$request = request //等同于vue2的Vue.prototype.$request = request
-app.config.warnHandler = () => null
+app.config.globalProperties.$message = ElMessage // 全局消息提示函数
+app.config.globalProperties.$request = request // 全局请求函数
+app.config.warnHandler = () => null // 忽略警告信息
 
-// 全局组件挂载
-app.component('DictTag', DictTag)
-app.component('Pagination', Pagination)
-app.component('TreeSelect', TreeSelect)
-app.component('ImageUpload', ImageUpload)
-app.component('ImagePreview', ImagePreview)
-app.component('RightToolbar', RightToolbar)
-app.component('Editor', Editor)
+// ==================== 全局组件注册 ====================
+app.component('DictTag', DictTag) // 全局字典标签组件
+app.component('Pagination', Pagination) // 全局分页组件
+app.component('TreeSelect', TreeSelect) // 全局树选择组件
+app.component('ImageUpload', ImageUpload) // 全局图片上传组件
+app.component('ImagePreview', ImagePreview) // 全局图片预览组件
+app.component('RightToolbar', RightToolbar) // 全局右侧操作栏组件
+app.component('Editor', Editor) // 全局编辑器组件
+app.component('svg-icon', SvgIcon) // 全局SVG图标组件
 
-
+// ==================== 插件注册 ====================
 app.use(router)
 app.use(store)
 app.use(plugins)
-// app.use(hiPrintPlugin)
 app.use(elementIcons)
-app.component('svg-icon', SvgIcon)
 app.use(setupFormCreate)
-// app.use(highlightPlugin, { hljs })
-// 在 main.js 或入口文件中
-Number.prototype._toFixed = Number.prototype.toFixed; // 备份原方法
+app.use(print)
+// ==================== Element Plus图标全局注册 ====================
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component)
+}
 
-Number.prototype.toFixed = function (n) {
-  //console.log("精度计算")
-  // 处理边界情况
-  if (n === undefined || n < 0 || n > 20) {
-    return this._toFixed(n);
-  }
-  const num = this.valueOf();
-  // 使用科学计数法避免浮点误差
-  const power = 10 ** (n + 1); // 放大到 n+1 位
-  // 添加极小修正值（避免浮点误差干扰）
-  let rounded = ((num * power + 0.1) / power);
-  return rounded._toFixed(n)
-};
-
+// ==================== 自定义指令注册 ====================
 directive(app)
 
-// 使用element-plus 并且设置全局的大小
+// ==================== UI框架配置 ====================
 app.use(ElementPlus, {
   locale: locale,
-  // 支持 large、default、small
   size: Cookies.get('size') || 'default',
 })
 app.use(VxeUIAll)
 app.use(VxeUITable)
 
+// ==================== Number原型方法扩展 ====================
+Number.prototype._toFixed = Number.prototype.toFixed
 
+Number.prototype.toFixed = function (n) {
+  if (n === undefined || n < 0 || n > 20) {
+    return this._toFixed(n)
+  }
+  const num = this.valueOf()
+  const power = 10 ** (n + 1)
+  let rounded = ((num * power + 0.1) / power)
+  return rounded._toFixed(n)
+}
+
+// ==================== 应用挂载 ====================
 app.mount('#app')

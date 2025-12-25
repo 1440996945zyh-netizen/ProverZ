@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-15 11:34:41
- * @LastEditTime: 2025-12-17 14:11:45
+ * @LastEditTime: 2025-12-25 14:19:58
  * @LastEditors: zhangsd
  * @Description: 表单设计器列表页面，负责表单模板的查询、新增、编辑、删除、详情、复制等操作
  * @FilePath: \view\src\views\bpmModel\formdesigner\index.vue
@@ -26,11 +26,12 @@
 				:loading="isTableLoading"
 				:showPagination="true"
 				:total="totalCount"
+				:defaultWidth="15"
 			/>
 		</div>
 
 		<!-- 表单详情 查看 -->
-		<Dialog title="表单详情" v-model:visible="formDetailVisible" width="80%">
+		<Dialog title="表单详情" v-model:visible="formDetailVisible" width="40%">
 			<form-create :option="detailData.option" :rule="detailData.rule" />
 			<template #footer>
 				<ElButton @click="formDetailVisible = false">取消</ElButton>
@@ -44,11 +45,12 @@ defineOptions({ name: 'FormDesigne' })
 
 // ===================== 导入模块 =====================
 import { ref, computed, getCurrentInstance, onMounted } from 'vue'
-import { ElTag, ElButton, ElMessageBox, ElMessage } from 'element-plus'
+import { formatDate } from '@/utils/common/date'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
-import TipMessage from '@/components/TipMessage/index.vue'
 import tableParamsStore from '@/store/modules/tableParams'
+import { setConfAndFields2 } from '@/utils/bpm/formCreate'
+import { getFormPage, getDetail, deleteForm } from '@/api/system/bpm/form'
 // 可按需导入路由（如果需要跳转）
 import { useRouter, useRoute } from 'vue-router'
 
@@ -66,6 +68,11 @@ const detailData = ref({
 	rule: [],
 	option: {},
 })
+const queryParams = ref({
+	pageNum: 1,
+	pageSize: 20,
+	name: undefined,
+})
 // ===================== 计算属性 =====================
 // 从store获取基础表格高度
 const tableStoreHeight = computed(() => tableParamsStore().normalTableHeight)
@@ -78,7 +85,7 @@ const searchForm = ref([
 	{
 		name: '表单名',
 		type: 'input',
-		modelValue: 'formName', // 修正：原processName → formName 与业务匹配
+		modelValue: 'name',
 		span: 24,
 	},
 ])
@@ -87,22 +94,7 @@ const searchForm = ref([
 const isTableLoading = ref(false)
 
 // 表格数据列表
-const tableData = ref([
-	{
-		formNo: 'formNo1',
-		formName: '表单名1',
-		status: '0',
-		remark: '备注1',
-		createTime: '2025-12-15 11:34:41',
-	},
-	{
-		formNo: 'formNo2',
-		formName: '表单名2',
-		status: '1', // 补充不同状态测试
-		remark: '备注2',
-		createTime: '2025-12-15 11:34:41',
-	},
-])
+const tableData = ref([])
 
 // 表格总条数（原total）
 const totalCount = ref(tableData.value.length)
@@ -115,30 +107,27 @@ const totalCount = ref(tableData.value.length)
 const tableColumns = ref([
 	{
 		label: '表单编号',
-		prop: 'formNo',
-		width: '200',
+		prop: 'id',
 		align: 'center',
 	},
 	{
 		label: '表单名称',
-		prop: 'formName',
-		width: '200',
+		prop: 'name',
 		align: 'center',
 	},
 	{
 		label: '状态',
 		prop: 'status',
-		width: '100',
 		align: 'center',
 		render: row => {
 			return [
 				h(
 					ElTag,
 					{
-						type: row.status === '0' ? '' : 'info',
+						type: row.status == '0' ? '' : 'info',
 					},
 					{
-						default: () => (row.status === '0' ? '正常' : '停用'),
+						default: () => (row.status == '0' ? '正常' : '停用'),
 					}
 				),
 			]
@@ -147,19 +136,19 @@ const tableColumns = ref([
 	{
 		label: '备注',
 		prop: 'remark',
-		width: '200',
 		align: 'center',
 	},
 	{
 		label: '创建时间',
 		prop: 'createTime',
-		width: '200',
 		align: 'center',
+		formatter: (row, column, cellValue) => {
+			return formatDate(row.row.createTime)
+		},
 	},
 	{
 		label: '操作',
 		prop: 'operation',
-		width: '100',
 		fixed: 'right',
 		align: 'center',
 		render: row => {
@@ -169,7 +158,23 @@ const tableColumns = ref([
 					{
 						onClick: () => {
 							// console.log(row)
-							edit(row)
+							openForm('copy', row)
+						},
+						type: 'primary',
+						link: true,
+						icon: 'CopyDocument',
+						permission: 'bpm:fromdesigner:detail', // 权限
+					},
+					{
+						default: () => '复制',
+					}
+				),
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							// console.log(row)
+							openForm('edit', row)
 						},
 						type: 'primary',
 						link: true,
@@ -180,22 +185,7 @@ const tableColumns = ref([
 						default: () => '编辑',
 					}
 				),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							// console.log(row)
-							handleDelete(row)
-						},
-						type: 'danger',
-						link: true,
-						icon: 'Delete',
-						permission: 'bpm:fromdesigner:delete', // 权限
-					},
-					{
-						default: () => '删除',
-					}
-				),
+
 				h(
 					ElButton,
 					{
@@ -217,15 +207,15 @@ const tableColumns = ref([
 					{
 						onClick: () => {
 							// console.log(row)
-							handleCopy(row)
+							handleDelete(row)
 						},
-						type: 'primary',
+						type: 'danger',
 						link: true,
-						icon: 'CopyDocument',
-						permission: 'bpm:fromdesigner:detail', // 权限
+						icon: 'Delete',
+						permission: 'bpm:fromdesigner:delete', // 权限
 					},
 					{
-						default: () => '复制',
+						default: () => '删除',
 					}
 				),
 			]
@@ -241,7 +231,7 @@ const buttonList = ref([
 		label: '新增', // 按钮名称
 		type: 'primary', // 按钮类型
 		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
-		click: () => handleAdd, // 回调函数
+		click: () => openForm('create', {}), // 回调函数
 		permission: 'bpm:fromdesigner:insert', // 修正权限码
 	},
 ])
@@ -271,17 +261,15 @@ const handleCellClick = (row, prop) => {
  * 获取表格数据列表
  * 可扩展：对接接口、处理分页/搜索参数
  */
-const getTableList = async () => {
+const getTableList = async e => {
 	try {
 		isTableLoading.value = true
-		// 模拟接口请求（实际项目替换为真实接口）
-		// const res = await proxy.$api.formDesigner.getList(searchForm.value)
-		// tableData.value = res.list
-		// totalCount.value = res.total
+		queryParams.value = e
+		const res = await getFormPage(e)
+		tableData.value = res.data.pages
+		totalCount.value = res.data.totalNum
 
-		// 模拟加载延迟
-		await new Promise(resolve => setTimeout(resolve, 500))
-		ElMessage.success('数据加载成功')
+		// ElMessage.success('数据加载成功')
 	} catch (error) {
 		console.error('获取表单列表失败：', error)
 		ElMessage.error('数据加载失败，请重试')
@@ -289,30 +277,24 @@ const getTableList = async () => {
 		isTableLoading.value = false
 	}
 }
-
 /**
- * 新增表单
- * 可扩展：打开新增弹窗/跳转到新增页面
+ * 打开表单设计器
+ * @param type 操作类型（copy/edit）
+ * @param row 表单行数据
  */
-const handleAdd = () => {
-	console.log('新增表单')
-	// 示例：跳转新增页面
-	router.push({ name: 'BpmFormEditor' })
+const openForm = (type, row) => {
+	console.log('打开表单：', row)
+	const toRouter = {
+		name: 'BpmFormEditor',
+		query: { type },
+	}
 
-	// 示例：打开新增弹窗（需引入弹窗组件）
-	// addFormDialogRef.value.open()
-	// ElMessage.info('新增表单功能待实现')
-}
-
-/**
- * 编辑表单
- * @param {Object} row 待编辑的行数据
- */
-const handleEdit = row => {
-	console.log('编辑表单：', row)
+	if (typeof row.id === 'number' || typeof row.id === 'string') {
+		toRouter.query.id = row.id
+	}
 	// 示例：跳转编辑页面
-	// router.push({ path: '/system/formDesigner/edit', query: { formNo: row.formNo } })
-	ElMessage.info(`编辑表单：${row.formName}`)
+	router.push(toRouter)
+	// ElMessage.info(`打开表单：${row.formName}`)
 }
 
 /**
@@ -320,17 +302,18 @@ const handleEdit = row => {
  * @param {Object} row 待删除的行数据
  */
 const handleDelete = async row => {
+	console.log('row =>', row)
 	try {
 		// 确认删除
-		await ElMessageBox.confirm(`确定要删除表单【${row.formName}】吗？删除后不可恢复！`, '删除确认', {
+		await ElMessageBox.confirm(`确定要删除表单【${row.name}】吗？删除后不可恢复！`, '删除确认', {
 			confirmButtonText: '确定',
 			cancelButtonText: '取消',
 			type: 'warning',
 		})
 
 		// 模拟接口删除
-		// await proxy.$api.formDesigner.delete(row.formNo)
-		ElMessage.success(`表单【${row.formName}】删除成功`)
+		await deleteForm(row.id)
+		ElMessage.success(`表单【${row.name}】删除成功`)
 
 		// 重新加载列表
 		getTableList()
@@ -349,23 +332,10 @@ const handleDelete = async row => {
 const handleDetail = async row => {
 	console.log('查看表单详情：', row)
 	// 设置表单
-	const data = await FormApi.getForm(row.id)
+	const { data } = await getDetail(row.id)
 	setConfAndFields2(detailData, data.conf, data.fields)
 	// 打开详情弹窗
 	formDetailVisible.value = true
-}
-
-/**
- * 复制表单
- * @param {Object} row 待复制的行数据
- */
-const handleCopy = row => {
-	console.log('复制表单：', row)
-	// 示例：调用复制接口
-	// await proxy.$api.formDesigner.copy(row.formNo)
-	ElMessage.success(`表单【${row.formName}】复制成功`)
-	// 重新加载列表
-	getTableList()
 }
 
 // ===================== 生命周期 =====================

@@ -140,6 +140,17 @@ export const constantRoutes = [
 					title: '设计流程表单',
 				}
 			},
+			{
+				path: 'bpmModel/processInstance/detail',
+				component: () => import('@/views/bpmModel/processInstance/detail/index.vue'),
+				name: 'BpmProcessInstanceDetail',
+				meta: { title: '流程实例详情', icon: '' },
+				props: (route) => ({
+					id: route.query.id,
+					taskId: route.query.taskId,
+					activityId: route.query.activityId
+				})
+			}
 		],
 	},
 	{

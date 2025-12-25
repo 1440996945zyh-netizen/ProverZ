@@ -14,14 +14,16 @@ export const UserTypeEnum = {
 /**
  * 全局通用状态枚举标签
  */
-export const CommonStatusEnumLabel =[
+export const CommonStatusEnumLabel = [
   {
     value: CommonStatusEnum.ENABLE,
-    label: '开启'
+    label: '开启',
+    type: 'success',
   },
   {
     value: CommonStatusEnum.DISABLE,
-    label: '禁用'
+    label: '禁用',
+    type: 'danger',
   }
 ]
 /**
@@ -33,14 +35,14 @@ export const DICT_TYPE = {
   TERMINAL: 'terminal', // 终端
   DATE_INTERVAL: 'date_interval', // 数据间隔
 
-    // ========== INFRA 模块 ==========
-  INFRA_BOOLEAN_STRING :'infra_boolean_string',
+  // ========== INFRA 模块 ==========
+  INFRA_BOOLEAN_STRING: 'infra_boolean_string',
   // ========== BPM 模块 ==========
   BPM_MODEL_TYPE: 'bpm_model_type',
   BPM_MODEL_FORM_TYPE: 'bpm_model_form_type',
   BPM_TASK_CANDIDATE_STRATEGY: 'bpm_task_candidate_strategy',
-  BPM_PROCESS_INSTANCE_STATUS: 'bpm_process_instance_status',
-  BPM_TASK_STATUS: 'bpm_task_status',
+  // BPM_PROCESS_INSTANCE_STATUS: 'bpm_process_instance_status',
+  // BPM_TASK_STATUS: 'bpm_task_status',
   BPM_OA_LEAVE_TYPE: 'bpm_oa_leave_type',
   BPM_PROCESS_LISTENER_TYPE: 'bpm_process_listener_type',
   BPM_PROCESS_LISTENER_VALUE_TYPE: 'bpm_process_listener_value_type',
@@ -103,15 +105,15 @@ export const BPM_PROCESS_LISTENER_VALUE_TYPE = [
     label: '表达式'
   },
   {
-    value:'delegateExpression',
-    label:'代理表达式'
+    value: 'delegateExpression',
+    label: '代理表达式'
   }
 ]
 
 /**
  * 任务状态枚举
  */
-export const  TaskStatusEnum =  {
+export const TaskStatusEnum = {
   /**
    * 跳过
    */
@@ -152,3 +154,47 @@ export const  TaskStatusEnum =  {
    */
   APPROVING: 7
 }
+/**
+ * 流程实例状态枚举标签
+ */
+export const BPM_PROCESS_INSTANCE_STATUS = [
+  {
+    value: BpmProcessInstanceStatus.NOT_START,
+    label: '未开始',
+    type: 'info'
+  },
+  {
+    value: BpmProcessInstanceStatus.RUNNING,
+    label: '审批中',
+    type: 'primary'
+  },
+  {
+    value: BpmProcessInstanceStatus.APPROVE,
+    label: '审批通过',
+    type: 'success'
+  },
+  {
+    value: BpmProcessInstanceStatus.REJECT,
+    label: '审批不通过',
+    type: 'danger'
+  },
+  {
+    value: BpmProcessInstanceStatus.CANCEL,
+    label: '已取消',
+    type: 'info'
+  }
+]
+
+/**
+ * 任务状态枚举标签
+ */
+export const BPM_TASK_STATUS = [
+  { label: "审批通过中", value: "7", type: "success" },
+  { label: "委派中", value: "6", type: "primary" },
+  { label: "已退回", value: "5", type: "warning" },
+  { label: "已取消", value: "4", type: "info" },
+  { label: "审批不通过", value: "3", type: "danger" },
+  { label: "审批通过", value: "2", type: "success" },
+  { label: "审批中", value: "1", type: "primary" },
+  { label: "待审批", value: "0", type: "info" }
+]

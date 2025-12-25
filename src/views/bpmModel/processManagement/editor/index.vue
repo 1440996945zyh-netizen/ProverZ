@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 14:38:40
- * @LastEditTime: 2025-12-22 10:17:22
+ * @LastEditTime: 2025-12-25 15:29:22
  * @LastEditors: zhangsd
  * @Description: 流程设计器
  * @FilePath: \view\src\views\bpmModel\processManagement\editor\index.vue
@@ -45,7 +45,7 @@ import CustomContentPadProvider from '@/components/bpmnProcessDesigner/package/d
 import CustomPaletteProvider from '@/components/bpmnProcessDesigner/package/designer/plugins/palette'
 import * as ModelApi from '@/api/system/bpm/model'
 import { BpmModelFormType } from '@/utils/bpm/constantEnumeration'
-import * as FormApi from '@/api/system/bpm/form'
+import {  getDetail  } from '@/api/system/bpm/form'
 
 // 定义组件名称
 defineOptions({ name: 'BpmModelEditor' })
@@ -140,20 +140,8 @@ watch(
   () => modelData.value.formId,
   async (newFormId) => {
     if (newFormId && modelData.value.formType === BpmModelFormType.NORMAL) {
-      // const data = await FormApi.getForm(newFormId)
-      const data = {
-				id: 39,
-				name: 'test',
-				conf: '{"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"right","size":"default","labelWidth":"100px"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":true,"innerText":"提交"}}',
-				fields: [
-					'{"type":"input","field":"Fgyomj6yl6fnabc","title":"输入框","info":"","$required":false,"_fc_id":"id_F403mj6yl6fnacc","name":"ref_Ff23mj6yl6fnadc","display":true,"hidden":false,"_fc_drag_tag":"input"}',
-					'{"type":"input","field":"Fpvwmj6yl7giaec","title":"多行输入框","info":"","$required":false,"props":{"type":"textarea"},"_fc_id":"id_Fovymj6yl7giafc","name":"ref_Fw2smj6yl7giagc","display":true,"hidden":false,"_fc_drag_tag":"textarea"}',
-					'{"type":"checkbox","field":"Ft94mj6yl8amahc","title":"多选框","info":"","effect":{"fetch":""},"$required":false,"options":[{"label":"选项01","value":"1"},{"label":"选项02","value":"2"},{"label":"选项03","value":"3"}],"_fc_id":"id_Fuapmj6yl8amaic","name":"ref_F0iamj6yl8amajc","display":true,"hidden":false,"_fc_drag_tag":"checkbox"}',
-				],
-				status: 0,
-				remark: '',
-				createTime: 1765791379000,
-			}
+      const {data} = await getDetail(newFormId)
+
       formFields.value = data.fields
     } else {
       formFields.value = []

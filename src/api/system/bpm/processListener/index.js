@@ -4,26 +4,44 @@ import request from '@/utils/auth/request'
 export const ProcessListenerApi = {
   // 查询流程监听器分页
   getProcessListenerPage: async (params) => {
-    return await request.get({ url: `/bpm/process-listener/page`, params })
+    return request({
+      url: `/bpm/process-listener/page`,
+      method: 'get',
+      params
+    })
   },
 
   // 查询流程监听器详情
   getProcessListener: async (id) => {
-    return await request.get({ url: `/bpm/process-listener/get?id=` + id })
+    return request({
+      url: `/bpm/process-listener/get?id=` + id,
+      method: 'get'
+    })
   },
 
   // 新增流程监听器
   createProcessListener: async (data) => {
-    return await request.post({ url: `/bpm/process-listener/create`, data })
+    return request({
+      url: `/bpm/process-listener/create`,
+      method: 'post',
+      data
+    })
   },
 
   // 修改流程监听器
   updateProcessListener: async (data) => {
-    return await request.put({ url: `/bpm/process-listener/update`, data })
+    return request({
+      url: `/bpm/process-listener/update`,
+      method: 'put',
+      data
+    })
   },
 
   // 删除流程监听器
   deleteProcessListener: async (id) => {
-    return await request.delete({ url: `/bpm/process-listener/delete?id=` + id })
+    return request({
+      url: `/bpm/process-listener/delete?id=` + id,
+      method: 'delete'
+    })
   }
 }

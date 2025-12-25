@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 11:26:00
- * @LastEditTime: 2025-12-22 10:16:24
+ * @LastEditTime: 2025-12-25 16:45:05
  * @LastEditors: zhangsd
  * @Description: 创建流程
  * @FilePath: \view\src\views\bpmModel\processManagement\components\CreateProcess.vue
@@ -75,20 +75,13 @@ defineOptions({
 })
 import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/plugins/useMessage.js'
-// import { useTagsViewStore } from '@/store/modules/tagsView'
-// import { useUserStoreWithOut } from '@/store/modules/user'
-import * as ModelApi from '@/api/system/bpm/model/index'
-import * as FormApi from '@/api/system/bpm/form/index'
-import { CategoryApi } from '@/api/system/bpm/category/index'
-// import * as UserApi from '@/api/system/user'
-// import * as DeptApi from '@/api/system/dept'
-import * as DefinitionApi from '@/api/system/bpm/definition/index'
+import ModelApi from '@/api/system/bpm/model/index'
+import DefinitionApi from '@/api/system/bpm/definition/index'
 import { BpmModelFormType, BpmModelType, BpmAutoApproveType } from '@/utils/bpm/constantEnumeration'
 import BasicInfo from './BasicInfo.vue'
 import FormDesign from './FormDesign.vue'
 import ProcessDesign from './ProcessDesign.vue'
 import publicApi from '@/api/public'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import ExtraSettings from './ExtraSettings.vue'
 // import { useTagsView } from '@/hooks/web/useTagsView'
 import useUserStore from '@/store/modules/user'
@@ -227,22 +220,25 @@ const initData = async () => {
 	}
 	console.log('formData.value =>', formData.value)
 	// 获取表单列表
-	formList.value = [
-		{
-			id: '15463138461384313',
-			name: '测试表单',
-		},
-		{
-			id: '15463138461384314',
-			name: '测试表单2',
-		},
-	]
-	// 获取分类列表
-	// categoryList.value = await CategoryApi.getCategorySimpleList()
 	await publicApi
 		.getLocalSelect({
-			type: 'DICT',
-			dictType: 'PROCESS_TYPE',
+			type: 'BPM_FORM',
+		})
+		.then(res => {
+			if (res.code === '0000') {
+				formList.value =
+					res.data || []
+			} else {
+				formList.value = []
+			}
+		})
+		.catch(err => {
+			formList.value = []
+		})
+	// 获取分类列表
+	await publicApi
+		.getLocalSelect({
+			type: 'BPM_CATEGORY',
 		})
 		.then(res => {
 			if (res.code === '0000') {
@@ -262,7 +258,6 @@ const initData = async () => {
 			categoryList.value = []
 		})
 	// 获取用户列表
-	// userList.value = await UserApi.getSimpleUserList()
 	await publicApi
 		.getLocalSelect({
 			type: 'USER',
@@ -394,7 +389,7 @@ const handleSave = async () => {
 
 		// 返回列表页（排除更新场景）
 		if (actionType !== 'update') {
-			await router.push({ name: 'BpmModel' })
+			await router.push({ path: '/bpmModel/processManagement' })
 		}
 	} catch (error) {
 		console.error('保存失败:', error)
