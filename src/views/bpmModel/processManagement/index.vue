@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-12-25 16:50:18
+ * @LastEditTime: 2025-12-25 22:19:01
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
@@ -479,10 +479,10 @@ const getList = (params = {}) => {
 	BpmModelApi.getModelList(params)
 		.then(res => {
 			if (res.code == '0000') {
-				tableData.value = res.data.pages
+				tableData.value = res.data
 
 				console.log('tableData.value =>', tableData.value)
-				total.value = res.data.totalNum
+				total.value = res.data.length
 				tableLoading.value = false
 			}
 		})
