@@ -55,11 +55,10 @@ const api = {
    * @param {*} params 
    * @returns 
    */
-  deleteFlow(params) {
+  deleteFlow(id) {
     return request({
-      url: flowableApi + '/delete',
+      url: flowableApi + '/delete'+ id,
       method: 'delete',
-      params: params
     })
   },
 }

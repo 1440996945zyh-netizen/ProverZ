@@ -22,7 +22,7 @@ const BpmModelApi = {
    */
   getModel: async (id) => {
     return request({
-      url: '/bpm/model/get?id=' + id,
+      url: '/bpm/model/getDetail?id=' + id,
       method: 'get'
     })
   },
@@ -74,13 +74,10 @@ const BpmModelApi = {
    * @param {*} state 
    * @returns 
    */
-  updateModelState: async (id, state) => {
-    const data = {
-      id, // 简化对象属性简写
-      state // 简化对象属性简写
-    }
+  updateModelState: async (data) => {
+    
     return request({
-      url: '/bpm/model/update-state',
+      url: '/bpm/model/updateState',
       method: 'put',
       data
     })

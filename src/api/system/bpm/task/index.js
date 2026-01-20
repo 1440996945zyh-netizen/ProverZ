@@ -48,7 +48,7 @@ export const TaskStatusEnum = Object.freeze({
 
 export const getTaskTodoPage = async (params) => {
   return request({
-    url: '/bpm/task/todo-page',
+    url: '/bpm/task/todoPage',
     method: 'get',
     params
   })
@@ -56,7 +56,7 @@ export const getTaskTodoPage = async (params) => {
 
 export const getTaskDonePage = async (params) => {
   return request({
-    url: '/bpm/task/done-page',
+    url: '/bpm/task/donePage',
     method: 'get',
     params
   })
@@ -64,7 +64,7 @@ export const getTaskDonePage = async (params) => {
 
 export const getTaskManagerPage = async (params) => {
   return request({
-    url: '/bpm/task/manager-page',
+    url: '/bpm/task/managerPage',
     method: 'get',
     params
   })
@@ -88,7 +88,7 @@ export const rejectTask = async (data) => {
 
 export const getTaskListByProcessInstanceId = async (processInstanceId) => {
   return request({
-    url: '/bpm/task/list-by-process-instance-id?processInstanceId=' + processInstanceId,
+    url: '/bpm/task/getByProcessInstanceId?processInstanceId=' + processInstanceId,
     method: 'get'
   })
 }

@@ -5,7 +5,7 @@
  * @LastEditors: zhangsd
  * @Description: 创建流程
  * @FilePath: \view\src\views\bpmModel\processManagement\components\CreateProcess.vue
---> 
+-->
 <template>
 	<div class="process-container">
 		<!-- 头部导航栏 -->
@@ -185,7 +185,7 @@ const initData = async () => {
 	console.log('actionType =>', actionType)
 	if (actionType === 'definition') {
 		// 流程定义场景（恢复）
-		const definitionId = route.params.id
+		const definitionId = route.query.id
 		const data = await DefinitionApi.getProcessDefinition(definitionId)
 		data.type = data.modelType
 		delete data.modelType
@@ -198,12 +198,13 @@ const initData = async () => {
 		formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
 	} else if (['update', 'copy'].includes(actionType)) {
 		// 修改/复制场景
-		const modelId = route.params.id
-		formData.value = await ModelApi.getModel(modelId)
+		const modelId = route.query.id
+		const res = await ModelApi.getModel(modelId)
+		formData.value = res.data
 		formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
-
+		debugger
 		// 复制场景处理
-		if (route.params.type === 'copy') {
+		if (route.query.type === 'copy') {
 			delete formData.value.id
 			if (formData.value.bpmnXml) {
 				formData.value.bpmnXml = formData.value.bpmnXml.replaceAll(formData.value.name, formData.value.name + '副本')
@@ -226,8 +227,7 @@ const initData = async () => {
 		})
 		.then(res => {
 			if (res.code === '0000') {
-				formList.value =
-					res.data || []
+				formList.value = res.data || []
 			} else {
 				formList.value = []
 			}

@@ -32,8 +32,8 @@
 			name="managerTaskTable"
 			:showPagination="true"
 			:showToolBar="false"
-			:showNum="5"
-			defaultWidth="60"
+			:showNum="2"
+			defaultWidth="100"
 		/>
 	</div>
 </template>
@@ -243,297 +243,297 @@ const getList = async (params = queryParams.value) => {
 	loading.value = true
 	try {
 		// 合并查询参数
-		// const query = { ...queryParams.value, ...params }
-		//  const data = await TaskApi.getTaskManagerPage(queryParams)
-		// list.value = data.list
-		// total.value = data.total
-		tableData.value = [
-			{
-				id: '5148f021-dcae-11f0-b9e4-00ff3e31cab8',
-				name: 'HR审批',
-				createTime: 1766130169463,
-				endTime: 1766130396648,
-				durationInMillis: 227185,
-				status: 2,
-				reason: '通过 有病就去治',
-				ownerUser: null,
-				assigneeUser: {
-					id: 114,
-					nickname: 'hr 小姐姐',
-					avatar: null,
-					deptId: null,
-					deptName: null,
-				},
-				taskDefinitionKey: 'Activity_0hq637b',
-				processInstanceId: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
-				processInstance: {
-					id: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
-					name: '通用表单',
-					createTime: null,
-					processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
-					summary: [
-						{
-							key: '结束时间',
-							value: '2025-12-19',
-						},
-						{
-							key: '请假类型',
-							value: '20',
-						},
-						{
-							key: '请假原因',
-							value: '有病',
-						},
-					],
-					startUser: {
-						id: 104,
-						nickname: '测试号',
-						avatar: null,
-						deptId: 107,
-						deptName: null,
-					},
-				},
-				parentTaskId: null,
-				children: null,
-				formId: null,
-				formName: null,
-				formConf: null,
-				formFields: null,
-				formVariables: null,
-				buttonsSetting: null,
-				signEnable: null,
-				reasonRequire: null,
-				nodeType: null,
-			},
-			{
-				id: '3fa651d6-dcae-11f0-b9e4-00ff3e31cab8',
-				name: '部门领导审批',
-				createTime: 1766130139877,
-				endTime: 1766130169317,
-				durationInMillis: 29440,
-				status: 2,
-				reason: '通过',
-				ownerUser: null,
-				assigneeUser: {
-					id: 1,
-					nickname: '芋道源码',
-					avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-					deptId: 103,
-					deptName: '研发部门',
-				},
-				taskDefinitionKey: 'Activity_10dxbm6',
-				processInstanceId: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
-				processInstance: {
-					id: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
-					name: '通用表单',
-					createTime: null,
-					processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
-					summary: [
-						{
-							key: '结束时间',
-							value: '2025-12-19',
-						},
-						{
-							key: '请假类型',
-							value: '20',
-						},
-						{
-							key: '请假原因',
-							value: '有病',
-						},
-					],
-					startUser: {
-						id: 104,
-						nickname: '测试号',
-						avatar: null,
-						deptId: 107,
-						deptName: null,
-					},
-				},
-				parentTaskId: null,
-				children: null,
-				formId: null,
-				formName: null,
-				formConf: null,
-				formFields: null,
-				formVariables: null,
-				buttonsSetting: null,
-				signEnable: null,
-				reasonRequire: null,
-				nodeType: null,
-			},
-			{
-				id: '16f265b3-dcae-11f0-b9e4-00ff3e31cab8',
-				name: '部门领导审批',
-				createTime: 1766130071588,
-				endTime: 1766130097814,
-				durationInMillis: 26226,
-				status: 4,
-				reason: '系统自动取消',
-				ownerUser: null,
-				assigneeUser: {
-					id: 1,
-					nickname: '芋道源码',
-					avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-					deptId: 103,
-					deptName: '研发部门',
-				},
-				taskDefinitionKey: 'Activity_10dxbm6',
-				processInstanceId: '16f0defc-dcae-11f0-b9e4-00ff3e31cab8',
-				processInstance: {
-					id: '16f0defc-dcae-11f0-b9e4-00ff3e31cab8',
-					name: '通用表单',
-					createTime: null,
-					processDefinitionId: 'common-form:3:07c8b6aa-dcae-11f0-b9e4-00ff3e31cab8',
-					summary: [
-						{
-							key: '结束时间',
-							value: '2025-12-19',
-						},
-						{
-							key: '请假类型',
-							value: '10',
-						},
-						{
-							key: '请假原因',
-							value: '有事请假',
-						},
-					],
-					startUser: {
-						id: 104,
-						nickname: '测试号',
-						avatar: null,
-						deptId: 107,
-						deptName: null,
-					},
-				},
-				parentTaskId: null,
-				children: null,
-				formId: null,
-				formName: null,
-				formConf: null,
-				formFields: null,
-				formVariables: null,
-				buttonsSetting: null,
-				signEnable: null,
-				reasonRequire: null,
-				nodeType: null,
-			},
-			{
-				id: 'f9a75f43-dfac-11f0-bc4a-00ff3e31cab8',
-				name: '部门领导审批',
-				createTime: 1766459446395,
-				endTime: null,
-				durationInMillis: null,
-				status: 1,
-				reason: null,
-				ownerUser: null,
-				assigneeUser: {
-					id: 1,
-					nickname: '芋道源码',
-					avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-					deptId: 103,
-					deptName: '研发部门',
-				},
-				taskDefinitionKey: 'Activity_10dxbm6',
-				processInstanceId: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
-				processInstance: {
-					id: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
-					name: '通用表单',
-					createTime: null,
-					processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
-					summary: [
-						{
-							key: '结束时间',
-							value: '2025-12-24',
-						},
-						{
-							key: '请假类型',
-							value: '10',
-						},
-						{
-							key: '请假原因',
-							value: '',
-						},
-					],
-					startUser: {
-						id: 1,
-						nickname: '芋道源码',
-						avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-						deptId: 103,
-						deptName: null,
-					},
-				},
-				parentTaskId: null,
-				children: null,
-				formId: null,
-				formName: null,
-				formConf: null,
-				formFields: null,
-				formVariables: null,
-				buttonsSetting: null,
-				signEnable: null,
-				reasonRequire: null,
-				nodeType: null,
-			},
-			{
-				id: 'cea636cf-dca1-11f0-b9e4-00ff3e31cab8',
-				name: '经理审批',
-				createTime: 1766124796330,
-				endTime: null,
-				durationInMillis: null,
-				status: 1,
-				reason: null,
-				ownerUser: null,
-				assigneeUser: {
-					id: 1,
-					nickname: '芋道源码',
-					avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-					deptId: 103,
-					deptName: '研发部门',
-				},
-				taskDefinitionKey: 'Activity_027dk1j',
-				processInstanceId: 'cea43ae7-dca1-11f0-b9e4-00ff3e31cab8',
-				processInstance: {
-					id: 'cea43ae7-dca1-11f0-b9e4-00ff3e31cab8',
-					name: 'test',
-					createTime: null,
-					processDefinitionId: 'test:3:7a40d609-dca1-11f0-b9e4-00ff3e31cab8',
-					summary: [
-						{
-							key: '输入框',
-							value: '12412',
-						},
-						{
-							key: '多行输入框',
-							value: '1424',
-						},
-						{
-							key: '多选框',
-							value: '[1]',
-						},
-					],
-					startUser: {
-						id: 1,
-						nickname: '芋道源码',
-						avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-						deptId: 103,
-						deptName: null,
-					},
-				},
-				parentTaskId: null,
-				children: null,
-				formId: null,
-				formName: null,
-				formConf: null,
-				formFields: null,
-				formVariables: null,
-				buttonsSetting: null,
-				signEnable: null,
-				reasonRequire: null,
-				nodeType: null,
-			},
-		]
+		const query = { ...queryParams.value, ...params }
+		const data = await TaskApi.getTaskManagerPage(query)
+		tableData.value = data.list
+		total.value = data.total
+		// tableData.value = [
+		// 	{
+		// 		id: '5148f021-dcae-11f0-b9e4-00ff3e31cab8',
+		// 		name: 'HR审批',
+		// 		createTime: 1766130169463,
+		// 		endTime: 1766130396648,
+		// 		durationInMillis: 227185,
+		// 		status: 2,
+		// 		reason: '通过 有病就去治',
+		// 		ownerUser: null,
+		// 		assigneeUser: {
+		// 			id: 114,
+		// 			nickname: 'hr 小姐姐',
+		// 			avatar: null,
+		// 			deptId: null,
+		// 			deptName: null,
+		// 		},
+		// 		taskDefinitionKey: 'Activity_0hq637b',
+		// 		processInstanceId: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
+		// 		processInstance: {
+		// 			id: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			name: '通用表单',
+		// 			createTime: null,
+		// 			processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			summary: [
+		// 				{
+		// 					key: '结束时间',
+		// 					value: '2025-12-19',
+		// 				},
+		// 				{
+		// 					key: '请假类型',
+		// 					value: '20',
+		// 				},
+		// 				{
+		// 					key: '请假原因',
+		// 					value: '有病',
+		// 				},
+		// 			],
+		// 			startUser: {
+		// 				id: 104,
+		// 				nickname: '测试号',
+		// 				avatar: null,
+		// 				deptId: 107,
+		// 				deptName: null,
+		// 			},
+		// 		},
+		// 		parentTaskId: null,
+		// 		children: null,
+		// 		formId: null,
+		// 		formName: null,
+		// 		formConf: null,
+		// 		formFields: null,
+		// 		formVariables: null,
+		// 		buttonsSetting: null,
+		// 		signEnable: null,
+		// 		reasonRequire: null,
+		// 		nodeType: null,
+		// 	},
+		// 	{
+		// 		id: '3fa651d6-dcae-11f0-b9e4-00ff3e31cab8',
+		// 		name: '部门领导审批',
+		// 		createTime: 1766130139877,
+		// 		endTime: 1766130169317,
+		// 		durationInMillis: 29440,
+		// 		status: 2,
+		// 		reason: '通过',
+		// 		ownerUser: null,
+		// 		assigneeUser: {
+		// 			id: 1,
+		// 			nickname: '芋道源码',
+		// 			avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
+		// 			deptId: 103,
+		// 			deptName: '研发部门',
+		// 		},
+		// 		taskDefinitionKey: 'Activity_10dxbm6',
+		// 		processInstanceId: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
+		// 		processInstance: {
+		// 			id: '3fa5193f-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			name: '通用表单',
+		// 			createTime: null,
+		// 			processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			summary: [
+		// 				{
+		// 					key: '结束时间',
+		// 					value: '2025-12-19',
+		// 				},
+		// 				{
+		// 					key: '请假类型',
+		// 					value: '20',
+		// 				},
+		// 				{
+		// 					key: '请假原因',
+		// 					value: '有病',
+		// 				},
+		// 			],
+		// 			startUser: {
+		// 				id: 104,
+		// 				nickname: '测试号',
+		// 				avatar: null,
+		// 				deptId: 107,
+		// 				deptName: null,
+		// 			},
+		// 		},
+		// 		parentTaskId: null,
+		// 		children: null,
+		// 		formId: null,
+		// 		formName: null,
+		// 		formConf: null,
+		// 		formFields: null,
+		// 		formVariables: null,
+		// 		buttonsSetting: null,
+		// 		signEnable: null,
+		// 		reasonRequire: null,
+		// 		nodeType: null,
+		// 	},
+		// 	{
+		// 		id: '16f265b3-dcae-11f0-b9e4-00ff3e31cab8',
+		// 		name: '部门领导审批',
+		// 		createTime: 1766130071588,
+		// 		endTime: 1766130097814,
+		// 		durationInMillis: 26226,
+		// 		status: 4,
+		// 		reason: '系统自动取消',
+		// 		ownerUser: null,
+		// 		assigneeUser: {
+		// 			id: 1,
+		// 			nickname: '芋道源码',
+		// 			avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
+		// 			deptId: 103,
+		// 			deptName: '研发部门',
+		// 		},
+		// 		taskDefinitionKey: 'Activity_10dxbm6',
+		// 		processInstanceId: '16f0defc-dcae-11f0-b9e4-00ff3e31cab8',
+		// 		processInstance: {
+		// 			id: '16f0defc-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			name: '通用表单',
+		// 			createTime: null,
+		// 			processDefinitionId: 'common-form:3:07c8b6aa-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			summary: [
+		// 				{
+		// 					key: '结束时间',
+		// 					value: '2025-12-19',
+		// 				},
+		// 				{
+		// 					key: '请假类型',
+		// 					value: '10',
+		// 				},
+		// 				{
+		// 					key: '请假原因',
+		// 					value: '有事请假',
+		// 				},
+		// 			],
+		// 			startUser: {
+		// 				id: 104,
+		// 				nickname: '测试号',
+		// 				avatar: null,
+		// 				deptId: 107,
+		// 				deptName: null,
+		// 			},
+		// 		},
+		// 		parentTaskId: null,
+		// 		children: null,
+		// 		formId: null,
+		// 		formName: null,
+		// 		formConf: null,
+		// 		formFields: null,
+		// 		formVariables: null,
+		// 		buttonsSetting: null,
+		// 		signEnable: null,
+		// 		reasonRequire: null,
+		// 		nodeType: null,
+		// 	},
+		// 	{
+		// 		id: 'f9a75f43-dfac-11f0-bc4a-00ff3e31cab8',
+		// 		name: '部门领导审批',
+		// 		createTime: 1766459446395,
+		// 		endTime: null,
+		// 		durationInMillis: null,
+		// 		status: 1,
+		// 		reason: null,
+		// 		ownerUser: null,
+		// 		assigneeUser: {
+		// 			id: 1,
+		// 			nickname: '芋道源码',
+		// 			avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
+		// 			deptId: 103,
+		// 			deptName: '研发部门',
+		// 		},
+		// 		taskDefinitionKey: 'Activity_10dxbm6',
+		// 		processInstanceId: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
+		// 		processInstance: {
+		// 			id: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
+		// 			name: '通用表单',
+		// 			createTime: null,
+		// 			processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
+		// 			summary: [
+		// 				{
+		// 					key: '结束时间',
+		// 					value: '2025-12-24',
+		// 				},
+		// 				{
+		// 					key: '请假类型',
+		// 					value: '10',
+		// 				},
+		// 				{
+		// 					key: '请假原因',
+		// 					value: '',
+		// 				},
+		// 			],
+		// 			startUser: {
+		// 				id: 1,
+		// 				nickname: '芋道源码',
+		// 				avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
+		// 				deptId: 103,
+		// 				deptName: null,
+		// 			},
+		// 		},
+		// 		parentTaskId: null,
+		// 		children: null,
+		// 		formId: null,
+		// 		formName: null,
+		// 		formConf: null,
+		// 		formFields: null,
+		// 		formVariables: null,
+		// 		buttonsSetting: null,
+		// 		signEnable: null,
+		// 		reasonRequire: null,
+		// 		nodeType: null,
+		// 	},
+		// 	{
+		// 		id: 'cea636cf-dca1-11f0-b9e4-00ff3e31cab8',
+		// 		name: '经理审批',
+		// 		createTime: 1766124796330,
+		// 		endTime: null,
+		// 		durationInMillis: null,
+		// 		status: 1,
+		// 		reason: null,
+		// 		ownerUser: null,
+		// 		assigneeUser: {
+		// 			id: 1,
+		// 			nickname: '芋道源码',
+		// 			avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
+		// 			deptId: 103,
+		// 			deptName: '研发部门',
+		// 		},
+		// 		taskDefinitionKey: 'Activity_027dk1j',
+		// 		processInstanceId: 'cea43ae7-dca1-11f0-b9e4-00ff3e31cab8',
+		// 		processInstance: {
+		// 			id: 'cea43ae7-dca1-11f0-b9e4-00ff3e31cab8',
+		// 			name: 'test',
+		// 			createTime: null,
+		// 			processDefinitionId: 'test:3:7a40d609-dca1-11f0-b9e4-00ff3e31cab8',
+		// 			summary: [
+		// 				{
+		// 					key: '输入框',
+		// 					value: '12412',
+		// 				},
+		// 				{
+		// 					key: '多行输入框',
+		// 					value: '1424',
+		// 				},
+		// 				{
+		// 					key: '多选框',
+		// 					value: '[1]',
+		// 				},
+		// 			],
+		// 			startUser: {
+		// 				id: 1,
+		// 				nickname: '芋道源码',
+		// 				avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
+		// 				deptId: 103,
+		// 				deptName: null,
+		// 			},
+		// 		},
+		// 		parentTaskId: null,
+		// 		children: null,
+		// 		formId: null,
+		// 		formName: null,
+		// 		formConf: null,
+		// 		formFields: null,
+		// 		formVariables: null,
+		// 		buttonsSetting: null,
+		// 		signEnable: null,
+		// 		reasonRequire: null,
+		// 		nodeType: null,
+		// 	},
+		// ]
 		total.value = tableData.value.length
 		// 更新查询参数
 		// queryParams.value = { ...query }
@@ -543,7 +543,6 @@ const getList = async (params = queryParams.value) => {
 	}
 	loading.value = false
 }
-
 
 /**
  * 审核任务
@@ -573,5 +572,4 @@ onMounted(async () => {
 })
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

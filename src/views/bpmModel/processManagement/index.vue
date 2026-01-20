@@ -5,7 +5,7 @@
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
---> 
+-->
 <template>
 	<div>
 		<!-- 主列表流程管理显示 -->
@@ -78,11 +78,11 @@
 	</div>
 </template>
 
-<script setup >
+<script setup>
 defineOptions({ name: 'ProcessManagement' })
 // 1. 基础依赖导入
-import { ref, reactive, computed, getCurrentInstance, onMounted, h, nextTick } from 'vue'
-
+import { ref, reactive, computed, getCurrentInstance, onMounted, h, nextTick, version } from 'vue'
+import { formatDate } from '@/utils/common/date'
 // 2. 组件导入
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
@@ -94,7 +94,7 @@ import TipMessage from '@/components/TipMessage/index.vue'
 // 3. 状态管理与假数据导入
 import tableParamsStore from '@/store/modules/tableParams'
 import { processMockData } from './details/data'
-import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete } from '@element-plus/icons-vue'
+import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete, Finished, Check } from '@element-plus/icons-vue'
 // import { message } from 'ant-design-vue'
 import { getProcessInstanceMyPage } from '@/api/system/bpm/processInstance'
 import { useRoute, useRouter } from 'vue-router'
@@ -322,50 +322,73 @@ const tableColumns = ref([
 			}
 		},
 	},
+	// {
+	// 	prop: 'version',
+	// 	label: '流程版本',
+	// 	align: 'center',
+	// 	render: row => {
+	// 		return [
+	// 			h(
+	// 				ElTag,
+	// 				{
+	// 					size: 'medium',
+	// 					permission: undefined, // 明确添加permission属性
+	// 				},
+	// 				{ default: () => `v${row.version}` }
+	// 			),
+	// 		]
+	// 	},
+	// },
+	// {
+	// 	prop: 'suspensionState',
+	// 	label: '状态',
+	// 	align: 'center',
+	// 	render: row => {
+	// 		const statusMap = {
+	// 			1: { label: '激活', type: 'success' },
+	// 			2: { label: '挂起', type: 'warning' },
+	// 		}
+	// 		const status = statusMap[row.suspensionState] || { label: '未知', type: '' }
+	// 		return [
+	// 			h(
+	// 				ElTag,
+	// 				{
+	// 					type: status.type,
+	// 					permission: undefined, // 明确添加permission属性
+	// 				},
+	// 				{ default: () => status.label }
+	// 			),
+	// 		]
+	// 	},
+	// },
 	{
-		prop: 'version',
-		label: '流程版本',
-		align: 'center',
-		render: row => {
-			return [
-				h(
-					ElTag,
-					{
-						size: 'medium',
-						permission: undefined, // 明确添加permission属性
-					},
-					{ default: () => `v${row.version}` }
-				),
-			]
-		},
-	},
-	{
-		prop: 'suspensionState',
-		label: '状态',
-		align: 'center',
-		render: row => {
-			const statusMap = {
-				1: { label: '激活', type: 'success' },
-				2: { label: '挂起', type: 'warning' },
-			}
-			const status = statusMap[row.suspensionState] || { label: '未知', type: '' }
-			return [
-				h(
-					ElTag,
-					{
-						type: status.type,
-						permission: undefined, // 明确添加permission属性
-					},
-					{ default: () => status.label }
-				),
-			]
-		},
-	},
-	{
-		prop: 'deploymentTime',
+		prop: '',
 		label: '部署时间',
 		align: 'center',
 		width: 180,
+		render: row => {
+			// 修复：给原生span添加props对象（即使为空）
+			return [h('span', { props: {} }, row.processDefinition ? formatDate(row.processDefinition.deploymentTime) : '')]
+		},
+		sortable: true,
+	},
+	{
+		prop: 'createTime',
+		label: '版本',
+		align: 'center',
+		width: 80,
+		render: row => {
+			return [
+				h(
+					ElTag,
+					{
+						type: row.processDefinition ? 'primary' : 'info',
+						permission: undefined, // 明确添加permission属性
+					},
+					{ default: () => (row.processDefinition ? 'v' + row.processDefinition.version : '未部署') }
+				),
+			]
+		},
 		sortable: true,
 	},
 	{
@@ -382,6 +405,20 @@ const tableColumns = ref([
 					click: () => handleLoadXml(row),
 					permission: 'bpm:process:update',
 					icon: Edit, // 添加图标组件
+				},
+				{
+					name: '发布',
+					command: '发布',
+					click: () => deployModel(row),
+					permission: 'bpm:process:update',
+					icon: Check, // 添加图标组件
+				},
+				{
+					name: '版本',
+					command: '版本',
+					click: () => historyVersion(row),
+					permission: 'bpm:process:update',
+					icon: Finished, // 添加图标组件
 				},
 				// 仅当无表单时显示配置表单按钮
 				...(row.formId === null && (row.category === 'oa' || row.category === 'cw')
@@ -480,15 +517,12 @@ const getList = (params = {}) => {
 		.then(res => {
 			if (res.code == '0000') {
 				tableData.value = res.data
-
-				console.log('tableData.value =>', tableData.value)
 				total.value = res.data.length
 				tableLoading.value = false
 			}
 		})
 		.catch(error => {
 			tableLoading.value = false
-			console.error('获取流程列表失败:', error)
 			proxy.$modal.msgError('获取流程列表失败，请重试')
 		})
 }
@@ -509,7 +543,7 @@ const handleProcessView = async deploymentId => {
 	console.log('deploymentId =>', deploymentId)
 	try {
 		// 模拟调用接口获取XML（实际项目中替换为真实API）
-		// const res = await flowableApi.readFlowableXml(deploymentId)
+		// const res = await BpmModelApi.readFlowableXml(deploymentId)
 		// if (res.code == '0000') {
 		// 	processView.xmlData = res.data
 		// 	// 设置流程查看状态
@@ -555,33 +589,14 @@ const handleForm = formId => {
  * @param row 行数据
  */
 const handleLoadXml = async row => {
-	if (!row || !row.deploymentId) {
-		ElMessage.warning('流程数据异常')
-		return
-	}
-	try {
-		// 1. 加载中状态
-		ElMessage.info(`加载流程【${row.name}】中...`)
-		// 2. 调用接口获取流程XML
-		const res = await flowableApi.readFlowableXml(row.deploymentId)
-		if (res.code === '0000') {
-			// 3. 组装编辑所需的流程数据（传递给设计器）
-			editor.value = {
-				...row,
-				bpmnXml: res.data, // 核心：XML数据
-				processName: row.name,
-				processKey: row.key,
-				category: row.category,
-			}
-			// 4. 打开设计器弹窗
-			processDesignerVisible.value = true
-		} else {
-			ElMessage.error('加载流程XML失败：' + (res.msg || '未知错误'))
-		}
-	} catch (error) {
-		console.error('加载流程XML失败:', error)
-		ElMessage.error('加载流程XML失败，请重试')
-	}
+	//打开设计器弹窗
+	router.push({
+		name: 'CreateProcess',
+		query: {
+			type: 'update',
+			id: row.id,
+		},
+	})
 }
 /**
  * 保存流程XML
@@ -639,7 +654,19 @@ const handleSaveFormConfig = async () => {
 const SubmitApplication = row => {
 	ElMessage.info(`发起申请: ${row.name}`)
 }
-
+/**发布流程 */
+const deployModel = row => {
+	BpmModelApi.deployModel(row.id).then(res => {
+		if (res.code === '0000') {
+			ElMessage.success('发布成功')
+			getList() // 刷新列表
+		} else {
+			ElMessage.error('发布失败')
+		}
+	})
+}
+/**历史版本 */
+const historyVersion = row => {}
 /**
  * 更新流程状态（挂起/激活）
  * @param {Object} row 流程数据
@@ -707,32 +734,26 @@ const handleAddProcess = () => {
 const handleConfirmAction = () => {
 	if (currentAction.value === 'state') {
 		console.log('currentRow.value =>', currentRow.value)
-		flowableApi
-			.updateFlowState({
-				deployId: currentRow.value.deploymentId,
-				state: currentRow.value.targetState,
-			})
-			.then(res => {
-				if (res.code == '0000') {
-					proxy.$modal.msgSuccess(`流程${currentRow.value.targetState === 1 ? '激活' : '挂起'}成功`)
-					getList()
-				} else {
-					ElMessage.error('更新流程状态失败')
-				}
-			})
+		BpmModelApi.updateModelState({
+			id: currentRow.value.id,
+			state: currentRow.value.targetState,
+		}).then(res => {
+			if (res.code == '0000') {
+				proxy.$modal.msgSuccess(`流程${currentRow.value.targetState === 1 ? '激活' : '挂起'}成功`)
+				getList()
+			} else {
+				ElMessage.error('更新流程状态失败')
+			}
+		})
 	} else if (currentAction.value === 'delete') {
-		flowableApi
-			.deleteFlow({
-				deployId: currentRow.value.deploymentId,
-			})
-			.then(res => {
-				if (res.code == '0000') {
-					proxy.$modal.msgSuccess('流程删除成功')
-					getList()
-				} else {
-					ElMessage.error('删除流程失败')
-				}
-			})
+		BpmModelApi.deleteModel(currentRow.value.id).then(res => {
+			if (res.code == '0000') {
+				proxy.$modal.msgSuccess('流程删除成功')
+				getList()
+			} else {
+				ElMessage.error('删除流程失败')
+			}
+		})
 	}
 }
 
