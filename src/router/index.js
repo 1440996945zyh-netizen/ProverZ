@@ -149,6 +149,14 @@ export const constantRoutes = [
 				},
 			},
 			{
+				path: 'bpmModel/processInstance/manager',
+				component: () => import('@/views/bpmModel/processInstance/manager/index.vue'),
+				name: 'BpmProcessInstance',
+				meta: {
+					title: '流程实例',
+				},
+			},
+			{
 				path: 'bpmModel/processInstance/detail',
 				component: () => import('@/views/bpmModel/processInstance/detail/index.vue'),
 				name: 'BpmProcessInstanceDetail',

@@ -10,7 +10,7 @@ const BpmProcessDefinitionApi = {
 	 */
 	getProcessDefinition: async (id, key) => {
 		return request({
-			url: '/bpm/processDefinition/get',
+			url: '/bpm/processDefinition/getDetail',
 			method: 'get',
 			params: { id, key },
 		})
