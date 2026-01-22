@@ -138,19 +138,27 @@ export const constantRoutes = [
 				name: 'BpmFormEditor',
 				meta: {
 					title: '设计流程表单',
-				}
+				},
+			},
+			{
+				path: 'bpmModel/processManagement/definition',
+				component: () => import('@/views/bpmModel/processManagement/definition/index.vue'),
+				name: 'BpmProcessDefinition',
+				meta: {
+					title: '流程定义',
+				},
 			},
 			{
 				path: 'bpmModel/processInstance/detail',
 				component: () => import('@/views/bpmModel/processInstance/detail/index.vue'),
 				name: 'BpmProcessInstanceDetail',
 				meta: { title: '流程实例详情', icon: '' },
-				props: (route) => ({
+				props: route => ({
 					id: route.query.id,
 					taskId: route.query.taskId,
-					activityId: route.query.activityId
-				})
-			}
+					activityId: route.query.activityId,
+				}),
+			},
 		],
 	},
 	{
@@ -158,8 +166,8 @@ export const constantRoutes = [
 		component: () => import('@/layout/index.vue'), // 或者空组件
 		meta: {
 			title: '外部系统',
-			isIframe: true // 标记为 iframe 页面
-		}
+			isIframe: true, // 标记为 iframe 页面
+		},
 	},
 ]
 

@@ -14,7 +14,7 @@
 			<div class="header-left" @click="handleBack">
 				<el-icon><ArrowLeftBold /></el-icon>
 				<span class="title-text" :title="formData.name || '创建流程'">
-					{{ formData.name || '创建流程' }}
+					{{ formData?.name || '创建流程' }}
 				</span>
 			</div>
 
@@ -180,10 +180,11 @@ const userList = ref([])
 const deptList = ref([])
 
 /** 初始化数据 */
-const actionType = route.query.type
+const actionType = ref('')
 const initData = async () => {
-	console.log('actionType =>', actionType)
-	if (actionType === 'definition') {
+	actionType.value = route.query.type
+	console.log('actionType =>', actionType.value)
+	if (actionType.value === 'definition') {
 		// 流程定义场景（恢复）
 		const definitionId = route.query.id
 		const data = await DefinitionApi.getProcessDefinition(definitionId)
@@ -195,15 +196,25 @@ const initData = async () => {
 			data.simpleModel = JSON.parse(data.simpleModel)
 		}
 		formData.value = data
-		formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
-	} else if (['update', 'copy'].includes(actionType)) {
+		formData.value.startUserIds = formData.value.startUserIds || []
+		formData.value.startDeptIds = formData.value.startDeptIds || []
+		formData.value.startUserType = formData.value.startUserIds.length > 0 ? 1 : formData.value.startDeptIds.length > 0 ? 2 : 0
+	} else if (['update', 'copy'].includes(actionType.value)) {
+		console.log('update', 'copy', actionType.value)
 		// 修改/复制场景
 		const modelId = route.query.id
 		const res = await ModelApi.getModel(modelId)
 		formData.value = res.data
-		formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
-		debugger
-		// 复制场景处理
+		formData.value.bpmnXml = res.data.bpmnXml
+		if (formData.value.type === BpmModelType.BPMN) {
+			processData.value = formData.value.bpmnXml
+		} else if (formData.value.type === BpmModelType.SIMPLE) {
+			processData.value = formData.value.simpleModel
+		}
+		console.log('加载流程数据', processData.value)
+		formData.value.startUserIds = formData.value.startUserIds || []
+		formData.value.startDeptIds = formData.value.startDeptIds || []
+		formData.value.startUserType = formData.value.startUserIds.length > 0 ? 1 : formData.value.startDeptIds.length > 0 ? 2 : 0 // 复制场景处理
 		if (route.query.type === 'copy') {
 			delete formData.value.id
 			if (formData.value.bpmnXml) {
@@ -215,6 +226,47 @@ const initData = async () => {
 			// tagsView.setTitle('复制流程')
 		}
 	} else {
+		formData.value = {
+			id: undefined,
+			name: '',
+			key: '',
+			category: undefined,
+			icon: undefined,
+			description: '',
+			type: BpmModelType.BPMN,
+			formType: BpmModelFormType.NORMAL,
+			formId: '',
+			formCustomCreatePath: '',
+			formCustomViewPath: '',
+			visible: true,
+			startUserType: undefined,
+			startUserIds: [],
+			startDeptIds: [],
+			managerUserIds: [],
+			allowCancelRunningProcess: true,
+
+			processIdRule: {
+				enable: false,
+				prefix: '',
+				infix: '',
+				postfix: '',
+				length: 5,
+			},
+			autoApprovalType: BpmAutoApproveType.NONE,
+			titleSetting: {
+				enable: false,
+				title: '',
+			},
+			summarySetting: {
+				enable: false,
+				summary: [],
+			},
+			allowWithdrawTask: false,
+			printTemplateSetting: {
+				enable: false,
+			},
+		}
+
 		// 新增场景
 		formData.value.startUserType = 0 // 全体
 		formData.value.managerUserIds.push(userStore.userId)
@@ -309,21 +361,17 @@ const initData = async () => {
 	// extraSettingsRef.value.initData()
 }
 
-/** 根据类型切换流程数据 */
-watch(
-	() => formData.value.type,
-	() => {
-		if (formData.value.type === BpmModelType.BPMN) {
-			processData.value = formData.value.bpmnXml
-		} else if (formData.value.type === BpmModelType.SIMPLE) {
-			processData.value = formData.value.simpleModel
-		}
-		console.log('加载流程数据', processData.value)
-	},
-	{
-		immediate: true,
-	}
-)
+// /** 根据类型切换流程数据 */
+// watch(
+// 	() => formData.value.type,
+// 	() => {
+// 		console.log(BpmModelType, 'BpmModelType')
+
+// 	},
+// 	{
+// 		immediate: true,
+// 	},
+// )
 
 /** 校验所有步骤数据是否完整 */
 const validateAllSteps = async () => {
@@ -369,15 +417,15 @@ const handleSave = async () => {
 			...formData.value,
 		}
 
-		if (actionType === 'definition') {
+		if (actionType.value === 'definition') {
 			// 恢复场景
 			await ModelApi.updateModel(modelData)
 			message.success('恢复成功，可点击【发布】按钮，进行发布模型')
-		} else if (actionType === 'update') {
+		} else if (actionType.value === 'update') {
 			// 修改场景
 			await ModelApi.updateModel(modelData)
 			message.success('修改成功，可点击【发布】按钮，进行发布模型')
-		} else if (actionType === 'copy') {
+		} else if (actionType.value === 'copy') {
 			// 复制场景
 			formData.value.id = await ModelApi.createModel(modelData)
 			message.success('复制成功，可点击【发布】按钮，进行发布模型')
@@ -388,7 +436,7 @@ const handleSave = async () => {
 		}
 
 		// 返回列表页（排除更新场景）
-		if (actionType !== 'update') {
+		if (actionType.value !== 'update') {
 			await router.push({ path: '/bpmModel/processManagement' })
 		}
 	} catch (error) {
@@ -449,6 +497,7 @@ const handleStepClick = async index => {
 
 		// 流程设计步骤需要刷新设计器
 		if (index === 2) {
+			console.log('流程设计步骤需要刷新设计器index', index)
 			await nextTick()
 			// 等待组件初始化
 			await new Promise(resolve => setTimeout(resolve, 200))
@@ -469,7 +518,17 @@ const handleBack = () => {
 	// 跳转到列表页
 	router.push({ path: '/bpmModel/processManagement' })
 }
-
+// 监听路由参数变化，当 id 或 type 变化时重新初始化数据
+watch(
+	() => [route.query.id, route.query.type],
+	async ([newId, newType], [oldId, oldType]) => {
+		// 只有当 id 或 type 真正变化时才重新初始化
+		if (newId !== oldId || newType !== oldType) {
+			await initData()
+		}
+	},
+	{ immediate: true }, // 首次加载也执行
+)
 /** 初始化 */
 onMounted(async () => {
 	await initData()

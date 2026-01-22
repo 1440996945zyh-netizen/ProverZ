@@ -40,7 +40,7 @@
 	</div>
 </template>
 
-<script setup >
+<script setup>
 defineOptions({ name: 'FormDesigne' })
 
 // ===================== 导入模块 =====================
@@ -128,7 +128,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => (row.status == '0' ? '正常' : '停用'),
-					}
+					},
 				),
 			]
 		},
@@ -167,7 +167,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '复制',
-					}
+					},
 				),
 				h(
 					ElButton,
@@ -183,7 +183,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '编辑',
-					}
+					},
 				),
 
 				h(
@@ -200,7 +200,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '详情',
-					}
+					},
 				),
 				h(
 					ElButton,
@@ -216,7 +216,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '删除',
-					}
+					},
 				),
 			]
 		},

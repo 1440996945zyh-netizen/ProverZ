@@ -47,7 +47,7 @@
 	</div>
 </template>
 
-<script  setup>
+<script setup>
 defineOptions({ name: 'BpmFormEditor' })
 import Dialog from '@/components/Dialog'
 import { ref, reactive, onMounted } from 'vue'
@@ -57,7 +57,7 @@ import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/bpm/formCreate'
 import { useFormCreateDesigner } from '@/components/FormCreate'
 import { useMessage } from '@/plugins/useMessage'
-import {  getDetail, updateForm, insertForm } from '@/api/system/bpm/form'
+import { getDetail, updateForm, insertForm } from '@/api/system/bpm/form'
 
 const message = useMessage()
 const route = useRoute()
@@ -155,7 +155,6 @@ const submitForm = async () => {
 
 /** 关闭当前标签页并返回列表 */
 const close = () => {
-
 	router.push({ path: '/bpmModel/FormDesigner' })
 }
 

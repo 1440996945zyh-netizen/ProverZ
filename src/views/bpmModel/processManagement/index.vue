@@ -75,6 +75,14 @@
 		<!-- <Dialog v-model:visible="processDesignerVisible" :title="processDesignerTitle" :showFooter="false" isFullscreen :modal="true">
 			<processDesigner :editor="editor" @save="doSaveXml"></processDesigner>
 		</Dialog> -->
+
+		<!-- 表单详情 查看 -->
+		<Dialog title="表单详情" v-model:visible="formDetailVisible" width="40%" class="custom-form-dialog">
+			<form-create :option="formDetailPreview.option" :rule="formDetailPreview.rule" />
+			<template #footer>
+				<ElButton @click="formDetailVisible = false">取消</ElButton>
+			</template>
+		</Dialog>
 	</div>
 </template>
 
@@ -99,6 +107,9 @@ import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete, Finished, Chec
 import { getProcessInstanceMyPage } from '@/api/system/bpm/processInstance'
 import { useRoute, useRouter } from 'vue-router'
 import BpmModelApi from '@/api/system/bpm/model'
+import { getDetail } from '@/api/system/bpm/form'
+import { setConfAndFields2 } from '@/utils/bpm/formCreate'
+
 const route = useRoute()
 const router = useRouter()
 // 4. 组件实例与基础配置
@@ -232,7 +243,7 @@ const tableColumns = ref([
 		prop: 'id',
 		label: '流程定义id',
 		align: 'center',
-		width: 250,
+		minWidth: 250,
 	},
 	{
 		prop: 'key',
@@ -244,7 +255,7 @@ const tableColumns = ref([
 		prop: 'category',
 		label: '流程分类',
 		align: 'center',
-		width: 250,
+		width: 150,
 		render: row => {
 			const option = categoryOptions.find(item => item.value === row.category)
 			// 修复：给原生span添加props对象（即使为空）
@@ -255,6 +266,7 @@ const tableColumns = ref([
 		prop: 'name',
 		label: '流程名称',
 		align: 'center',
+		width: 100,
 		showOverFlow: true,
 		render: row => {
 			return [
@@ -266,7 +278,7 @@ const tableColumns = ref([
 						onClick: () => handleProcessView(row.deploymentId),
 						permission: undefined, // 明确添加permission属性（避免props为null）
 					},
-					{ default: () => row.name }
+					{ default: () => row.name },
 				),
 			]
 		},
@@ -275,35 +287,10 @@ const tableColumns = ref([
 		prop: 'formName',
 		label: '表单名称',
 		align: 'center',
+		width: 100,
 		showOverFlow: true,
 		render: row => {
-			if (row.formId && row.category === 'zdyyw') {
-				return [
-					h(
-						ElButton,
-						{
-							type: 'link',
-							class: 'link-button',
-							onClick: () => handleCustomForm(row.formId),
-							permission: undefined,
-						},
-						{ default: () => row.formName }
-					),
-				]
-			} else if (row.formId && row.category === 'online') {
-				return [
-					h(
-						ElButton,
-						{
-							type: 'link',
-							class: 'link-button',
-							onClick: () => handleOnlineForm(row.formId, row.formName),
-							permission: undefined,
-						},
-						{ default: () => row.formName }
-					),
-				]
-			} else if (row.formId) {
+			if (row.formId) {
 				return [
 					h(
 						ElButton,
@@ -313,7 +300,7 @@ const tableColumns = ref([
 							onClick: () => handleForm(row.formId),
 							permission: undefined,
 						},
-						{ default: () => row.formName }
+						{ default: () => row.formName },
 					),
 				]
 			} else {
@@ -373,21 +360,56 @@ const tableColumns = ref([
 		sortable: true,
 	},
 	{
-		prop: 'createTime',
+		prop: 'version',
 		label: '版本',
 		align: 'center',
-		width: 80,
+		width: 150, // 增加宽度以容纳两个标签
 		render: row => {
-			return [
-				h(
-					ElTag,
-					{
-						type: row.processDefinition ? 'primary' : 'info',
-						permission: undefined, // 明确添加permission属性
-					},
-					{ default: () => (row.processDefinition ? 'v' + row.processDefinition.version : '未部署') }
-				),
-			]
+			const tags = []
+
+			if (row.processDefinition) {
+				// 版本标签
+				tags.push(
+					h(
+						ElTag,
+						{
+							type: 'primary',
+							class: 'mr-5', // 右边距
+							permission: undefined,
+						},
+						{ default: () => `v${row.processDefinition.version}` },
+					),
+				)
+
+				// 挂起状态标签（当 suspensionState === 2 时显示）
+				if (row.processDefinition.suspensionState === 2) {
+					tags.push(
+						h(
+							ElTag,
+							{
+								type: 'warning',
+								class: 'ml-5',
+								permission: undefined,
+							},
+							{ default: () => '已停用' },
+						),
+					)
+				}
+			} else {
+				// 未部署状态
+				tags.push(
+					h(
+						ElTag,
+						{
+							type: 'info',
+							permission: undefined,
+						},
+						{ default: () => '未部署' },
+					),
+				)
+			}
+
+			return tags
 		},
 		sortable: true,
 	},
@@ -430,7 +452,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:config',
 								icon: Setting, // 添加图标组件
 							},
-					  ]
+						]
 					: []),
 				// 仅当可发起申请时显示
 				...(canSubmit(row)
@@ -442,7 +464,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:submit',
 								icon: Promotion, // 添加图标组件
 							},
-					  ]
+						]
 					: []),
 				// 根据状态显示挂起/激活
 				...(row.suspensionState === 1
@@ -454,7 +476,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:state',
 								icon: VideoPause, // 添加图标组件
 							},
-					  ]
+						]
 					: [
 							{
 								name: '激活',
@@ -463,7 +485,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:state',
 								icon: VideoPlay, // 添加图标组件
 							},
-					  ]),
+						]),
 				// 删除
 				{
 					name: '删除',
@@ -485,7 +507,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }), // 下拉按钮显示更多图标
-					}
+					},
 				),
 			]
 		},
@@ -560,29 +582,41 @@ const handleProcessView = async deploymentId => {
 	}
 }
 
-/**
- * 处理自定义表单
- * @param {string} formId 表单ID
- */
-const handleCustomForm = formId => {
-	proxy.$modal.msg(`打开自定义表单: ${formId}`)
-}
+// /**
+//  * 处理自定义表单
+//  * @param {string} formId 表单ID
+//  */
+// const handleCustomForm = formId => {
+// 	proxy.$modal.msg(`打开自定义表单: ${formId}`)
+// }
 
-/**
- * 处理在线表单
- * @param {string} formId 表单ID
- * @param {string} formName 表单名称
- */
-const handleOnlineForm = (formId, formName) => {
-	proxy.$modal.msg(`打开在线表单: ${formName}`)
-}
-
+// /**
+//  * 处理在线表单
+//  * @param {string} formId 表单ID
+//  * @param {string} formName 表单名称
+//  */
+// const handleOnlineForm = (formId, formName) => {
+// 	proxy.$modal.msg(`打开在线表单: ${formName}`)
+// }
+/** 流程表单的详情按钮操作 */
+const formDetailVisible = ref(false)
+const formDetailPreview = ref({
+	rule: [],
+	option: {},
+})
 /**
  * 处理普通表单
  * @param {string} formId 表单ID
  */
-const handleForm = formId => {
-	proxy.$modal.msg(`打开表单: ${formId}`)
+const handleForm = async formId => {
+	// 设置表单
+	const apiResponse = await getDetail(formId)
+
+	const formData = apiResponse.data
+
+	setConfAndFields2(formDetailPreview, formData.conf, formData.fields)
+	// 弹窗打开
+	formDetailVisible.value = true
 }
 /**
  * 加载流程XML 编辑
@@ -666,7 +700,14 @@ const deployModel = row => {
 	})
 }
 /**历史版本 */
-const historyVersion = row => {}
+const historyVersion = row => {
+	router.push({
+		name: 'BpmProcessDefinition',
+		query: {
+			key: row.key,
+		},
+	})
+}
 /**
  * 更新流程状态（挂起/激活）
  * @param {Object} row 流程数据
@@ -723,7 +764,7 @@ const handleAddProcess = () => {
 	router.push({
 		name: 'CreateProcess',
 		query: {
-			type: 'instance',
+			type: 'create',
 		},
 	})
 }
@@ -821,6 +862,25 @@ onMounted(() => {
 		background: transparent !important;
 		border-color: transparent !important;
 		box-shadow: none !important;
+	}
+}
+:deep(.custom-form-dialog) {
+	.el-dialog__body {
+		padding: 15px 20px !important;
+		max-height: 70vh;
+		overflow-y: auto;
+	}
+
+	/* 调整表单元素间距 */
+	.form-create .form-group {
+		margin-bottom: 18px !important;
+	}
+
+	/* 标题样式 */
+	.form-create .form-title {
+		font-size: 16px !important;
+		color: #333 !important;
+		margin-bottom: 15px !important;
 	}
 }
 </style>
