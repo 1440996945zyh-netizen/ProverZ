@@ -32,35 +32,11 @@
 			/>
 		</div>
 
-		<!-- 表单详情对话框 -->
-		<Dialog v-model:visible="formDetailVisible" title="表单详情" width="800px" :modal="true">
-			<div class="form-detail-container">
-				<template v-if="formDetailPreview.rule && formDetailPreview.rule.length > 0">
-					<div class="form-preview-header">
-						<el-text type="primary" size="large">表单预览</el-text>
-					</div>
-					<div class="form-preview-content">
-						<el-descriptions :column="1" border>
-							<el-descriptions-item
-								v-for="(item, index) in formDetailPreview.rule"
-								:key="index"
-								:label="item.title || item.label || '未命名字段'"
-							>
-								{{ getFieldPreviewValue(item) }}
-							</el-descriptions-item>
-						</el-descriptions>
-					</div>
-				</template>
-				<template v-else>
-					<div class="empty-form">
-						<el-empty description="暂无表单详情可预览" />
-					</div>
-				</template>
-			</div>
+		<!-- 表单详情 查看 -->
+		<Dialog title="表单详情" v-model:visible="formDetailVisible" width="40%">
+			<form-create :option="formDetailPreview.option" :rule="formDetailPreview.rule" />
 			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="formDetailVisible = false">关闭</el-button>
-				</span>
+				<ElButton @click="formDetailVisible = false">取消</ElButton>
 			</template>
 		</Dialog>
 	</div>
@@ -76,6 +52,7 @@ import DropDown from '@/components/DropDown/newIndex.vue'
 
 import BpmProcessDefinitionApi from '@/api/system/bpm/definition'
 import { getDetail } from '@/api/system/bpm/form'
+import { setConfAndFields2 } from '@/utils/bpm/formCreate'
 
 defineOptions({ name: 'BpmProcessDefinition' })
 
