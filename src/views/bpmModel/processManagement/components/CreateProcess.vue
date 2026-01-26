@@ -266,6 +266,7 @@ const initData = async () => {
 				enable: false,
 			},
 		}
+		processData.value = undefined
 
 		// 新增场景
 		formData.value.startUserType = 0 // 全体
@@ -521,7 +522,10 @@ const handleBack = () => {
 // 监听路由参数变化，当 id 或 type 变化时重新初始化数据
 watch(
 	() => [route.query.id, route.query.type],
-	async ([newId, newType], [oldId, oldType]) => {
+	async ([newId, newType], oldValues) => {
+		const [oldId, oldType] = oldValues || [] // 添加默认值处理
+		console.log('路由参数变化，重新初始化数据', { newId, newType, oldId, oldType })
+
 		// 只有当 id 或 type 真正变化时才重新初始化
 		if (newId !== oldId || newType !== oldType) {
 			await initData()
