@@ -180,27 +180,6 @@ const getCategoryList = async () => {
 		// 流程分类
 		const res = await CategoryApi.getCategoryPage()
 		categoryList.value = res.data.pages || []
-
-		// categoryList.value = [
-		// 	{
-		// 		id: 120,
-		// 		name: 'OA',
-		// 		code: 'OA',
-		// 		description: null,
-		// 		status: null,
-		// 		sort: null,
-		// 		createTime: null,
-		// 	},
-		// 	{
-		// 		id: 121,
-		// 		name: '其他',
-		// 		code: 'QT',
-		// 		description: null,
-		// 		status: null,
-		// 		sort: null,
-		// 		createTime: null,
-		// 	},
-		// ]
 	} catch (e) {
 		console.error('获取流程分类失败：', e)
 	}
@@ -279,6 +258,7 @@ const getCategoryName = categoryCode => {
 const handleSelect = async (row, formVariables) => {
 	// 设置选择的流程
 	selectProcessDefinition.value = row
+	console.log('selectProcessDefinition', selectProcessDefinition.value)
 	// 初始化流程定义详情
 	await nextTick()
 

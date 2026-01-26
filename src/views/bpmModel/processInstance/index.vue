@@ -324,9 +324,10 @@ const getList = async () => {
 		if (res.code === '0000') {
 			tableData.value = res.data.pages
 			total.value = res.data.totalNum
-			tableLoading.value = false
+			loading.value = false
 		}
 	} catch (error) {
+		console.log(error, '获取流程列表失败')
 		proxy.$modal.msgError('获取流程列表失败，请重试')
 	} finally {
 		loading.value = false // 确保无论如何都关闭loading

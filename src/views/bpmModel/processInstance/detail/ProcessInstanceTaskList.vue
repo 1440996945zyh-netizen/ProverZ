@@ -57,14 +57,14 @@ defineOptions({ name: 'BpmProcessInstanceTaskList' })
 
 // 定义组件Props，替换TS的propTypes为JS原生配置
 const props = defineProps({
-  loading: {
-    type: Boolean,
-    default: false // 是否加载中
-  },
-  id: {
-    type: String,
-    required: true // 流程实例的编号
-  }
+	loading: {
+		type: Boolean,
+		default: false, // 是否加载中
+	},
+	id: {
+		type: String,
+		required: true, // 流程实例的编号
+	},
 })
 
 // 响应式变量定义，移除TS类型注解
@@ -73,81 +73,49 @@ const tasks = ref([]) // 流程任务的数组
 /** 查看表单 */
 const fApi = ref(null) // form-create 的 API 操作类（移除ApiAttrs类型注解）
 const taskForm = ref({
-  rule: [],
-  option: {},
-  value: {}
+	rule: [],
+	option: {},
+	value: {},
 }) // 流程任务的表单详情
 const taskFormVisible = ref(false)
 
-const handleFormDetail = async (row) => {
-  // 设置表单
-  setConfAndFields2(taskForm, row.formConf, row.formFields, row.formVariables)
-  // 弹窗打开
-  taskFormVisible.value = true
-  // 隐藏提交、重置按钮，设置禁用只读
-  await nextTick()
-  fApi.value.fapi.btn.show(false)
-  fApi.value?.fapi?.resetBtn.show(false)
-  fApi.value?.fapi?.disabled(true)
+const handleFormDetail = async row => {
+	// 设置表单
+	setConfAndFields2(taskForm, row.formConf, row.formFields, row.formVariables)
+	// 弹窗打开
+	taskFormVisible.value = true
+	// 隐藏提交、重置按钮，设置禁用只读
+	await nextTick()
+	fApi.value.fapi.btn.show(false)
+	fApi.value?.fapi?.resetBtn.show(false)
+	fApi.value?.fapi?.disabled(true)
 }
 /**
  * 加载流程任务列表
  */
 const loadTasks = async () => {
-  // tasks.value = await TaskApi.getTaskListByProcessInstanceId(props.id)
-  tasks.value = [
-        {
-            "id": "f9a75f43-dfac-11f0-bc4a-00ff3e31cab8",
-            "name": "部门领导审批",
-            "createTime": 1766459446395,
-            "endTime": null,
-            "durationInMillis": null,
-            "status": 1,
-            "reason": null,
-            "ownerUser": null,
-            "assigneeUser": {
-                "id": 1,
-                "nickname": "芋道源码",
-                "avatar": "http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png",
-                "deptId": 103,
-                "deptName": "研发部门"
-            },
-            "taskDefinitionKey": "Activity_10dxbm6",
-            "processInstanceId": "f98de4bd-dfac-11f0-bc4a-00ff3e31cab8",
-            "processInstance": null,
-            "parentTaskId": null,
-            "children": null,
-            "formId": null,
-            "formName": null,
-            "formConf": null,
-            "formFields": null,
-            "formVariables": null,
-            "buttonsSetting": null,
-            "signEnable": null,
-            "reasonRequire": null,
-            "nodeType": null
-        }
-      ]
-
+	const res = await TaskApi.getTaskListByProcessInstanceId(props.id)
+	tasks.value = res.data || []
 }
 /**
  * 只有 loading 完成时，才去加载流程任务列表
  */
 watch(
-  () => props.loading,
-  async (value) => {
-    if (value) {
-     await loadTasks()
-    }
-  }
-,{immediate: true})
+	() => props.loading,
+	async value => {
+		if (value) {
+			await loadTasks()
+		}
+	},
+	{ immediate: true },
+)
 /**
  * 组件挂载时，加载流程任务列表
  */
 onMounted(() => {
-  if (!props.loading) {
-    loadTasks()
-  }
+	if (!props.loading) {
+		loadTasks()
+	}
 })
 </script>
 

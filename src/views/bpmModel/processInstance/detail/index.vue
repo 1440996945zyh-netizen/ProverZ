@@ -46,10 +46,10 @@
 							"
 						>
 							<el-avatar :size="28" v-if="processInstance?.startUser?.avatar" :src="processInstance?.startUser?.avatar" />
-							<el-avatar :size="28" v-else-if="processInstance?.startUser?.nickname">
-								{{ processInstance?.startUser?.nickname.substring(0, 1) }}
+							<el-avatar :size="28" v-else-if="processInstance?.startUser?.userName">
+								{{ processInstance?.startUser?.userName.substring(0, 1) }}
 							</el-avatar>
-							{{ processInstance?.startUser?.nickname }}
+							{{ processInstance?.startUser?.userName }}
 						</div>
 						<div style="color: #878c93">{{ formatDate(processInstance.startTime) }} 提交</div>
 					</div>
@@ -97,14 +97,6 @@
 						<!-- 流程图 -->
 						<el-tab-pane label="流程图" name="diagram">
 							<div class="form-scroll-area">
-								<!-- 简单流程模型 -->
-								<!-- <ProcessInstanceSimpleViewer
-                v-show="
-                  processDefinition.modelType && processDefinition.modelType === BpmModelType.SIMPLE
-                "
-                :loading="processInstanceLoading"
-                :model-view="processModelView"
-              /> -->
 								<!-- BPMN流程模型 -->
 								<ProcessInstanceBpmnViewer
 									v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN"
@@ -215,6 +207,7 @@ const writableFields = ref([])
 
 /** 获得详情 */
 const getDetail = () => {
+	console.log('getDetail')
 	// 获得审批详情
 	getApprovalDetail()
 	// 获得流程模型视图
@@ -238,251 +231,8 @@ const getApprovalDetail = async () => {
 			taskId: props.taskId,
 		}
 		console.log('param =>', param)
-		const data = await ProcessInstanceApi.getApprovalDetail(param)
-		// const data = {
-		// 	status: 1,
-		// 	activityNodes: [
-		// 		{
-		// 			id: 'StartUserNode',
-		// 			name: '发起人',
-		// 			nodeType: 10,
-		// 			status: 2,
-		// 			startTime: 1766459446304,
-		// 			endTime: 1766459446322,
-		// 			tasks: [
-		// 				{
-		// 					id: 'StartUserNode',
-		// 					ownerUser: null,
-		// 					assigneeUser: {
-		// 						id: 1,
-		// 						nickname: '芋道源码',
-		// 						avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-		// 						deptId: 103,
-		// 						deptName: '研发部门',
-		// 					},
-		// 					status: 2,
-		// 					reason: null,
-		// 					signPicUrl: null,
-		// 				},
-		// 			],
-		// 			candidateStrategy: null,
-		// 			candidateUsers: [],
-		// 			processInstanceId: null,
-		// 		},
-		// 		{
-		// 			id: 'Activity_10dxbm6',
-		// 			name: '部门领导审批',
-		// 			nodeType: 11,
-		// 			status: 1,
-		// 			startTime: 1766459446395,
-		// 			endTime: null,
-		// 			tasks: [
-		// 				{
-		// 					id: 'f9a75f43-dfac-11f0-bc4a-00ff3e31cab8',
-		// 					ownerUser: null,
-		// 					assigneeUser: {
-		// 						id: 1,
-		// 						nickname: '芋道源码',
-		// 						avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-		// 						deptId: 103,
-		// 						deptName: '研发部门',
-		// 					},
-		// 					status: 1,
-		// 					reason: null,
-		// 					signPicUrl: null,
-		// 				},
-		// 			],
-		// 			candidateStrategy: 37,
-		// 			candidateUsers: [],
-		// 			processInstanceId: null,
-		// 		},
-		// 		{
-		// 			id: 'Activity_0hq637b',
-		// 			name: 'HR审批',
-		// 			nodeType: 11,
-		// 			status: -1,
-		// 			startTime: null,
-		// 			endTime: null,
-		// 			tasks: null,
-		// 			candidateStrategy: 22,
-		// 			candidateUsers: [
-		// 				{
-		// 					id: 114,
-		// 					nickname: 'hr 小姐姐',
-		// 					avatar: null,
-		// 					deptId: null,
-		// 					deptName: null,
-		// 				},
-		// 			],
-		// 			processInstanceId: null,
-		// 		},
-		// 		{
-		// 			id: 'Event_02u1iqv',
-		// 			name: '结束',
-		// 			nodeType: 1,
-		// 			status: -1,
-		// 			startTime: null,
-		// 			endTime: null,
-		// 			tasks: null,
-		// 			candidateStrategy: null,
-		// 			candidateUsers: [],
-		// 			processInstanceId: null,
-		// 		},
-		// 	],
-		// 	formFieldsPermission: {
-		// 		F8nhmjcjnzk1b4c: '1',
-		// 		Fjtmmjcjcm5fakc: '1',
-		// 		F58dmjcjg2vfanc: '1',
-		// 		Fb8fmjcjnevtb1c: '1',
-		// 	},
-		// 	todoTask: {
-		// 		id: 'f9a75f43-dfac-11f0-bc4a-00ff3e31cab8',
-		// 		name: '部门领导审批',
-		// 		createTime: 1766459446395,
-		// 		endTime: null,
-		// 		durationInMillis: null,
-		// 		status: 1,
-		// 		reason: null,
-		// 		ownerUser: null,
-		// 		assigneeUser: {
-		// 			id: 1,
-		// 			nickname: '芋道源码',
-		// 			avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-		// 			deptId: 103,
-		// 			deptName: '研发部门',
-		// 		},
-		// 		taskDefinitionKey: 'Activity_10dxbm6',
-		// 		processInstanceId: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
-		// 		processInstance: null,
-		// 		parentTaskId: null,
-		// 		children: [],
-		// 		formId: null,
-		// 		formName: null,
-		// 		formConf: null,
-		// 		formFields: null,
-		// 		formVariables: null,
-		// 		buttonsSetting: {
-		// 			1: {
-		// 				displayName: '通过',
-		// 				enable: true,
-		// 			},
-		// 			2: {
-		// 				displayName: '拒绝',
-		// 				enable: true,
-		// 			},
-		// 			3: {
-		// 				displayName: '转办',
-		// 				enable: true,
-		// 			},
-		// 			4: {
-		// 				displayName: '委派',
-		// 				enable: true,
-		// 			},
-		// 			5: {
-		// 				displayName: '加签',
-		// 				enable: true,
-		// 			},
-		// 			6: {
-		// 				displayName: '退回',
-		// 				enable: true,
-		// 			},
-		// 		},
-		// 		signEnable: false,
-		// 		reasonRequire: false,
-		// 		nodeType: null,
-		// 	},
-		// 	processDefinition: {
-		// 		icon: null,
-		// 		description: '',
-		// 		type: null,
-		// 		formType: 10,
-		// 		formId: 40,
-		// 		formCustomCreatePath: '',
-		// 		formCustomViewPath: '',
-		// 		visible: true,
-		// 		startUserIds: [],
-		// 		startDeptIds: [],
-		// 		managerUserIds: [1],
-		// 		sort: 1766128949437,
-		// 		allowCancelRunningProcess: true,
-		// 		allowWithdrawTask: false,
-		// 		processIdRule: {
-		// 			enable: false,
-		// 			prefix: '',
-		// 			infix: '',
-		// 			postfix: '',
-		// 			length: 5,
-		// 		},
-		// 		autoApprovalType: 0,
-		// 		titleSetting: {
-		// 			enable: false,
-		// 			title: '',
-		// 		},
-		// 		summarySetting: {
-		// 			enable: false,
-		// 			summary: [],
-		// 		},
-		// 		processBeforeTriggerSetting: null,
-		// 		processAfterTriggerSetting: null,
-		// 		taskBeforeTriggerSetting: null,
-		// 		taskAfterTriggerSetting: null,
-		// 		printTemplateSetting: {
-		// 			enable: false,
-		// 			template: null,
-		// 		},
-		// 		id: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
-		// 		version: 4,
-		// 		name: '通用表单',
-		// 		key: 'common-form',
-		// 		category: 'OA',
-		// 		categoryName: null,
-		// 		modelType: 10,
-		// 		modelId: '7a191d73-dcab-11f0-b9e4-00ff3e31cab8',
-		// 		formConf:
-		// 			'{"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"right","size":"default","labelWidth":"100px"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":true,"innerText":"提交"}}',
-		// 		formFields: [
-		// 			'{"type":"datePicker","field":"Fb8fmjcjnevtb1c","title":"开始时间","info":"","$required":"请输入开始时间","_fc_id":"id_Fdnwmjcjnevtb2c","name":"ref_Fkr1mjcjnevtb3c","display":true,"hidden":false,"_fc_drag_tag":"datePicker"}',
-		// 			'{"type":"datePicker","field":"F8nhmjcjnzk1b4c","title":"结束时间","info":"","$required":"请输入结束时间","_fc_id":"id_F7pimjcjnzk1b5c","name":"ref_F8epmjcjnzk1b6c","display":true,"hidden":false,"_fc_drag_tag":"datePicker"}',
-		// 			'{"type":"select","field":"Fjtmmjcjcm5fakc","title":"请假类型","info":"","effect":{"fetch":""},"$required":"强选择请假类型","props":{"clearable":true,"filterable":false},"options":[{"label":"事假","value":"10"},{"label":"病假","value":"20"},{"label":"其他","value":"30"}],"_fc_id":"id_Fuelmjcjcm5falc","name":"ref_Fhnhmjcjcm5famc","display":true,"hidden":false,"_fc_drag_tag":"select"}',
-		// 			'{"type":"input","field":"F58dmjcjg2vfanc","title":"请假原因","info":"","$required":false,"props":{"type":"textarea"},"_fc_id":"id_Fl48mjcjg2vfaoc","name":"ref_Fghfmjcjg2vfapc","display":true,"hidden":false,"_fc_drag_tag":"textarea"}',
-		// 		],
-		// 		formName: null,
-		// 		suspensionState: 1,
-		// 		deploymentTime: null,
-		// 		bpmnXml:
-		// 			'<?xml version="1.0" encoding="UTF-8"?>\n<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/bpmn" id="diagram_common-form">\n  <process id="common-form" name="通用表单" isExecutable="true">\n    <startEvent id="Event_12qla9o">\n      <extensionElements>\n        <flowable:formData></flowable:formData>\n      </extensionElements>\n    </startEvent>\n    <userTask id="Activity_10dxbm6" name="部门领导审批">\n      <extensionElements>\n        <flowable:approveMethod><![CDATA[4]]></flowable:approveMethod>\n        <flowable:candidateStrategy><![CDATA[37]]></flowable:candidateStrategy>\n        <flowable:candidateParam><![CDATA[1]]></flowable:candidateParam>\n        <flowable:formData></flowable:formData>\n        <flowable:assignStartUserHandlerType><![CDATA[1]]></flowable:assignStartUserHandlerType>\n        <flowable:rejectHandlerType><![CDATA[1]]></flowable:rejectHandlerType>\n        <flowable:rejectReturnTaskId></flowable:rejectReturnTaskId>\n        <flowable:assignEmptyHandlerType><![CDATA[1]]></flowable:assignEmptyHandlerType>\n        <flowable:assignEmptyUserIds></flowable:assignEmptyUserIds>\n        <flowable:approveType><![CDATA[1]]></flowable:approveType>\n        <flowable:buttonsSetting id="1" enable="true" displayName="通过"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="2" enable="true" displayName="拒绝"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="3" enable="true" displayName="转办"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="4" enable="true" displayName="委派"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="5" enable="true" displayName="加签"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="6" enable="true" displayName="退回"></flowable:buttonsSetting>\n        <flowable:fieldsPermission field="Fb8fmjcjnevtb1c" title="开始时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F8nhmjcjnzk1b4c" title="结束时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="Fjtmmjcjcm5fakc" title="请假类型" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F58dmjcjg2vfanc" title="请假原因" permission="1"></flowable:fieldsPermission>\n        <flowable:signEnable><![CDATA[false]]></flowable:signEnable>\n        <flowable:reasonRequire><![CDATA[false]]></flowable:reasonRequire>\n      </extensionElements>\n      <multiInstanceLoopCharacteristics isSequential="true" flowable:collection="${coll_userList}">\n        <loopCardinality>1</loopCardinality>\n        <completionCondition>${ nrOfCompletedInstances &gt;= nrOfInstances }</completionCondition>\n      </multiInstanceLoopCharacteristics>\n    </userTask>\n    <sequenceFlow id="Flow_0n82iub" sourceRef="Event_12qla9o" targetRef="Activity_10dxbm6"></sequenceFlow>\n    <userTask id="Activity_0hq637b" name="HR审批">\n      <extensionElements>\n        <flowable:approveMethod><![CDATA[4]]></flowable:approveMethod>\n        <flowable:candidateStrategy><![CDATA[22]]></flowable:candidateStrategy>\n        <flowable:candidateParam><![CDATA[5]]></flowable:candidateParam>\n        <flowable:assignStartUserHandlerType><![CDATA[1]]></flowable:assignStartUserHandlerType>\n        <flowable:rejectHandlerType><![CDATA[1]]></flowable:rejectHandlerType>\n        <flowable:rejectReturnTaskId></flowable:rejectReturnTaskId>\n        <flowable:assignEmptyHandlerType><![CDATA[1]]></flowable:assignEmptyHandlerType>\n        <flowable:assignEmptyUserIds></flowable:assignEmptyUserIds>\n        <flowable:approveType><![CDATA[1]]></flowable:approveType>\n        <flowable:buttonsSetting id="1" enable="true" displayName="通过"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="2" enable="true" displayName="拒绝"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="3" enable="true" displayName="转办"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="4" enable="true" displayName="委派"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="5" enable="true" displayName="加签"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="6" enable="true" displayName="退回"></flowable:buttonsSetting>\n        <flowable:fieldsPermission field="Fb8fmjcjnevtb1c" title="开始时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F8nhmjcjnzk1b4c" title="结束时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="Fjtmmjcjcm5fakc" title="请假类型" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F58dmjcjg2vfanc" title="请假原因" permission="1"></flowable:fieldsPermission>\n        <flowable:signEnable><![CDATA[false]]></flowable:signEnable>\n        <flowable:reasonRequire><![CDATA[false]]></flowable:reasonRequire>\n        <flowable:formData></flowable:formData>\n      </extensionElements>\n      <multiInstanceLoopCharacteristics isSequential="true" flowable:collection="${coll_userList}">\n        <loopCardinality>1</loopCardinality>\n        <completionCondition>${ nrOfCompletedInstances &gt;= nrOfInstances }</completionCondition>\n      </multiInstanceLoopCharacteristics>\n    </userTask>\n    <sequenceFlow id="Flow_100ug1n" sourceRef="Activity_10dxbm6" targetRef="Activity_0hq637b"></sequenceFlow>\n    <endEvent id="Event_02u1iqv"></endEvent>\n    <sequenceFlow id="Flow_0wwr60y" sourceRef="Activity_0hq637b" targetRef="Event_02u1iqv"></sequenceFlow>\n  </process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_common-form">\n    <bpmndi:BPMNPlane bpmnElement="common-form" id="BPMNPlane_common-form">\n      <bpmndi:BPMNShape bpmnElement="Event_12qla9o" id="BPMNShape_Event_12qla9o">\n        <omgdc:Bounds height="36.0" width="36.0" x="302.0" y="212.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape bpmnElement="Activity_10dxbm6" id="BPMNShape_Activity_10dxbm6">\n        <omgdc:Bounds height="80.0" width="100.0" x="390.0" y="190.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape bpmnElement="Activity_0hq637b" id="BPMNShape_Activity_0hq637b">\n        <omgdc:Bounds height="80.0" width="100.0" x="550.0" y="190.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape bpmnElement="Event_02u1iqv" id="BPMNShape_Event_02u1iqv">\n        <omgdc:Bounds height="36.0" width="36.0" x="712.0" y="212.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge bpmnElement="Flow_0n82iub" id="BPMNEdge_Flow_0n82iub">\n        <omgdi:waypoint x="338.0" y="230.0"></omgdi:waypoint>\n        <omgdi:waypoint x="390.0" y="230.0"></omgdi:waypoint>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge bpmnElement="Flow_100ug1n" id="BPMNEdge_Flow_100ug1n">\n        <omgdi:waypoint x="490.0" y="230.0"></omgdi:waypoint>\n        <omgdi:waypoint x="550.0" y="230.0"></omgdi:waypoint>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge bpmnElement="Flow_0wwr60y" id="BPMNEdge_Flow_0wwr60y">\n        <omgdi:waypoint x="650.0" y="230.0"></omgdi:waypoint>\n        <omgdi:waypoint x="712.0" y="230.0"></omgdi:waypoint>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</definitions>',
-		// 		simpleModel: null,
-		// 	},
-		// 	processInstance: {
-		// 		id: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
-		// 		name: '通用表单',
-		// 		summary: null,
-		// 		category: null,
-		// 		categoryName: null,
-		// 		status: 1,
-		// 		startTime: 1766459446268,
-		// 		endTime: null,
-		// 		durationInMillis: null,
-		// 		formVariables: {
-		// 			F8nhmjcjnzk1b4c: '2025-12-24',
-		// 			PROCESS_START_USER_ID: 1,
-		// 			_FLOWABLE_SKIP_EXPRESSION_ENABLED: true,
-		// 			Fjtmmjcjcm5fakc: '10',
-		// 			Fb8fmjcjnevtb1c: '2025-12-23',
-		// 		},
-		// 		businessKey: null,
-		// 		startUser: {
-		// 			id: 1,
-		// 			nickname: '芋道源码',
-		// 			avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-		// 			deptId: 103,
-		// 			deptName: '研发部门',
-		// 		},
-		// 		processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
-		// 		processDefinition: null,
-		// 		tasks: null,
-		// 	},
-		// }
+		const res = await ProcessInstanceApi.getApprovalDetail(param)
+		const data = res.data
 		if (!data) {
 			message.error('查询不到审批详情信息！')
 			return
@@ -553,74 +303,12 @@ const getProcessModelView = async () => {
 			bpmnXml: '',
 		}
 	}
-	// const data = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
-	const data = {
-		processInstance: {
-			id: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
-			name: '通用表单',
-			summary: null,
-			category: null,
-			categoryName: null,
-			status: 1,
-			startTime: 1766459446268,
-			endTime: null,
-			durationInMillis: null,
-			formVariables: null,
-			businessKey: null,
-			startUser: {
-				id: 1,
-				nickname: '芋道源码',
-				avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-				deptId: 103,
-				deptName: '研发部门',
-			},
-			processDefinitionId: 'common-form:4:3493d8be-dcae-11f0-b9e4-00ff3e31cab8',
-			processDefinition: null,
-			tasks: null,
-		},
-		tasks: [
-			{
-				id: 'f9a75f43-dfac-11f0-bc4a-00ff3e31cab8',
-				name: '部门领导审批',
-				createTime: 1766459446395,
-				endTime: null,
-				durationInMillis: null,
-				status: 1,
-				reason: null,
-				ownerUser: null,
-				assigneeUser: {
-					id: 1,
-					nickname: '芋道源码',
-					avatar: 'http://test.yudao.iocoder.cn/20250921/avatar_1758423875594.png',
-					deptId: 103,
-					deptName: '研发部门',
-				},
-				taskDefinitionKey: 'Activity_10dxbm6',
-				processInstanceId: 'f98de4bd-dfac-11f0-bc4a-00ff3e31cab8',
-				processInstance: null,
-				parentTaskId: null,
-				children: null,
-				formId: null,
-				formName: null,
-				formConf: null,
-				formFields: null,
-				formVariables: null,
-				buttonsSetting: null,
-				signEnable: null,
-				reasonRequire: null,
-				nodeType: null,
-			},
-		],
-		bpmnXml:
-			'<?xml version="1.0" encoding="UTF-8"?>\n<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/bpmn" id="diagram_common-form">\n  <process id="common-form" name="通用表单" isExecutable="true">\n    <startEvent id="Event_12qla9o">\n      <extensionElements>\n        <flowable:formData></flowable:formData>\n      </extensionElements>\n    </startEvent>\n    <userTask id="Activity_10dxbm6" name="部门领导审批">\n      <extensionElements>\n        <flowable:approveMethod><![CDATA[4]]></flowable:approveMethod>\n        <flowable:candidateStrategy><![CDATA[37]]></flowable:candidateStrategy>\n        <flowable:candidateParam><![CDATA[1]]></flowable:candidateParam>\n        <flowable:formData></flowable:formData>\n        <flowable:assignStartUserHandlerType><![CDATA[1]]></flowable:assignStartUserHandlerType>\n        <flowable:rejectHandlerType><![CDATA[1]]></flowable:rejectHandlerType>\n        <flowable:rejectReturnTaskId></flowable:rejectReturnTaskId>\n        <flowable:assignEmptyHandlerType><![CDATA[1]]></flowable:assignEmptyHandlerType>\n        <flowable:assignEmptyUserIds></flowable:assignEmptyUserIds>\n        <flowable:approveType><![CDATA[1]]></flowable:approveType>\n        <flowable:buttonsSetting id="1" enable="true" displayName="通过"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="2" enable="true" displayName="拒绝"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="3" enable="true" displayName="转办"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="4" enable="true" displayName="委派"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="5" enable="true" displayName="加签"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="6" enable="true" displayName="退回"></flowable:buttonsSetting>\n        <flowable:fieldsPermission field="Fb8fmjcjnevtb1c" title="开始时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F8nhmjcjnzk1b4c" title="结束时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="Fjtmmjcjcm5fakc" title="请假类型" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F58dmjcjg2vfanc" title="请假原因" permission="1"></flowable:fieldsPermission>\n        <flowable:signEnable><![CDATA[false]]></flowable:signEnable>\n        <flowable:reasonRequire><![CDATA[false]]></flowable:reasonRequire>\n      </extensionElements>\n      <multiInstanceLoopCharacteristics isSequential="true" flowable:collection="${coll_userList}">\n        <loopCardinality>1</loopCardinality>\n        <completionCondition>${ nrOfCompletedInstances &gt;= nrOfInstances }</completionCondition>\n      </multiInstanceLoopCharacteristics>\n    </userTask>\n    <sequenceFlow id="Flow_0n82iub" sourceRef="Event_12qla9o" targetRef="Activity_10dxbm6"></sequenceFlow>\n    <userTask id="Activity_0hq637b" name="HR审批">\n      <extensionElements>\n        <flowable:approveMethod><![CDATA[4]]></flowable:approveMethod>\n        <flowable:candidateStrategy><![CDATA[22]]></flowable:candidateStrategy>\n        <flowable:candidateParam><![CDATA[5]]></flowable:candidateParam>\n        <flowable:assignStartUserHandlerType><![CDATA[1]]></flowable:assignStartUserHandlerType>\n        <flowable:rejectHandlerType><![CDATA[1]]></flowable:rejectHandlerType>\n        <flowable:rejectReturnTaskId></flowable:rejectReturnTaskId>\n        <flowable:assignEmptyHandlerType><![CDATA[1]]></flowable:assignEmptyHandlerType>\n        <flowable:assignEmptyUserIds></flowable:assignEmptyUserIds>\n        <flowable:approveType><![CDATA[1]]></flowable:approveType>\n        <flowable:buttonsSetting id="1" enable="true" displayName="通过"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="2" enable="true" displayName="拒绝"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="3" enable="true" displayName="转办"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="4" enable="true" displayName="委派"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="5" enable="true" displayName="加签"></flowable:buttonsSetting>\n        <flowable:buttonsSetting id="6" enable="true" displayName="退回"></flowable:buttonsSetting>\n        <flowable:fieldsPermission field="Fb8fmjcjnevtb1c" title="开始时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F8nhmjcjnzk1b4c" title="结束时间" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="Fjtmmjcjcm5fakc" title="请假类型" permission="1"></flowable:fieldsPermission>\n        <flowable:fieldsPermission field="F58dmjcjg2vfanc" title="请假原因" permission="1"></flowable:fieldsPermission>\n        <flowable:signEnable><![CDATA[false]]></flowable:signEnable>\n        <flowable:reasonRequire><![CDATA[false]]></flowable:reasonRequire>\n        <flowable:formData></flowable:formData>\n      </extensionElements>\n      <multiInstanceLoopCharacteristics isSequential="true" flowable:collection="${coll_userList}">\n        <loopCardinality>1</loopCardinality>\n        <completionCondition>${ nrOfCompletedInstances &gt;= nrOfInstances }</completionCondition>\n      </multiInstanceLoopCharacteristics>\n    </userTask>\n    <sequenceFlow id="Flow_100ug1n" sourceRef="Activity_10dxbm6" targetRef="Activity_0hq637b"></sequenceFlow>\n    <endEvent id="Event_02u1iqv"></endEvent>\n    <sequenceFlow id="Flow_0wwr60y" sourceRef="Activity_0hq637b" targetRef="Event_02u1iqv"></sequenceFlow>\n  </process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_common-form">\n    <bpmndi:BPMNPlane bpmnElement="common-form" id="BPMNPlane_common-form">\n      <bpmndi:BPMNShape bpmnElement="Event_12qla9o" id="BPMNShape_Event_12qla9o">\n        <omgdc:Bounds height="36.0" width="36.0" x="302.0" y="212.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape bpmnElement="Activity_10dxbm6" id="BPMNShape_Activity_10dxbm6">\n        <omgdc:Bounds height="80.0" width="100.0" x="390.0" y="190.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape bpmnElement="Activity_0hq637b" id="BPMNShape_Activity_0hq637b">\n        <omgdc:Bounds height="80.0" width="100.0" x="550.0" y="190.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape bpmnElement="Event_02u1iqv" id="BPMNShape_Event_02u1iqv">\n        <omgdc:Bounds height="36.0" width="36.0" x="712.0" y="212.0"></omgdc:Bounds>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge bpmnElement="Flow_0n82iub" id="BPMNEdge_Flow_0n82iub">\n        <omgdi:waypoint x="338.0" y="230.0"></omgdi:waypoint>\n        <omgdi:waypoint x="390.0" y="230.0"></omgdi:waypoint>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge bpmnElement="Flow_100ug1n" id="BPMNEdge_Flow_100ug1n">\n        <omgdi:waypoint x="490.0" y="230.0"></omgdi:waypoint>\n        <omgdi:waypoint x="550.0" y="230.0"></omgdi:waypoint>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge bpmnElement="Flow_0wwr60y" id="BPMNEdge_Flow_0wwr60y">\n        <omgdi:waypoint x="650.0" y="230.0"></omgdi:waypoint>\n        <omgdi:waypoint x="712.0" y="230.0"></omgdi:waypoint>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</definitions>',
-		simpleModel: null,
-		unfinishedTaskActivityIds: ['Activity_10dxbm6'],
-		finishedTaskActivityIds: ['Event_12qla9o'],
-		finishedSequenceFlowActivityIds: ['Flow_0n82iub'],
-		rejectedTaskActivityIds: [],
-	}
+	const res = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
+	const data = res.data
+
 	if (data) {
 		processModelView.value = data
+		console.log('processModelView.value111111111111', processModelView.value)
 	}
 }
 

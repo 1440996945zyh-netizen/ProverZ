@@ -94,6 +94,7 @@ const router = useRouter()
 // import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 import BpmProcessDefinitionApi from '@/api/system/bpm/definition'
+import { componentSizeMap } from 'element-plus'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const visibleDialog = ref(true)
@@ -159,6 +160,7 @@ const initProcessInfo = async (row, formVariables) => {
 		// 加载流程图
 		const res = await BpmProcessDefinitionApi.getProcessDefinition(row.id)
 		const processDefinitionDetail = res.data
+
 		if (processDefinitionDetail) {
 			bpmnXML.value = processDefinitionDetail.bpmnXml
 			simpleJson.value = processDefinitionDetail.simpleModel
