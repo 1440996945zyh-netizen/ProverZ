@@ -473,7 +473,7 @@ const handleDeploy = async () => {
 		await ModelApi.deployModel(formData.value.id)
 		message.success('发布成功')
 		// 返回列表页
-		await router.push({ name: 'BpmModel' })
+		await router.push({ path: '/bpmModel/processManagement' })
 	} catch (error) {
 		console.error('发布失败:', error)
 		message.warning(error.message || '发布失败')

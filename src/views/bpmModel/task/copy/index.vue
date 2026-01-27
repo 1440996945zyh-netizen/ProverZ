@@ -244,16 +244,16 @@ const resetQuery = () => {
  * 处理详情按钮
  */
 const handleAudit = row => {
-	const query = {
+	const params = {
 		id: row.processInstanceId,
 		activityId: undefined,
 	}
 	if (row.activityId) {
-		query.activityId = row.activityId
+		params.activityId = row.activityId
 	}
 	router.push({
 		name: 'BpmProcessInstanceDetail',
-		query: query,
+		params: params,
 	})
 }
 

@@ -15,8 +15,8 @@ import 'vxe-table/es/style.css'
 
 // ==================== 样式文件导入 ====================
 import '@/assets/styles/index.scss' // 全局样式
-import "./assets/styles/hiprint.css"
-import "./assets/styles/print-lock.css"
+import './assets/styles/hiprint.css'
+import './assets/styles/print-lock.css'
 import './assets/newIconFonts/iconfont.css'
 import './assets/home_icon/font_icon/iconfont.css'
 import './assets/home_icon/iconfont.css'
@@ -41,9 +41,19 @@ import { download } from '@/utils/auth/request'
 import request from '@/utils/auth/request'
 import { ElMessage } from 'element-plus'
 import {
-  useDict, deepClone, clearObjectValues, flattenToTree, setEditTableOptions, 
-  formatDate, addDateRange, selectDictLabel, selectDictLabels, getRules, 
-  resetForm, setFormData, filterInput
+	useDict,
+	deepClone,
+	clearObjectValues,
+	flattenToTree,
+	setEditTableOptions,
+	formatDate,
+	addDateRange,
+	selectDictLabel,
+	selectDictLabels,
+	getRules,
+	resetForm,
+	setFormData,
+	filterInput,
 } from '@/utils'
 import $bus from '@/utils/bus.js'
 
@@ -101,7 +111,7 @@ app.use(setupFormCreate)
 app.use(print)
 // ==================== Element Plus图标全局注册 ====================
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-    app.component(key, component)
+	app.component(key, component)
 }
 
 // ==================== 自定义指令注册 ====================
@@ -109,8 +119,8 @@ directive(app)
 
 // ==================== UI框架配置 ====================
 app.use(ElementPlus, {
-  locale: locale,
-  size: Cookies.get('size') || 'default',
+	locale: locale,
+	size: Cookies.get('size') || 'default',
 })
 app.use(VxeUIAll)
 app.use(VxeUITable)
@@ -119,13 +129,13 @@ app.use(VxeUITable)
 Number.prototype._toFixed = Number.prototype.toFixed
 
 Number.prototype.toFixed = function (n) {
-  if (n === undefined || n < 0 || n > 20) {
-    return this._toFixed(n)
-  }
-  const num = this.valueOf()
-  const power = 10 ** (n + 1)
-  let rounded = ((num * power + 0.1) / power)
-  return rounded._toFixed(n)
+	if (n === undefined || n < 0 || n > 20) {
+		return this._toFixed(n)
+	}
+	const num = this.valueOf()
+	const power = 10 ** (n + 1)
+	let rounded = (num * power + 0.1) / power
+	return rounded._toFixed(n)
 }
 
 // ==================== 应用挂载 ====================

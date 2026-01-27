@@ -236,9 +236,9 @@ const dateFormatter = cellValue => {
 const getList = async () => {
 	loading.value = true
 	try {
-		const data = await getTaskTodoPage(queryParams)
-		tableData.value = data.list
-		total.value = data.total
+		const res = await getTaskTodoPage(queryParams)
+		tableData.value = res.data.pages
+		total.value = res.data.total
 	} catch (error) {
 		console.error('获取待办任务列表失败:', error)
 		ElMessage.error('获取列表失败')
@@ -290,7 +290,7 @@ const toggleAdvancedFilter = () => {
 const handleAudit = row => {
 	router.push({
 		name: 'BpmProcessInstanceDetail',
-		query: {
+		params: {
 			id: row.processInstance.id,
 			taskId: row.id,
 		},

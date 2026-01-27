@@ -101,7 +101,7 @@ const buttonList = reactive([])
  */
 const tableColumns = ref([
 	{
-		label: '流程名称',
+		label: '流程名称1',
 		prop: 'processInstance.name',
 		minWidth: 200,
 		fixed: 'left',
@@ -110,7 +110,7 @@ const tableColumns = ref([
 
 	{
 		label: '流程发起人',
-		prop: 'startUser.nickname',
+		prop: 'processInstance.startUser.userName',
 		width: 120,
 		align: 'center',
 	},
@@ -150,7 +150,7 @@ const tableColumns = ref([
 	},
 	{
 		label: '审批人',
-		prop: 'assigneeUser.nickname',
+		prop: 'assigneeUser.userName',
 		width: 120,
 		align: 'center',
 	},
@@ -256,7 +256,7 @@ const getList = async (params = queryParams.value) => {
 const handleAudit = row => {
 	router.push({
 		name: 'BpmProcessInstanceDetail',
-		query: {
+		params: {
 			id: row.processInstance.id,
 		},
 	})

@@ -127,13 +127,13 @@ export const constantRoutes = [
 		name: 'bpmModel',
 		children: [
 			{
-				path: 'bpmModel/processManagement/CreateProcess',
+				path: 'processManagement/CreateProcess',
 				component: () => import('@/views/bpmModel/processManagement/components/CreateProcess.vue'),
 				name: 'CreateProcess',
 				meta: { title: '创建流程', icon: '' },
 			},
 			{
-				path: 'bpmModel/formdesigner/editor',
+				path: 'formdesigner/editor',
 				component: () => import('@/views/bpmModel/formdesigner/editor/index.vue'),
 				name: 'BpmFormEditor',
 				meta: {
@@ -141,7 +141,7 @@ export const constantRoutes = [
 				},
 			},
 			{
-				path: 'bpmModel/processManagement/definition',
+				path: 'processManagement/definition',
 				component: () => import('@/views/bpmModel/processManagement/definition/index.vue'),
 				name: 'BpmProcessDefinition',
 				meta: {
@@ -149,7 +149,7 @@ export const constantRoutes = [
 				},
 			},
 			{
-				path: 'bpmModel/processInstance/manager',
+				path: 'processInstance/manager',
 				component: () => import('@/views/bpmModel/processInstance/manager/index.vue'),
 				name: 'BpmProcessInstance',
 				meta: {
@@ -157,7 +157,7 @@ export const constantRoutes = [
 				},
 			},
 			{
-				path: 'bpmModel/processInstance/detail',
+				path: 'processInstance/detail/:id',
 				component: () => import('@/views/bpmModel/processInstance/detail/index.vue'),
 				name: 'BpmProcessInstanceDetail',
 				meta: { title: '流程实例详情', icon: '' },

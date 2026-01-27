@@ -116,7 +116,7 @@ export const getFormFieldsPermission = async params => {
 // 获取流程实例的 BPMN 模型视图
 export const getProcessInstanceBpmnModelView = async id => {
 	return request({
-		url: processInstanceApi + 'get-bpmn-model-view?id=' + id,
+		url: processInstanceApi + 'getBpmnModelView?id=' + id,
 		method: 'get',
 	})
 }

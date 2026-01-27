@@ -154,7 +154,8 @@ import { BpmModelType, BpmModelFormType, BPM_PROCESS_INSTANCE_STATUS, TaskStatus
 import { setConfAndFields2 } from '@/utils/bpm/formCreate'
 // import { registerComponent } from '@/utils/routerHelper'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
-// import * as UserApi from '@/api/system/user'
+import { useRoute } from 'vue-router'
+import UserApi from '@/api/system/user'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
@@ -169,7 +170,8 @@ import PrintDialog from './PrintDialog.vue'
 import { useMessage } from '@/plugins/useMessage'
 import dictTag from '@/components/dictTag'
 defineOptions({ name: 'BpmProcessInstanceDetail' })
-
+import { watch } from 'vue'
+const route = useRoute()
 // 定义props
 const props = defineProps(['id', 'taskId', 'activityId'])
 
@@ -205,6 +207,8 @@ const detailForm = ref({
 // 表单可以编辑的字段
 const writableFields = ref([])
 
+const processInstanceId = route.params.id // 详情id
+
 /** 获得详情 */
 const getDetail = () => {
 	console.log('getDetail')
@@ -213,7 +217,6 @@ const getDetail = () => {
 	// 获得流程模型视图
 	getProcessModelView()
 }
-
 // 加载流程实例（异步组件）
 const BusinessFormComponent = ref(null)
 /** 获取审批详情 */
@@ -224,9 +227,10 @@ const activityNodes = ref([])
  */
 const getApprovalDetail = async () => {
 	processInstanceLoading.value = true
+	console.log('getApprovalDetail1111111', props)
 	try {
 		const param = {
-			processInstanceId: props.id,
+			processInstanceId,
 			activityId: props.activityId,
 			taskId: props.taskId,
 		}
@@ -303,7 +307,7 @@ const getProcessModelView = async () => {
 			bpmnXml: '',
 		}
 	}
-	const res = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
+	const res = await ProcessInstanceApi.getProcessInstanceBpmnModelView(processInstanceId)
 	const data = res.data
 
 	if (data) {
@@ -336,9 +340,9 @@ const refresh = () => {
 /** 处理打印 */
 const printRef = ref(null)
 const handlePrint = async () => {
-	printRef.value.open(props.id)
+	printRef.value.open(processInstanceId)
 }
-console.log('props.id =>', props.id)
+console.log('processInstanceId =>', processInstanceId)
 /** 当前的 Tab */
 const activeTab = ref('form')
 
@@ -348,81 +352,7 @@ const userOptions = ref([])
 onMounted(async () => {
 	getDetail()
 	// 获得用户列表
-	// userOptions.value = await UserApi.getSimpleUserList()
-	userOptions.value = [
-		{
-			id: 1,
-			nickname: '芋道源码',
-			deptId: 103,
-			deptName: '研发部门',
-		},
-		{
-			id: 100,
-			nickname: '芋道',
-			deptId: 104,
-			deptName: '市场部门',
-		},
-		{
-			id: 103,
-			nickname: '源码',
-			deptId: 106,
-			deptName: '财务部门',
-		},
-		{
-			id: 104,
-			nickname: '测试号',
-			deptId: 107,
-			deptName: '运维部门',
-		},
-		{
-			id: 112,
-			nickname: '新对象',
-			deptId: 100,
-			deptName: '芋道源码',
-		},
-		{
-			id: 114,
-			nickname: 'hr 小姐姐',
-			deptId: null,
-			deptName: null,
-		},
-		{
-			id: 115,
-			nickname: '阿呆',
-			deptId: 102,
-			deptName: '长沙分公司',
-		},
-		{
-			id: 117,
-			nickname: '测试号02',
-			deptId: 100,
-			deptName: '芋道源码',
-		},
-		{
-			id: 118,
-			nickname: '狗蛋',
-			deptId: 103,
-			deptName: '研发部门',
-		},
-		{
-			id: 139,
-			nickname: '小秃头',
-			deptId: null,
-			deptName: null,
-		},
-		{
-			id: 141,
-			nickname: '新用户',
-			deptId: null,
-			deptName: null,
-		},
-		{
-			id: 142,
-			nickname: 'test01',
-			deptId: null,
-			deptName: null,
-		},
-	]
+	userOptions.value = await UserApi.getListNoPage()
 })
 </script>
 

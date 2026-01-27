@@ -379,7 +379,7 @@ const toggleAdvancedFilter = () => {
 const handleAudit = row => {
 	router.push({
 		name: 'BpmProcessInstanceDetail',
-		query: {
+		params: {
 			id: row.processInstance.id,
 			taskId: row.id,
 		},

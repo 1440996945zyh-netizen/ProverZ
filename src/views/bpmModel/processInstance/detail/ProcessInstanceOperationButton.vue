@@ -146,8 +146,8 @@
 				<div
 					@click="openPopover('copy')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Paperclip /></el-icon>
 					&nbsp;
@@ -196,8 +196,8 @@
 				<div
 					@click="openPopover('transfer')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Share /></el-icon>
 					&nbsp;
@@ -246,8 +246,8 @@
 				<div
 					@click="openPopover('delegate')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><User /></el-icon>
 					&nbsp;
@@ -296,8 +296,8 @@
 				<div
 					@click="openPopover('addSign')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Plus /></el-icon>
 					&nbsp;
@@ -349,8 +349,8 @@
 				<div
 					@click="openPopover('deleteSign')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Minus /></el-icon>
 					&nbsp; 减签
@@ -401,8 +401,8 @@
 				<div
 					@click="openPopover('return')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Back /></el-icon>
 					&nbsp;
@@ -456,8 +456,8 @@
 				<div
 					@click="openPopover('cancel')"
 					style="cursor: pointer; border-radius: 12px; padding: 6px"
-					onmouseover="this.style.backgroundColor='#f5f5f5'"
-					onmouseout="this.style.backgroundColor='transparent'"
+					onmouseover="this.style.backgroundColor = '#f5f5f5'"
+					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Reply /></el-icon>
 					&nbsp; 取消
@@ -490,8 +490,8 @@
 		<div
 			@click="handleReCreate()"
 			style="cursor: pointer; border-radius: 12px; padding: 6px"
-			onmouseover="this.style.backgroundColor='#f5f5f5'"
-			onmouseout="this.style.backgroundColor='transparent'"
+			onmouseover="this.style.backgroundColor = '#f5f5f5'"
+			onmouseout="this.style.backgroundColor = 'transparent'"
 			v-if="
 				userId === processInstance?.startUser?.id &&
 				isEndProcessStatus(processInstance?.status) &&
@@ -516,22 +516,22 @@ import * as TaskApi from '@/api/system/bpm/task'
 // import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 // import * as UserApi from '@/api/system/user'
 import {
-  NodeType,
-  OPERATION_BUTTON_NAME,
-  OperationButtonType,
-  CandidateStrategy
+	NodeType,
+	OPERATION_BUTTON_NAME,
+	OperationButtonType,
+	CandidateStrategy,
 } from '@/components/bpmnProcessDesigner/package/penal/consts'
 import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/bpm/constantEnumeration'
 import SignDialog from './SignDialog.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import { isEmpty } from '@/utils/common/form-validation'
-import useUserStore from '@/store/modules/user';
+import useUserStore from '@/store/modules/user'
 import { useMessage } from '@/plugins/useMessage'
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
-const route = useRoute();
-const router = useRouter();
-   const userStore = useUserStore();
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
 const message = useMessage() // 消息弹窗
 
 const userId = userStore.userId // 当前登录的编号
@@ -539,43 +539,43 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 
 // 定义props，移除TS类型注解
 const props = defineProps({
-  processInstance: {
-    type: Object,
-    required: true // 流程实例信息
-  },
-  processDefinition: {
-    type: Object,
-    required: true // 流程定义信息
-  },
-  userOptions: {
-    type: Array,
-    required: true // 用户列表
-  },
-  normalForm: {
-    type: Object,
-    required: true // 流程表单 formCreate
-  },
-  normalFormApi: {
-    type: Object,
-    required: true // 流程表单 formCreate Api
-  },
-  writableFields: {
-    type: Array,
-    required: true // 流程表单可以编辑的字段
-  }
+	processInstance: {
+		type: Object,
+		required: true, // 流程实例信息
+	},
+	processDefinition: {
+		type: Object,
+		required: true, // 流程定义信息
+	},
+	userOptions: {
+		type: Array,
+		required: true, // 用户列表
+	},
+	normalForm: {
+		type: Object,
+		required: true, // 流程表单 formCreate
+	},
+	normalFormApi: {
+		type: Object,
+		required: true, // 流程表单 formCreate Api
+	},
+	writableFields: {
+		type: Array,
+		required: true, // 流程表单可以编辑的字段
+	},
 })
 
 const formLoading = ref(false) // 表单加载中
 const popOverVisible = ref({
-  approve: false,
-  reject: false,
-  transfer: false,
-  delegate: false,
-  addSign: false,
-  return: false,
-  copy: false,
-  cancel: false,
-  deleteSign: false
+	approve: false,
+	reject: false,
+	transfer: false,
+	delegate: false,
+	addSign: false,
+	return: false,
+	copy: false,
+	cancel: false,
+	deleteSign: false,
 }) // 气泡卡是否展示
 const returnList = ref([]) // 退回节点
 
@@ -593,544 +593,538 @@ const approveSignFormRef = ref(null)
 const nextAssigneesActivityNode = ref([]) // 下一个审批节点信息
 const nextAssigneesTimelineRef = ref(null) // 下一个节点审批人时间线组件的引用
 const approveReasonForm = reactive({
-  reason: '',
-  signPicUrl: '',
-  nextAssignees: {}
+	reason: '',
+	signPicUrl: '',
+	nextAssignees: {},
 })
 const approveReasonRule = computed(() => {
-  return {
-    reason: [
-      { required: reasonRequire.value, message: nodeTypeName.value + '意见不能为空', trigger: 'blur' }
-    ],
-    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
-    nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
-  }
+	return {
+		reason: [{ required: reasonRequire.value, message: nodeTypeName.value + '意见不能为空', trigger: 'blur' }],
+		signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
+		nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }],
+	}
 })
 
 // 拒绝表单
 const rejectFormRef = ref(null)
 const rejectReasonForm = reactive({
-  reason: ''
+	reason: '',
 })
 const rejectReasonRule = computed(() => {
-  return {
-    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }]
-  }
+	return {
+		reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }],
+	}
 })
 
 // 抄送表单
 const copyFormRef = ref(null)
 const copyForm = reactive({
-  copyUserIds: [],
-  copyReason: ''
+	copyUserIds: [],
+	copyReason: '',
 })
 const copyFormRule = reactive({
-  copyUserIds: [{ required: true, message: '抄送人不能为空', trigger: 'change' }]
+	copyUserIds: [{ required: true, message: '抄送人不能为空', trigger: 'change' }],
 })
 
 // 转办表单
 const transferFormRef = ref(null)
 const transferForm = reactive({
-  assigneeUserId: undefined,
-  reason: ''
+	assigneeUserId: undefined,
+	reason: '',
 })
 const transferFormRule = reactive({
-  assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+	assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
+	reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
 })
 
 // 委派表单
 const delegateFormRef = ref(null)
 const delegateForm = reactive({
-  delegateUserId: undefined,
-  reason: ''
+	delegateUserId: undefined,
+	reason: '',
 })
 const delegateFormRule = reactive({
-  delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+	delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
+	reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
 })
 
 // 加签表单
 const addSignFormRef = ref(null)
 const addSignForm = reactive({
-  addSignUserIds: undefined,
-  reason: ''
+	addSignUserIds: undefined,
+	reason: '',
 })
 const addSignFormRule = reactive({
-  addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+	addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
+	reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
 })
 
 // 减签表单
 const deleteSignFormRef = ref(null)
 const deleteSignForm = reactive({
-  deleteSignTaskId: undefined,
-  reason: ''
+	deleteSignTaskId: undefined,
+	reason: '',
 })
 const deleteSignFormRule = reactive({
-  deleteSignTaskId: [{ required: true, message: '减签人员不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+	deleteSignTaskId: [{ required: true, message: '减签人员不能为空', trigger: 'change' }],
+	reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
 })
 
 // 退回表单
 const returnFormRef = ref(null)
 const returnForm = reactive({
-  targetTaskDefinitionKey: undefined,
-  returnReason: ''
+	targetTaskDefinitionKey: undefined,
+	returnReason: '',
 })
 const returnFormRule = reactive({
-  targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }],
-  returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }]
+	targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }],
+	returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }],
 })
 
 // 取消表单
 const cancelFormRef = ref(null)
 const cancelForm = reactive({
-  cancelReason: ''
+	cancelReason: '',
 })
 const cancelFormRule = reactive({
-  cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }]
+	cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }],
 })
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
 watch(
-  () => approveFormFApi.value,
-  (val) => {
-    val?.btn?.show(false)
-    val?.resetBtn?.show(false)
-  },
-  {
-    deep: true
-  }
+	() => approveFormFApi.value,
+	val => {
+		val?.btn?.show(false)
+		val?.resetBtn?.show(false)
+	},
+	{
+		deep: true,
+	},
 )
 
 /** 弹出气泡卡 */
-const openPopover = async (type) => {
-  if (popOverVisible.value[type] === true) return
-  if (type === 'approve') {
-    // 校验流程表单
-    const valid = await validateNormalForm()
-    if (!valid) {
-      message.warning('表单校验不通过，请先完善表单!!')
-      return
-    }
-    initNextAssigneesFormField()
-  }
-  if (type === 'return') {
-    // 获取退回节点
-    returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
-    if (returnList.value.length === 0) {
-      message.warning('当前没有可退回的节点')
-      return
-    }
-  }
-  Object.keys(popOverVisible.value).forEach((item) => {
-    popOverVisible.value[item] = item === type
-  })
+const openPopover = async type => {
+	if (popOverVisible.value[type] === true) return
+	if (type === 'approve') {
+		// 校验流程表单
+		const valid = await validateNormalForm()
+		if (!valid) {
+			message.warning('表单校验不通过，请先完善表单!!')
+			return
+		}
+		initNextAssigneesFormField()
+	}
+	if (type === 'return') {
+		// 获取退回节点
+		returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
+		if (returnList.value.length === 0) {
+			message.warning('当前没有可退回的节点')
+			return
+		}
+	}
+	Object.keys(popOverVisible.value).forEach(item => {
+		popOverVisible.value[item] = item === type
+	})
 }
 
 /** 关闭气泡卡 */
 const closePopover = (type, formRef) => {
-  if (formRef) {
-    formRef.resetFields()
-  }
-  popOverVisible.value[type] = false
-  nextAssigneesActivityNode.value = []
-  // 清理 Timeline 组件中的自定义审批人数据
-  if (nextAssigneesTimelineRef.value) {
-    nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
-  }
+	if (formRef) {
+		formRef.resetFields()
+	}
+	popOverVisible.value[type] = false
+	nextAssigneesActivityNode.value = []
+	// 清理 Timeline 组件中的自定义审批人数据
+	if (nextAssigneesTimelineRef.value) {
+		nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
+	}
 }
 
 /** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
 const initNextAssigneesFormField = async () => {
-  // 获取修改的流程变量, 暂时只支持流程表单
-  const variables = getUpdatedProcessInstanceVariables()
-  const data = []
-  // const data = await ProcessInstanceApi.getNextApprovalNodes({
-  //   processInstanceId: props.processInstance.id,
-  //   taskId: runningTask.value.id,
-  //   processVariablesStr: JSON.stringify(variables)
-  // })
-  if (data && data.length > 0) {
-    const customApproveUsersData = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
-    data.forEach((node) => {
-      if (
-        // 情况一：当前节点没有审批人，并且是发起人自选
-        (isEmpty(node.tasks) &&
-          isEmpty(node.candidateUsers) &&
-          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
-        // 情况二：当前节点是审批人自选
-        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
-      ) {
-        nextAssigneesActivityNode.value.push(node)
-      }
+	// 获取修改的流程变量, 暂时只支持流程表单
+	const variables = getUpdatedProcessInstanceVariables()
+	const data = []
+	// const data = await ProcessInstanceApi.getNextApprovalNodes({
+	//   processInstanceId: props.processInstance.id,
+	//   taskId: runningTask.value.id,
+	//   processVariablesStr: JSON.stringify(variables)
+	// })
+	if (data && data.length > 0) {
+		const customApproveUsersData = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
+		data.forEach(node => {
+			if (
+				// 情况一：当前节点没有审批人，并且是发起人自选
+				(isEmpty(node.tasks) && isEmpty(node.candidateUsers) && CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
+				// 情况二：当前节点是审批人自选
+				CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
+			) {
+				nextAssigneesActivityNode.value.push(node)
+			}
 
-      // 如果节点有 candidateUsers，设置到 customApproveUsers 中
-      if (node.candidateUsers && node.candidateUsers.length > 0) {
-        customApproveUsersData[node.id] = node.candidateUsers
-      }
-    })
+			// 如果节点有 candidateUsers，设置到 customApproveUsers 中
+			if (node.candidateUsers && node.candidateUsers.length > 0) {
+				customApproveUsersData[node.id] = node.candidateUsers
+			}
+		})
 
-    // 将 candidateUsers 设置到 Timeline 组件中
-    await nextTick() // 等待下一个 tick，确保 Timeline 组件已经渲染
-    if (nextAssigneesTimelineRef.value && Object.keys(customApproveUsersData).length > 0) {
-      nextAssigneesTimelineRef.value.batchSetCustomApproveUsers(customApproveUsersData)
-    }
-  }
+		// 将 candidateUsers 设置到 Timeline 组件中
+		await nextTick() // 等待下一个 tick，确保 Timeline 组件已经渲染
+		if (nextAssigneesTimelineRef.value && Object.keys(customApproveUsersData).length > 0) {
+			nextAssigneesTimelineRef.value.batchSetCustomApproveUsers(customApproveUsersData)
+		}
+	}
 }
 
 /** 选择下一个节点的审批人 */
 const selectNextAssigneesConfirm = (id, userList) => {
-  approveReasonForm.nextAssignees[id] = userList?.map((item) => item.id)
+	approveReasonForm.nextAssignees[id] = userList?.map(item => item.id)
 }
 /** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
 const validateNextAssignees = () => {
-  if (Object.keys(nextAssigneesActivityNode.value).length === 0) {
-    return true
-  }
-  // 如果需要自选审批人，则校验每个节点是否都已配置审批人
-  for (const item of nextAssigneesActivityNode.value) {
-    if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
-      message.warning('下一个节点的审批人不能为空!')
-      return false
-    }
-  }
-  return true
+	if (Object.keys(nextAssigneesActivityNode.value).length === 0) {
+		return true
+	}
+	// 如果需要自选审批人，则校验每个节点是否都已配置审批人
+	for (const item of nextAssigneesActivityNode.value) {
+		if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+			message.warning('下一个节点的审批人不能为空!')
+			return false
+		}
+	}
+	return true
 }
 
 /** 处理审批通过和不通过的操作 */
 const handleAudit = async (pass, formRef) => {
-  formLoading.value = true
-  try {
-    // 校验表单
-    if (!formRef) return
-    await formRef.validate()
-    // 校验流程表单必填字段
-    const valid = await validateNormalForm()
-    if (!valid) {
-      message.warning('表单校验不通过，请先完善表单!!')
-      return
-    }
+	formLoading.value = true
+	try {
+		// 校验表单
+		if (!formRef) return
+		await formRef.validate()
+		// 校验流程表单必填字段
+		const valid = await validateNormalForm()
+		if (!valid) {
+			message.warning('表单校验不通过，请先完善表单!!')
+			return
+		}
 
-    if (pass) {
-      const nextAssigneesValid = validateNextAssignees()
-      if (!nextAssigneesValid) return
-      const variables = getUpdatedProcessInstanceVariables()
-      // 审批通过数据
-      const data = {
-        id: runningTask.value.id,
-        reason: approveReasonForm.reason,
-        variables, // 审批通过, 把修改的字段值赋于流程实例变量
-        nextAssignees: approveReasonForm.nextAssignees // 下个自选节点选择的审批人信息
-      }
-      // 签名
-      if (runningTask.value.signEnable) {
-        data.signPicUrl = approveReasonForm.signPicUrl
-      }
-      // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
-      // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
-      const formCreateApi = approveFormFApi.value
-      if (Object.keys(formCreateApi)?.length > 0) {
-        await formCreateApi.validate()
-        data.variables = approveForm.value.value
-      }
-      await TaskApi.approveTask(data)
-      popOverVisible.value.approve = false
-      nextAssigneesActivityNode.value = []
-      // 清理 Timeline 组件中的自定义审批人数据
-      if (nextAssigneesTimelineRef.value) {
-        nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
-      }
-      message.success('审批通过成功')
-    } else {
-      // 审批不通过数据
-      const data = {
-        id: runningTask.value.id,
-        reason: rejectReasonForm.reason
-      }
-      await TaskApi.rejectTask(data)
-      popOverVisible.value.reject = false
-      message.success('审批不通过成功')
-    }
-    // 重置表单
-    formRef.resetFields()
-    // 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+		if (pass) {
+			const nextAssigneesValid = validateNextAssignees()
+			if (!nextAssigneesValid) return
+			const variables = getUpdatedProcessInstanceVariables()
+			// 审批通过数据
+			const data = {
+				id: runningTask.value.id,
+				reason: approveReasonForm.reason,
+				variables, // 审批通过, 把修改的字段值赋于流程实例变量
+				nextAssignees: approveReasonForm.nextAssignees, // 下个自选节点选择的审批人信息
+			}
+			// 签名
+			if (runningTask.value.signEnable) {
+				data.signPicUrl = approveReasonForm.signPicUrl
+			}
+			// 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
+			// TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
+			const formCreateApi = approveFormFApi.value
+			if (Object.keys(formCreateApi)?.length > 0) {
+				await formCreateApi.validate()
+				data.variables = approveForm.value.value
+			}
+			await TaskApi.approveTask(data)
+			popOverVisible.value.approve = false
+			nextAssigneesActivityNode.value = []
+			// 清理 Timeline 组件中的自定义审批人数据
+			if (nextAssigneesTimelineRef.value) {
+				nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
+			}
+			message.success('审批通过成功')
+		} else {
+			// 审批不通过数据
+			const data = {
+				id: runningTask.value.id,
+				reason: rejectReasonForm.reason,
+			}
+			await TaskApi.rejectTask(data)
+			popOverVisible.value.reject = false
+			message.success('审批不通过成功')
+		}
+		// 重置表单
+		formRef.resetFields()
+		// 加载最新数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理抄送 */
 const handleCopy = async () => {
-  formLoading.value = true
-  try {
-    // 1. 校验表单
-    if (!copyFormRef.value) return
-    await copyFormRef.value.validate()
-    // 2. 提交抄送
-    const data = {
-      id: runningTask.value.id,
-      reason: copyForm.copyReason,
-      copyUserIds: copyForm.copyUserIds
-    }
-    await TaskApi.copyTask(data)
-    copyFormRef.value.resetFields()
-    popOverVisible.value.copy = false
-    message.success('操作成功')
-  } finally {
-    formLoading.value = false
-  }
+	formLoading.value = true
+	try {
+		// 1. 校验表单
+		if (!copyFormRef.value) return
+		await copyFormRef.value.validate()
+		// 2. 提交抄送
+		const data = {
+			id: runningTask.value.id,
+			reason: copyForm.copyReason,
+			copyUserIds: copyForm.copyUserIds,
+		}
+		await TaskApi.copyTask(data)
+		copyFormRef.value.resetFields()
+		popOverVisible.value.copy = false
+		message.success('操作成功')
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理转交 */
 const handleTransfer = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!transferFormRef.value) return
-    await transferFormRef.value.validate()
-    // 1.2 提交转交
-    const data = {
-      id: runningTask.value.id,
-      reason: transferForm.reason,
-      assigneeUserId: transferForm.assigneeUserId
-    }
-    await TaskApi.transferTask(data)
-    transferFormRef.value.resetFields()
-    popOverVisible.value.transfer = false
-    message.success('操作成功')
-    // 2. 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+	formLoading.value = true
+	try {
+		// 1.1 校验表单
+		if (!transferFormRef.value) return
+		await transferFormRef.value.validate()
+		// 1.2 提交转交
+		const data = {
+			id: runningTask.value.id,
+			reason: transferForm.reason,
+			assigneeUserId: transferForm.assigneeUserId,
+		}
+		await TaskApi.transferTask(data)
+		transferFormRef.value.resetFields()
+		popOverVisible.value.transfer = false
+		message.success('操作成功')
+		// 2. 加载最新数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理委派 */
 const handleDelegate = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!delegateFormRef.value) return
-    await delegateFormRef.value.validate()
-    // 1.2 处理委派
-    const data = {
-      id: runningTask.value.id,
-      reason: delegateForm.reason,
-      delegateUserId: delegateForm.delegateUserId
-    }
+	formLoading.value = true
+	try {
+		// 1.1 校验表单
+		if (!delegateFormRef.value) return
+		await delegateFormRef.value.validate()
+		// 1.2 处理委派
+		const data = {
+			id: runningTask.value.id,
+			reason: delegateForm.reason,
+			delegateUserId: delegateForm.delegateUserId,
+		}
 
-    await TaskApi.delegateTask(data)
-    popOverVisible.value.delegate = false
-    delegateFormRef.value.resetFields()
-    message.success('操作成功')
-    // 2. 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+		await TaskApi.delegateTask(data)
+		popOverVisible.value.delegate = false
+		delegateFormRef.value.resetFields()
+		message.success('操作成功')
+		// 2. 加载最新数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理加签 */
-const handlerAddSign = async (type) => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!addSignFormRef.value) return
-    await addSignFormRef.value.validate()
-    // 1.2 提交加签
-    const data = {
-      id: runningTask.value.id,
-      type,
-      reason: addSignForm.reason,
-      userIds: addSignForm.addSignUserIds
-    }
-    await TaskApi.signCreateTask(data)
-    message.success('操作成功')
-    addSignFormRef.value.resetFields()
-    popOverVisible.value.addSign = false
-    // 2 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+const handlerAddSign = async type => {
+	formLoading.value = true
+	try {
+		// 1.1 校验表单
+		if (!addSignFormRef.value) return
+		await addSignFormRef.value.validate()
+		// 1.2 提交加签
+		const data = {
+			id: runningTask.value.id,
+			type,
+			reason: addSignForm.reason,
+			userIds: addSignForm.addSignUserIds,
+		}
+		await TaskApi.signCreateTask(data)
+		message.success('操作成功')
+		addSignFormRef.value.resetFields()
+		popOverVisible.value.addSign = false
+		// 2 加载最新数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理退回 */
 const handleReturn = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!returnFormRef.value) return
-    await returnFormRef.value.validate()
-    // 1.2 提交退回
-    const data = {
-      id: runningTask.value.id,
-      reason: returnForm.returnReason,
-      targetTaskDefinitionKey: returnForm.targetTaskDefinitionKey
-    }
+	formLoading.value = true
+	try {
+		// 1.1 校验表单
+		if (!returnFormRef.value) return
+		await returnFormRef.value.validate()
+		// 1.2 提交退回
+		const data = {
+			id: runningTask.value.id,
+			reason: returnForm.returnReason,
+			targetTaskDefinitionKey: returnForm.targetTaskDefinitionKey,
+		}
 
-    await TaskApi.returnTask(data)
-    popOverVisible.value.return = false
-    returnFormRef.value.resetFields()
-    message.success('操作成功')
-    // 2 重新加载数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+		await TaskApi.returnTask(data)
+		popOverVisible.value.return = false
+		returnFormRef.value.resetFields()
+		message.success('操作成功')
+		// 2 重新加载数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理取消 */
 const handleCancel = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!cancelFormRef.value) return
-    await cancelFormRef.value.validate()
-    // 1.2 提交取消
-    await ProcessInstanceApi.cancelProcessInstanceByStartUser(
-      props.processInstance.id,
-      cancelForm.cancelReason
-    )
-    popOverVisible.value.return = false
-    message.success('操作成功')
-    cancelFormRef.value.resetFields()
-    // 2 重新加载数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+	formLoading.value = true
+	try {
+		// 1.1 校验表单
+		if (!cancelFormRef.value) return
+		await cancelFormRef.value.validate()
+		// 1.2 提交取消
+		await ProcessInstanceApi.cancelProcessInstanceByStartUser(props.processInstance.id, cancelForm.cancelReason)
+		popOverVisible.value.return = false
+		message.success('操作成功')
+		cancelFormRef.value.resetFields()
+		// 2 重新加载数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 
 /** 处理再次提交 */
 const handleReCreate = async () => {
-  // 跳转发起流程界面
-  await router.push({
-    name: 'BpmProcessInstanceCreate',
-    query: { processInstanceId: props.processInstance?.id }
-  })
+	// 跳转发起流程界面
+	await router.push({
+		name: 'BpmProcessInstanceCreate',
+		query: { processInstanceId: props.processInstance?.id },
+	})
 }
 
 /** 获取减签人员标签 */
-const getDeleteSignUserLabel = (task) => {
-  const deptName = task?.assigneeUser?.deptName || task?.ownerUser?.deptName
-  const nickname = task?.assigneeUser?.nickname || task?.ownerUser?.nickname
-  return `${nickname} ( 所属部门：${deptName} )`
+const getDeleteSignUserLabel = task => {
+	const deptName = task?.assigneeUser?.deptName || task?.ownerUser?.deptName
+	const nickname = task?.assigneeUser?.nickname || task?.ownerUser?.nickname
+	return `${nickname} ( 所属部门：${deptName} )`
 }
 /** 处理减签 */
 const handlerDeleteSign = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!deleteSignFormRef.value) return
-    await deleteSignFormRef.value.validate()
-    // 1.2 提交减签
-    const data = {
-      id: deleteSignForm.deleteSignTaskId,
-      reason: deleteSignForm.reason
-    }
-    await TaskApi.signDeleteTask(data)
-    message.success('减签成功')
-    deleteSignFormRef.value.resetFields()
-    popOverVisible.value.deleteSign = false
-    // 2 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
+	formLoading.value = true
+	try {
+		// 1.1 校验表单
+		if (!deleteSignFormRef.value) return
+		await deleteSignFormRef.value.validate()
+		// 1.2 提交减签
+		const data = {
+			id: deleteSignForm.deleteSignTaskId,
+			reason: deleteSignForm.reason,
+		}
+		await TaskApi.signDeleteTask(data)
+		message.success('减签成功')
+		deleteSignFormRef.value.resetFields()
+		popOverVisible.value.deleteSign = false
+		// 2 加载最新数据
+		reload()
+	} finally {
+		formLoading.value = false
+	}
 }
 /** 重新加载数据 */
 const reload = () => {
-  emit('success')
+	emit('success')
 }
 
 /** 任务是否为处理中状态 */
 const isHandleTaskStatus = () => {
-  let canHandle = false
-  if (TaskApi.TaskStatusEnum.RUNNING === runningTask.value?.status) {
-    canHandle = true
-  }
-  return canHandle
+	let canHandle = false
+	if (TaskApi.TaskStatusEnum.RUNNING === runningTask.value?.status) {
+		canHandle = true
+	}
+	return canHandle
 }
 
 /** 流程状态是否为结束状态 */
-const isEndProcessStatus = (status) => {
-  let isEndStatus = false
-  if (
-    BpmProcessInstanceStatus.APPROVE === status ||
-    BpmProcessInstanceStatus.REJECT === status ||
-    BpmProcessInstanceStatus.CANCEL === status
-  ) {
-    isEndStatus = true
-  }
-  return isEndStatus
+const isEndProcessStatus = status => {
+	let isEndStatus = false
+	if (
+		BpmProcessInstanceStatus.APPROVE === status ||
+		BpmProcessInstanceStatus.REJECT === status ||
+		BpmProcessInstanceStatus.CANCEL === status
+	) {
+		isEndStatus = true
+	}
+	return isEndStatus
 }
 
 /** 是否显示按钮 */
-const isShowButton = (btnType) => {
-  let isShow = true
-  if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
-    isShow = runningTask.value.buttonsSetting[btnType].enable
-  }
-  return isShow
+const isShowButton = btnType => {
+	let isShow = true
+	if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
+		isShow = runningTask.value.buttonsSetting[btnType].enable
+	}
+	return isShow
 }
 
 /** 获取按钮的显示名称 */
-const getButtonDisplayName = (btnType) => {
-  let displayName = OPERATION_BUTTON_NAME.get(btnType)
-  if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
-    displayName = runningTask.value.buttonsSetting[btnType].displayName
-  }
-  return displayName
+const getButtonDisplayName = btnType => {
+	let displayName = OPERATION_BUTTON_NAME.get(btnType)
+	if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
+		displayName = runningTask.value.buttonsSetting[btnType].displayName
+	}
+	return displayName
 }
 
-const loadTodoTask = (task) => {
-  approveForm.value = {}
-  runningTask.value = task
-  approveFormFApi.value = {}
-  reasonRequire.value = task?.reasonRequire ?? false
-  nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
-  // 处理 approve 表单.
-  if (task && task.formId && task.formConf) {
-    const tempApproveForm = {}
-    setConfAndFields2(tempApproveForm, task.formConf, task.formFields, task.formVariables)
-    approveForm.value = tempApproveForm
-  } else {
-    approveForm.value = {} // 占位，避免为空
-  }
+const loadTodoTask = task => {
+	console.log('loadTodoTask1111111111', task)
+	approveForm.value = {}
+	runningTask.value = task
+	approveFormFApi.value = {}
+	reasonRequire.value = task?.reasonRequire ?? false
+	nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
+	// 处理 approve 表单.
+	if (task && task.formId && task.formConf) {
+		const tempApproveForm = {}
+		setConfAndFields2(tempApproveForm, task.formConf, task.formFields, task.formVariables)
+		approveForm.value = tempApproveForm
+	} else {
+		approveForm.value = {} // 占位，避免为空
+	}
 }
 
 /** 校验流程表单 */
 const validateNormalForm = async () => {
-  if (props.processDefinition?.formType === BpmModelFormType.NORMAL) {
-    let valid = true
-    try {
-      await props.normalFormApi?.validate()
-    } catch {
-      valid = false
-    }
-    return valid
-  } else {
-    return true
-  }
+	if (props.processDefinition?.formType === BpmModelFormType.NORMAL) {
+		let valid = true
+		try {
+			await props.normalFormApi?.validate()
+		} catch {
+			valid = false
+		}
+		return valid
+	} else {
+		return true
+	}
 }
 
 /** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
 const getUpdatedProcessInstanceVariables = () => {
-  const variables = {}
-  props.writableFields.forEach((field) => {
-    variables[field] = props.normalFormApi.getValue(field)
-  })
-  return variables
+	const variables = {}
+	props.writableFields.forEach(field => {
+		variables[field] = props.normalFormApi.getValue(field)
+	})
+	return variables
 }
 
 /** 处理签名完成 */
-const handleSignFinish = (url) => {
-  approveReasonForm.signPicUrl = url
-  approveSignFormRef.value.validate('change')
+const handleSignFinish = url => {
+	approveReasonForm.signPicUrl = url
+	approveSignFormRef.value.validate('change')
 }
 
 // 暴露方法给父组件

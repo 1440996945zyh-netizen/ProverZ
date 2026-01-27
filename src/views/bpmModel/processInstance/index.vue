@@ -200,7 +200,7 @@ const tableColumns = ref([
 									class: 'el-link el-link--primary',
 									onClick: () => handleDetail(row),
 								},
-								row.tasks[0].assigneeUser?.nickname,
+								row.tasks[0].assigneeUser?.userName,
 							),
 							` (${row.tasks[0].name}) 审批中`,
 						]),
@@ -215,7 +215,7 @@ const tableColumns = ref([
 									class: 'el-link el-link--primary',
 									onClick: () => handleDetail(row),
 								},
-								row.tasks[0].assigneeUser?.nickname,
+								row.tasks[0].assigneeUser?.userName,
 							),
 							` 等 ${row.tasks.length} 人 (${row.tasks[0].name})审批中`,
 						]),
@@ -400,7 +400,7 @@ const handleCreate = async row => {
 const handleDetail = row => {
 	router.push({
 		name: 'BpmProcessInstanceDetail',
-		query: {
+		params: {
 			id: row.id,
 		},
 	})
