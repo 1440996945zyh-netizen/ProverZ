@@ -15,7 +15,7 @@
 					<!-- 审批图标 -->
 					<img style="position: absolute; right: 20px" width="150" :src="auditIconsMap[processInstance.status]" alt="" />
 					<div class="process-info">
-						<div style="">编号：{{ id || '' }}</div>
+						<div style="">编号：{{ processInstanceId || '' }}</div>
 						<el-icon style="margin-left: 15px; cursor: pointer" @click="handlePrint">
 							<Printer />
 						</el-icon>

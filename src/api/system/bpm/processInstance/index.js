@@ -44,7 +44,7 @@ export const cancelProcessInstanceByStartUser = async (id, reason) => {
 		reason, // 简化 reason: reason 为 reason
 	}
 	return request({
-		url: processInstanceApi + 'cancel-by-start-user',
+		url: processInstanceApi + 'cancelByStartUser',
 		method: 'delete',
 		data,
 	})

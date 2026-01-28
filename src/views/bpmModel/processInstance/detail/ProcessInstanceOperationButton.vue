@@ -513,7 +513,7 @@ import { useRoute, useRouter } from 'vue-router'
 // import { useUserStoreWithOut } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/bpm/formCreate'
 import * as TaskApi from '@/api/system/bpm/task'
-// import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 // import * as UserApi from '@/api/system/user'
 import {
 	NodeType,

@@ -10,99 +10,98 @@
 <template>
 	<div class="app-container">
 		<!-- 第一步，通过流程定义的列表，选择对应的流程 -->
-		<template v-if="!selectProcessDefinition">
-			<!-- 搜索栏 - 增加间距，优化布局 -->
-			<div class="search-wrapper">
-				<SearchHeader ref="SearchHeaderRef" :selectData="selectData" @searchClick="handleQuery" :buttonList="buttonList" />
-			</div>
+		<!-- 搜索栏 - 增加间距，优化布局 -->
+		<div class="search-wrapper">
+			<SearchHeader ref="SearchHeaderRef" :selectData="selectData" @searchClick="handleQuery" :buttonList="buttonList" />
+		</div>
 
-			<!-- 流程列表卡片 - 优化容器样式，增加内边距 -->
-			<div
-				:class="{ 'process-definition-container': filteredProcessDefinitionList && filteredProcessDefinitionList.length }"
-				class="content-wrap"
-				:style="{ height: tableHeight + 'px' }"
-			>
-				<!-- 流程列表内容 - 优化响应式布局 -->
-				<div class="process-content">
-					<el-row v-if="filteredProcessDefinitionList && filteredProcessDefinitionList.length" :gutter="24" class="el-row-wrap">
-						<!-- 左侧分类栏 - 增加最小宽度，避免挤压 -->
-						<el-col :span="5" :xs="24" :sm="6" :md="5" class="category-col">
-							<div class="category-list">
-								<div
-									v-for="category in availableCategories"
-									:key="category.code"
-									class="category-item"
-									:class="categoryActive.code === category.code ? 'category-item-active' : ''"
-									@click="handleCategoryClick(category)"
-								>
-									{{ category.name }}
+		<!-- 流程列表卡片 - 优化容器样式，增加内边距 -->
+		<div
+			:class="{ 'process-definition-container': filteredProcessDefinitionList && filteredProcessDefinitionList.length }"
+			class="content-wrap"
+			:style="{ height: tableHeight + 'px' }"
+		>
+			<!-- 流程列表内容 - 优化响应式布局 -->
+			<div class="process-content">
+				<el-row v-if="filteredProcessDefinitionList && filteredProcessDefinitionList.length" :gutter="24" class="el-row-wrap">
+					<!-- 左侧分类栏 - 增加最小宽度，避免挤压 -->
+					<el-col :span="5" :xs="24" :sm="6" :md="5" class="category-col">
+						<div class="category-list">
+							<div
+								v-for="category in availableCategories"
+								:key="category.code"
+								class="category-item"
+								:class="categoryActive.code === category.code ? 'category-item-active' : ''"
+								@click="handleCategoryClick(category)"
+							>
+								{{ category.name }}
+							</div>
+						</div>
+					</el-col>
+					<!-- 右侧流程卡片区域 - 优化滚动高度，响应式适配 -->
+					<el-col :span="19" :xs="24" :sm="18" :md="19" class="definition-col">
+						<el-scrollbar ref="scrollWrapper" class="definition-scroll" @scroll="handleScroll">
+							<div
+								class="definition-group"
+								v-for="(definitions, categoryCode) in processDefinitionGroup"
+								:key="categoryCode"
+								:ref="`category-${categoryCode}`"
+							>
+								<!-- 分组标题 - 优化样式，增加间距 -->
+								<h3 class="group-title">
+									{{ getCategoryName(categoryCode) }}
+								</h3>
+								<!-- 流程卡片网格 - 响应式布局，优化间距 -->
+								<div class="definition-card-grid">
+									<el-tooltip
+										v-for="definition in definitions"
+										:key="definition.id"
+										:content="definition.description"
+										:disabled="!definition.description || definition.description.trim().length === 0"
+										placement="top"
+									>
+										<el-card
+											shadow="hover"
+											class="definition-item-card"
+											@click="handleSelect(definition)"
+											:class="{ 'definition-card-active': selectProcessDefinition?.id === definition.id }"
+										>
+											<template #default>
+												<div class="card-content">
+													<el-image
+														v-if="definition.icon"
+														:src="definition.icon"
+														class="card-icon-img"
+														fit="cover"
+													/>
+													<div v-else class="flow-icon">
+														<span class="flow-icon-text">
+															{{ definition.name.substring(0, 2) }}
+														</span>
+													</div>
+													<el-text class="card-name" size="large">{{ definition.name }}</el-text>
+												</div>
+											</template>
+										</el-card>
+									</el-tooltip>
 								</div>
 							</div>
-						</el-col>
-						<!-- 右侧流程卡片区域 - 优化滚动高度，响应式适配 -->
-						<el-col :span="19" :xs="24" :sm="18" :md="19" class="definition-col">
-							<el-scrollbar ref="scrollWrapper" class="definition-scroll" @scroll="handleScroll">
-								<div
-									class="definition-group"
-									v-for="(definitions, categoryCode) in processDefinitionGroup"
-									:key="categoryCode"
-									:ref="`category-${categoryCode}`"
-								>
-									<!-- 分组标题 - 优化样式，增加间距 -->
-									<h3 class="group-title">
-										{{ getCategoryName(categoryCode) }}
-									</h3>
-									<!-- 流程卡片网格 - 响应式布局，优化间距 -->
-									<div class="definition-card-grid">
-										<el-tooltip
-											v-for="definition in definitions"
-											:key="definition.id"
-											:content="definition.description"
-											:disabled="!definition.description || definition.description.trim().length === 0"
-											placement="top"
-										>
-											<el-card
-												shadow="hover"
-												class="definition-item-card"
-												@click="handleSelect(definition)"
-												:class="{ 'definition-card-active': selectProcessDefinition?.id === definition.id }"
-											>
-												<template #default>
-													<div class="card-content">
-														<el-image
-															v-if="definition.icon"
-															:src="definition.icon"
-															class="card-icon-img"
-															fit="cover"
-														/>
-														<div v-else class="flow-icon">
-															<span class="flow-icon-text">
-																{{ definition.name.substring(0, 2) }}
-															</span>
-														</div>
-														<el-text class="card-name" size="large">{{ definition.name }}</el-text>
-													</div>
-												</template>
-											</el-card>
-										</el-tooltip>
-									</div>
-								</div>
-							</el-scrollbar>
-						</el-col>
-					</el-row>
-					<!-- 空状态 - 优化居中显示，增加间距 -->
-					<el-empty class="empty-wrap" :image-size="200" description="没有找到搜索结果" v-else />
-				</div>
+						</el-scrollbar>
+					</el-col>
+				</el-row>
+				<!-- 空状态 - 优化居中显示，增加间距 -->
+				<el-empty class="empty-wrap" :image-size="200" description="没有找到搜索结果" v-else />
 			</div>
-		</template>
+		</div>
 
 		<!-- 第二步，填写表单，进行流程的提交 -->
-		<ProcessDefinitionDetail
-			v-else
-			ref="processDefinitionDetailRef"
-			:selectProcessDefinition="selectProcessDefinition"
-			@cancel="selectProcessDefinition = undefined"
-		/>
+		<Dialog v-model:visible="visibleDialog" :title="'流程:' + selectProcessDefinition.name" isFullscreen>
+			<ProcessDefinitionDetail
+				ref="processDefinitionDetailRef"
+				:selectProcessDefinition="selectProcessDefinition"
+				@cancel="selectProcessDefinition = undefined"
+			/>
+		</Dialog>
 	</div>
 </template>
 
@@ -112,6 +111,7 @@ import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 import { CategoryApi } from '@/api/system/bpm/category'
 import ProcessDefinitionDetail from './ProcessDefinitionDetail.vue'
 import { groupBy } from 'lodash-es'
+import Dialog from '@/components/Dialog'
 import SearchHeader from '@/components/SearchHeader'
 import { getCurrentInstance, onMounted, computed, ref, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
@@ -143,7 +143,7 @@ const categoryList = ref([]) // 分类的列表
 const categoryActive = ref({}) // 选中的分类
 const processDefinitionList = ref([]) // 流程定义的列表
 const filteredProcessDefinitionList = ref([]) // 用于存储搜索过滤后的流程定义
-const selectProcessDefinition = ref() // 选中的流程定义
+const selectProcessDefinition = ref({}) // 选中的流程定义
 const processDefinitionDetailRef = ref() // 流程详情组件ref
 
 /** 查询列表 */
@@ -157,11 +157,13 @@ const getList = async () => {
 
 		// 如果 processInstanceId 非空，说明是重新发起
 		if (processInstanceId && processInstanceId.length > 0) {
-			const processInstance = await ProcessInstanceApi.getProcessInstance(processInstanceId)
+			const res = await ProcessInstanceApi.getProcessInstance(processInstanceId)
+			const processInstance = res.data || {}
 			if (!processInstance) {
 				message.error('重新发起流程失败，原因：流程实例不存在')
 				return
 			}
+			console.log('processInstance:', processInstance)
 			const processDefinition = processDefinitionList.value.find(item => item.key == processInstance.processDefinition?.key)
 			if (!processDefinition) {
 				message.error('重新发起流程失败，原因：流程定义不存在')
@@ -253,9 +255,11 @@ const handleCategoryClick = category => {
 const getCategoryName = categoryCode => {
 	return categoryList.value?.find(ctg => ctg.code === categoryCode)?.name
 }
-
+const visibleDialog = ref(false)
 /** 处理选择流程的按钮操作 **/
 const handleSelect = async (row, formVariables) => {
+	// 打开流程详情
+	visibleDialog.value = true
 	// 设置选择的流程
 	selectProcessDefinition.value = row
 	console.log('selectProcessDefinition', selectProcessDefinition.value)

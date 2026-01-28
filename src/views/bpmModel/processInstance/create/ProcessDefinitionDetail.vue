@@ -7,74 +7,72 @@
  * @FilePath: \view\src\views\bpmModel\processInstance\create\ProcessDefinitionDetail.vue
 -->
 <template>
-	<Dialog v-model:visible="visibleDialog" :title="'流程:' + selectProcessDefinition.name" isFullscreen>
-		<div class="processInstance-wrap-main">
-			<el-scrollbar>
-				<!-- <div class="process-name-tip">流程：{{ selectProcessDefinition.name }}</div> -->
-				<el-divider class="divider-short" />
+	<div class="processInstance-wrap-main">
+		<el-scrollbar>
+			<!-- <div class="process-name-tip">流程：{{ selectProcessDefinition.name }}</div> -->
+			<el-divider class="divider-short" />
 
-				<!-- 中间主要内容 tab 栏 -->
-				<el-tabs v-model="activeTab">
-					<!-- 表单信息 -->
-					<el-tab-pane label="表单填写" name="form">
-						<div class="form-scroll-area" v-loading="processInstanceStartLoading">
-							<el-scrollbar>
-								<el-row>
-									<el-col :span="17">
-										<form-create
-											:rule="detailForm.rule"
-											v-model:api="fApi"
-											v-model="detailForm.value"
-											:option="detailForm.option"
-											@submit="submitForm"
-										/>
-									</el-col>
+			<!-- 中间主要内容 tab 栏 -->
+			<el-tabs v-model="activeTab">
+				<!-- 表单信息 -->
+				<el-tab-pane label="表单填写" name="form">
+					<div class="form-scroll-area" v-loading="processInstanceStartLoading">
+						<el-scrollbar>
+							<el-row>
+								<el-col :span="17">
+									<form-create
+										:rule="detailForm.rule"
+										v-model:api="fApi"
+										v-model="detailForm.value"
+										:option="detailForm.option"
+										@submit="submitForm"
+									/>
+								</el-col>
 
-									<el-col :span="6" :offset="1">
-										<!-- 流程时间线 -->
-										<ProcessInstanceTimeline
-											ref="timelineRef"
-											:activity-nodes="activityNodes"
-											:show-status-icon="false"
-											@select-user-confirm="selectUserConfirm"
-										/>
-									</el-col>
-								</el-row>
-							</el-scrollbar>
-						</div>
-					</el-tab-pane>
-					<!-- 流程图 -->
-					<el-tab-pane label="流程图" name="diagram">
-						<div class="form-scroll-area">
-							<!-- BPMN 流程图预览 -->
-							<ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" v-if="BpmModelType.BPMN === selectProcessDefinition.modelType" />
-
-							<!-- Simple 流程图预览 -->
-							<ProcessInstanceSimpleViewer
-								:simple-json="simpleJson"
-								v-if="BpmModelType.SIMPLE === selectProcessDefinition.modelType"
-							/>
-						</div>
-					</el-tab-pane>
-				</el-tabs>
-
-				<!-- 底部操作栏 -->
-				<div class="bottom-operation-bar">
-					<!-- 操作栏按钮 -->
-					<div v-if="activeTab === 'form'" class="button-container">
-						<el-button plain type="success" @click="submitForm">
-							<Icon icon="ep:select" />
-							&nbsp; 发起
-						</el-button>
-						<el-button plain type="danger" @click="handleCancel">
-							<Icon icon="ep:close" />
-							&nbsp; 取消
-						</el-button>
+								<el-col :span="6" :offset="1">
+									<!-- 流程时间线 -->
+									<ProcessInstanceTimeline
+										ref="timelineRef"
+										:activity-nodes="activityNodes"
+										:show-status-icon="false"
+										@select-user-confirm="selectUserConfirm"
+									/>
+								</el-col>
+							</el-row>
+						</el-scrollbar>
 					</div>
+				</el-tab-pane>
+				<!-- 流程图 -->
+				<el-tab-pane label="流程图" name="diagram">
+					<div class="form-scroll-area">
+						<!-- BPMN 流程图预览 -->
+						<ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" v-if="BpmModelType.BPMN === selectProcessDefinition.modelType" />
+
+						<!-- Simple 流程图预览 -->
+						<ProcessInstanceSimpleViewer
+							:simple-json="simpleJson"
+							v-if="BpmModelType.SIMPLE === selectProcessDefinition.modelType"
+						/>
+					</div>
+				</el-tab-pane>
+			</el-tabs>
+
+			<!-- 底部操作栏 -->
+			<div class="bottom-operation-bar">
+				<!-- 操作栏按钮 -->
+				<div v-if="activeTab === 'form'" class="button-container">
+					<el-button plain type="success" @click="submitForm">
+						<Icon icon="ep:select" />
+						&nbsp; 发起
+					</el-button>
+					<el-button plain type="danger" @click="handleCancel">
+						<Icon icon="ep:close" />
+						&nbsp; 取消
+					</el-button>
 				</div>
-			</el-scrollbar>
-		</div>
-	</Dialog>
+			</div>
+		</el-scrollbar>
+	</div>
 </template>
 
 <script setup>
@@ -123,22 +121,22 @@ const bpmnXML = ref(null) // BPMN 数据
 const simpleJson = ref(undefined) // Simple 设计器数据 json 格式
 const activeTab = ref('form') // 当前的 Tab
 const activityNodes = ref([]) // 审批节点信息
-
+const formInstance = ref(null) // 创建表单实例
 /** 设置表单信息、获取流程图数据 **/
 const initProcessInfo = async (row, formVariables) => {
 	// 重置指定审批人
 	startUserSelectTasks.value = []
 	startUserSelectAssignees.value = {}
 	formVariables = formVariables || {}
-
+	// 先销毁表单实例
 	// 情况一：流程表单
 	if (row.formType == BpmModelFormType.NORMAL) {
 		// 设置表单
 		// 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
 		// 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
 		//        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
-		const formApi = formCreate.create(decodeFields(row.formFields))
-		const allowedFields = formApi.fields()
+		// formInstance.value = formCreate.create(decodeFields(row.formFields))
+		// const allowedFields = formInstance.value.fields()
 		for (const key in formVariables) {
 			if (!allowedFields.includes(key)) {
 				delete formVariables[key]
@@ -173,7 +171,15 @@ const initProcessInfo = async (row, formVariables) => {
 		// 这里暂时无需加载流程图，因为跳出到另外个 Tab；
 	}
 }
-
+/** 销毁表单实例的方法 **/
+const destroyForm = () => {
+	console.log('formInstance.value', formInstance.value)
+	if (formInstance.value) {
+		// 关键3：调用 form-create 的销毁方法，清理 DOM 和实例
+		formInstance.value.remove(true) // true 表示同时移除 DOM 节点
+		formInstance.value = null // 清空实例引用
+	}
+}
 /** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次 */
 watch(
 	() => detailForm.value.value,
@@ -324,7 +330,9 @@ const handleCancel = () => {
 const selectUserConfirm = (id, userList) => {
 	startUserSelectAssignees.value[id] = userList?.map(item => item.id)
 }
-
+onBeforeUnmount(() => {
+	destroyForm()
+})
 // 暴露方法给父组件
 defineExpose({ initProcessInfo })
 </script>
