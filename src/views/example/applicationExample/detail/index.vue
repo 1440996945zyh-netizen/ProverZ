@@ -68,17 +68,15 @@
 
 				<el-col :span="24">
 					<el-form-item label="申请人" prop="applicantId">
-						<el-select
-							v-model="formData.applicantId"
-							placeholder="请选择申请人"
+						<Select
+							:selectData="userOptions"
+							v-model:value="formData.applicantId"
+							v-model:label="formData.applicantName"
 							:disabled="isViewMode || !!formData.id"
-							style="width: 100%"
-							@change="handleApplicantChange"
-							filterable
-							clearable
-						>
+						/>
+						<!-- <el-select v-model="formData.applicantId" placeholder="请选择申请人" :disabled="isViewMode || !!formData.id">
 							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
-						</el-select>
+						</el-select> -->
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -95,6 +93,7 @@ const { proxy } = getCurrentInstance()
 const ruleForm = ref()
 const isViewMode = ref(false)
 const userOptions = ref([]) // 用户列表选项
+import Select from '@/components/Select/index.vue'
 
 const formData = reactive({
 	id: null,
@@ -103,7 +102,7 @@ const formData = reactive({
 	payeeName: '',
 	applicantId: '',
 	applicantName: '',
-	approvalStatus: 'pending',
+	approvalStatus: '',
 	applyTime: dayjs().format('YYYY-MM-DD '),
 	expectedPaymentTime: dayjs().add(7, 'day').format('YYYY-MM-DD'),
 })
@@ -177,33 +176,13 @@ const loadUserOptions = async () => {
 	try {
 		const userResData = await publicApi.getLocalSelect({ type: 'USER' })
 		if (userResData && userResData.data) {
-			userOptions.value = userResData.data.map(item => ({
-				nickname: item.label,
-				id: item.value,
-			}))
+			userOptions.value = userResData.data
 		} else {
 			userOptions.value = []
 		}
 	} catch (error) {
 		console.error('加载用户列表失败:', error)
 		userOptions.value = []
-	}
-}
-
-// 处理申请人选择变化
-const handleApplicantChange = applicantId => {
-	if (applicantId) {
-		// 根据选中的用户ID，从用户列表中查找对应的用户姓名
-		const selectedUser = userOptions.value.find(user => user.id === applicantId)
-		if (selectedUser) {
-			formData.applicantName = selectedUser.nickname
-		} else {
-			// 如果没有找到，清空申请人姓名
-			formData.applicantName = ''
-		}
-	} else {
-		// 清空选择时，同时清空申请人姓名
-		formData.applicantName = ''
 	}
 }
 
@@ -273,14 +252,6 @@ const setFormData = data => {
 			formData[key] = data[key]
 		}
 	})
-
-	// 如果是编辑模式，需要设置申请人姓名的显示值
-	if (formData.applicantId && userOptions.value.length > 0) {
-		const selectedUser = userOptions.value.find(user => user.id === formData.applicantId)
-		if (selectedUser) {
-			formData.applicantName = selectedUser.nickname
-		}
-	}
 }
 
 defineExpose({

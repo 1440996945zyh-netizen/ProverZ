@@ -11,7 +11,6 @@
 				:tableData="tableData"
 				:cellClickEvent="cellClickEvent"
 				:total="total"
-				:id="tableId"
 				:isShowAdvancedQuery="true"
 			/>
 		</div>
@@ -48,7 +47,6 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-const tableId = ref('bpm_application_example_1760148546265')
 
 // 表格数据
 const tableData = ref([])
@@ -120,7 +118,7 @@ const tableColumns = ref([
 					break
 				case '1':
 					type = 'warning'
-					text = '审批种'
+					text = '审批中'
 					break
 				case '2':
 					type = 'success'
