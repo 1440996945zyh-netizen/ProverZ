@@ -287,10 +287,7 @@ const getBusinessTypeList = () => {
 	publicApi
 		.getLocalSelect({ type: 'DICT', dictType: 'BPM_BUSINESS_TYPE', remark: formData.businessName })
 		.then(response => {
-			businessTypeOptions.value = response.data.map(item => ({
-				label: item.dictLabel,
-				value: item.dictValue,
-			}))
+			businessTypeOptions.value = response.data
 		})
 		.catch(error => {
 			console.error('获取业务类型列表失败', error)

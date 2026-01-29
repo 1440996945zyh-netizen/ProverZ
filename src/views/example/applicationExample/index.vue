@@ -19,6 +19,7 @@
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="drawerVisible = false">取消</el-button>
+					<el-button type="primary" @click="handleSubmit">提交</el-button>
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
@@ -34,6 +35,7 @@ import api from '@/api/example/applicationExample/index.js'
 import detail from './detail/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import dayjs from 'dayjs'
+import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 
 const { proxy } = getCurrentInstance()
 const advancedQuery = ref([])
@@ -67,12 +69,13 @@ const tableColumns = ref([
 		},
 	},
 	{
-		label: '付款事由',
-		prop: 'paymentTitle',
+		label: '收款方名称',
+		prop: 'payeeName',
 		align: 'left',
-		minWidth: 180,
+		minWidth: 150,
 		showOverflowTooltip: true,
 	},
+
 	{
 		label: '付款金额',
 		prop: 'paymentAmount',
@@ -90,18 +93,19 @@ const tableColumns = ref([
 			]
 		},
 	},
-	{
-		label: '收款方名称',
-		prop: 'payeeName',
-		align: 'left',
-		minWidth: 150,
-		showOverflowTooltip: true,
-	},
+
 	{
 		label: '申请人',
 		prop: 'applicantName',
 		align: 'left',
 		width: 100,
+	},
+	{
+		label: '付款事由',
+		prop: 'paymentTitle',
+		align: 'left',
+		minWidth: 180,
+		showOverflowTooltip: true,
 	},
 	{
 		label: '审批状态',
@@ -113,20 +117,25 @@ const tableColumns = ref([
 			let text = ''
 			switch (row.approvalStatus) {
 				case '0':
-					type = 'warning'
+					type = ''
 					text = '待审批'
 					break
+
 				case '1':
 					type = 'warning'
 					text = '审批中'
 					break
 				case '2':
 					type = 'success'
-					text = '已审批'
+					text = '审批通过'
 					break
 				case '3':
 					type = 'danger'
-					text = '已拒绝'
+					text = '审批驳回'
+					break
+				case '4':
+					type = 'info'
+					text = '已撤回/作废'
 					break
 				default:
 					type = 'info'
@@ -321,33 +330,61 @@ const edit = row => {
 	})
 }
 
-/** 查看详情 */
-const viewDetail = row => {
-	const viewRow = row || clickRow.value
-	drawerVisible.value = true
-	title.value = '报销申请详情'
-	nextTick(() => {
-		detailRef.value.resetForm()
-		detailRef.value.isViewMode = true
-		api.getDetail(viewRow.id)
-			.then(res => {
-				if (res && res.data) {
-					proxy.setFormData(detailRef.value.formData, res.data)
+const handleSubmit = async () => {
+	if (await detailRef.value.validate()) {
+		try {
+			// 1. 查询流程定义ID
+			const procDefRes = await api.getProcDefId({
+				businessId: '2015965855761960960',
+				businessTypeCode: 'APPLICATION',
+			})
 
-					// 格式化日期
-					if (res.data.applyTime) {
-						detailRef.value.formData.applyTime = dayjs(res.data.applyTime).format('YYYY-MM-DD HH:mm:ss')
-					}
-					if (res.data.expectedPaymentTime) {
-						detailRef.value.formData.expectedPaymentTime = dayjs(res.data.expectedPaymentTime).format('YYYY-MM-DD')
-					}
-				}
-			})
-			.catch(error => {
-				console.error('获取详情失败:', error)
-				proxy.$modal.msgError('获取详情失败')
-			})
-	})
+			if (!procDefRes.data) {
+				proxy.$modal.msgError('获取流程定义ID失败')
+				return
+			}
+
+			const validParams = {
+				expectedPaymentTime: detailRef.value.formData.expectedPaymentTime,
+				payeeName: detailRef.value.formData.payeeName,
+				paymentAmount: detailRef.value.formData.paymentAmount,
+			}
+			// 2. 组合参数进行流程校验
+			const validateParams = {
+				processDefinitionId: procDefRes.data,
+				activityId: 'StartUserNode',
+				processVariablesStr: JSON.stringify(validParams),
+			}
+
+			const validateRes = await ProcessInstanceApi.getApprovalDetail(validateParams)
+
+			// 3. 校验失败处理
+			if (!validateRes.success) {
+				proxy.$modal.msgError(validateRes.msg || '流程校验未通过')
+				return
+			}
+
+			// 4. 校验成功，发起流程
+			const startParams = {
+				processDefinitionId: procDefRes.data,
+				startUserSelectAssignees: {},
+				variables: detailRef.value.formData,
+			}
+
+			const startRes = await ProcessInstanceApi.createProcessInstance(startParams)
+
+			if (startRes.success) {
+				proxy.$modal.msgSuccess(startRes.msg || '流程发起成功')
+				drawerVisible.value = false
+				getList(queryParams.value)
+			} else {
+				proxy.$modal.msgError(startRes.msg || '流程发起失败')
+			}
+		} catch (error) {
+			console.error('流程处理异常:', error)
+			proxy.$modal.msgError(error.response?.data?.msg || '流程处理失败')
+		}
+	}
 }
 
 /** 保存 */

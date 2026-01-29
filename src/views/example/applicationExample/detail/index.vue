@@ -30,13 +30,13 @@
 					</el-form-item>
 				</el-col>
 				<el-col :span="24">
-					<el-form-item label="付款事由" prop="paymentTitle">
+					<el-form-item label="收款方名称" prop="payeeName">
 						<el-input
-							v-model="formData.paymentTitle"
-							placeholder="请输入付款事由"
+							v-model="formData.payeeName"
+							placeholder="请输入收款方名称"
 							:disabled="isViewMode"
 							show-word-limit
-							maxlength="200"
+							maxlength="100"
 						/>
 					</el-form-item>
 				</el-col>
@@ -55,18 +55,6 @@
 				</el-col>
 
 				<el-col :span="24">
-					<el-form-item label="收款方名称" prop="payeeName">
-						<el-input
-							v-model="formData.payeeName"
-							placeholder="请输入收款方名称"
-							:disabled="isViewMode"
-							show-word-limit
-							maxlength="100"
-						/>
-					</el-form-item>
-				</el-col>
-
-				<el-col :span="24">
 					<el-form-item label="申请人" prop="applicantId">
 						<Select
 							:selectData="userOptions"
@@ -77,6 +65,17 @@
 						<!-- <el-select v-model="formData.applicantId" placeholder="请选择申请人" :disabled="isViewMode || !!formData.id">
 							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
 						</el-select> -->
+					</el-form-item>
+				</el-col>
+				<el-col :span="24">
+					<el-form-item label="付款事由" prop="paymentTitle">
+						<el-input
+							v-model="formData.paymentTitle"
+							placeholder="请输入付款事由"
+							:disabled="isViewMode"
+							show-word-limit
+							maxlength="200"
+						/>
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -93,6 +92,7 @@ const { proxy } = getCurrentInstance()
 const ruleForm = ref()
 const isViewMode = ref(false)
 const userOptions = ref([]) // 用户列表选项
+
 import Select from '@/components/Select/index.vue'
 
 const formData = reactive({

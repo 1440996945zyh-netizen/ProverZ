@@ -157,6 +157,14 @@ export const constantRoutes = [
 				},
 			},
 			{
+				path: 'processInstance/create',
+				component: () => import('@/views/bpmModel/processInstance/create/index.vue'),
+				name: 'BpmProcessInstanceCreate',
+				meta: {
+					title: '发起流程',
+				},
+			},
+			{
 				path: 'processInstance/detail/:id',
 				component: () => import('@/views/bpmModel/processInstance/detail/index.vue'),
 				name: 'BpmProcessInstanceDetail',

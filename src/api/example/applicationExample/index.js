@@ -52,6 +52,14 @@ const api = {
 			method: 'get',
 		})
 	},
+	//根据业务id查询BPM绑定流程定义id
+	getProcDefId(query) {
+		return request({
+			url: '/api/internal/bpmBusinessConfig/getProcDefId',
+			method: 'get',
+			params: query,
+		})
+	},
 }
 
 export default api

@@ -78,8 +78,8 @@ const tableColumns = ref([
 		showOverflowTooltip: true,
 	},
 	{
-		label: '流程定义KEY',
-		prop: 'procDefKey',
+		label: '流程定义ID',
+		prop: 'procDefId',
 		align: 'left',
 		minWidth: 150,
 	},
