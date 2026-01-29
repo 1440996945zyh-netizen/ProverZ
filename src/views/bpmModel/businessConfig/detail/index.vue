@@ -169,7 +169,9 @@ const handleMenuChange = val => {
 	const selectedMenu = findMenu(menuOptions.value, val)
 	if (selectedMenu) {
 		// 将菜单名称赋值给 businessName
+
 		formData.businessName = selectedMenu.menuName
+		getBusinessTypeList()
 	}
 }
 
@@ -283,9 +285,9 @@ const businessTypeOptions = ref([]) // 存储业务类型下拉选项
 // 根据字典查询业务类型
 const getBusinessTypeList = () => {
 	publicApi
-		.getDictList({ types: 'BUSINESS_TYPE' })
+		.getLocalSelect({ type: 'DICT', dictType: 'BUSINESS_TYPE', remark: formData.businessName })
 		.then(response => {
-			businessTypeOptions.value = response.data.BUSINESS_TYPE.map(item => ({
+			businessTypeOptions.value = response.data.map(item => ({
 				label: item.dictLabel,
 				value: item.dictValue,
 			}))
@@ -317,7 +319,6 @@ const initData = async () => {
 }
 
 onMounted(() => {
-	getBusinessTypeList()
 	getTreeselect()
 	initData()
 })
