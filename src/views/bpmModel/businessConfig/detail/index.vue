@@ -285,7 +285,7 @@ const businessTypeOptions = ref([]) // 存储业务类型下拉选项
 // 根据字典查询业务类型
 const getBusinessTypeList = () => {
 	publicApi
-		.getLocalSelect({ type: 'DICT', dictType: 'BUSINESS_TYPE', remark: formData.businessName })
+		.getLocalSelect({ type: 'DICT', dictType: 'BPM_BUSINESS_TYPE', remark: formData.businessName })
 		.then(response => {
 			businessTypeOptions.value = response.data.map(item => ({
 				label: item.dictLabel,
