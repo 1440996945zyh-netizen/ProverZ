@@ -150,11 +150,11 @@ const tableColumns = ref([
 		},
 	},
 	{
-		prop: 'processInstance.startUser.nickname',
+		prop: 'processInstance.startUser.userName',
 		label: '发起人',
 		align: 'center',
 		width: 100,
-		render: row => [h('span', { props: {} }, row.processInstance?.startUser?.nickname || '')],
+		render: row => [h('span', { props: {} }, row.processInstance?.startUser?.userName || '')],
 	},
 	{
 		prop: 'processInstance.createTime',

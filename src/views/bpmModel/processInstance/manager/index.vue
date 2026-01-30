@@ -170,7 +170,7 @@ const tableColumns = ref([
 	},
 	{
 		label: '流程发起人',
-		prop: 'startUser.nickname',
+		prop: 'startUser.userName',
 		width: 120,
 		align: 'center',
 	},

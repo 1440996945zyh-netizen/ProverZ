@@ -36,6 +36,7 @@ import detail from './detail/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import dayjs from 'dayjs'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
+import { useRoute } from 'vue-router'
 
 const { proxy } = getCurrentInstance()
 const advancedQuery = ref([])
@@ -241,7 +242,7 @@ const buttonList = reactive([
 		label: '新增申请',
 		type: 'primary',
 		icon: 'Plus',
-		click: () => add(),
+		click: () => add,
 		permission: 'bpm:application:example:insert',
 	},
 ])
@@ -296,9 +297,6 @@ const add = () => {
 	title.value = '新增报销申请'
 	nextTick(() => {
 		detailRef.value.resetForm()
-		detailRef.value.formData.approvalStatus = 'pending'
-		detailRef.value.formData.applicantId = proxy.$store.getters.userInfo?.userId || ''
-		detailRef.value.formData.applicantName = proxy.$store.getters.userInfo?.userName || ''
 	})
 }
 
@@ -329,13 +327,15 @@ const edit = row => {
 			})
 	})
 }
+const route = useRoute()
 
 const handleSubmit = async () => {
 	if (await detailRef.value.validate()) {
 		try {
+			console.log('route:', route)
 			// 1. 查询流程定义ID
 			const procDefRes = await api.getProcDefId({
-				businessId: '2015965855761960960',
+				businessId: route.meta?.menuId,
 				businessTypeCode: 'APPLICATION',
 			})
 

@@ -11,7 +11,7 @@
 		<el-table-column label="审批节点" prop="name" min-width="120" align="center" />
 		<el-table-column label="审批人" min-width="100" align="center">
 			<template #default="scope">
-				{{ scope.row.assigneeUser?.nickname || scope.row.ownerUser?.nickname }}
+				{{ scope.row.assigneeUser?.userName || scope.row.ownerUser?.userName }}
 			</template>
 		</el-table-column>
 		<el-table-column :formatter="dateFormatter" align="center" label="开始时间" prop="createTime" min-width="140" />
@@ -52,6 +52,7 @@ import { BPM_TASK_STATUS } from '@/utils/bpm/constantEnumeration'
 import { setConfAndFields2 } from '@/utils/bpm/formCreate'
 import * as TaskApi from '@/api/system/bpm/task'
 import Dialog from '@/components/Dialog'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'BpmProcessInstanceTaskList' })
 
@@ -78,7 +79,9 @@ const taskForm = ref({
 	value: {},
 }) // 流程任务的表单详情
 const taskFormVisible = ref(false)
+const route = useRoute()
 
+const processInstanceId = route.params.id // 详情id
 const handleFormDetail = async row => {
 	// 设置表单
 	setConfAndFields2(taskForm, row.formConf, row.formFields, row.formVariables)
@@ -94,7 +97,7 @@ const handleFormDetail = async row => {
  * 加载流程任务列表
  */
 const loadTasks = async () => {
-	const res = await TaskApi.getTaskListByProcessInstanceId(props.id)
+	const res = await TaskApi.getTaskListByProcessInstanceId(processInstanceId)
 	tasks.value = res.data || []
 }
 /**

@@ -42,7 +42,7 @@ const usePermissionStore = defineStore('permission', {
 		},
 		// 新增：根据路径查找菜单项
 		findMenuByPath(targetPath) {
-			const normalizePath = (path) => {
+			const normalizePath = path => {
 				if (!path) return ''
 				return path.replace(/^\/+/, '')
 			}
@@ -95,7 +95,7 @@ const usePermissionStore = defineStore('permission', {
 		// 新增：获取扁平化的菜单列表
 		getFlatMenuList(menuList = null) {
 			const flatList = []
-			const flatten = (menus) => {
+			const flatten = menus => {
 				menus.forEach(menu => {
 					flatList.push(menu)
 					if (menu.children && menu.children.length) {
@@ -137,6 +137,9 @@ function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
 		if (type && route.children) {
 			route.children = filterChildren(route.children)
 		}
+		if (!route.meta) route.meta = {}
+		// 假设后端返回的菜单数据中包含id字段
+		route.meta.menuId = route.id
 		if (route.component) {
 			// Layout ParentView 组件特殊处理
 			if (route.component === 'Layout') {

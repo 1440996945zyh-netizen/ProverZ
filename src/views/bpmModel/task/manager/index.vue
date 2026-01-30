@@ -66,7 +66,7 @@ const tableHeight = computed(() => storeHight.value - 15)
 // 查询参数
 const queryParams = ref({
 	pageNo: 1,
-	pageSize: 10,
+	pageSize: 20,
 	name: '',
 	createTime: [],
 })
@@ -79,16 +79,16 @@ const selectData = reactive([
 		name: '流程名称', // 搜索框名称
 		type: 'input', // 搜索框类型
 		modelValue: 'name', // 绑定字段
-		span: 8, // 栅格占位
+		span: 24, // 栅格占位
 		placeholder: '请输入流程名称',
 	},
-	{
-		type: 'daterange', // 搜索框类型
-		modelValue: 'createTime', // 绑定字段
-		span: 8, // 占位，共24
-		name: '创建时间',
-		shortcuts: [],
-	},
+	// {
+	// 	type: 'daterange', // 搜索框类型
+	// 	modelValue: 'createTime', // 绑定字段
+	// 	span: 8, // 占位，共24
+	// 	name: '创建时间',
+	// 	shortcuts: [],
+	// },
 ])
 
 /**
@@ -101,7 +101,7 @@ const buttonList = reactive([])
  */
 const tableColumns = ref([
 	{
-		label: '流程名称1',
+		label: '流程名称',
 		prop: 'processInstance.name',
 		minWidth: 200,
 		fixed: 'left',
@@ -236,7 +236,7 @@ const getList = async (params = queryParams.value) => {
 	try {
 		// 合并查询参数
 		const query = { ...queryParams.value, ...params }
-		const res = await TaskApi.getTaskManagerPage(queryParams)
+		const res = await TaskApi.getTaskManagerPage(query)
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 

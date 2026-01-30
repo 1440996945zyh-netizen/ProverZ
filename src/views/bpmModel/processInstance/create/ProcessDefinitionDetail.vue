@@ -137,6 +137,7 @@ const initProcessInfo = async (row, formVariables) => {
 		//        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
 		// formInstance.value = formCreate.create(decodeFields(row.formFields))
 		// const allowedFields = formInstance.value.fields()
+		const allowedFields = row.formFields.map(field => field.field)
 		for (const key in formVariables) {
 			if (!allowedFields.includes(key)) {
 				delete formVariables[key]
