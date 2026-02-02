@@ -1081,7 +1081,6 @@ const getButtonDisplayName = btnType => {
 }
 
 const loadTodoTask = task => {
-	console.log('loadTodoTask1111111111', task)
 	approveForm.value = {}
 	runningTask.value = task
 	approveFormFApi.value = {}
