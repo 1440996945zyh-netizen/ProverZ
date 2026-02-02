@@ -17,7 +17,7 @@ export const CommonStatusEnumLabel = [
 	{
 		value: CommonStatusEnum.ENABLE,
 		label: '开启',
-		type: 'success',
+		type: 'success', 
 	},
 	{
 		value: CommonStatusEnum.DISABLE,
