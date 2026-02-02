@@ -240,7 +240,6 @@ const importXML = async xml => {
 		} finally {
 			isLoading.value = false
 			// 高亮流程
-			console.log(props.view, 'vi1111111111ew')
 			setProcessStatus(props.view)
 		}
 	}
