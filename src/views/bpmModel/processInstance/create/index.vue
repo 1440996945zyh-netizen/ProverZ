@@ -207,17 +207,28 @@ const getProcessDefinitionList = async () => {
 		console.error('获取流程定义失败：', e)
 	}
 }
+// 查询参数
+const queryParams = ref({
+	pageNo: 1,
+	pageSize: 20,
+	name: '',
+})
 
 /** 搜索流程 */
-const handleQuery = () => {
-	if (searchName.value.trim()) {
-		// 如果有搜索关键字，进行过滤
-		filteredProcessDefinitionList.value = processDefinitionList.value.filter(definition =>
-			definition.name.toLowerCase().includes(searchName.value.toLowerCase()),
-		)
-	} else {
-		// 如果没有搜索关键字，恢复所有数据
-		filteredProcessDefinitionList.value = processDefinitionList.value
+
+const handleQuery = async e => {
+	console.log('handleQuery:', e)
+	loading.value = true
+	try {
+		const query = Object.assign(queryParams.value, e)
+
+		const res = await BpmProcessDefinitionApi.getProcessDefinitionList({
+			suspensionState: 1,
+			name: query.searchName, // 添加查询参数
+		})
+		filteredProcessDefinitionList.value = res.data || []
+	} finally {
+		loading.value = false
 	}
 }
 

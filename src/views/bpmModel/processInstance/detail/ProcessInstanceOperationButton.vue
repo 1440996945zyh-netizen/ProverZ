@@ -168,7 +168,7 @@
 				>
 					<el-form-item label="抄送人" prop="copyUserIds">
 						<el-select v-model="copyForm.copyUserIds" clearable style="width: 100%" multiple placeholder="请选择抄送人">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="抄送意见" prop="copyReason">
@@ -218,7 +218,7 @@
 				>
 					<el-form-item label="新审批人" prop="assigneeUserId">
 						<el-select v-model="transferForm.assigneeUserId" clearable style="width: 100%">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
@@ -268,7 +268,7 @@
 				>
 					<el-form-item label="接收人" prop="delegateUserId">
 						<el-select v-model="delegateForm.delegateUserId" clearable style="width: 100%">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
@@ -318,7 +318,7 @@
 				>
 					<el-form-item label="加签处理人" prop="addSignUserIds">
 						<el-select v-model="addSignForm.addSignUserIds" multiple clearable style="width: 100%">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
@@ -527,6 +527,7 @@ import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import { isEmpty } from '@/utils/common/form-validation'
 import useUserStore from '@/store/modules/user'
 import { useMessage } from '@/plugins/useMessage'
+import publicApi from '@/api/public/index.js'
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
 const route = useRoute()
@@ -537,7 +538,7 @@ const message = useMessage() // 消息弹窗
 const userId = userStore.userId // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 
-// 定义props，移除TS类型注解
+// 定义props
 const props = defineProps({
 	processInstance: {
 		type: Object,
@@ -1125,6 +1126,25 @@ const handleSignFinish = url => {
 	approveReasonForm.signPicUrl = url
 	approveSignFormRef.value.validate('change')
 }
+const userOptions = ref([]) // 用户列表选项
+// 加载用户选项
+const loadUserOptions = async () => {
+	try {
+		const userResData = await publicApi.getLocalSelect({ type: 'USER' })
+		if (userResData && userResData.data) {
+			userOptions.value = userResData.data
+		} else {
+			userOptions.value = []
+		}
+	} catch (error) {
+		console.error('加载用户列表失败:', error)
+		userOptions.value = []
+	}
+}
+// 组件挂载时加载用户列表
+onMounted(async () => {
+	await loadUserOptions()
+})
 
 // 暴露方法给父组件
 defineExpose({ loadTodoTask })
