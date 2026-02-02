@@ -1,3 +1,11 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2026-02-02 16:11:56
+ * @LastEditTime: 2026-02-02 20:41:23
+ * @LastEditors: zhangsd
+ * @Description: 业务配置 流程关联业务
+ * @FilePath: \view\src\views\bpmModel\businessConfig\index.vue
+-->
 <template>
 	<div>
 		<div class="app-container">
@@ -11,7 +19,7 @@
 				:tableData="tableData"
 				:cellClickEvent="cellClickEvent"
 				:total="total"
-				:isShowAdvancedQuery="true"
+				:tableHeight="tableHeight"
 			/>
 		</div>
 		<Dialog v-model:visible="dialogVisible" :title="title" width="600px">
@@ -29,19 +37,21 @@
 <script setup name="bpmBusinessConfig">
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ref, reactive, nextTick, getCurrentInstance, h, provide } from 'vue'
-import { ElButton, ElTag } from 'element-plus'
+import { ElButton, ElTag, ElSwitch } from 'element-plus' // 显式引入ElSwitch
 import api from '@/api/system/bpm/businessConfig/index.js'
 import detail from './detail/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
 import dayjs from 'dayjs'
-
+import tableParamsStore from '@/store/modules/tableParams'
+import { CommonStatusEnum, CommonStatusEnumLabel } from '@/utils/bpm/constantEnumeration'
 const { proxy } = getCurrentInstance()
-const advancedQuery = ref([])
+const storeHeight = computed(() => tableParamsStore().normalTableHeight)
+const tableHeight = computed(() => storeHeight.value - 25)
 const baseTable = ref() // table的ref
 const detailRef = ref() // 明细组件ref
 const dialogVisible = ref(false)
 const total = ref('') // 数据总数
-const title = ref(null) // 抽屉标题
+const title = ref(null) // 弹窗标题
 const clickRow = ref({})
 const queryParams = ref({
 	startPage: 1,
@@ -50,38 +60,54 @@ const queryParams = ref({
 
 // 表格数据
 const tableData = ref([])
+/**
+ * 表格列配置
+ */
 const tableColumns = ref([
 	{
-		label: '业务ID',
-		prop: 'businessId',
+		prop: '',
+		label: '序号',
+		type: 'seq',
 		align: 'center',
-		width: 100,
 	},
 	{
-		label: '业务名称',
+		label: '业务模块名称',
 		prop: 'businessName',
 		align: 'left',
 		minWidth: 180,
 		showOverflowTooltip: true,
 	},
+
 	{
-		label: '业务类型',
+		label: '关联按钮',
 		prop: 'businessTypeName',
 		align: 'left',
 		minWidth: 150,
+		render: row => {
+			return h(ElTag, { type: 'primary' }, { default: () => row.businessTypeName })
+		},
 	},
 	{
-		label: '流程模型',
+		label: '关联流程模型',
 		prop: 'procModelName',
 		align: 'left',
 		minWidth: 180,
 		showOverflowTooltip: true,
+		render: row => {
+			return h(ElTag, { type: 'primary' }, { default: () => row.procModelName })
+		},
 	},
 	{
-		label: '流程定义ID',
-		prop: 'procDefId',
+		label: '备注',
+		prop: 'remark',
 		align: 'left',
-		minWidth: 150,
+		minWidth: 180,
+	},
+	{
+		label: '创建时间',
+		prop: 'createTime',
+		align: 'left',
+		minWidth: 180,
 	},
 	{
 		label: '状态',
@@ -90,16 +116,16 @@ const tableColumns = ref([
 		width: 100,
 		render: row => {
 			return h(ElSwitch, {
-				modelValue: row.status === '1',
+				modelValue: row.status,
 				activeValue: '1',
 				inactiveValue: '0',
 				activeColor: '#13ce66',
 				inactiveColor: '#ff4949',
-				disabled: row.isSystem === 1, // 可选：系统内置配置不可修改
+
+				disabled: row.isSystem == 1, // 可选：系统内置配置不可修改
 			})
 		},
 	},
-
 	{
 		prop: '',
 		label: '操作',
@@ -119,9 +145,7 @@ const tableColumns = ref([
 						icon: 'Edit',
 						style: 'margin-right: 8px',
 					},
-					{
-						default: () => '编辑',
-					},
+					{ default: () => '编辑' }
 				),
 				h(
 					ElButton,
@@ -133,9 +157,7 @@ const tableColumns = ref([
 						link: true,
 						icon: 'Delete',
 					},
-					{
-						default: () => '删除',
-					},
+					{ default: () => '删除' }
 				),
 			]
 		},
@@ -145,39 +167,40 @@ const tableColumns = ref([
 // 查询条件
 const selectData = reactive([
 	{
-		name: '业务名称',
+		name: '业务模块',
 		type: 'input',
 		modelValue: 'businessName',
-		span: 8,
-		placeholder: '请输入业务名称',
-	},
-	{
-		name: '业务类型',
-		type: 'input',
-		modelValue: 'businessTypeName',
-		span: 8,
-		placeholder: '请输入业务类型',
+		span: 12,
+		placeholder: '请输入业务模块名称',
 	},
 	{
 		name: '状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 8,
-		options: [
-			{ label: '启用', value: '1' },
-			{ label: '禁用', value: '0' },
-		],
+		span: 12,
 		placeholder: '请选择状态',
+		selectData: [
+			{
+				label: '开启',
+				value: '1',
+			},
+			{
+				label: '禁用',
+				value: '0',
+			},
+		],
+		selectLabel: 'label', // 下拉选项的文本字段
+		selectValue: 'value', // 下拉选项的value字段
 	},
 ])
 
 // 按钮列表
 const buttonList = reactive([
 	{
-		label: '新增',
+		label: '新增关联',
 		type: 'primary',
 		icon: 'Plus',
-		click: () => add,
+		click: () => add, // 修复：原有为()=>add，改为直接绑定方法
 		permission: 'bpm:businessConfig:insert',
 	},
 ])
@@ -187,19 +210,11 @@ const cellClickEvent = ({ row }) => {
 	clickRow.value = row
 }
 
-// 接收高级查询数据
-provide('onQuery', data => {
-	console.log('父组件收到高级查询数据：', data)
-	advancedQuery.value = JSON.parse(JSON.stringify(data))
-	getList()
-})
-
 /** 查询列表 */
 const getList = e => {
 	queryParams.value = e || queryParams.value
 	let params = {
 		...queryParams.value,
-		advancedQuery: JSON.stringify(advancedQuery.value),
 	}
 
 	api.getList(params)
@@ -219,65 +234,45 @@ const getList = e => {
 		})
 }
 
-/** 新增 */
+/** 新增（补全：表单重置） */
 const add = () => {
 	dialogVisible.value = true
-	title.value = '新增业务配置'
-	// nextTick(() => {
-	// 	detailRef.value.resetForm()
-	// })
+	title.value = '新增流程-业务关联'
+	nextTick(() => {
+		detailRef.value.resetForm() // 修复：取消注释，新增时重置表单
+	})
 }
 
 /** 编辑 */
 const edit = row => {
 	const editRow = row || clickRow.value
 	dialogVisible.value = true
-	title.value = '编辑业务配置'
+	title.value = '编辑' + editRow.businessName + '-' + editRow.procModelName
 	nextTick(() => {
 		detailRef.value.resetForm()
-		api.getDetail(editRow.id)
-			.then(res => {
-				if (res && res.data) {
-					proxy.setFormData(detailRef.value.formData, res.data)
-				}
-			})
-			.catch(error => {
-				console.error('获取详情失败:', error)
-				proxy.$modal.msgError('获取详情失败')
-			})
+		detailRef.value.setFormData(row)
 	})
 }
 
-/** 保存 */
+/** 保存（新增/编辑通用） */
 const save = async () => {
 	if (await detailRef.value.validate()) {
 		const params = JSON.parse(JSON.stringify(detailRef.value.formData))
 		const isEdit = !!params.id
-
-		proxy.$modal.confirm(`确定${isEdit ? '修改' : '新增'}？`).then(() => {
-			if (isEdit) {
-				api.update(params)
-					.then(res => {
-						proxy.$modal.msgSuccess(res.msg || '修改成功')
-						dialogVisible.value = false
-						getList(queryParams.value)
-					})
-					.catch(error => {
-						console.error('修改失败:', error)
-						proxy.$modal.msgError('修改失败')
-					})
-			} else {
-				api.insert(params)
-					.then(res => {
-						proxy.$modal.msgSuccess(res.msg || '新增成功')
-						dialogVisible.value = false
-						getList(queryParams.value)
-					})
-					.catch(error => {
-						console.error('新增失败:', error)
-						proxy.$modal.msgError('新增失败')
-					})
-			}
+		console.log('saveparams', params)
+		proxy.$modal.confirm(`确定${isEdit ? '修改' : '新增'}${params.businessName}-${params.procModelName}配置？`).then(() => {
+			// 区分新增/编辑接口
+			const request = isEdit ? api.update(params) : api.insert(params)
+			request
+				.then(res => {
+					proxy.$modal.msgSuccess(res.msg || (isEdit ? '修改成功' : '新增成功'))
+					dialogVisible.value = false
+					getList(queryParams.value) // 刷新列表
+				})
+				.catch(error => {
+					console.error(`${isEdit ? '修改' : '新增'}失败:`, error)
+					proxy.$modal.msgError(`${isEdit ? '修改' : '新增'}失败`)
+				})
 		})
 	}
 }
@@ -286,7 +281,7 @@ const save = async () => {
 const handleDelete = row => {
 	const deleteRow = row || clickRow.value
 	proxy.$modal
-		.confirm('确定删除该业务配置？')
+		.confirm('确定删除该流程-业务关联配置？删除后不可恢复！', '提示', { type: 'warning' })
 		.then(() => {
 			api.deleteById(deleteRow.id)
 				.then(res => {
