@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:21:33
- * @LastEditTime: 2026-02-02 17:54:18
+ * @LastEditTime: 2026-02-03 15:09:11
  * @LastEditors: zhangsd
  * @Description:  流程监听器
  * @FilePath: \view\src\views\bpmModel\processListener\index.vue
@@ -33,7 +33,6 @@
 
 <script setup>
 defineOptions({ name: 'BpmProcessListener' })
-import { Edit, Setting, Promotion, VideoPause, VideoPlay, Delete, Finished, Check } from '@element-plus/icons-vue'
 import ProcessListenerForm from './ProcessListenerForm.vue'
 // 1. 基础依赖导入
 import { formatDate } from '@/utils/common/date'
@@ -43,10 +42,8 @@ import {
 	BPM_PROCESS_LISTENER_TYPE,
 	BPM_PROCESS_LISTENER_VALUE_TYPE,
 } from '@/utils/bpm/constantEnumeration'
-
 // 2. 组件导入
 import BaseTable from '@/components/BaseTable/index.vue'
-import DropDown from '@/components/DropDown/newIndex.vue'
 // 3. 接口与状态管理导入
 import { ProcessListenerApi } from '@/api/system/bpm/processListener'
 import tableParamsStore from '@/store/modules/tableParams'
@@ -57,28 +54,16 @@ const { proxy } = getCurrentInstance()
 const storeHeight = computed(() => tableParamsStore().normalTableHeight)
 const listenerTableRef = ref(null)
 const formRef = ref(null)
-const dialogTitle = ref('')
-const dialogVisible = ref(false)
+
 // 5. 核心响应式数据
 const data = reactive({
 	queryParams: {
-		pageNo: 1,
-		pageSize: 20,
+		startPage: 1,
+		pageSize: 10,
 		name: undefined,
 		type: undefined,
 	},
-	tableData: [
-		{
-			id: 1,
-			name: '员工请假流程',
-			type: 'execution',
-			status: 0,
-			event: '开始',
-			valueType: 'expression',
-			value: '${bpmTaskAssignStartUserExpression.calculateUsers(execution)}',
-			createTime: 1770022075000,
-		},
-	],
+	tableData: [],
 	total: 0,
 	tableLoading: false,
 })
@@ -92,15 +77,16 @@ const rowConfig = { keyField: 'id' }
 // 7. 搜索条件配置
 const selectData = reactive([
 	{
-		name: '名字',
+		name: '名称',
 		type: 'input',
-		modelValue: 'name',
+		modelValue: 'listenerName',
 		span: 12,
 	},
 	{
 		name: '类型',
 		type: 'select',
-		modelValue: 'type',
+		modelLabel: 'listenerTypeName',
+		modelValue: 'listenerTypeCode',
 		span: 12,
 		placeholder: '请选择类型',
 		selectData: BPM_PROCESS_LISTENER_TYPE,
@@ -125,19 +111,20 @@ const buttonList = reactive([
 // 9. 表格列配置
 const tableColumns = ref([
 	{
-		prop: 'id',
+		prop: '',
 		label: '编号',
 		align: 'center',
 		width: 80,
+		type: 'seq',
 	},
 	{
-		prop: 'name',
-		label: '名字',
+		prop: 'listenerName',
+		label: '名称',
 		align: 'center',
 		minWidth: 150,
 	},
 	{
-		prop: 'type',
+		prop: 'listenerTypeName',
 		label: '类型',
 		align: 'center',
 		width: 120,
@@ -146,26 +133,22 @@ const tableColumns = ref([
 				h(
 					ElTag,
 					{
-						type: BPM_PROCESS_LISTENER_TYPE.find(item => item.value === row.type)?.label === '执行监听器' ? '' : 'info',
+						type: row.listenerTypeCode == 'task' ? '' : 'success',
 					},
 					{
-						default: () =>
-							BPM_PROCESS_LISTENER_TYPE.find(item => item.value === row.type)?.label === '执行监听器'
-								? '执行监听器'
-								: '任务监听器',
+						default: () => row.listenerTypeName || '',
 					}
 				),
 			]
 		},
 	},
 	{
-		prop: 'status',
+		prop: 'listenerStatus',
 		label: '状态',
 		align: 'center',
 		width: 100,
-
 		render: row => {
-			const statusItem = CommonStatusEnumLabel.find(item => item.value == row.status)
+			const statusItem = CommonStatusEnumLabel.find(item => item.value == row.listenerStatus)
 			return h(
 				ElTag,
 				{
@@ -178,13 +161,13 @@ const tableColumns = ref([
 		},
 	},
 	{
-		prop: 'event',
+		prop: 'listenerEventName',
 		label: '事件',
 		align: 'center',
 		width: 120,
 	},
 	{
-		prop: 'valueType',
+		prop: 'listenerValueTypeName',
 		label: '值类型',
 		align: 'center',
 		width: 120,
@@ -193,22 +176,20 @@ const tableColumns = ref([
 				h(
 					ElTag,
 					{
-						type: BPM_PROCESS_LISTENER_VALUE_TYPE.find(item => item.value === row.valueType)?.label === 'JAVA类' ? '' : 'info',
+						type:
+							row.listenerValueTypeCode == 'class'
+								? ''
+								: row.listenerValueTypeCode == 'expression' ? 'success' : 'warning',
 					},
 					{
-						default: () =>
-							BPM_PROCESS_LISTENER_VALUE_TYPE.find(item => item.value === row.valueType)?.label === 'JAVA类'
-								? 'JAVA类'
-								: BPM_PROCESS_LISTENER_VALUE_TYPE.find(item => item.value === row.valueType)?.label === '表达式'
-								? '表达式'
-								: '代理表达式',
+						default: () => row.listenerValueTypeName || '',
 					}
 				),
 			]
 		},
 	},
 	{
-		prop: 'value',
+		prop: 'listenerValue',
 		label: '值',
 		align: 'center',
 		showOverFlow: true,
@@ -224,38 +205,36 @@ const tableColumns = ref([
 	{
 		label: '操作',
 		align: 'center',
-		width: 120,
+		width: 180,
 		fixed: 'right',
 		render: row => {
-			const dropDownList = [
-				{
-					name: '编辑',
-					command: '编辑',
-					click: () => {
-						openForm('update', row.id)
-					},
-					permission: 'bpm:processListener:update',
-					icon: Edit,
-				},
-				{
-					name: '删除',
-					command: '删除',
-					click: () => handleDelete(row.id),
-					type: 'danger',
-					permission: 'bpm:processListener:delete',
-					icon: Delete,
-				},
-			]
 			return [
 				h(
-					DropDown,
+					ElButton,
 					{
-						dropDownList,
-						isInner: true,
+						onClick: () => {
+							openForm('update', row.id)
+						},
+						type: 'primary',
+						link: true,
+						icon: 'Edit',
+						style: 'margin-right: 8px',
+						permission: 'bpm:processListener:update',
 					},
+					{ default: () => '编辑' }
+				),
+				h(
+					ElButton,
 					{
-						default: () => h('span', { class: 'el-icon-more' }),
-					}
+						onClick: () => {
+							handleDelete(row.id)
+						},
+						type: 'danger',
+						link: true,
+						icon: 'Delete',
+						permission: 'bpm:processListener:delete',
+					},
+					{ default: () => '删除' }
 				),
 			]
 		},
@@ -264,12 +243,16 @@ const tableColumns = ref([
 
 // 10. 核心业务方法
 /** 查询列表 */
-const getList = async () => {
+const getList = async e => {
+	let params = {
+		...queryParams.value,
+		...e,
+	}
 	tableLoading.value = true
 	try {
-		const data = await ProcessListenerApi.getProcessListenerPage(queryParams.value)
-		tableData.value = data.list || []
-		total.value = data.total
+		const res = await ProcessListenerApi.getList(params)
+		tableData.value = res.data.pages || []
+		total.value = res.data.totalNum
 	} catch (error) {
 		proxy.$modal.msgError('获取列表失败')
 	} finally {
@@ -287,8 +270,8 @@ const handleQuery = () => {
 const openForm = (type, id) => {
 	console.log('type,id =>', type, id)
 	console.log('formRef 实例:', formRef.value)
-	nextTick( () => {
-		 formRef.value.open(type, id)
+	nextTick(() => {
+		formRef.value.open(type, id)
 	})
 }
 
