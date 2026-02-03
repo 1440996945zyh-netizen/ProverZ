@@ -817,11 +817,11 @@ const tableColumnsDone = ref([
 		},
 	},
 	{
-		prop: 'processInstance.startUser.nickname',
+		prop: 'processInstance.startUser.userName',
 		label: '发起人',
 		align: 'center',
 		width: 100,
-		render: row => [h('span', { props: {} }, row.processInstance?.startUser?.nickname || '')],
+		render: row => [h('span', { props: {} }, row.processInstance?.startUser?.userName || '')],
 	},
 	{
 		prop: 'name',
@@ -1065,11 +1065,11 @@ const tableColumnsCopy = ref([
 		},
 	},
 	{
-		prop: 'startUser.nickname',
+		prop: 'startUser.userName',
 		label: '流程发起人',
 		align: 'center',
 		minWidth: 100,
-		render: row => [h('span', { props: {} }, row.startUser?.nickname || '')],
+		render: row => [h('span', { props: {} }, row.startUser?.userName || '')],
 	},
 	{
 		prop: 'processInstanceStartTime',
@@ -1088,7 +1088,7 @@ const tableColumnsCopy = ref([
 		label: '抄送人',
 		align: 'center',
 		minWidth: 100,
-		render: row => [h('span', { props: {} }, row.createUser?.nickname || '系统')],
+		render: row => [h('span', { props: {} }, row.createUser?.userName || '')],
 	},
 	{
 		prop: 'reason',
@@ -1145,14 +1145,15 @@ const totalCopy = computed(() => copyData.total)
 const getListCopy = async () => {
 	copyData.loading = true
 	try {
-		const data = await getProcessInstanceCopyPage(copyData.queryParams)
-		copyData.tableData = data.list
-		copyData.total = data.total
+		const res = await getProcessInstanceCopyPage(copyData.queryParams)
+		copyData.tableData = res.data.pages || []
+		copyData.total = res.data.totalNum || 0
 	} catch (error) {
+		;``
 		console.error('获取抄送任务列表失败:', error)
 		ElMessage.error('获取列表失败')
 		copyData.tableData = []
-		copyData.total = 0
+		copyData.totalNum = 0
 	} finally {
 		copyData.loading = false
 	}
