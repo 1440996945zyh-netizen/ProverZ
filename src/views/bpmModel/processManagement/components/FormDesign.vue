@@ -1,20 +1,22 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 14:18:02
- * @LastEditTime: 2025-12-25 15:28:46
+ * @LastEditTime: 2026-02-03 15:48:28
  * @LastEditors: zhangsd
  * @Description: 表单设计
  * @FilePath: \view\src\views\bpmModel\processManagement\components\FormDesign.vue
 -->
 <template>
 	<el-form ref="formRef" :model="modelData" :rules="rules" label-width="120px" class="mt-20px">
-		<el-form-item label="表单类型" prop="formType" class="form-item-gap">
+		<!-- <el-form-item label="表单类型" prop="formType" class="form-item-gap">
 			<el-radio-group v-model="modelData.formType">
 				<el-radio v-for="dict in formTypeList" :key="dict.value" :value="dict.value">
 					{{ dict.label }}
 				</el-radio>
 			</el-radio-group>
-		</el-form-item>
+		</el-form-item> -->
+
+		<TipMessage type="Primary" style="margin-bottom: 15px;">请选择流程表单</TipMessage>
 
 		<el-form-item v-if="modelData.formType == BpmModelFormType.NORMAL" label="流程表单" prop="formId" class="form-item-gap">
 			<el-select v-model="modelData.formId" clearable style="width: 100%">
@@ -79,6 +81,7 @@ import { ref, watch } from 'vue'
 import { setConfAndFields2 } from '@/utils/bpm/formCreate'
 import { BpmModelFormType } from '@/utils/bpm/constantEnumeration'
 import { getFormPage, getDetail, deleteForm } from '@/api/system/bpm/form'
+import TipMessage from '@/components/TipMessage'
 // 定义组件属性
 const props = defineProps({
 	formList: {
@@ -106,9 +109,19 @@ const formPreview = ref({
 	option: {
 		submitBtn: false,
 		resetBtn: false,
+		menuBtn: false,
 		formData: {},
 	},
 })
+watch(
+	() => modelData.value,
+	newVal => {
+		if (newVal && (newVal.formType === undefined || newVal.formType === null)) {
+			modelData.value.formType = BpmModelFormType.NORMAL // 确保值为 10
+		}
+	},
+	{ immediate: true }
+)
 
 // 监听表单ID变化，加载表单数据
 watch(
@@ -116,9 +129,15 @@ watch(
 	async newFormId => {
 		console.log('newFormId =>', newFormId)
 		if (newFormId && modelData.value.formType == BpmModelFormType.NORMAL) {
-			const {data} = await getDetail(newFormId)
-		
+			const { data } = await getDetail(newFormId)
+
 			setConfAndFields2(formPreview.value, data.conf, data.fields)
+			formPreview.value.option = {
+				...formPreview.value.option, // 保留其他布局配置
+				submitBtn: false,            // 隐藏提交按钮
+				resetBtn: false,             // 隐藏重置按钮
+				menuBtn: false               // 隐藏整个底部按钮区域（最保险）
+			}
 			// 设置只读
 			formPreview.value.rule.forEach(item => {
 				item.props = { ...item.props, disabled: true }
@@ -133,7 +152,7 @@ watch(
 
 // 表单验证规则
 const rules = {
-	formType: [{ required: true, message: '表单类型不能为空', trigger: 'blur' }],
+	// formType: [{ required: true, message: '表单类型不能为空', trigger: 'blur' }],
 	formId: [{ required: true, message: '流程表单不能为空', trigger: 'blur' }],
 	formCustomCreatePath: [{ required: true, message: '表单提交路由不能为空', trigger: 'blur' }],
 	formCustomViewPath: [{ required: true, message: '表单查看地址不能为空', trigger: 'blur' }],

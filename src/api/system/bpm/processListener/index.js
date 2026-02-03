@@ -1,28 +1,29 @@
 import request from '@/utils/auth/request'
 
+const baseApi = '/api/internal/bpmProcessListener'
 // BPM 流程监听器 API
 export const ProcessListenerApi = {
   // 查询流程监听器分页
-  getProcessListenerPage: async (params) => {
+  getList: (query) => {
     return request({
-      url: `/bpm/process-listener/page`,
+      url: baseApi + '/getList',
       method: 'get',
-      params
+      params: query,
     })
   },
 
   // 查询流程监听器详情
   getProcessListener: async (id) => {
     return request({
-      url: `/bpm/process-listener/get?id=` + id,
+      url: baseApi + `/getDetail/${id}`,
       method: 'get'
     })
   },
 
   // 新增流程监听器
-  createProcessListener: async (data) => {
+  insertProcessListener: async (data) => {
     return request({
-      url: `/bpm/process-listener/create`,
+      url: baseApi + '/insert',
       method: 'post',
       data
     })
@@ -31,8 +32,8 @@ export const ProcessListenerApi = {
   // 修改流程监听器
   updateProcessListener: async (data) => {
     return request({
-      url: `/bpm/process-listener/update`,
-      method: 'put',
+      url: baseApi + '/update',
+      method: 'post',
       data
     })
   },
@@ -40,7 +41,7 @@ export const ProcessListenerApi = {
   // 删除流程监听器
   deleteProcessListener: async (id) => {
     return request({
-      url: `/bpm/process-listener/delete?id=` + id,
+      url: baseApi + `/deleteById/${id}`,
       method: 'delete'
     })
   }

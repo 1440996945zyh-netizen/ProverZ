@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 13:38:46
- * @LastEditTime: 2025-12-18 11:31:53
+ * @LastEditTime: 2026-02-03 15:21:03
  * @LastEditors: zhangsd
  * @Description: 基本信息
  * @FilePath: \view\src\views\bpmModel\processManagement\components\BasicInfo.vue
@@ -29,11 +29,11 @@
 				<el-input v-model="modelData.name" :disabled="!!modelData.id" clearable placeholder="请输入流程名称" />
 			</el-form-item>
 
-			<el-form-item label="流程分类" prop="category" class="form-item-gap">
+			<!-- <el-form-item label="流程分类" prop="category" class="form-item-gap">
 				<el-select class="width-full" v-model="modelData.category" clearable placeholder="请选择流程分类">
 					<el-option v-for="category in categoryList" :key="category.code" :label="category.name" :value="category.code" />
 				</el-select>
-			</el-form-item>
+			</el-form-item> -->
 
 			<!-- <el-form-item label="流程图标" class="form-item-gap">
 				<UploadImg v-model="modelData.icon" :limit="1" height="64px" width="64px" />
@@ -43,23 +43,23 @@
 				<el-input v-model="modelData.description" clearable type="textarea" />
 			</el-form-item>
 
-			<el-form-item label="流程类型" prop="type" class="form-item-gap">
+			<!-- <el-form-item label="流程类型" prop="type" class="form-item-gap">
 				<el-radio-group v-model="modelData.type">
 					<el-radio v-for="dict in dictBpmModelType" :key="dict.value" :value="dict.value">
 						{{ dict.label }}
 					</el-radio>
 				</el-radio-group>
-			</el-form-item>
+			</el-form-item> -->
 
-			<el-form-item label="是否可见" prop="visible" class="form-item-gap">
+			<!-- <el-form-item label="是否可见" prop="visible" class="form-item-gap">
 				<el-radio-group v-model="modelData.visible">
 					<el-radio v-for="dict in dictTypeMap" :key="dict.value" :value="dict.value">
 						{{ dict.label }}
 					</el-radio>
 				</el-radio-group>
-			</el-form-item>
+			</el-form-item> -->
 
-			<el-form-item label="谁可以发起" prop="startUserType" class="form-item-gap">
+			<!-- <el-form-item label="谁可以发起" prop="startUserType" class="form-item-gap" >
 				<el-select v-model="modelData.startUserType" placeholder="请选择谁可以发起" @change="handleStartUserTypeChange">
 					<el-option label="全员" :value="0" />
 					<el-option label="指定人员" :value="1" />
@@ -92,7 +92,7 @@
 						选择部门
 					</el-button>
 				</div>
-			</el-form-item>
+			</el-form-item> -->
 
 			<el-form-item label="流程管理员" prop="managerUserIds" class="form-item-gap">
 				<div class="flex flex-wrap gap-16">
@@ -189,9 +189,9 @@ const rules = {
 			trigger: 'blur',
 		},
 	],
-	category: [{ required: true, message: '流程分类不能为空', trigger: 'blur' }],
-	type: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
-	visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
+	// category: [{ required: true, message: '流程分类不能为空', trigger: 'blur' }],
+	// type: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
+	// visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
 	managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }],
 }
 
@@ -202,6 +202,9 @@ const modelData = defineModel({})
 watch(
 	() => modelData.value,
 	newVal => {
+		if (newVal.visible == undefined) newVal.visible = true // 默认可见
+		if (newVal.type == undefined) newVal.type = 10 // 默认 BPMN 设计器
+		if (newVal.startUserType == undefined) newVal.startUserType = 0 // 默认全员发起
 		if (newVal.startUserIds?.length) {
 			selectedStartUsers.value = props.userList.filter(user => newVal.startUserIds.includes(user.id))
 		} else {
@@ -216,10 +219,10 @@ watch(
 
 		if (newVal.managerUserIds?.length) {
 			selectedManagerUsers.value = props.userList.filter(user => newVal.managerUserIds.includes(user.id))
-			
 		} else {
 			selectedManagerUsers.value = []
 		}
+		
 		console.log('newVal =>', newVal)
 	},
 	{ immediate: true }
@@ -228,13 +231,13 @@ watch(
 /** 打开发起人选择 */
 const openStartUserSelect = () => {
 	currentSelectType.value = 'start'
-	console.log('selectedStartUsers.value =>', selectedStartUsers.value);
+	console.log('selectedStartUsers.value =>', selectedStartUsers.value)
 	userSelectFormRef.value.open(0, selectedStartUsers.value)
 }
 
 /** 打开部门选择 */
 const openStartDeptSelect = () => {
-	deptSelectFormRef.value.open( selectedStartDepts.value)
+	deptSelectFormRef.value.open(selectedStartDepts.value)
 }
 
 /** 打开管理员选择 */
