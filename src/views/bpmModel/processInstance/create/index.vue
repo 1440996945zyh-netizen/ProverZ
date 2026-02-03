@@ -95,11 +95,12 @@
 		</div>
 
 		<!-- 第二步，填写表单，进行流程的提交 -->
-		<Dialog v-model:visible="visibleDialog" :title="'流程:' + selectProcessDefinition.name" isFullscreen>
+		<Dialog v-model:visible="visibleDialog" :title="'流程:' + (selectProcessDefinition?.name || '')" isFullscreen>
 			<ProcessDefinitionDetail
 				ref="processDefinitionDetailRef"
 				:selectProcessDefinition="selectProcessDefinition"
-				@cancel="selectProcessDefinition = undefined"
+				@cancel="handleCancel"
+				@close="visibleDialog = false"
 			/>
 		</Dialog>
 	</div>
@@ -330,6 +331,11 @@ const availableCategories = computed(() => {
 	// 过滤出有流程的分类
 	return categoryList.value.filter(category => availableCategoryCodes.includes(category.code))
 })
+// 处理取消操作
+const handleCancel = () => {
+	selectProcessDefinition.value = {}
+	visibleDialog.value = false
+}
 
 /** 初始化 */
 onMounted(() => {
