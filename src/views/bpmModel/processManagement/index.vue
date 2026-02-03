@@ -521,7 +521,7 @@ const tableColumns = ref([
 					  ]
 					: []),
 				// 根据状态显示挂起/激活
-				...(row.processDefinition.suspensionState === 1
+				...(row.processDefinition?.suspensionState === 1
 					? [
 							{
 								name: '停用',
