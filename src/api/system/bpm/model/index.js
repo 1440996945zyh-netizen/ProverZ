@@ -127,7 +127,7 @@ const BpmModelApi = {
    */
   cleanModel: async (id) => {
     return request({
-      url: '/bpm/model/clean?id=' + id,
+      url: `/bpm/model/clean?id=${id}`,
       method: 'delete'
     })
   }

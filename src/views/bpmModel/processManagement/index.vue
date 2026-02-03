@@ -239,34 +239,34 @@ const buttonList = reactive([
 
 // 14. 表格列配置（修复操作列逻辑，匹配流程业务）
 const tableColumns = ref([
-	{
-		prop: 'id',
-		label: '流程定义id',
-		align: 'center',
-		minWidth: 250,
-	},
-	{
-		prop: 'key',
-		label: '流程标识Key',
-		align: 'center',
-		width: 250,
-	},
-	{
-		prop: 'category',
-		label: '流程分类',
-		align: 'center',
-		width: 150,
-		render: row => {
-			const option = categoryOptions.find(item => item.value === row.category)
-			// 修复：给原生span添加props对象（即使为空）
-			return [h('span', { props: {} }, option ? option.label : row.category)]
-		},
-	},
+	// {
+	// 	prop: 'id',
+	// 	label: '流程定义id',
+	// 	align: 'center',
+	// 	minWidth: 250,
+	// },
+	// {
+	// 	prop: 'key',
+	// 	label: '流程标识Key',
+	// 	align: 'center',
+	// 	width: 250,
+	// },
+	// {
+	// 	prop: 'category',
+	// 	label: '流程分类',
+	// 	align: 'center',
+	// 	width: 150,
+	// 	render: row => {
+	// 		const option = categoryOptions.find(item => item.value === row.category)
+	// 		// 修复：给原生span添加props对象（即使为空）
+	// 		return [h('span', { props: {} }, option ? option.label : row.category)]
+	// 	},
+	// },
 	{
 		prop: 'name',
 		label: '流程名称',
 		align: 'center',
-		width: 100,
+		minWidth: 150,
 		showOverFlow: true,
 		render: row => {
 			return [
@@ -278,16 +278,16 @@ const tableColumns = ref([
 						onClick: () => handleProcessView(row.deploymentId),
 						permission: undefined, // 明确添加permission属性（避免props为null）
 					},
-					{ default: () => row.name },
+					{ default: () => row.name }
 				),
 			]
 		},
 	},
 	{
 		prop: 'formName',
-		label: '表单名称',
+		label: '表单信息',
 		align: 'center',
-		width: 100,
+		minWidth: 150,
 		showOverFlow: true,
 		render: row => {
 			if (row.formId) {
@@ -300,7 +300,7 @@ const tableColumns = ref([
 							onClick: () => handleForm(row.formId),
 							permission: undefined,
 						},
-						{ default: () => row.formName },
+						{ default: () => row.formName }
 					),
 				]
 			} else {
@@ -350,7 +350,7 @@ const tableColumns = ref([
 	// },
 	{
 		prop: '',
-		label: '部署时间',
+		label: '发布时间',
 		align: 'center',
 		width: 180,
 		render: row => {
@@ -377,10 +377,64 @@ const tableColumns = ref([
 							class: 'mr-5', // 右边距
 							permission: undefined,
 						},
-						{ default: () => `v${row.processDefinition.version}` },
-					),
+						{ default: () => `v${row.processDefinition.version}` }
+					)
 				)
 
+				// 挂起状态标签（当 suspensionState === 2 时显示）
+				// if (row.processDefinition.suspensionState === 2) {
+				// 	tags.push(
+				// 		h(
+				// 			ElTag,
+				// 			{
+				// 				type: 'warning',
+				// 				class: 'ml-5',
+				// 				permission: undefined,
+				// 			},
+				// 			{ default: () => '已停用' },
+				// 		),
+				// 	)
+				// }
+			} else {
+				// 未部署状态
+				tags.push(
+					h(
+						ElTag,
+						{
+							type: 'info',
+							permission: undefined,
+						},
+						{ default: () => '未部署' }
+					)
+				)
+			}
+
+			return tags
+		},
+		sortable: true,
+	},
+	{
+		prop: 'suspensionState',
+		label: '状态',
+		align: 'center',
+		width: 150, // 增加宽度以容纳两个标签
+		render: row => {
+			const tags = []
+
+			if (row.processDefinition) {
+				if (row.processDefinition.suspensionState === 1) {
+					tags.push(
+						h(
+							ElTag,
+							{
+								type: 'success',
+								class: 'ml-5',
+								permission: undefined,
+							},
+							{ default: () => '已激活' }
+						)
+					)
+				}
 				// 挂起状态标签（当 suspensionState === 2 时显示）
 				if (row.processDefinition.suspensionState === 2) {
 					tags.push(
@@ -391,8 +445,8 @@ const tableColumns = ref([
 								class: 'ml-5',
 								permission: undefined,
 							},
-							{ default: () => '已停用' },
-						),
+							{ default: () => '已停用' }
+						)
 					)
 				}
 			} else {
@@ -404,8 +458,8 @@ const tableColumns = ref([
 							type: 'info',
 							permission: undefined,
 						},
-						{ default: () => '未部署' },
-					),
+						{ default: () => '未部署' }
+					)
 				)
 			}
 
@@ -452,7 +506,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:config',
 								icon: Setting, // 添加图标组件
 							},
-						]
+					  ]
 					: []),
 				// 仅当可发起申请时显示
 				...(canSubmit(row)
@@ -464,19 +518,19 @@ const tableColumns = ref([
 								permission: 'bpm:process:submit',
 								icon: Promotion, // 添加图标组件
 							},
-						]
+					  ]
 					: []),
 				// 根据状态显示挂起/激活
-				...(row.suspensionState === 1
+				...(row.processDefinition.suspensionState === 1
 					? [
 							{
-								name: '挂起',
-								command: '挂起',
+								name: '停用',
+								command: '停用',
 								click: () => handleUpdateSuspensionState(row, 2),
 								permission: 'bpm:process:state',
 								icon: VideoPause, // 添加图标组件
 							},
-						]
+					  ]
 					: [
 							{
 								name: '激活',
@@ -485,7 +539,16 @@ const tableColumns = ref([
 								permission: 'bpm:process:state',
 								icon: VideoPlay, // 添加图标组件
 							},
-						]),
+					  ]),
+				// 清理
+				{
+					name: '清理',
+					command: '清理',
+					click: () => clean(row),
+					type: 'danger',
+					permission: 'bpm:process:clean',
+					icon: Delete, // 添加图标组件
+				},
 				// 删除
 				{
 					name: '删除',
@@ -507,7 +570,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }), // 下拉按钮显示更多图标
-					},
+					}
 				),
 			]
 		},
@@ -733,6 +796,28 @@ const handleUpdateSuspensionState = (row, state) => {
 }
 
 /**
+ * 清理流程
+ * @param {Object} row 流程数据
+ */
+const clean = row => {
+	currentRow.value = row
+	currentAction.value = 'clean'
+	confirmMessage.value = `确定要清理流程【${row.name}】吗？`
+
+	ElMessageBox.confirm(confirmMessage.value, '确认操作', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(() => {
+			handleConfirmAction()
+		})
+		.catch(() => {
+			// 取消操作
+		})
+}
+
+/**
  * 删除流程
  * @param {Object} row 流程数据
  */
@@ -793,6 +878,15 @@ const handleConfirmAction = () => {
 				getList()
 			} else {
 				ElMessage.error('删除流程失败')
+			}
+		})
+	} else if (currentAction.value === 'clean') {
+		BpmModelApi.cleanModel(currentRow.value.id).then(res => {
+			if (res.code == '0000') {
+				proxy.$modal.msgSuccess('流程清理成功')
+				getList()
+			} else {
+				ElMessage.error('清理流程失败')
 			}
 		})
 	}
