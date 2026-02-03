@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-12-25 22:19:01
+ * @LastEditTime: 2026-02-03 15:49:28
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
@@ -678,6 +678,12 @@ const handleForm = async formId => {
 	const formData = apiResponse.data
 
 	setConfAndFields2(formDetailPreview, formData.conf, formData.fields)
+	formDetailPreview.value.option = {
+				...formDetailPreview.value.option, // 保留其他布局配置
+				submitBtn: false,            // 隐藏提交按钮
+				resetBtn: false,             // 隐藏重置按钮
+				menuBtn: false               // 隐藏整个底部按钮区域（最保险）
+			}
 	// 弹窗打开
 	formDetailVisible.value = true
 }
