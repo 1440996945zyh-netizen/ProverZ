@@ -1,30 +1,15 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2025-12-22 11:10:21
+ * @LastEditTime: 2025-12-23 11:13:32
+ * @LastEditors: zhangsd
+ * @Description: 审批中心
+ * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
+-->
 <template>
 	<div class="app-container">
 		<!-- Tab 页签 -->
 		<el-tabs v-model="activeTab" class="main-tabs" @tab-click="handleTabClick">
-			<el-tab-pane name="myProcess" label="我的流程">
-				<!-- 我的流程表格 -->
-				<BaseTable
-					ref="instanceTableRef"
-					:showSearchHeader="true"
-					:selectData="selectDataMyProcess"
-					:searchClick="getListMyProcess"
-					:buttonList="buttonListMyProcess"
-					:tableColumns="tableColumnsMyProcess"
-					:tableData="tableDataMyProcess"
-					:cellClickEvent="cellClickEventMyProcess"
-					:rowConfig="rowConfig"
-					:tableHeight="tableHeight"
-					name="instanceTable"
-					:loading="loadingMyProcess"
-					:showPagination="true"
-					:showToolBar="false"
-					:showNum="5"
-					defaultWidth="50"
-					:total="totalMyProcess"
-				/>
-			</el-tab-pane>
-
 			<el-tab-pane name="todo" label="待办任务">
 				<!-- 待办任务表格 -->
 				<BaseTable
@@ -93,6 +78,28 @@
 					:total="totalCopy"
 				/>
 			</el-tab-pane>
+			<el-tab-pane name="myProcess" label="我的流程">
+				<!-- 我的流程表格 -->
+				<BaseTable
+					ref="instanceTableRef"
+					:showSearchHeader="true"
+					:selectData="selectDataMyProcess"
+					:searchClick="getListMyProcess"
+					:buttonList="buttonListMyProcess"
+					:tableColumns="tableColumnsMyProcess"
+					:tableData="tableDataMyProcess"
+					:cellClickEvent="cellClickEventMyProcess"
+					:rowConfig="rowConfig"
+					:tableHeight="tableHeight"
+					name="instanceTable"
+					:loading="loadingMyProcess"
+					:showPagination="true"
+					:showToolBar="false"
+					:showNum="5"
+					defaultWidth="50"
+					:total="totalMyProcess"
+				/>
+			</el-tab-pane>
 		</el-tabs>
 	</div>
 </template>
@@ -116,7 +123,7 @@ const { proxy } = getCurrentInstance()
 const router = useRouter()
 
 // 当前激活的 Tab
-const activeTab = ref('myProcess')
+const activeTab = ref('todo')
 
 // 通用配置
 const tableHeight = computed(() => {
@@ -151,7 +158,7 @@ const myProcessData = reactive({
 		{ value: 1, label: '进行中' },
 		{ value: 2, label: '已通过' },
 		{ value: 3, label: '已驳回' },
-		{ value: 4, label: '已取消' },
+		{ value: 4, label: '已办结' },
 		{ value: 5, label: '草稿' },
 	],
 })
@@ -294,7 +301,7 @@ const tableColumnsMyProcess = ref([
 					1: { label: '进行中', type: 'primary' },
 					2: { label: '已通过', type: 'success' },
 					3: { label: '已驳回', type: 'danger' },
-					4: { label: '已取消', type: 'info' },
+					4: { label: '已办结', type: 'info' },
 					5: { label: '草稿', type: 'warning' },
 				}
 				const status = statusMap[row.status] || { label: '未知', type: '' }
@@ -340,8 +347,8 @@ const tableColumnsMyProcess = ref([
 				...(row.status === 1
 					? [
 							{
-								name: '取消',
-								command: '取消',
+								name: '办结',
+								command: '办结',
 								click: () => handleCancelMyProcess(row),
 								permission: 'bpm:process-instance:query',
 								type: 'danger',
@@ -451,23 +458,23 @@ const handleDetailMyProcess = row => {
 const handleCancelMyProcess = async row => {
 	try {
 		// 二次确认
-		const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
+		const { value } = await ElMessageBox.prompt('请输入办结原因', '办结流程', {
 			confirmButtonText: '确定',
 			cancelButtonText: '取消',
 			inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
-			inputErrorMessage: '取消原因不能为空',
+			inputErrorMessage: '办结原因不能为空',
 		})
 
 		// 发起取消
 		await ProcessInstanceApi.cancelProcessInstanceByStartUser(row.id, value)
-		ElMessage.success('取消成功')
+		ElMessage.success('办结成功')
 
 		// 刷新列表
 		await getListMyProcess()
 	} catch (error) {
 		if (error !== 'cancel') {
-			console.error('取消流程失败:', error)
-			ElMessage.error('取消失败')
+			console.error('办结流程失败:', error)
+			ElMessage.error('办结流程失败')
 		}
 	}
 }

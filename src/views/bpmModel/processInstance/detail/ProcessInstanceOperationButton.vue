@@ -460,7 +460,7 @@
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Reply /></el-icon>
-					&nbsp; 取消
+					&nbsp; 办结
 				</div>
 			</template>
 			<div
@@ -475,9 +475,9 @@
 					:rules="cancelFormRule"
 					label-width="100px"
 				>
-					<el-form-item label="取消理由" prop="cancelReason">
-						<span style="color: #878c93; font-size: 12px">&nbsp; 取消后，该审批流程将自动结束</span>
-						<el-input v-model="cancelForm.cancelReason" clearable placeholder="请输入取消理由" type="textarea" :rows="3" />
+					<el-form-item label="办结理由" prop="cancelReason">
+						<span style="color: #878c93; font-size: 12px">&nbsp; 办结后，该审批流程将自动结束</span>
+						<el-input v-model="cancelForm.cancelReason" clearable placeholder="请输入办结理由" type="textarea" :rows="3" />
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleCancel()">确认</el-button>
@@ -688,7 +688,7 @@ const cancelForm = reactive({
 	cancelReason: '',
 })
 const cancelFormRule = reactive({
-	cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }],
+	cancelReason: [{ required: true, message: '办结理由不能为空', trigger: 'blur' }],
 })
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
@@ -717,7 +717,8 @@ const openPopover = async type => {
 	}
 	if (type === 'return') {
 		// 获取退回节点
-		returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
+		const res = await TaskApi.getTaskListByReturn(runningTask.value.id)
+		returnList.value = res.data || []
 		if (returnList.value.length === 0) {
 			message.warning('当前没有可退回的节点')
 			return

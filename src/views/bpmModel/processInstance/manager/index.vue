@@ -237,25 +237,21 @@ const tableColumns = ref([
 		render: row => {
 			const taskContainer = []
 			if (!row.tasks || !Array.isArray(row.tasks) || row.tasks.length === 0) {
-				taskContainer.push(h('span', '-'))
+				taskContainer.push(h('span', { style: { color: '#409EFF' } }, '-'))
 			} else {
-				// 遍历任务，生成按钮（添加唯一key）
 				row.tasks.forEach(task => {
 					taskContainer.push(
 						h(
-							ElButton,
+							'span', // 替换 ElButton 为 span
 							{
-								key: `task_${task.id}`, // 唯一key，避免vnode冲突
-								type: 'text',
-								class: 'link-button',
-								onClick: () => handleProcessView(row, task),
+								key: `task_${task.id}`,
+								style: { color: '#409EFF' }, // 设置蓝色字体
 							},
-							{ default: () => task.name },
+							task.name,
 						),
 					)
 				})
 			}
-			// 用div包裹所有子元素，返回单个VNode
 			return h('div', { style: { display: 'flex', gap: '4px', justifyContent: 'center' } }, taskContainer)
 		},
 	},
@@ -296,7 +292,7 @@ const tableColumns = ref([
 							link: true,
 							icon: 'DocumentDelete',
 						},
-						{ default: () => '取消' },
+						{ default: () => '办结' },
 					),
 				)
 			}
@@ -353,15 +349,15 @@ const handleDetail = row => {
  */
 const handleCancel = async row => {
 	// 二次确认弹窗
-	const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
+	const { value } = await ElMessageBox.prompt('请输入办结原因', '办结流程', {
 		confirmButtonText: '确认',
 		cancelButtonText: '取消',
 		inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 非空且非纯空格校验
-		inputErrorMessage: '取消原因不能为空',
+		inputErrorMessage: '办结原因不能为空',
 	})
 	// 发起取消请求
 	await ProcessInstanceApi.cancelProcessInstanceByAdmin(row.id, value)
-	message.success('取消成功')
+	message.success('办结成功')
 	// 刷新列表
 	await getList()
 }
