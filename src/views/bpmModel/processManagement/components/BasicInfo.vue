@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 13:38:46
- * @LastEditTime: 2026-02-03 15:21:03
+ * @LastEditTime: 2026-02-03 20:50:17
  * @LastEditors: zhangsd
  * @Description: 基本信息
  * @FilePath: \view\src\views\bpmModel\processManagement\components\BasicInfo.vue
@@ -205,6 +205,7 @@ watch(
 		if (newVal.visible == undefined) newVal.visible = true // 默认可见
 		if (newVal.type == undefined) newVal.type = 10 // 默认 BPMN 设计器
 		if (newVal.startUserType == undefined) newVal.startUserType = 0 // 默认全员发起
+		if (newVal.category == undefined) newVal.category = 'QT' // 默认BPMN模型
 		if (newVal.startUserIds?.length) {
 			selectedStartUsers.value = props.userList.filter(user => newVal.startUserIds.includes(user.id))
 		} else {

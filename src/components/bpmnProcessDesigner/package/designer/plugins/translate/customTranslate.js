@@ -20,28 +20,49 @@
 //     return str || "{" + key + "}";
 //   });
 // }
-
+// customTranslate.js
+import defaultTranslationsCN from './zh'; // 导入默认中文翻译
 /**
  * bpmn-js 翻译核心函数（适配官方规范）
- * @param {Object} translations 翻译字典（如 zh.js）
+ * @param {Object} customTranslations 翻译字典（如 zh.js）
  */
-export default function customTranslate(translations = {}) {
-  // 内置默认英文兜底（防止翻译缺失）
-  const defaultTranslations = {
+export default function createCustomTranslate(customTranslations = {}) {
+   // 合并默认翻译和自定义翻译
+  const translations = {
+    // 默认英文兜底
     'Append EndEvent': 'Append EndEvent',
+    'Append Gateway': 'Append Gateway',
+    'Append Task': 'Append Task',
     'Exclusive Gateway': 'Exclusive Gateway',
-    // 可补充更多默认英文键
+    'Parallel Gateway': 'Parallel Gateway',
+    'Inclusive Gateway': 'Inclusive Gateway',
+    'Event-based Gateway': 'Event-based Gateway',
+    
+        // 默认中文翻译
+    ...defaultTranslationsCN,
+    
+    // 用户自定义翻译（最高优先级）
+    ...customTranslations
   };
-
+  
   return function translate(key, replacements = {}) {
-    // 1. 优先用自定义翻译 → 2. 兜底英文 → 3. 直接返回key
-    let text = translations[key] || defaultTranslations[key] || key;
-
-    // 替换占位符（如 {type}、{count} 等）
-    Object.keys(replacements).forEach((placeholder) => {
-      text = text.replace(new RegExp(`{${placeholder}}`, 'g'), replacements[placeholder]);
-    });
-
+    // 获取翻译文本
+    let text = translations[key];
+    
+    // 如果没找到翻译，返回原始key（或者可以返回key）
+    if (text === undefined) {
+      console.warn(`Missing translation for key: "${key}"`);
+      text = key;
+    }
+    
+    // 替换占位符
+    if (replacements && typeof replacements === 'object') {
+      Object.keys(replacements).forEach((placeholder) => {
+        const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
+        text = text.replace(regex, replacements[placeholder]);
+      });
+    }
+    
     return text;
   };
 }
