@@ -176,7 +176,8 @@ const selectDataMyProcess = reactive([
 	{
 		name: '流程名称',
 		type: 'input',
-		modelValue: 'name',
+		// modelValue: 'name',
+		modelValue: 'processDefinitionName',
 		span: 8,
 		placeholder: '请输入流程名称',
 	},
@@ -232,8 +233,8 @@ const tableColumnsMyProcess = ref([
 						'div',
 						{ class: 'flex flex-col' },
 						row.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
-						),
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
+						)
 					),
 				]
 			}
@@ -265,7 +266,7 @@ const tableColumnsMyProcess = ref([
 									class: 'el-link el-link--primary',
 									onClick: () => handleDetailMyProcess(row),
 								},
-								row.tasks[0].assigneeUser?.userName,
+								row.tasks[0].assigneeUser?.userName
 							),
 							` (${row.tasks[0].name}) 审批中`,
 						]),
@@ -280,7 +281,7 @@ const tableColumnsMyProcess = ref([
 									class: 'el-link el-link--primary',
 									onClick: () => handleDetailMyProcess(row),
 								},
-								row.tasks[0].assigneeUser?.userName,
+								row.tasks[0].assigneeUser?.userName
 							),
 							` 等 ${row.tasks.length} 人 (${row.tasks[0].name})审批中`,
 						]),
@@ -302,7 +303,7 @@ const tableColumnsMyProcess = ref([
 						{
 							class: `el-tag el-tag--${status.type}`,
 						},
-						status.label,
+						status.label
 					),
 				]
 			}
@@ -344,7 +345,7 @@ const tableColumnsMyProcess = ref([
 								permission: 'bpm:process-instance:query',
 								type: 'danger',
 							},
-						]
+					  ]
 					: [
 							{
 								name: '重新发起',
@@ -352,7 +353,7 @@ const tableColumnsMyProcess = ref([
 								click: () => handleCreateMyProcess(row),
 								permission: undefined,
 							},
-						]),
+					  ]),
 			]
 
 			return [
@@ -365,7 +366,7 @@ const tableColumnsMyProcess = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }),
-					},
+					}
 				),
 			]
 		},
@@ -480,7 +481,8 @@ const selectDataTodo = reactive([
 	{
 		name: '任务名称',
 		type: 'input',
-		modelValue: 'name',
+		// modelValue: 'name',
+		modelValue: 'processDefinitionName',
 		span: 12,
 		placeholder: '请输入任务名称',
 	},
@@ -525,8 +527,8 @@ const tableColumnsTodo = ref([
 						'div',
 						{ class: 'flex flex-col' },
 						row.processInstance.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
-						),
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
+						)
 					),
 				]
 			}
@@ -607,7 +609,7 @@ const tableColumnsTodo = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }),
-					},
+					}
 				),
 			]
 		},
@@ -685,7 +687,8 @@ const selectDataDone = reactive([
 	{
 		name: '任务名称',
 		type: 'input',
-		modelValue: 'name',
+		// modelValue: 'name',
+		modelValue: 'processDefinitionName',
 		span: 8,
 		placeholder: '请输入任务名称',
 	},
@@ -760,8 +763,8 @@ const tableColumnsDone = ref([
 						'div',
 						{ class: 'flex flex-col' },
 						row.processInstance.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
-						),
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
+						)
 					),
 				]
 			}
@@ -815,7 +818,7 @@ const tableColumnsDone = ref([
 					{
 						class: `el-tag el-tag--${status.type}`,
 					},
-					status.label,
+					status.label
 				),
 			]
 		},
@@ -884,7 +887,7 @@ const tableColumnsDone = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }),
-					},
+					}
 				),
 			]
 		},
@@ -1005,8 +1008,8 @@ const tableColumnsCopy = ref([
 						'div',
 						{ class: 'flex flex-col' },
 						row.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
-						),
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
+						)
 					),
 				]
 			}
@@ -1079,7 +1082,7 @@ const tableColumnsCopy = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }),
-					},
+					}
 				),
 			]
 		},
