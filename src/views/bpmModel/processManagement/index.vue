@@ -123,15 +123,6 @@ const editor = ref(null)
 
 // 5. 核心响应式数据
 const data = reactive({
-	// 查询参数
-	queryParams: {
-		pageNum: 1,
-		pageSize: 20,
-		processName: undefined,
-		processKey: undefined,
-		category: undefined,
-		status: undefined,
-	},
 	// 表格数据（从假数据获取）
 	tableData: [],
 	// 总条数（根据假数据长度动态设置）
@@ -153,7 +144,11 @@ const formConfig = reactive({
 })
 
 // 7. 解构响应式数据
-const { queryParams, tableData, total, tableLoading } = toRefs(data)
+const { tableData, total, tableLoading } = toRefs(data)
+const queryParams = ref({
+	pageNum: 1,
+	pageSize: 20,
+})
 
 // 8. 页面状态变量
 const tableHeight = computed(() => storeHight.value - 15)
@@ -195,7 +190,7 @@ const selectData = reactive([
 	{
 		name: '流程名称',
 		type: 'input',
-		modelValue: 'processName',
+		modelValue: 'name',
 		span: 6,
 	},
 	{
@@ -278,7 +273,7 @@ const tableColumns = ref([
 						onClick: () => handleProcessView(row.deploymentId),
 						permission: undefined, // 明确添加permission属性（避免props为null）
 					},
-					{ default: () => row.name }
+					{ default: () => row.name },
 				),
 			]
 		},
@@ -300,7 +295,7 @@ const tableColumns = ref([
 							onClick: () => handleForm(row.formId),
 							permission: undefined,
 						},
-						{ default: () => row.formName }
+						{ default: () => row.formName },
 					),
 				]
 			} else {
@@ -377,8 +372,8 @@ const tableColumns = ref([
 							class: 'mr-5', // 右边距
 							permission: undefined,
 						},
-						{ default: () => `v${row.processDefinition.version}` }
-					)
+						{ default: () => `v${row.processDefinition.version}` },
+					),
 				)
 
 				// 挂起状态标签（当 suspensionState === 2 时显示）
@@ -404,8 +399,8 @@ const tableColumns = ref([
 							type: 'info',
 							permission: undefined,
 						},
-						{ default: () => '未部署' }
-					)
+						{ default: () => '未部署' },
+					),
 				)
 			}
 
@@ -431,8 +426,8 @@ const tableColumns = ref([
 								class: 'ml-5',
 								permission: undefined,
 							},
-							{ default: () => '已激活' }
-						)
+							{ default: () => '已激活' },
+						),
 					)
 				}
 				// 挂起状态标签（当 suspensionState === 2 时显示）
@@ -445,8 +440,8 @@ const tableColumns = ref([
 								class: 'ml-5',
 								permission: undefined,
 							},
-							{ default: () => '已停用' }
-						)
+							{ default: () => '已停用' },
+						),
 					)
 				}
 			} else {
@@ -458,8 +453,8 @@ const tableColumns = ref([
 							type: 'info',
 							permission: undefined,
 						},
-						{ default: () => '未部署' }
-					)
+						{ default: () => '未部署' },
+					),
 				)
 			}
 
@@ -506,7 +501,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:config',
 								icon: Setting, // 添加图标组件
 							},
-					  ]
+						]
 					: []),
 				// 仅当可发起申请时显示
 				...(canSubmit(row)
@@ -518,7 +513,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:submit',
 								icon: Promotion, // 添加图标组件
 							},
-					  ]
+						]
 					: []),
 				// 根据状态显示挂起/激活
 				...(row.processDefinition?.suspensionState === 1
@@ -530,7 +525,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:state',
 								icon: VideoPause, // 添加图标组件
 							},
-					  ]
+						]
 					: [
 							{
 								name: '激活',
@@ -539,7 +534,7 @@ const tableColumns = ref([
 								permission: 'bpm:process:state',
 								icon: VideoPlay, // 添加图标组件
 							},
-					  ]),
+						]),
 				// 清理
 				{
 					name: '清理',
@@ -570,7 +565,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => h('span', { class: 'el-icon-more' }), // 下拉按钮显示更多图标
-					}
+					},
 				),
 			]
 		},
@@ -596,8 +591,12 @@ const canSubmit = row => {
  * 获取流程列表
  * @param {Object} params 搜索参数
  */
-const getList = (params = {}) => {
+const getList = e => {
+	console.log('e =>', e)
+	console.log('(queryParams.value,', queryParams.value)
 	tableLoading.value = true
+	const params = Object.assign(queryParams.value, e)
+
 	BpmModelApi.getModelList(params)
 		.then(res => {
 			if (res.code == '0000') {
@@ -679,11 +678,11 @@ const handleForm = async formId => {
 
 	setConfAndFields2(formDetailPreview, formData.conf, formData.fields)
 	formDetailPreview.value.option = {
-				...formDetailPreview.value.option, // 保留其他布局配置
-				submitBtn: false,            // 隐藏提交按钮
-				resetBtn: false,             // 隐藏重置按钮
-				menuBtn: false               // 隐藏整个底部按钮区域（最保险）
-			}
+		...formDetailPreview.value.option, // 保留其他布局配置
+		submitBtn: false, // 隐藏提交按钮
+		resetBtn: false, // 隐藏重置按钮
+		menuBtn: false, // 隐藏整个底部按钮区域（最保险）
+	}
 	// 弹窗打开
 	formDetailVisible.value = true
 }
