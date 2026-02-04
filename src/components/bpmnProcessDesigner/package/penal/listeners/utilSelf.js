@@ -69,33 +69,33 @@ export function initListenerType(listener) {
  * @returns {Object} 表单数据对象
  */
 export function initListenerForm2(processListener) {
-  switch (processListener.valueType) {
+  switch (processListener.listenerValueTypeCode) {
     case 'class':
       return {
         listenerType: 'classListener',
-        class: processListener.value,
-        event: processListener.event,
+        class: processListener.listenerValue,
+        event: processListener.listenerEventCode,
         fields: []
       }
       
     case 'expression':
       return {
         listenerType: 'expressionListener',
-        expression: processListener.value,
-        event: processListener.event,
+        expression: processListener.listenerValue,
+        event: processListener.listenerEventCode,
         fields: []
       }
       
     case 'delegateExpression':
       return {
         listenerType: 'delegateExpressionListener',
-        delegateExpression: processListener.value,
-        event: processListener.event,
+        delegateExpression: processListener.listenerValue,
+        event: processListener.listenerEventCode,
         fields: []
       }
       
     default:
-      throw new Error('未知的监听器类型')
+      throw new Error('未知的监听器类型'+ processListener.listenerValueTypeCode)
   }
 }
 

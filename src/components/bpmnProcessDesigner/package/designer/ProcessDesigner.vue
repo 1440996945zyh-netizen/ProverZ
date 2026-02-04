@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:06:46
- * @LastEditTime: 2025-12-18 15:24:57
+ * @LastEditTime: 2026-02-04 09:36:19
  * @LastEditors: zhangsd
  * @Description: 流程设计器
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\designer\ProcessDesigner.vue
@@ -109,7 +109,7 @@
 		</div>
 		<!-- 流程设计器容器 -->
 		<div class="my-process-designer__container">
-			<div class="my-process-designer__canvas" ref="bpmnCanvas" id="bpmnCanvas" ></div>
+			<div class="my-process-designer__canvas" ref="bpmnCanvas" id="bpmnCanvas"></div>
 		</div>
 		<!-- 预览弹窗 -->
 		<Dialog title="预览" v-model:visible="previewModelVisible" width="80%" :showFooter="false">
@@ -132,7 +132,7 @@ import Highlightjs from '@/components/Highlight'
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 import DefaultEmptyXML from '@/components/bpmnProcessDesigner/package/designer/plugins/defaultEmpty'
 // 翻译相关
-import customTranslate from '@/components/bpmnProcessDesigner/package/designer/plugins/translate/customTranslate'
+import createCustomTranslate from '@/components/bpmnProcessDesigner/package/designer/plugins/translate/customTranslate'
 import translationsCN from '@/components/bpmnProcessDesigner/package/designer/plugins/translate/zh'
 // 流程模拟
 import tokenSimulation from 'bpmn-js-token-simulation'
@@ -315,7 +315,7 @@ const additionalModules = computed(() => {
 
 	// 翻译模块
 	const TranslateModule = {
-		translate: ['value', customTranslate(props.translations || translationsCN)],
+		translate: ['value', createCustomTranslate(props.translations || translationsCN)],
 	}
 	Modules.push(TranslateModule)
 
@@ -615,12 +615,12 @@ const elementsAlign = align => {
 /**
  * 预览XML
  */
-const previewProcessXML =  () => {
+const previewProcessXML = () => {
 	// console.log(bpmnModeler.saveXML, 'bpmnModeler')
 	bpmnModeler.saveXML({ format: true }).then(async ({ xml }) => {
 		previewResult.value = xml
 		previewType.value = 'xml'
-    await nextTick() // 等待数据更新到DOM
+		await nextTick() // 等待数据更新到DOM
 		previewModelVisible.value = true
 	})
 }
