@@ -115,6 +115,7 @@ import { getTaskTodoPage, getTaskDonePage } from '@/api/system/bpm/task'
 import { CategoryApi } from '@/api/system/bpm/category'
 import DefinitionApi from '@/api/system/bpm/definition'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import * as TaskApi from '@/api/system/bpm/task'
 
 defineOptions({ name: 'BpmProcessInstanceAll' })
 
@@ -135,10 +136,10 @@ const rowConfig = { keyField: 'id' }
 
 // 公共数据 - 可被多个 Tab 使用
 const commonData = reactive({
-	categoryList: [],
-	processDefinitionList: [],
 	showPopover: false,
 })
+const categoryList = ref([])
+const processDefinitionList = ref([])
 
 // 1. 我的流程 Tab 数据和方法
 const myProcessData = reactive({
@@ -176,38 +177,28 @@ const selectDataMyProcess = reactive([
 		name: '流程名称',
 		type: 'input',
 		modelValue: 'name',
-		span: 6,
+		span: 8,
 		placeholder: '请输入流程名称',
 	},
 	{
 		name: '流程分类',
 		type: 'select',
 		modelValue: 'category',
-		span: 6,
+		span: 8,
 		placeholder: '请选择流程分类',
-		selectData: commonData.categoryList,
-		selectLabel: 'name',
-		selectValue: 'code',
+		selectData: categoryList,
+		selectLabel: 'label',
+		selectValue: 'value',
 	},
 	{
 		name: '流程状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 6,
+		span: 8,
 		placeholder: '请选择流程状态',
 		selectData: myProcessData.statusOptions,
 		selectLabel: 'label',
 		selectValue: 'value',
-	},
-	{
-		name: '所属流程',
-		type: 'select',
-		modelValue: 'processDefinitionKey',
-		span: 6,
-		placeholder: '请选择流程定义',
-		selectData: commonData.processDefinitionList,
-		selectLabel: 'name',
-		selectValue: 'key',
 	},
 ])
 
@@ -386,10 +377,11 @@ const loadingMyProcess = computed(() => myProcessData.loading)
 const tableDataMyProcess = computed(() => myProcessData.tableData)
 const totalMyProcess = computed(() => myProcessData.total)
 
-const getListMyProcess = async () => {
+const getListMyProcess = async e => {
 	myProcessData.loading = true
 	try {
-		const res = await getProcessInstanceMyPage(myProcessData.queryParams)
+		const params = Object.assign(myProcessData.queryParams, e)
+		const res = await getProcessInstanceMyPage(params)
 		if (res.code === '0000') {
 			myProcessData.tableData = res.data.pages
 			myProcessData.total = res.data.totalNum
@@ -410,16 +402,6 @@ const handleQueryMyProcess = () => {
 	myProcessData.queryParams.pageNum = 1
 	getListMyProcess()
 	commonData.showPopover = false
-}
-
-const resetQueryMyProcess = () => {
-	myProcessData.queryParams.name = ''
-	myProcessData.queryParams.processDefinitionKey = undefined
-	myProcessData.queryParams.category = undefined
-	myProcessData.queryParams.status = undefined
-	myProcessData.queryParams.createTime = []
-	myProcessData.queryParams.pageNum = 1
-	getListMyProcess()
 }
 
 const toggleAdvancedFilterMyProcess = () => {
@@ -499,28 +481,18 @@ const selectDataTodo = reactive([
 		name: '任务名称',
 		type: 'input',
 		modelValue: 'name',
-		span: 6,
+		span: 12,
 		placeholder: '请输入任务名称',
 	},
 	{
 		name: '流程分类',
 		type: 'select',
 		modelValue: 'category',
-		span: 6,
+		span: 12,
 		placeholder: '请选择流程分类',
-		selectData: commonData.categoryList,
-		selectLabel: 'name',
-		selectValue: 'code',
-	},
-	{
-		name: '所属流程',
-		type: 'select',
-		modelValue: 'processDefinitionKey',
-		span: 6,
-		placeholder: '请选择流程定义',
-		selectData: commonData.processDefinitionList,
-		selectLabel: 'name',
-		selectValue: 'key',
+		selectData: categoryList,
+		selectLabel: 'label',
+		selectValue: 'value',
 	},
 ])
 
@@ -647,10 +619,11 @@ const loadingTodo = computed(() => todoData.loading)
 const tableDataTodo = computed(() => todoData.tableData)
 const totalTodo = computed(() => todoData.total)
 
-const getListTodo = async () => {
+const getListTodo = async e => {
 	todoData.loading = true
 	try {
-		const res = await getTaskTodoPage(todoData.queryParams)
+		const params = Object.assign(todoData.queryParams, e)
+		const res = await getTaskTodoPage(params)
 		todoData.tableData = res.data.pages
 		todoData.total = res.data.total
 	} catch (error) {
@@ -671,15 +644,6 @@ const handleQueryTodo = () => {
 	todoData.queryParams.pageNum = 1
 	getListTodo()
 	commonData.showPopover = false
-}
-
-const resetQueryTodo = () => {
-	todoData.queryParams.name = ''
-	todoData.queryParams.category = undefined
-	todoData.queryParams.processDefinitionKey = ''
-	todoData.queryParams.createTime = []
-	todoData.queryParams.pageNum = 1
-	getListTodo()
 }
 
 const toggleAdvancedFilterTodo = () => {
@@ -707,8 +671,6 @@ const doneData = reactive({
 		name: '',
 		category: undefined,
 		status: undefined,
-		processDefinitionKey: '',
-		createTime: [],
 	},
 	statusOptions: [
 		{ value: 1, label: '审批中' },
@@ -724,38 +686,28 @@ const selectDataDone = reactive([
 		name: '任务名称',
 		type: 'input',
 		modelValue: 'name',
-		span: 6,
+		span: 8,
 		placeholder: '请输入任务名称',
 	},
 	{
 		name: '流程分类',
 		type: 'select',
 		modelValue: 'category',
-		span: 6,
+		span: 8,
 		placeholder: '请选择流程分类',
-		selectData: commonData.categoryList,
-		selectLabel: 'name',
-		selectValue: 'code',
+		selectData: categoryList,
+		selectLabel: 'label',
+		selectValue: 'value',
 	},
 	{
 		name: '审批状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 6,
+		span: 8,
 		placeholder: '请选择审批状态',
 		selectData: doneData.statusOptions,
 		selectLabel: 'label',
 		selectValue: 'value',
-	},
-	{
-		name: '所属流程',
-		type: 'select',
-		modelValue: 'processDefinitionKey',
-		span: 6,
-		placeholder: '请选择流程定义',
-		selectData: commonData.processDefinitionList,
-		selectLabel: 'name',
-		selectValue: 'key',
 	},
 ])
 
@@ -944,12 +896,13 @@ const loadingDone = computed(() => doneData.loading)
 const tableDataDone = computed(() => doneData.tableData)
 const totalDone = computed(() => doneData.total)
 
-const getListDone = async () => {
+const getListDone = async e => {
 	doneData.loading = true
 	try {
-		const data = await getTaskDonePage(doneData.queryParams)
-		doneData.tableData = data.pages || []
-		doneData.total = data.totalNum
+		const params = Object.assign(doneData.queryParams, e)
+		const res = await getTaskDonePage(params)
+		doneData.tableData = res.data.pages || []
+		doneData.total = res.data.totalNum || 0
 	} catch (error) {
 		console.error('获取已办任务列表失败:', error)
 		ElMessage.error('获取列表失败')
@@ -968,16 +921,6 @@ const handleQueryDone = () => {
 	doneData.queryParams.pageNum = 1
 	getListDone()
 	commonData.showPopover = false
-}
-
-const resetQueryDone = () => {
-	doneData.queryParams.name = ''
-	doneData.queryParams.category = undefined
-	doneData.queryParams.status = undefined
-	doneData.queryParams.processDefinitionKey = ''
-	doneData.queryParams.createTime = []
-	doneData.queryParams.pageNum = 1
-	getListDone()
 }
 
 const toggleAdvancedFilterDone = () => {
@@ -1013,8 +956,6 @@ const copyData = reactive({
 	queryParams: {
 		pageNum: 1,
 		pageSize: 10,
-		processInstanceId: '',
-		processInstanceName: '',
 		createTime: [],
 	},
 })
@@ -1024,19 +965,27 @@ const selectDataCopy = reactive([
 		name: '流程名称',
 		type: 'input',
 		modelValue: 'processInstanceName',
-		span: 6,
+		span: 8,
 		placeholder: '请输入流程名称',
 	},
 	{
-		name: '抄送时间',
-		type: 'dateRange',
-		modelValue: 'createTime',
-		span: 6,
-		placeholder: '请选择抄送时间范围',
+		type: 'daterange', // 搜索框类型
+		modelValue: 'createTime', // 绑定字段
+		span: 16, // 占位，共24
+		name: '发起时间',
+		shortcuts: [],
 	},
 ])
 
-const buttonListCopy = reactive([])
+const buttonListCopy = reactive([
+	{
+		label: '高级筛选',
+		type: 'default',
+		icon: 'Plus',
+		click: () => toggleAdvancedFilterCopy,
+		permission: undefined,
+	},
+])
 
 const tableColumnsCopy = ref([
 	{
@@ -1142,10 +1091,19 @@ const loadingCopy = computed(() => copyData.loading)
 const tableDataCopy = computed(() => copyData.tableData)
 const totalCopy = computed(() => copyData.total)
 
-const getListCopy = async () => {
+const getListCopy = async e => {
 	copyData.loading = true
 	try {
-		const res = await getProcessInstanceCopyPage(copyData.queryParams)
+		const params = Object.assign(copyData.queryParams, e)
+		if (params.createTime && params.createTime.length === 2) {
+			const [startDate, endDate] = params.createTime
+
+			// 将 createTime[0] 转为当天的 00:00:00
+			const startTime = startDate ? `${startDate} 00:00:00` : undefined
+			const endTime = endDate ? `${endDate} 23:59:59` : undefined
+			params.createTime = [startTime, endTime]
+		}
+		const res = await getProcessInstanceCopyPage(params)
 		copyData.tableData = res.data.pages || []
 		copyData.total = res.data.totalNum || 0
 	} catch (error) {
@@ -1164,13 +1122,6 @@ const cellClickEventCopy = ({ row }) => {
 }
 
 const handleQueryCopy = () => {
-	copyData.queryParams.pageNum = 1
-	getListCopy()
-}
-
-const resetQueryCopy = () => {
-	copyData.queryParams.processInstanceName = ''
-	copyData.queryParams.createTime = []
 	copyData.queryParams.pageNum = 1
 	getListCopy()
 }
@@ -1212,32 +1163,23 @@ const toggleAdvancedFilter = tabName => {
 	commonData.showPopover = !commonData.showPopover
 }
 
-/** 激活时 **/
-onActivated(() => {
-	if (activeTab.value === 'myProcess') {
-		getListMyProcess()
-	} else if (activeTab.value === 'todo') {
-		getListTodo()
-	} else if (activeTab.value === 'done') {
-		getListDone()
-	} else if (activeTab.value === 'copy') {
-		getListCopy()
-	}
-})
+const initCommonData = async () => {
+	const [categoryData, definitionData] = await Promise.all([CategoryApi.getCategoryPage(), DefinitionApi.getProcessDefinitionPage()])
+
+	categoryList.value = categoryData.data.pages.map(item => ({ label: item.name, value: item.code }))
+	processDefinitionList.value = definitionData.data.pages.map(item => ({ label: item.name, value: item.key }))
+}
 
 /** 初始化 **/
 onMounted(async () => {
 	// 获取公共数据
 	try {
-		const [categoryData, definitionData] = await Promise.all([CategoryApi.getCategoryPage(), DefinitionApi.getProcessDefinitionPage()])
-
-		commonData.categoryList = categoryData.data.pages
-		commonData.processDefinitionList = definitionData.data.pages
-
+		await initCommonData()
 		// 初始化当前 Tab 的数据
 		if (activeTab.value === 'myProcess') {
 			await getListMyProcess()
 		} else if (activeTab.value === 'todo') {
+			console.log('初始化待办任务')
 			await getListTodo()
 		} else if (activeTab.value === 'done') {
 			await getListDone()
