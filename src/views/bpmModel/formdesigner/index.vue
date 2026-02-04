@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-15 11:34:41
- * @LastEditTime: 2025-12-25 14:19:58
+ * @LastEditTime: 2026-02-04 11:11:24
  * @LastEditors: zhangsd
  * @Description: 表单设计器列表页面，负责表单模板的查询、新增、编辑、删除、详情、复制等操作
  * @FilePath: \view\src\views\bpmModel\formdesigner\index.vue
@@ -128,7 +128,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => (row.status == '0' ? '正常' : '停用'),
-					},
+					}
 				),
 			]
 		},
@@ -167,7 +167,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '复制',
-					},
+					}
 				),
 				h(
 					ElButton,
@@ -183,7 +183,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '编辑',
-					},
+					}
 				),
 
 				h(
@@ -200,7 +200,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '详情',
-					},
+					}
 				),
 				h(
 					ElButton,
@@ -216,7 +216,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '删除',
-					},
+					}
 				),
 			]
 		},
@@ -333,7 +333,16 @@ const handleDetail = async row => {
 	console.log('查看表单详情：', row)
 	// 设置表单
 	const { data } = await getDetail(row.id)
-	setConfAndFields2(detailData, data.conf, data.fields)
+	setConfAndFields2(detailData.value, data.conf, data.fields)
+	detailData.value.rule.forEach(item => {
+		item.props = { ...item.props, disabled: true }
+	})
+	detailData.value.option = {
+		...detailData.value.option, // 保留其他布局配置
+		submitBtn: false, // 隐藏提交按钮
+		resetBtn: false, // 隐藏重置按钮
+		menuBtn: false, // 隐藏整个底部按钮区域（最保险）
+	}
 	// 打开详情弹窗
 	formDetailVisible.value = true
 }
