@@ -168,7 +168,7 @@
 				>
 					<el-form-item label="抄送人" prop="copyUserIds">
 						<el-select v-model="copyForm.copyUserIds" clearable style="width: 100%" multiple placeholder="请选择抄送人">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="抄送意见" prop="copyReason">
@@ -218,7 +218,7 @@
 				>
 					<el-form-item label="新审批人" prop="assigneeUserId">
 						<el-select v-model="transferForm.assigneeUserId" clearable style="width: 100%">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
@@ -268,7 +268,7 @@
 				>
 					<el-form-item label="接收人" prop="delegateUserId">
 						<el-select v-model="delegateForm.delegateUserId" clearable style="width: 100%">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
@@ -318,7 +318,7 @@
 				>
 					<el-form-item label="加签处理人" prop="addSignUserIds">
 						<el-select v-model="addSignForm.addSignUserIds" multiple clearable style="width: 100%">
-							<el-option v-for="item in userOptions" :key="item.id" :label="item.nickname" :value="item.id" />
+							<el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
@@ -460,7 +460,7 @@
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
 					<el-icon :size="14"><Reply /></el-icon>
-					&nbsp; 取消
+					&nbsp; 办结
 				</div>
 			</template>
 			<div
@@ -475,9 +475,9 @@
 					:rules="cancelFormRule"
 					label-width="100px"
 				>
-					<el-form-item label="取消理由" prop="cancelReason">
-						<span style="color: #878c93; font-size: 12px">&nbsp; 取消后，该审批流程将自动结束</span>
-						<el-input v-model="cancelForm.cancelReason" clearable placeholder="请输入取消理由" type="textarea" :rows="3" />
+					<el-form-item label="办结理由" prop="cancelReason">
+						<span style="color: #878c93; font-size: 12px">&nbsp; 办结后，该审批流程将自动结束</span>
+						<el-input v-model="cancelForm.cancelReason" clearable placeholder="请输入办结理由" type="textarea" :rows="3" />
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleCancel()">确认</el-button>
@@ -527,6 +527,7 @@ import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import { isEmpty } from '@/utils/common/form-validation'
 import useUserStore from '@/store/modules/user'
 import { useMessage } from '@/plugins/useMessage'
+import publicApi from '@/api/public/index.js'
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
 const route = useRoute()
@@ -537,7 +538,7 @@ const message = useMessage() // 消息弹窗
 const userId = userStore.userId // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 
-// 定义props，移除TS类型注解
+// 定义props
 const props = defineProps({
 	processInstance: {
 		type: Object,
@@ -687,7 +688,7 @@ const cancelForm = reactive({
 	cancelReason: '',
 })
 const cancelFormRule = reactive({
-	cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }],
+	cancelReason: [{ required: true, message: '办结理由不能为空', trigger: 'blur' }],
 })
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
@@ -716,7 +717,8 @@ const openPopover = async type => {
 	}
 	if (type === 'return') {
 		// 获取退回节点
-		returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
+		const res = await TaskApi.getTaskListByReturn(runningTask.value.id)
+		returnList.value = res.data || []
 		if (returnList.value.length === 0) {
 			message.warning('当前没有可退回的节点')
 			return
@@ -1125,6 +1127,25 @@ const handleSignFinish = url => {
 	approveReasonForm.signPicUrl = url
 	approveSignFormRef.value.validate('change')
 }
+const userOptions = ref([]) // 用户列表选项
+// 加载用户选项
+const loadUserOptions = async () => {
+	try {
+		const userResData = await publicApi.getLocalSelect({ type: 'USER' })
+		if (userResData && userResData.data) {
+			userOptions.value = userResData.data
+		} else {
+			userOptions.value = []
+		}
+	} catch (error) {
+		console.error('加载用户列表失败:', error)
+		userOptions.value = []
+	}
+}
+// 组件挂载时加载用户列表
+onMounted(async () => {
+	await loadUserOptions()
+})
 
 // 暴露方法给父组件
 defineExpose({ loadTodoTask })

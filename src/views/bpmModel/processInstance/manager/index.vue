@@ -47,8 +47,8 @@ import BaseTable from '@/components/BaseTable/index.vue'
 import { dateFormatter, formatPast2, formatDate } from '@/utils/common/date'
 // API 接口
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
-// import { CategoryApi } from '@/api/system/bpm/category'
-// import * as UserApi from '@/api/system/bpm/user'
+import { CategoryApi } from '@/api/system/bpm/category'
+import publicApi from '@/api/public/index.js'
 
 import { useMessage } from '@/plugins/useMessage'
 import { BPM_PROCESS_INSTANCE_STATUS } from '@/utils/bpm/constantEnumeration'
@@ -66,7 +66,13 @@ const tableData = ref([]) // 表格数据
 const clickRow = ref({}) // 点击的当前行数据
 const categoryList = ref([]) // 流程分类列表
 const userList = ref([]) // 用户列表
-const processStatusDict = ref([]) // 流程状态字典
+const processStatusDict = ref([
+	{ value: 1, label: '进行中' },
+	{ value: 2, label: '已通过' },
+	{ value: 3, label: '已驳回' },
+	{ value: 4, label: '已办结' },
+	{ value: 5, label: '草稿' },
+]) // 流程状态字典
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 
 const tableHeight = computed(() => storeHight.value - 15)
@@ -237,25 +243,21 @@ const tableColumns = ref([
 		render: row => {
 			const taskContainer = []
 			if (!row.tasks || !Array.isArray(row.tasks) || row.tasks.length === 0) {
-				taskContainer.push(h('span', '-'))
+				taskContainer.push(h('span', { style: { color: '#409EFF' } }, '-'))
 			} else {
-				// 遍历任务，生成按钮（添加唯一key）
 				row.tasks.forEach(task => {
 					taskContainer.push(
 						h(
-							ElButton,
+							'span', // 替换 ElButton 为 span
 							{
-								key: `task_${task.id}`, // 唯一key，避免vnode冲突
-								type: 'text',
-								class: 'link-button',
-								onClick: () => handleProcessView(row, task),
+								key: `task_${task.id}`,
+								style: { color: '#409EFF' }, // 设置蓝色字体
 							},
-							{ default: () => task.name },
+							task.name,
 						),
 					)
 				})
 			}
-			// 用div包裹所有子元素，返回单个VNode
 			return h('div', { style: { display: 'flex', gap: '4px', justifyContent: 'center' } }, taskContainer)
 		},
 	},
@@ -296,7 +298,7 @@ const tableColumns = ref([
 							link: true,
 							icon: 'DocumentDelete',
 						},
-						{ default: () => '取消' },
+						{ default: () => '办结' },
 					),
 				)
 			}
@@ -315,6 +317,14 @@ const getList = async (params = queryParams.value) => {
 	try {
 		// 合并查询参数
 		const query = { ...queryParams.value, ...params }
+		if (query.createTime && query.createTime.length === 2) {
+			const [startDate, endDate] = query.createTime
+
+			// 将 createTime[0] 转为当天的 00:00:00
+			const startTime = startDate ? `${startDate} 00:00:00` : undefined
+			const endTime = endDate ? `${endDate} 23:59:59` : undefined
+			query.createTime = [startTime, endTime]
+		}
 		const res = await ProcessInstanceApi.getProcessInstanceManagerPage(query)
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
@@ -353,17 +363,32 @@ const handleDetail = row => {
  */
 const handleCancel = async row => {
 	// 二次确认弹窗
-	const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
+	const { value } = await ElMessageBox.prompt('请输入办结原因', '办结流程', {
 		confirmButtonText: '确认',
 		cancelButtonText: '取消',
 		inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 非空且非纯空格校验
-		inputErrorMessage: '取消原因不能为空',
+		inputErrorMessage: '办结原因不能为空',
 	})
 	// 发起取消请求
 	await ProcessInstanceApi.cancelProcessInstanceByAdmin(row.id, value)
-	message.success('取消成功')
+	message.success('办结成功')
 	// 刷新列表
 	await getList()
+}
+
+// 加载用户选项
+const loadUserOptions = async () => {
+	try {
+		const userResData = await publicApi.getLocalSelect({ type: 'USER' })
+		if (userResData && userResData.data) {
+			userList.value = userResData.data
+		} else {
+			userList.value = []
+		}
+	} catch (error) {
+		console.error('加载用户列表失败:', error)
+		userList.value = []
+	}
 }
 
 /**
@@ -371,11 +396,15 @@ const handleCancel = async row => {
  */
 const loadInitData = async () => {
 	// 获取流程分类列表
-	//   categoryList.value = await CategoryApi.getCategorySimpleList()
+	const res = await CategoryApi.getCategoryPage()
+	categoryList.value = res.data.pages.map(item => ({
+		value: item.code,
+		label: item.name,
+	}))
 	// 获取用户列表
-	//   userList.value = await UserApi.getSimpleUserList()
-	// 获取流程状态字典
-	//   processStatusDict.value = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)
+	await loadUserOptions()
+	// // 获取流程状态字典
+	// processStatusDict.value = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)
 }
 
 /**

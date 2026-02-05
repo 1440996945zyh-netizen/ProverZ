@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-17 11:44:57
- * @LastEditTime: 2025-12-25 14:21:27
+ * @LastEditTime: 2026-02-04 10:04:47
  * @LastEditors: zhangsd
  * @Description: 表单设计器
  * @FilePath: \view\src\views\bpmModel\formdesigner\editor\index.vue
@@ -97,6 +97,7 @@ const designerConfig = ref({
 	appendConfigData: [], // 定义渲染规则所需的formData
 	showAi: false, // 是否显示智能助手
 	showLanguage: false, // 是否显示语言选项
+	rightWidth: '400px', // 某些版本支持直接设置右侧宽度
 })
 
 const designer = ref() // 表单设计器实例
@@ -182,12 +183,36 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-::deep(.my-designer) {
+:deep(.my-designer) {
 	._fc-l, /* 左侧菜单 */
 	._fc-m, /* 中间画布 */
 	._fc-r {
 		/* 右侧配置 */
 		border-top: none;
 	}
+}
+/* 确保容器高度 */
+.my-designer {
+  height: 100% !important;
+}
+
+:deep(.my-designer) {
+  /* ._fc-r 是右侧配置栏的类名 */
+  ._fc-r {
+    width: 400px !important; // 在这里设置你想要的宽度
+    flex: 0 0 400px !important; // 强制固定宽度，不让 flex 压缩
+    border-left: 1px solid #e0e0e0;
+  }
+
+  /* 如果中间部分被挤压，确保中间部分自动填充 */
+  ._fc-m {
+    flex: 1;
+    overflow: auto;
+  }
+  
+  /* 调整右侧内部表单的 label 宽度，防止挤压 */
+//   .el-form-item__label {
+//     width: 90px !important;
+//   }
 }
 </style>

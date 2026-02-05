@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2025-12-25 22:19:01
+ * @LastEditTime: 2026-02-03 15:49:28
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
@@ -123,15 +123,6 @@ const editor = ref(null)
 
 // 5. 核心响应式数据
 const data = reactive({
-	// 查询参数
-	queryParams: {
-		pageNum: 1,
-		pageSize: 20,
-		processName: undefined,
-		processKey: undefined,
-		category: undefined,
-		status: undefined,
-	},
 	// 表格数据（从假数据获取）
 	tableData: [],
 	// 总条数（根据假数据长度动态设置）
@@ -153,7 +144,11 @@ const formConfig = reactive({
 })
 
 // 7. 解构响应式数据
-const { queryParams, tableData, total, tableLoading } = toRefs(data)
+const { tableData, total, tableLoading } = toRefs(data)
+const queryParams = ref({
+	pageNum: 1,
+	pageSize: 20,
+})
 
 // 8. 页面状态变量
 const tableHeight = computed(() => storeHight.value - 15)
@@ -195,30 +190,30 @@ const selectData = reactive([
 	{
 		name: '流程名称',
 		type: 'input',
-		modelValue: 'processName',
-		span: 6,
+		modelValue: 'name',
+		span: 12,
 	},
-	{
-		name: '流程标识Key',
-		type: 'input',
-		modelValue: 'processKey',
-		span: 6,
-	},
-	{
-		name: '流程分类',
-		type: 'select',
-		modelValue: 'category',
-		span: 6,
-		placeholder: '请选择流程分类',
-		selectData: categoryOptions,
-		selectLabel: 'label',
-		selectValue: 'value',
-	},
+	// {
+	// 	name: '流程标识Key',
+	// 	type: 'input',
+	// 	modelValue: 'processKey',
+	// 	span: 6,
+	// },
+	// {
+	// 	name: '流程分类',
+	// 	type: 'select',
+	// 	modelValue: 'category',
+	// 	span: 6,
+	// 	placeholder: '请选择流程分类',
+	// 	selectData: categoryOptions,
+	// 	selectLabel: 'label',
+	// 	selectValue: 'value',
+	// },
 	{
 		name: '流程状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 6,
+		span: 12,
 		placeholder: '请选择流程状态',
 		selectData: statusOptions,
 		selectLabel: 'dictLabel',
@@ -239,34 +234,34 @@ const buttonList = reactive([
 
 // 14. 表格列配置（修复操作列逻辑，匹配流程业务）
 const tableColumns = ref([
-	{
-		prop: 'id',
-		label: '流程定义id',
-		align: 'center',
-		minWidth: 250,
-	},
-	{
-		prop: 'key',
-		label: '流程标识Key',
-		align: 'center',
-		width: 250,
-	},
-	{
-		prop: 'category',
-		label: '流程分类',
-		align: 'center',
-		width: 150,
-		render: row => {
-			const option = categoryOptions.find(item => item.value === row.category)
-			// 修复：给原生span添加props对象（即使为空）
-			return [h('span', { props: {} }, option ? option.label : row.category)]
-		},
-	},
+	// {
+	// 	prop: 'id',
+	// 	label: '流程定义id',
+	// 	align: 'center',
+	// 	minWidth: 250,
+	// },
+	// {
+	// 	prop: 'key',
+	// 	label: '流程标识Key',
+	// 	align: 'center',
+	// 	width: 250,
+	// },
+	// {
+	// 	prop: 'category',
+	// 	label: '流程分类',
+	// 	align: 'center',
+	// 	width: 150,
+	// 	render: row => {
+	// 		const option = categoryOptions.find(item => item.value === row.category)
+	// 		// 修复：给原生span添加props对象（即使为空）
+	// 		return [h('span', { props: {} }, option ? option.label : row.category)]
+	// 	},
+	// },
 	{
 		prop: 'name',
 		label: '流程名称',
 		align: 'center',
-		width: 100,
+		minWidth: 150,
 		showOverFlow: true,
 		render: row => {
 			return [
@@ -285,9 +280,9 @@ const tableColumns = ref([
 	},
 	{
 		prop: 'formName',
-		label: '表单名称',
+		label: '表单信息',
 		align: 'center',
-		width: 100,
+		minWidth: 150,
 		showOverFlow: true,
 		render: row => {
 			if (row.formId) {
@@ -350,7 +345,7 @@ const tableColumns = ref([
 	// },
 	{
 		prop: '',
-		label: '部署时间',
+		label: '发布时间',
 		align: 'center',
 		width: 180,
 		render: row => {
@@ -381,6 +376,60 @@ const tableColumns = ref([
 					),
 				)
 
+				// 挂起状态标签（当 suspensionState === 2 时显示）
+				// if (row.processDefinition.suspensionState === 2) {
+				// 	tags.push(
+				// 		h(
+				// 			ElTag,
+				// 			{
+				// 				type: 'warning',
+				// 				class: 'ml-5',
+				// 				permission: undefined,
+				// 			},
+				// 			{ default: () => '已停用' },
+				// 		),
+				// 	)
+				// }
+			} else {
+				// 未部署状态
+				tags.push(
+					h(
+						ElTag,
+						{
+							type: 'info',
+							permission: undefined,
+						},
+						{ default: () => '未部署' },
+					),
+				)
+			}
+
+			return tags
+		},
+		sortable: true,
+	},
+	{
+		prop: 'suspensionState',
+		label: '状态',
+		align: 'center',
+		width: 150, // 增加宽度以容纳两个标签
+		render: row => {
+			const tags = []
+
+			if (row.processDefinition) {
+				if (row.processDefinition.suspensionState === 1) {
+					tags.push(
+						h(
+							ElTag,
+							{
+								type: 'success',
+								class: 'ml-5',
+								permission: undefined,
+							},
+							{ default: () => '已激活' },
+						),
+					)
+				}
 				// 挂起状态标签（当 suspensionState === 2 时显示）
 				if (row.processDefinition.suspensionState === 2) {
 					tags.push(
@@ -467,11 +516,11 @@ const tableColumns = ref([
 						]
 					: []),
 				// 根据状态显示挂起/激活
-				...(row.suspensionState === 1
+				...(row.processDefinition?.suspensionState === 1
 					? [
 							{
-								name: '挂起',
-								command: '挂起',
+								name: '停用',
+								command: '停用',
 								click: () => handleUpdateSuspensionState(row, 2),
 								permission: 'bpm:process:state',
 								icon: VideoPause, // 添加图标组件
@@ -486,6 +535,15 @@ const tableColumns = ref([
 								icon: VideoPlay, // 添加图标组件
 							},
 						]),
+				// 清理
+				{
+					name: '清理',
+					command: '清理',
+					click: () => clean(row),
+					type: 'danger',
+					permission: 'bpm:process:clean',
+					icon: Delete, // 添加图标组件
+				},
 				// 删除
 				{
 					name: '删除',
@@ -533,8 +591,12 @@ const canSubmit = row => {
  * 获取流程列表
  * @param {Object} params 搜索参数
  */
-const getList = (params = {}) => {
+const getList = e => {
+	console.log('e =>', e)
+	console.log('(queryParams.value,', queryParams.value)
 	tableLoading.value = true
+	const params = Object.assign(queryParams.value, e)
+
 	BpmModelApi.getModelList(params)
 		.then(res => {
 			if (res.code == '0000') {
@@ -615,6 +677,12 @@ const handleForm = async formId => {
 	const formData = apiResponse.data
 
 	setConfAndFields2(formDetailPreview, formData.conf, formData.fields)
+	formDetailPreview.value.option = {
+		...formDetailPreview.value.option, // 保留其他布局配置
+		submitBtn: false, // 隐藏提交按钮
+		resetBtn: false, // 隐藏重置按钮
+		menuBtn: false, // 隐藏整个底部按钮区域（最保险）
+	}
 	// 弹窗打开
 	formDetailVisible.value = true
 }
@@ -733,6 +801,28 @@ const handleUpdateSuspensionState = (row, state) => {
 }
 
 /**
+ * 清理流程
+ * @param {Object} row 流程数据
+ */
+const clean = row => {
+	currentRow.value = row
+	currentAction.value = 'clean'
+	confirmMessage.value = `确定要清理流程【${row.name}】吗？`
+
+	ElMessageBox.confirm(confirmMessage.value, '确认操作', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(() => {
+			handleConfirmAction()
+		})
+		.catch(() => {
+			// 取消操作
+		})
+}
+
+/**
  * 删除流程
  * @param {Object} row 流程数据
  */
@@ -793,6 +883,15 @@ const handleConfirmAction = () => {
 				getList()
 			} else {
 				ElMessage.error('删除流程失败')
+			}
+		})
+	} else if (currentAction.value === 'clean') {
+		BpmModelApi.cleanModel(currentRow.value.id).then(res => {
+			if (res.code == '0000') {
+				proxy.$modal.msgSuccess('流程清理成功')
+				getList()
+			} else {
+				ElMessage.error('清理流程失败')
 			}
 		})
 	}

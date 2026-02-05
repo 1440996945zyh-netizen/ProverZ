@@ -78,9 +78,16 @@ const selectData = reactive([
 	{
 		name: '流程名称', // 搜索框名称
 		type: 'input', // 搜索框类型
-		modelValue: 'name', // 绑定字段
-		span: 24, // 栅格占位
+		modelValue: 'processDefinitionName', // 绑定字段
+		span: 12, // 栅格占位
 		placeholder: '请输入流程名称',
+	},
+	{
+		name: '当前任务', // 搜索框名称
+		type: 'input', // 搜索框类型
+		modelValue: 'name', // 绑定字段
+		span: 12, // 栅格占位
+		placeholder: '请输入当前任务',
 	},
 	// {
 	// 	type: 'daterange', // 搜索框类型
@@ -168,7 +175,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => BPM_TASK_STATUS.find(item => item.value == row.status)?.label || '-',
-					},
+					}
 				),
 			]
 		},
@@ -218,7 +225,7 @@ const tableColumns = ref([
 						link: true,
 						icon: 'Document',
 					},
-					{ default: () => '历史' },
+					{ default: () => '历史' }
 				),
 			]
 

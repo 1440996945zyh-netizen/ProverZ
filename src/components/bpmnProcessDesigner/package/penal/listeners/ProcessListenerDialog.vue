@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:47:56
- * @LastEditTime: 2025-12-19 09:21:28
+ * @LastEditTime: 2026-02-03 17:07:26
  * @LastEditors: zhangsd
  * @Description: 流程监听器选择器
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\penal\listeners\ProcessListenerDialog.vue
@@ -29,7 +29,7 @@
 
 <script setup>
 import { ref, reactive, defineEmits, defineExpose, h } from 'vue'
-// import { ProcessListenerApi } from '@/api/bpm/processListener'
+import { ProcessListenerApi } from '@/api/system/bpm/processListener'
 import { CommonStatusEnum, BPM_PROCESS_LISTENER_TYPE, BPM_PROCESS_LISTENER_VALUE_TYPE } from '@/utils/bpm/constantEnumeration'
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ElButton, ElTag } from 'element-plus'
@@ -62,54 +62,46 @@ const buttonList = reactive([
 
 // 表格列配置（适配 BaseTable）
 const tableColumns = ref([
-	{ label: '名字', prop: 'name', align: 'center' },
+	{ label: '名字', prop: 'listenerName', align: 'center' }, // 修改 prop
 	{
 		label: '类型',
-		prop: 'type',
+		prop: 'listenerTypeCode', // 修改 prop
 		align: 'center',
 		render: row => {
 			return [
 				h(
 					ElTag,
 					{
-						type: BPM_PROCESS_LISTENER_TYPE.find(item => item.value === row.type)?.label === '执行监听器' ? '' : 'info',
+						type: row.listenerTypeCode === 'execution' ? '' : 'info',
 					},
 					{
-						default: () =>
-							BPM_PROCESS_LISTENER_TYPE.find(item => item.value === row.type)?.label === '执行监听器'
-								? '执行监听器'
-								: '任务监听器',
+						default: () => row.listenerTypeName || (row.listenerTypeCode === 'execution' ? '执行监听器' : '任务监听器'),
 					}
 				),
 			]
 		},
 	},
-	{ label: '事件', prop: 'event', align: 'center' },
+	{ label: '事件', prop: 'listenerEventName', align: 'center' }, // 修改为显示名称
 	{
 		label: '值类型',
-		prop: 'valueType',
+		prop: 'listenerValueTypeCode', // 修改 prop
 		align: 'center',
 		render: row => {
 			return [
 				h(
 					ElTag,
 					{
-						type: BPM_PROCESS_LISTENER_VALUE_TYPE.find(item => item.value === row.valueType)?.label === 'JAVA类' ? '' : 'info',
+						type: row.listenerValueTypeCode === 'class' ? '' : 'info',
 					},
 					{
-						default: () =>
-							BPM_PROCESS_LISTENER_VALUE_TYPE.find(item => item.value === row.valueType)?.label === 'JAVA类'
-								? 'JAVA类'
-								: BPM_PROCESS_LISTENER_VALUE_TYPE.find(item => item.value === row.valueType)?.label === '表达式'
-								? '表达式'
-								: '代理表达式',
+						default: () => row.listenerValueTypeName || row.listenerValueTypeCode,
 					}
 				),
 			]
 		},
 	},
-	{ label: '值', prop: 'value', align: 'center' },
-  	{
+	{ label: '值', prop: 'listenerValue', align: 'center' },
+	{
 		prop: '',
 		label: '操作',
 		width: 'operate',
@@ -131,11 +123,9 @@ const tableColumns = ref([
 						default: () => '选择',
 					}
 				),
-			
 			]
 		},
 	},
-
 ])
 
 /** 打开弹窗 */
@@ -155,18 +145,15 @@ const getList = async params => {
 		const query = {
 			pageNo: params.startPage || 1,
 			pageSize: params.pageSize || 10,
-			type: params.type || queryParams.value.type,
-			status: params.status || CommonStatusEnum.ENABLE,
-			// 透传其他搜索条件
-			name: params.name || '',
-			event: params.event || '',
+			listenerTypeCode: params.type || queryParams.value.type, // 修改参数名
+			listenerStatus: CommonStatusEnum.ENABLE, // 修改参数名
+			listenerName: params.name || '', // 修改参数名
+			listenerEventName: params.event || '', // 修改参数名
 		}
-		// const data = await ProcessListenerApi.getProcessListenerPage(query)
-		// tableData.value = data.list
-		// total.value = data.total
+		const res = await ProcessListenerApi.getList(query)
+		tableData.value = res.data.pages || []
+		total.value = res.data.totalNum
 		loading.value = false
-
-	
 	} finally {
 		loading.value = false
 	}
