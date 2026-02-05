@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2025-12-02 17:05:10
+ * @LastEditTime: 2026-02-05 14:00:39
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -31,7 +31,7 @@
 			/>
 		</div>
 		<!-- 新增弹窗/编辑弹窗 -->
-		<Dialog v-model:visible="open" :title="title" width="50%" >
+		<Dialog v-model:visible="open" :title="title" width="50%">
 			<el-form ref="menuRef" :model="form" :rules="rules" label-width="100px" style="padding: 20px">
 				<el-row>
 					<el-col :span="24">
@@ -56,11 +56,11 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="12">
-						<el-form-item label="显示方式" prop="isFrame" >
+						<el-form-item label="显示方式" prop="isFrame">
 							<template #label>
 								<span>
 									<el-tooltip
-										  content="内部：在系统内置页面打开；外部链接内部显示：嵌入当前系统窗口打开外部链接；外部链接外部显示：新浏览器标签页打开外部链接"
+										content="内部：在系统内置页面打开；外部链接内部显示：嵌入当前系统窗口打开外部链接；外部链接外部显示：新浏览器标签页打开外部链接"
 										placement="top"
 									>
 										<el-icon><question-filled /></el-icon>
@@ -147,12 +147,16 @@
 						<el-form-item
 							prop="path"
 							:rules="
-								form.menuType === 'M'
+								form.menuType === 'M' && form.parentId == '0'
 									? [
 											{ required: true, message: '路由地址不能为空' },
 											{ pattern: '^\/.*', message: '一级菜单路由以 / 开头' },
 									  ]
-									: [{ required: true, message: '路由地址不能为空', trigger: 'blur' }]
+									: [
+											// 非一级目录或菜单
+											{ required: true, message: '路由地址不能为空', trigger: 'blur' },
+											{ pattern: '^(?!/).*', message: '非一级菜单路由不能以 / 开头', trigger: 'blur' }, // 增加反向校验
+									  ]
 							"
 						>
 							<template #label>
@@ -346,6 +350,8 @@ const data = reactive({
 	},
 })
 const { queryParams, form, rules } = toRefs(data)
+// 菜单数据详情
+const menuDataInfo = ref([])
 //定义预设图标颜色列表（固定6种颜色）
 const colorMap = ref([
 	{ value: '#000000', label: '' },
@@ -668,10 +674,11 @@ const getList = params => {
 
 /**
  * @description 查询菜单下拉数结构
- */ 
+ */
 const getTreeselect = async () => {
 	menuOptions.value = []
 	getContentsMenu().then(response => {
+		menuDataInfo.value = response.data
 		const menu = { menuId: 0, menuName: '主类目', children: [] }
 		menu.children = proxy.flattenToTree(response.data, 'menuId')
 		menuOptions.value.push(menu)
@@ -745,26 +752,39 @@ const hideSelectIcon = event => {
 		showChooseIcon.value = false
 	}
 }
-
+/**
+ * @description 提交表单
+ */
 const submitForm = () => {
 	proxy.$refs['menuRef'].validate(valid => {
 		if (valid) {
-			if (form.value.id != undefined) {
-				// 当是外部链接时，移除路径中的前导斜杠
-				if(form.value.isFrame == '1' || form.value.isFrame == '2'){
-					form.value.link = form.value.path.replace(/^\/+/, '')
-				}
-				updateMenu(form.value).then(res => {
+			const menuData = { ...form.value }
+			// 处理外部链接的 link 字段
+			if (menuData.isFrame == '1' || menuData.isFrame == '2') {
+				// 假设 form.path 此时包含外部链接的 URL
+				menuData.link = menuData.path.replace(/^\/+/, '')
+			} else {
+				// 如果不是外部链接，确保 link 字段为 null 或空
+				menuData.link = null
+			}
+			// 处理二级类型为目录时的 component 字段
+			if (menuData.menuType == 'M' && menuData.parentId != '0') {
+				menuDataInfo.value.forEach(item => {
+					if (item.menuId == menuData.parentId) {
+						menuData.component = item.path
+					}
+				})
+			}
+
+			console.log('提交表单 submitForm menuData', menuData)
+			if (menuData.id != undefined) {
+				updateMenu(menuData).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					open.value = false
 					getList()
 				})
 			} else {
-				// 当是外部链接时，移除路径中的前导斜杠
-				if(form.value.isFrame == '1' || form.value.isFrame == '2'){
-					form.value.link = form.value.path.replace(/^\/+/, '')
-				}
-				addMenu(form.value).then(res => {
+				addMenu(menuData).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					open.value = false
 					getList()
