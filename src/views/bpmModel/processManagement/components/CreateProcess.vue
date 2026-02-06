@@ -187,7 +187,8 @@ const initData = async () => {
 	if (actionType.value === 'definition') {
 		// 流程定义场景（恢复）
 		const definitionId = route.query.id
-		const data = await DefinitionApi.getProcessDefinition(definitionId)
+		const res = await DefinitionApi.getProcessDefinition(definitionId)
+    const data = res.data
 		data.type = data.modelType
 		delete data.modelType
 		data.id = data.modelId
@@ -196,6 +197,11 @@ const initData = async () => {
 			data.simpleModel = JSON.parse(data.simpleModel)
 		}
 		formData.value = data
+    if (formData.value.type === BpmModelType.BPMN) {
+      processData.value = formData.value.bpmnXml
+    } else if (formData.value.type === BpmModelType.SIMPLE) {
+      processData.value = formData.value.simpleModel
+    }
 		formData.value.startUserIds = formData.value.startUserIds || []
 		formData.value.startDeptIds = formData.value.startDeptIds || []
 		formData.value.startUserType = formData.value.startUserIds.length > 0 ? 1 : formData.value.startDeptIds.length > 0 ? 2 : 0
