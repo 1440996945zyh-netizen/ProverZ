@@ -37,7 +37,10 @@ import Drawer from '@/components/Drawer/index.vue'
 import dayjs from 'dayjs'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 import { useRoute } from 'vue-router'
-
+// 引入流程启动器
+import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
+// 引入流程启动器
+const { startProcess, loading } = useProcessStarter()
 const { proxy } = getCurrentInstance()
 const advancedQuery = ref([])
 const baseTable = ref() // table的ref
@@ -89,7 +92,7 @@ const tableColumns = ref([
 					{
 						style: { color: '#f56c6c', fontWeight: 'bold' },
 					},
-					`¥ ${row.paymentAmount}`,
+					`¥ ${row.paymentAmount}`
 				),
 			]
 		},
@@ -107,6 +110,18 @@ const tableColumns = ref([
 		align: 'left',
 		minWidth: 180,
 		showOverflowTooltip: true,
+	},
+	{
+		label: '正在审批节点',
+		prop: 'currentNodeName',
+		align: 'center',
+		width: 120,
+	},
+	{
+		label: '节点处理人',
+		prop: 'approverNames',
+		align: 'center',
+		width: 120,
 	},
 	{
 		label: '审批状态',
@@ -140,7 +155,7 @@ const tableColumns = ref([
 					break
 				default:
 					type = 'info'
-					text = row.approvalStatus
+					text = row.approvalStatusLabel
 			}
 			return [
 				h(
@@ -150,7 +165,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => text,
-					},
+					}
 				),
 			]
 		},
@@ -159,11 +174,41 @@ const tableColumns = ref([
 	{
 		prop: '',
 		label: '操作',
-		width: 200,
+		width: 350,
 		align: 'center',
 		fixed: 'right',
 		render: row => {
 			return [
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							handleSubmitPayment(row, 'bpm:application:example:commercialpayment')
+						},
+						type: 'primary',
+						link: true,
+						icon: 'Finished',
+						disabled: row.approvalStatus === 'approved', // 已批准的不能删除
+					},
+					{
+						default: () => '商用付款',
+					}
+				),
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							handleSubmitPayment(row, 'bpm:application:example:consumablespayment')
+						},
+						type: 'primary',
+						link: true,
+						icon: 'Finished',
+						disabled: row.approvalStatus === 'approved', // 已批准的不能删除
+					},
+					{
+						default: () => '耗材付款',
+					}
+				),
 				h(
 					ElButton,
 					{
@@ -176,7 +221,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '编辑',
-					},
+					}
 				),
 				h(
 					ElButton,
@@ -191,7 +236,7 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '删除',
-					},
+					}
 				),
 			]
 		},
@@ -328,6 +373,61 @@ const edit = row => {
 	})
 }
 const route = useRoute()
+/**
+ * 提交商用付款流程
+ * @param param0.processDefinitionId 流程定义ID
+ * @param param0.variables 流程变量
+ */
+const submitCommercialPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitCommercialPayment:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId:rowData.id,
+		variables:variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.submitCommercialPayment(params)
+}
+/**
+ * 提交耗材付款申请
+ * @param param0.processDefinitionId 流程定义ID
+ * @param param0.variables 流程变量
+ * @param param0.startUserSelectAssignees 启动用户选择审批人
+ * @param param0.businessId 业务ID
+ * @param param0.rowData 点击行数据
+ * @param param0.processDefinitionId 流程定义ID
+ */
+const submitConsumablesPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitConsumablesPayment:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId:rowData.id,
+		variables:variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.submitConsumablesPayment(params)
+}
+/**
+ * 处理付款提交
+ * @param row 点击行数据
+ * @param paymentType 付款类型
+ */
+const handleSubmitPayment = (row, paymentType) => {
+	startProcess({
+		rowData: row, // 点击行数据
+		businessId: route.meta?.menuId, // 业务ID 业务菜单id
+		businessTypeCode: paymentType, // 业务类型编码 按钮权限标识
+		businessSubmit:paymentType == 'bpm:application:example:commercialpayment' ? submitCommercialPayment : submitConsumablesPayment, // 业务提交函数
+		onSuccess() {
+			ElMessage.success('提交成功')
+		},
+		onError(err) {
+			ElMessage.error(err.message)
+		},
+	})
+}
 
 const handleSubmit = async () => {
 	if (await detailRef.value.validate()) {
