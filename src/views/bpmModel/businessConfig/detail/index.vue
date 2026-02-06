@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-02 19:54:09
+ * @LastEditTime: 2026-02-05 17:38:51
  * @LastEditors: zhangsd
  * @Description: 新增业务关联
  * @FilePath: \view\src\views\bpmModel\businessConfig\detail\index.vue
@@ -194,7 +194,7 @@ const handleMenuChange = async menuId => {
 			const filterBtnList = res.data
 				.filter(item => item.menuType === 'F' && item.status == '0')
 				.map(item => ({
-					value: item.menuId,
+					value: item.perms,
 					label: item.menuName,
 				}))
 			btnOptions.value = filterBtnList
