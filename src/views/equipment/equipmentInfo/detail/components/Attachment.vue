@@ -107,7 +107,7 @@ import { ref, watch } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import publicApi from '@/api/public/index'
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 
 const props = defineProps({
 	equipmentId: {

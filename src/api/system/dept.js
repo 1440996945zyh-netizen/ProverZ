@@ -42,3 +42,12 @@ export function delDept(id) {
     method: 'delete'
   })
 }
+
+ // 根据部门级别查询部门列表
+export function getListByLevel(deptLevel) {
+  return request({
+    url: path + '/getListByLevel',
+    method: 'get',
+    params: { deptLevel }
+  })
+}

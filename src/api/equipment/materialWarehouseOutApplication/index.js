@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 
 const url = '/api/v1/internal/materialOutApplication'
 

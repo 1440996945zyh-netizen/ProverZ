@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 
 const api = {
 	// 查询特种设备列表（分页）

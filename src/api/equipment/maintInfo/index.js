@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/utils/auth/request'
 
 const api = {
 	// 查询设备维修派工信息列表（分页）
