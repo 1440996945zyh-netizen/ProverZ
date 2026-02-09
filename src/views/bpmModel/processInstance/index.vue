@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2025-12-23 11:13:32
+ * @LastEditTime: 2026-02-06 16:00:37
  * @LastEditors: zhangsd
  * @Description: 审批中心
  * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
@@ -116,7 +116,7 @@ import { CategoryApi } from '@/api/system/bpm/category'
 import DefinitionApi from '@/api/system/bpm/definition'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as TaskApi from '@/api/system/bpm/task'
-
+import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 defineOptions({ name: 'BpmProcessInstanceAll' })
 
 // 组件实例与路由

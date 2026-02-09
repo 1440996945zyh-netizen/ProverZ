@@ -30,6 +30,14 @@
 					</el-form-item>
 				</el-col>
 				<el-col :span="24">
+					<el-form-item label="付款类型" prop="paymentType" >
+						<el-radio-group v-model="formData.paymentType" @change="updatePaymentType">
+							<el-radio label="consumablespayment" value="consumablespayment">耗材付款</el-radio>
+							<el-radio label="commercialpayment" value="commercialpayment">商业付款</el-radio>
+						</el-radio-group>
+					</el-form-item>
+				</el-col>
+				<el-col :span="24">
 					<el-form-item label="收款方名称" prop="payeeName">
 						<el-input
 							v-model="formData.payeeName"
@@ -100,6 +108,7 @@ const formData = reactive({
 	paymentTitle: '',
 	paymentAmount: '',
 	payeeName: '',
+	paymentType: 'consumablespayment',
 	applicantId: '',
 	applicantName: '',
 	approvalStatus: '',
@@ -164,6 +173,10 @@ const rules = reactive({
 			trigger: 'blur',
 		},
 	],
+	paymentType: proxy.getRules({
+		required: true,
+		message: '请选择付款类型',
+	}),
 })
 
 // 组件挂载时加载用户列表
