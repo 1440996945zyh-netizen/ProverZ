@@ -1,3 +1,12 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2026-02-02 16:11:56
+ * @LastEditTime: 2026-02-09 10:23:39
+ * @LastEditors: zhangsd
+ * @Description: 业务流程示例
+ * @FilePath: \view\src\views\example\applicationExample\index.vue
+-->
+
 <template>
 	<div>
 		<div class="app-container">
@@ -111,7 +120,7 @@ const tableColumns = ref([
 					text = '商用付款'
 					break
 				case 'consumablespayment':
-					type = 'info'
+					type = 'warning'
 					text = '耗材付款'
 					break
 				default:
@@ -212,6 +221,8 @@ const tableColumns = ref([
 		fixed: 'right',
 		render: row => {
 			const buttons = []
+			//审批中(1) 和 审批通过(2) 锁定操作
+			const isLocked = row.approvalStatus == '1' || row.approvalStatus == '2'
 			if (row.paymentType == 'commercialpayment') {
 				buttons.push(
 					h(
@@ -223,6 +234,8 @@ const tableColumns = ref([
 							type: 'danger',
 							link: true,
 							icon: 'Finished',
+							// 审批中或通过后不可重复提交
+							disabled: isLocked,
 						},
 						{
 							default: () => '商用付款',
@@ -241,6 +254,8 @@ const tableColumns = ref([
 							type: 'warning',
 							link: true,
 							icon: 'Finished',
+							// 审批中或通过后不可重复提交
+							disabled: isLocked,
 						},
 						{
 							default: () => '耗材付款',
@@ -258,6 +273,8 @@ const tableColumns = ref([
 						type: 'primary',
 						link: true,
 						icon: 'Edit',
+						// 已审批或已拒绝的不能编辑
+						disabled: isLocked,
 					},
 					{
 						default: () => '编辑',
@@ -274,7 +291,7 @@ const tableColumns = ref([
 						type: 'danger',
 						link: true,
 						icon: 'Delete',
-						disabled: row.approvalStatus == '4' && row.paymentType == 'commercialpayment', // 已批准的不能删除
+						disabled: isLocked,
 					},
 					{
 						default: () => '删除',
@@ -478,9 +495,11 @@ const handleSubmitPayment = (row, paymentType) => {
 		businessSubmit: paymentType == 'bpm:application:example:commercialpayment' ? submitCommercialPayment : submitConsumablesPayment, // 业务提交函数
 		onSuccess() {
 			ElMessage.success('提交成功')
+			getList(queryParams.value)
 		},
 		onError(err) {
 			ElMessage.error(err.message)
+			getList(queryParams.value)
 		},
 	})
 }
