@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2026-02-09 11:27:50
+ * @LastEditTime: 2026-02-09 11:37:35
  * @LastEditors: zhangsd
  * @Description: 审批中心
  * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
@@ -324,7 +324,7 @@ const tableColumnsMyProcess = ref([
 						onClick: () => handleDetailMyProcess(row),
 						type: 'primary',
 						link: true,
-						icon: 'Search', // 对应原详情图标
+						icon: 'View', // 对应原详情图标
 					},
 					{
 						default: () => '详情',
@@ -342,7 +342,7 @@ const tableColumnsMyProcess = ref([
 							onClick: () => handleCancelMyProcess(row),
 							type: 'danger',
 							link: true,
-							icon: 'CircleCheck', // 对应办结图标
+							icon: 'SwitchButton', // 对应办结图标
 						},
 						{
 							default: () => '办结',
@@ -857,7 +857,7 @@ const tableColumnsDone = ref([
 				h(
 					ElButton,
 					{
-						click: () => {
+						onClick: () => {
 							handleWithdrawDone(row)
 						},
 						permission: undefined,
@@ -872,7 +872,7 @@ const tableColumnsDone = ref([
 				h(
 					ElButton,
 					{
-						click: () => {
+						onClick: () => {
 							handleAuditDone(row)
 						},
 						permission: undefined,
