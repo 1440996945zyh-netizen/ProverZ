@@ -1,14 +1,14 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:47:56
- * @LastEditTime: 2025-12-16 15:55:19
+ * @LastEditTime: 2026-02-06 16:47:39
  * @LastEditors: zhangsd
  * @Description: 流程条件
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\penal\flow-condition\FlowCondition.vue
 -->
 <template>
   <div class="panel-tab__content">
-    <el-form :model="flowConditionForm" label-width="90px" size="small">
+    <el-form :model="flowConditionForm" label-width="90px" >
       <el-form-item label="流转类型">
         <el-select v-model="flowConditionForm.type" @change="updateFlowType">
           <el-option label="普通流转路径" value="normal" />
@@ -29,7 +29,7 @@
       >
         <el-input
           v-model="flowConditionForm.body"
-          style="width: 192px"
+          style="width: 100%"
           clearable
           @change="updateFlowCondition"
         />

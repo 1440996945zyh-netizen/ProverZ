@@ -19,7 +19,7 @@
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="drawerVisible = false">取消</el-button>
-					<el-button type="primary" @click="handleSubmit">提交</el-button>
+					<!-- <el-button type="primary" @click="handleSubmit">提交</el-button> -->
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
@@ -97,7 +97,40 @@ const tableColumns = ref([
 			]
 		},
 	},
-
+	{
+		label: '付款类型',
+		prop: 'paymentType',
+		align: 'center',
+		width: 100,
+		render: row => {
+			let type = ''
+			let text = ''
+			switch (row.paymentType) {
+				case 'commercialpayment':
+					type = 'primary'
+					text = '商用付款'
+					break
+				case 'consumablespayment':
+					type = 'info'
+					text = '耗材付款'
+					break
+				default:
+					type = 'info'
+					text = '--'
+			}
+			return [
+				h(
+					ElTag,
+					{
+						type: type,
+					},
+					{
+						default: () => text,
+					}
+				),
+			]
+		},
+	},
 	{
 		label: '申请人',
 		prop: 'applicantName',
@@ -174,41 +207,48 @@ const tableColumns = ref([
 	{
 		prop: '',
 		label: '操作',
-		width: 350,
+		width: 280,
 		align: 'center',
 		fixed: 'right',
 		render: row => {
-			return [
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleSubmitPayment(row, 'bpm:application:example:commercialpayment')
+			const buttons = []
+			if (row.paymentType == 'commercialpayment') {
+				buttons.push(
+					h(
+						ElButton,
+						{
+							onClick: () => {
+								handleSubmitPayment(row, 'bpm:application:example:commercialpayment')
+							},
+							type: 'danger',
+							link: true,
+							icon: 'Finished',
 						},
-						type: 'primary',
-						link: true,
-						icon: 'Finished',
-						disabled: row.approvalStatus === 'approved', // 已批准的不能删除
-					},
-					{
-						default: () => '商用付款',
-					}
-				),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleSubmitPayment(row, 'bpm:application:example:consumablespayment')
+						{
+							default: () => '商用付款',
+						}
+					)
+				)
+			}
+			if (row.paymentType == 'consumablespayment') {
+				buttons.push(
+					h(
+						ElButton,
+						{
+							onClick: () => {
+								handleSubmitPayment(row, 'bpm:application:example:consumablespayment')
+							},
+							type: 'warning',
+							link: true,
+							icon: 'Finished',
 						},
-						type: 'primary',
-						link: true,
-						icon: 'Finished',
-						disabled: row.approvalStatus === 'approved', // 已批准的不能删除
-					},
-					{
-						default: () => '耗材付款',
-					}
-				),
+						{
+							default: () => '耗材付款',
+						}
+					)
+				)
+			}
+			buttons.push(
 				h(
 					ElButton,
 					{
@@ -222,7 +262,9 @@ const tableColumns = ref([
 					{
 						default: () => '编辑',
 					}
-				),
+				)
+			)
+			buttons.push(
 				h(
 					ElButton,
 					{
@@ -232,13 +274,14 @@ const tableColumns = ref([
 						type: 'danger',
 						link: true,
 						icon: 'Delete',
-						disabled: row.approvalStatus === 'approved', // 已批准的不能删除
+						disabled: row.approvalStatus == '4' && row.paymentType == 'commercialpayment', // 已批准的不能删除
 					},
 					{
 						default: () => '删除',
 					}
-				),
-			]
+				)
+			)
+			return buttons
 		},
 	},
 ])
@@ -258,6 +301,19 @@ const selectData = reactive([
 		modelValue: 'payeeName',
 		span: 8,
 		placeholder: '请输入收款方名称',
+	},
+	{
+		name: '付款类型',
+		type: 'select',
+		modelValue: 'paymentType',
+		span: 8,
+		placeholder: '请选择付款类型',
+		selectData: [
+			{ label: '商用付款', value: 'commercialpayment' },
+			{ label: '耗材付款', value: 'consumablespayment' },
+		],
+		selectLabel: 'label',
+		selectValue: 'value',
 	},
 	{
 		name: '申请人',
@@ -381,8 +437,8 @@ const route = useRoute()
 const submitCommercialPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
 	console.log('submitCommercialPayment:', processDefinitionId, variables, startUserSelectAssignees)
 	let params = {
-		businessDataId:rowData.id,
-		variables:variables,
+		businessDataId: rowData.id,
+		variables: variables,
 		startUserSelectAssignees: startUserSelectAssignees,
 		processDefinitionId: processDefinitionId,
 		businessId: businessId,
@@ -401,8 +457,8 @@ const submitCommercialPayment = ({ rowData, processDefinitionId, variables, star
 const submitConsumablesPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
 	console.log('submitConsumablesPayment:', processDefinitionId, variables, startUserSelectAssignees)
 	let params = {
-		businessDataId:rowData.id,
-		variables:variables,
+		businessDataId: rowData.id,
+		variables: variables,
 		startUserSelectAssignees: startUserSelectAssignees,
 		processDefinitionId: processDefinitionId,
 		businessId: businessId,
@@ -419,7 +475,7 @@ const handleSubmitPayment = (row, paymentType) => {
 		rowData: row, // 点击行数据
 		businessId: route.meta?.menuId, // 业务ID 业务菜单id
 		businessTypeCode: paymentType, // 业务类型编码 按钮权限标识
-		businessSubmit:paymentType == 'bpm:application:example:commercialpayment' ? submitCommercialPayment : submitConsumablesPayment, // 业务提交函数
+		businessSubmit: paymentType == 'bpm:application:example:commercialpayment' ? submitCommercialPayment : submitConsumablesPayment, // 业务提交函数
 		onSuccess() {
 			ElMessage.success('提交成功')
 		},
