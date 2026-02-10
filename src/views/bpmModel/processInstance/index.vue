@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2026-02-09 11:37:35
+ * @LastEditTime: 2026-02-09 13:52:49
  * @LastEditors: zhangsd
  * @Description: 审批中心
  * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
@@ -24,7 +24,7 @@
 					:rowConfig="rowConfig"
 					:tableHeight="tableHeight"
 					name="todoTaskTable"
-					:defaultWidth="20"
+					:defaultWidth="15"
 					:loading="loadingTodo"
 					:total="totalTodo"
 				/>

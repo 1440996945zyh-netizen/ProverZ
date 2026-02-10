@@ -37,11 +37,11 @@
 						<div
 							style="
 								background-color: #f5f5f5;
-								height: 35px;
-								border-radius: 18px;
+								height: 40px;
+								border-radius: 25px;
 								display: flex;
 								align-items: center;
-								padding: 8px;
+								padding: 10px 12px;
 								gap: 2px;
 							"
 						>

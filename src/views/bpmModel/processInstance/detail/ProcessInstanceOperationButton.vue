@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:19:11
- * @LastEditTime: 2026-02-09 11:37:04
+ * @LastEditTime: 2026-02-10 10:21:30
  * @LastEditors: zhangsd
  * @Description: 流程实例操作按钮
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\ProcessInstanceOperationButton.vue
@@ -746,12 +746,12 @@ const closePopover = (type, formRef) => {
 const initNextAssigneesFormField = async () => {
 	// 获取修改的流程变量, 暂时只支持流程表单
 	const variables = getUpdatedProcessInstanceVariables()
-	const data = []
-	// const data = await ProcessInstanceApi.getNextApprovalNodes({
-	//   processInstanceId: props.processInstance.id,
-	//   taskId: runningTask.value.id,
-	//   processVariablesStr: JSON.stringify(variables)
-	// })
+	// const data = []
+	const data = await ProcessInstanceApi.getNextApprovalNodes({
+	  processInstanceId: props.processInstance.id,
+	  taskId: runningTask.value.id,
+	  processVariablesStr: JSON.stringify(variables)
+	})
 	if (data && data.length > 0) {
 		const customApproveUsersData = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
 		data.forEach(node => {

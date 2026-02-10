@@ -76,6 +76,14 @@ const api = {
 			data: data,
 		})
 	},
+
+	submitUnificationPayment(data) {
+		return request({
+			url: '/api/internal/bpmApplicationExample/submitUnificationPayment',
+			method: 'post',
+			data: data,
+		})
+	},
 }
 
 export default api
