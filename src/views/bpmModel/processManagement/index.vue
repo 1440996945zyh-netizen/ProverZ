@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2026-02-03 15:49:28
+ * @LastEditTime: 2026-02-09 14:10:20
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
@@ -26,7 +26,7 @@
 				:showPagination="true"
 				:showToolBar="false"
 				:showNum="5"
-				defaultWidth="50"
+				:defaultWidth="30"
 				:total="total"
 			/>
 		</div>
@@ -223,11 +223,12 @@ const selectData = reactive([
 
 // 13. 顶部按钮配置
 const buttonList = reactive([
+
 	{
-		label: '新增流程',
-		type: 'primary',
-		icon: 'Plus',
-		click: () => handleAddProcess,
+		label: '新增', // 按钮名称
+		type: 'primary', // 按钮类型
+		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
+		click: () => handleAddProcess(), // 回调函数
 		permission: 'bpm:process:insert',
 	},
 ])

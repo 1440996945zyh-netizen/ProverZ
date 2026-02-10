@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-09 10:23:39
+ * @LastEditTime: 2026-02-10 13:45:03
  * @LastEditors: zhangsd
  * @Description: 业务流程示例
  * @FilePath: \view\src\views\example\applicationExample\index.vue
@@ -216,7 +216,7 @@ const tableColumns = ref([
 	{
 		prop: '',
 		label: '操作',
-		width: 280,
+		width: 350,
 		align: 'center',
 		fixed: 'right',
 		render: row => {
@@ -238,7 +238,7 @@ const tableColumns = ref([
 							disabled: isLocked,
 						},
 						{
-							default: () => '商用付款',
+							default: () => '商用付款审批',
 						}
 					)
 				)
@@ -258,7 +258,7 @@ const tableColumns = ref([
 							disabled: isLocked,
 						},
 						{
-							default: () => '耗材付款',
+							default: () => '耗材付款审批',
 						}
 					)
 				)
@@ -278,6 +278,22 @@ const tableColumns = ref([
 					},
 					{
 						default: () => '编辑',
+					}
+				),
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							handleSubmitPayment(row, 'bpm:application:example:unificationpayment')
+						},
+						type: 'primary',
+						link: true,
+						icon: 'Finished',
+						// 已审批或已拒绝的不能编辑
+						disabled: isLocked,
+					},
+					{
+						default: () => '统一付款审批',
 					}
 				)
 			)
@@ -482,6 +498,17 @@ const submitConsumablesPayment = ({ rowData, processDefinitionId, variables, sta
 	}
 	return api.submitConsumablesPayment(params)
 }
+const submitUnificationPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitUnificationPayment:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.submitUnificationPayment(params)
+}
 /**
  * 处理付款提交
  * @param row 点击行数据
@@ -492,7 +519,7 @@ const handleSubmitPayment = (row, paymentType) => {
 		rowData: row, // 点击行数据
 		businessId: route.meta?.menuId, // 业务ID 业务菜单id
 		businessTypeCode: paymentType, // 业务类型编码 按钮权限标识
-		businessSubmit: paymentType == 'bpm:application:example:commercialpayment' ? submitCommercialPayment : submitConsumablesPayment, // 业务提交函数
+		businessSubmit: paymentType == 'bpm:application:example:commercialpayment' ? submitCommercialPayment : paymentType == 'bpm:application:example:unificationpayment' ? submitUnificationPayment : submitConsumablesPayment, // 业务提交函数
 		onSuccess() {
 			ElMessage.success('提交成功')
 			getList(queryParams.value)
