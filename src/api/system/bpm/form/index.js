@@ -81,3 +81,10 @@ export const getFormSimpleList = async () => {
 		method: 'get',
 	})
 }
+
+export const getModelIdsByForm = (formId) => {
+  return request({
+    url: '/bpm/processDefinition/getModelIdsByForm?formId=' + formId,
+    method: 'get'
+  })
+}

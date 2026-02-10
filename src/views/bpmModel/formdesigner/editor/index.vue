@@ -57,8 +57,8 @@ import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/bpm/formCreate'
 import { useFormCreateDesigner } from '@/components/FormCreate'
 import { useMessage } from '@/plugins/useMessage'
-import { getDetail, updateForm, insertForm } from '@/api/system/bpm/form'
-
+import { getDetail, updateForm, insertForm, getModelIdsByForm } from '@/api/system/bpm/form'
+import { deployModel } from '@/api/system/bpm/model'
 const message = useMessage()
 const route = useRoute()
 const router = useRouter()
@@ -145,7 +145,28 @@ const submitForm = async () => {
 		} else {
 			await updateForm(data)
 			message.success('更新成功')
-		}
+      // 校验该表单有没有绑定流程模型
+      const { data: modelIds } = await getModelIdsByForm(data.id)
+
+      if (modelIds.length > 0) {
+        message.confirm(
+          '检测到该表单已绑定流程模型，修改后的表单需重新发布模型才能生效。是否立即发布？',
+          '同步更新提示'
+        ).then(async () => {
+          try {
+            for (const modelId of modelIds) {
+              await deployModel(modelId)
+            }
+            message.success('关联模型已全部重新发布')
+          } catch (e) {
+            message.error('部分模型发布失败，请手动检查')
+          }
+        }).catch(() => {
+          message.info('操作已取消，请记得稍后手动发布关联模型')
+        })
+      }
+
+    }
 
 		dialogVisible.value = false
 		close()
@@ -209,7 +230,7 @@ onMounted(async () => {
     flex: 1;
     overflow: auto;
   }
-  
+
   /* 调整右侧内部表单的 label 宽度，防止挤压 */
 //   .el-form-item__label {
 //     width: 90px !important;
