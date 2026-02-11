@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2025-12-23 11:13:32
+ * @LastEditTime: 2026-02-10 16:35:54
  * @LastEditors: zhangsd
  * @Description: 流程实例管理
  * @FilePath: \view\src\views\bpmModel\processInstance\manager\index.vue
@@ -75,7 +75,7 @@ const processStatusDict = ref([
 ]) // 流程状态字典
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 
-const tableHeight = computed(() => storeHight.value - 15)
+const tableHeight = computed(() => storeHight.value - 18)
 // 查询参数
 const queryParams = ref({
 	pageNo: 1,
@@ -165,15 +165,15 @@ const tableColumns = ref([
 		prop: 'name',
 		minWidth: 200,
 		fixed: 'left',
-		align: 'center',
+		align: 'left',
 	},
-	{
-		label: '流程分类',
-		prop: 'categoryName',
-		minWidth: 100,
-		fixed: 'left',
-		align: 'center',
-	},
+	// {
+	// 	label: '流程分类',
+	// 	prop: 'categoryName',
+	// 	minWidth: 100,
+	// 	fixed: 'left',
+	// 	align: 'center',
+	// },
 	{
 		label: '流程发起人',
 		prop: 'startUser.userName',
@@ -239,7 +239,7 @@ const tableColumns = ref([
 		label: '当前审批任务',
 		prop: 'tasks',
 		minWidth: 120,
-		align: 'center',
+		align: 'left',
 		render: row => {
 			const taskContainer = []
 			if (!row.tasks || !Array.isArray(row.tasks) || row.tasks.length === 0) {
@@ -258,15 +258,15 @@ const tableColumns = ref([
 					)
 				})
 			}
-			return h('div', { style: { display: 'flex', gap: '4px', justifyContent: 'center' } }, taskContainer)
+			return h('div', { style: { display: 'flex', gap: '4px',  } }, taskContainer)
 		},
 	},
-	{
-		label: '流程编号',
-		prop: 'id',
-		minWidth: '320px',
-		align: 'center',
-	},
+	// {
+	// 	label: '流程编号',
+	// 	prop: 'id',
+	// 	minWidth: '320px',
+	// 	align: 'center',
+	// },
 	{
 		prop: '',
 		label: '操作',

@@ -122,7 +122,7 @@
 						(buttonList.length === 0 && selectData.length > (props.showNum ? props.showNum : 6))
 					"
 				>
-					更多查询
+					更多条件
 					<i class="el-icon-caret-bottom"></i>
 				</el-button>
 				<el-button type="primary" icon="Search" @click="searchHandler" ref="searchDom" v-if="showSearch">查询</el-button>

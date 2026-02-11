@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:19:11
- * @LastEditTime: 2026-02-10 10:21:30
+ * @LastEditTime: 2026-02-11 09:40:59
  * @LastEditors: zhangsd
  * @Description: 流程实例操作按钮
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\ProcessInstanceOperationButton.vue
@@ -487,7 +487,7 @@
 			</div>
 		</el-popover>
 		<!-- 【再次提交】 按钮-->
-		<div
+		<!-- <div
 			@click="handleReCreate()"
 			style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 			onmouseover="this.style.backgroundColor = '#f5f5f5'"
@@ -500,7 +500,7 @@
 		>
 			<el-icon :size="14"><Refresh /></el-icon>
 			&nbsp; 再次提交
-		</div>
+		</div> -->
 	</div>
 
 	<!-- 签名弹窗 -->

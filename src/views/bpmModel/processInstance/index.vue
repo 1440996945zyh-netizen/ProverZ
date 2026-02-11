@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2026-02-09 13:52:49
+ * @LastEditTime: 2026-02-10 16:03:49
  * @LastEditors: zhangsd
  * @Description: 审批中心
  * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
@@ -209,7 +209,7 @@ const tableColumnsMyProcess = ref([
 	{
 		prop: 'name',
 		label: '流程名称',
-		align: 'center',
+		align: 'left',
 		minWidth: 200,
 		fixed: 'left',
 	},
@@ -217,6 +217,7 @@ const tableColumnsMyProcess = ref([
 		prop: 'summary',
 		label: '摘要',
 		minWidth: 240,
+		align: 'left',
 		render: row => {
 			if (row.summary && row.summary.length > 0) {
 				return [
@@ -236,7 +237,7 @@ const tableColumnsMyProcess = ref([
 	{
 		prop: 'status',
 		label: '流程状态',
-		align: 'center',
+		align: 'left',
 		minWidth: 200,
 		render: row => {
 			// 审批中状态
@@ -349,23 +350,24 @@ const tableColumnsMyProcess = ref([
 						}
 					)
 				)
-			} else {
-				// 非进行中状态（如已结束、已撤回）显示 重新发起
-				buttons.push(
-					h(
-						ElButton,
-						{
-							onClick: () => handleCreateMyProcess(row),
-							type: 'warning',
-							link: true,
-							icon: 'Refresh', // 对应重新发起图标
-						},
-						{
-							default: () => '重新发起',
-						}
-					)
-				)
-			}
+			} 
+			// else {
+			// 	// 非进行中状态（如已结束、已撤回）显示 重新发起
+			// 	buttons.push(
+			// 		h(
+			// 			ElButton,
+			// 			{
+			// 				onClick: () => handleCreateMyProcess(row),
+			// 				type: 'warning',
+			// 				link: true,
+			// 				icon: 'Refresh', // 对应重新发起图标
+			// 			},
+			// 			{
+			// 				default: () => '重新发起',
+			// 			}
+			// 		)
+			// 	)
+			// }
 
 			return buttons
 		},
@@ -510,15 +512,15 @@ const buttonListTodo = reactive([
 const tableColumnsTodo = ref([
 	{
 		prop: 'processInstance.name',
-		label: '流程',
-		align: 'center',
+		label: '流程名称',
+		align: 'left',
 		minwidth: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.name || '')],
 	},
 	{
 		prop: 'processInstance.summary',
 		label: '摘要',
-		align: 'center',
+		align: 'left',
 		minWidth: 480,
 		render: row => {
 			if (row.processInstance?.summary && row.processInstance.summary.length > 0) {
@@ -755,14 +757,15 @@ const formatPast2 = milliseconds => {
 const tableColumnsDone = ref([
 	{
 		prop: 'processInstance.name',
-		label: '流程',
-		align: 'center',
+		label: '流程名称',
+		align: 'left',
 		width: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.name || '')],
 	},
 	{
 		prop: 'processInstance.summary',
 		label: '摘要',
+		align: 'left',
 		minWidth: 240,
 		render: row => {
 			if (row.processInstance?.summary && row.processInstance.summary.length > 0) {
@@ -811,7 +814,7 @@ const tableColumnsDone = ref([
 	{
 		prop: 'reason',
 		label: '审批建议',
-		align: 'center',
+		align: 'left',
 		minWidth: 180,
 		showOverFlow: true,
 	},
@@ -990,13 +993,14 @@ const buttonListCopy = reactive([
 const tableColumnsCopy = ref([
 	{
 		prop: 'processInstanceName',
-		label: '流程名',
-		align: 'center',
-		minWidth: 180,
+		label: '流程名称',
+		align: 'left',
+		minWidth: 100,
 	},
 	{
 		prop: 'summary',
 		label: '摘要',
+		align: 'left',
 		minWidth: 180,
 		render: row => {
 			if (row.summary && row.summary.length > 0) {
@@ -1042,8 +1046,8 @@ const tableColumnsCopy = ref([
 	{
 		prop: 'reason',
 		label: '抄送意见',
-		align: 'center',
-		width: 150,
+		align: 'left',
+		width: 200,
 		showOverFlow: true,
 	},
 	{
