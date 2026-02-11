@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:21:33
- * @LastEditTime: 2026-02-03 15:09:11
+ * @LastEditTime: 2026-02-10 15:57:44
  * @LastEditors: zhangsd
  * @Description:  流程监听器
  * @FilePath: \view\src\views\bpmModel\processListener\index.vue
@@ -120,7 +120,7 @@ const tableColumns = ref([
 	{
 		prop: 'listenerName',
 		label: '名称',
-		align: 'center',
+		align: 'left',
 		minWidth: 150,
 	},
 	{
@@ -191,7 +191,7 @@ const tableColumns = ref([
 	{
 		prop: 'listenerValue',
 		label: '值',
-		align: 'center',
+		align: 'left',
 		showOverFlow: true,
 		minWidth: 200,
 	},

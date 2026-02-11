@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-05 17:38:51
+ * @LastEditTime: 2026-02-11 10:47:11
  * @LastEditors: zhangsd
  * @Description: 新增业务关联
  * @FilePath: \view\src\views\bpmModel\businessConfig\detail\index.vue
@@ -14,7 +14,7 @@
 			<el-row :gutter="20">
 				<!--  业务模块（菜单树，必选） -->
 				<el-col :span="24">
-					<el-form-item label="业务模块" prop="businessId">
+					<el-form-item label="主业务" prop="businessId">
 						<el-tree-select
 							v-model="formData.businessId"
 							:data="menuOptions"
@@ -29,7 +29,7 @@
 
 				<!-- 模块按钮（下拉，根据模块级联加载，必选） -->
 				<el-col :span="24">
-					<el-form-item label="关联按钮" prop="businessTypeCode">
+					<el-form-item label="子业务" prop="businessTypeCode">
 						<Select
 							:selectData="btnOptions"
 							v-model:value="formData.businessTypeCode"
@@ -41,14 +41,22 @@
 				</el-col>
 				<!--  关联流程模型（下拉，必选） -->
 				<el-col :span="24">
-					<el-form-item label="关联流程模型" prop="procModelId">
-						<Select
-							:selectData="modelList"
-							v-model:value="formData.procModelId"
-							v-model:label="formData.procModelName"
-							placeholder="请选择流程模型"
-						/>
-					</el-form-item>
+					<el-row :gutter="10">
+						<el-col :span="22">
+							<el-form-item label="关联流程模型" prop="procModelId">
+								<Select
+									:selectData="modelList"
+									v-model:value="formData.procModelId"
+									v-model:label="formData.procModelName"
+									placeholder="请选择流程模型"
+									style="width: 100%"
+								/>
+							</el-form-item>
+						</el-col>
+						<el-col :span="2" style="display: flex; justify-content: flex-start">
+							<el-button type="primary" link @click="handlePreview">预览</el-button>
+						</el-col>
+					</el-row>
 				</el-col>
 
 				<!--  状态（开关，默认启用） -->
@@ -109,6 +117,10 @@
 			</el-row>
 		</el-form>
 	</div>
+	<!-- 流程模型预览  -->
+	<Dialog v-model:visible="previewDialogVisible" title="流程模型预览" width="60%" :showFooter="false">
+		<BpmPreviewDialog :loading="previewLoading" :modelId="formData.procModelId" @close="previewDialogVisible = false" />
+	</Dialog>
 </template>
 
 <script setup name="bpmBusinessConfigDetail">
@@ -119,10 +131,16 @@ import publicApi from '@/api/public'
 import api from '@/api/system/bpm/businessConfig/index.js'
 import Select from '@/components/Select/index.vue'
 import { formatDate } from '@/utils/common/date'
+import Dialog from '@/components/Dialog/index.vue'
+import BpmPreviewDialog from '@/views/bpmModel/businessConfig/detail/bpmPreviewDialog.vue'
 const { proxy } = getCurrentInstance()
 const ruleForm = ref(null)
 const isViewMode = ref(false)
+// 预览流程模型
+const previewDialogVisible = ref(false)
 
+const previewLoading = ref(false)
+const previewBpmnXml = ref('')
 // 表单核心数据
 const formData = reactive({
 	id: null,
@@ -317,7 +335,20 @@ const initModelList = async () => {
 		console.error('加载流程模型失败：', err)
 	}
 }
-
+/**
+ * 预览流程模型
+ */
+const handlePreview = async () => {
+	previewLoading.value = true
+	try {
+		previewDialogVisible.value = true
+	} catch (err) {
+		console.error('预览流程模型失败：', err)
+		proxy.$modal.msgError('预览流程模型失败，请稍后重试')
+	} finally {
+		previewLoading.value = false
+	}
+}
 // 初始化加载
 onMounted(() => {
 	getTreeselect()

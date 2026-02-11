@@ -1,13 +1,13 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 14:18:02
- * @LastEditTime: 2026-02-03 15:48:28
+ * @LastEditTime: 2026-02-10 15:01:30
  * @LastEditors: zhangsd
  * @Description: 表单设计
  * @FilePath: \view\src\views\bpmModel\processManagement\components\FormDesign.vue
 -->
 <template>
-	<el-form ref="formRef" :model="modelData" :rules="rules" label-width="120px" class="mt-20px">
+	<el-form ref="formRef" :model="modelData" :rules="rules" label-width="100px" class="mt-20px">
 		<!-- <el-form-item label="表单类型" prop="formType" class="form-item-gap">
 			<el-radio-group v-model="modelData.formType">
 				<el-radio v-for="dict in formTypeList" :key="dict.value" :value="dict.value">
@@ -16,8 +16,11 @@
 			</el-radio-group>
 		</el-form-item> -->
 
-		<TipMessage type="Primary" style="margin-bottom: 15px;">请选择流程表单</TipMessage>
-
+		<!-- <TipMessage type="Primary" style="margin-bottom: 15px;">请选择流程表单</TipMessage> -->
+		<div class="form-preview-title">
+			<div class="title-line"></div>
+			<span class="title-text">表单选择</span>
+		</div>
 		<el-form-item v-if="modelData.formType == BpmModelFormType.NORMAL" label="流程表单" prop="formId" class="form-item-gap">
 			<el-select v-model="modelData.formId" clearable style="width: 100%">
 				<el-option v-for="form in formList" :key="form.value" :label="form.label" :value="form.value" />
@@ -64,8 +67,8 @@
 			class="form-preview-wrap"
 		>
 			<div class="form-preview-title">
-				<div class="title-line mr-10px"></div>
-				<span class="title-text">表单预览</span>
+				<div class="title-line"></div>
+				<span class="title-text">表单内容</span>
 			</div>
 			<form-create v-model="formPreview.formData" :rule="formPreview.rule" :option="formPreview.option" />
 		</div>
@@ -134,9 +137,9 @@ watch(
 			setConfAndFields2(formPreview.value, data.conf, data.fields)
 			formPreview.value.option = {
 				...formPreview.value.option, // 保留其他布局配置
-				submitBtn: false,            // 隐藏提交按钮
-				resetBtn: false,             // 隐藏重置按钮
-				menuBtn: false               // 隐藏整个底部按钮区域（最保险）
+				submitBtn: false, // 隐藏提交按钮
+				resetBtn: false, // 隐藏重置按钮
+				menuBtn: false, // 隐藏整个底部按钮区域（最保险）
 			}
 			// 设置只读
 			formPreview.value.rule.forEach(item => {
@@ -190,6 +193,7 @@ defineExpose({
 		width: 4px;
 		height: 15px;
 		background-color: var(--el-color-primary);
+		margin-right: 10px;
 	}
 
 	.title-text {

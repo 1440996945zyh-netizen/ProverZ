@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-23 14:57:27
- * @LastEditTime: 2025-12-23 15:17:30
+ * @LastEditTime: 2026-02-10 15:59:45
  * @LastEditors: zhangsd
  * @Description: 任务列表页面
  * @FilePath: \view\src\views\bpmModel\task\manager\index.vue
@@ -112,7 +112,7 @@ const tableColumns = ref([
 		prop: 'processInstance.name',
 		minWidth: 200,
 		fixed: 'left',
-		align: 'center',
+		align: 'left',
 	},
 
 	{
@@ -135,7 +135,7 @@ const tableColumns = ref([
 		label: '当前任务',
 		prop: 'name',
 		minWidth: 120,
-		align: 'center',
+		align: 'left',
 	},
 	{
 		label: '任务开始时间',
@@ -185,7 +185,7 @@ const tableColumns = ref([
 		label: '审批建议',
 		prop: 'reason',
 		width: 200,
-		align: 'center',
+		align: 'left',
 	},
 	{
 		label: '耗时',
@@ -196,18 +196,18 @@ const tableColumns = ref([
 			return [h(ElTag, { type: 'primary' }, { default: () => formatPast2(row.durationInMillis) })]
 		},
 	},
-	{
-		label: '流程编号',
-		prop: 'processInstanceId',
-		minWidth: 200,
-		align: 'center',
-	},
-	{
-		label: '任务编号',
-		prop: 'id',
-		minWidth: 200,
-		align: 'center',
-	},
+	// {
+	// 	label: '流程编号',
+	// 	prop: 'processInstanceId',
+	// 	minWidth: 200,
+	// 	align: 'center',
+	// },
+	// {
+	// 	label: '任务编号',
+	// 	prop: 'id',
+	// 	minWidth: 200,
+	// 	align: 'center',
+	// },
 
 	{
 		prop: '',

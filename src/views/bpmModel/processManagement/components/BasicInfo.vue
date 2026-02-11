@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 13:38:46
- * @LastEditTime: 2026-02-03 20:50:17
+ * @LastEditTime: 2026-02-10 15:41:37
  * @LastEditors: zhangsd
  * @Description: 基本信息
  * @FilePath: \view\src\views\bpmModel\processManagement\components\BasicInfo.vue
@@ -11,7 +11,12 @@
 		<el-form ref="formRef" :model="modelData" :rules="rules" label-width="120px" class="form-margin-top-20">
 			<el-form-item label="流程标识" prop="key" class="form-item-gap">
 				<div class="flex-align-center">
-					<el-input v-model="modelData.key" :disabled="!!modelData.id" placeholder="请输入流程标识，以字母或下划线开头" />
+					<el-input
+						v-model="modelData.key"
+						:disabled="!!modelData.id"
+						@input="modelData.key = modelData.key.toUpperCase()"
+						placeholder="请输入流程标识，以字母或下划线开头"
+					/>
 					<div class="modelIcon">
 						<el-tooltip
 							class="item"
@@ -40,7 +45,7 @@
 			</el-form-item> -->
 
 			<el-form-item label="流程描述" prop="description" class="form-item-gap">
-				<el-input v-model="modelData.description" clearable type="textarea" />
+				<el-input v-model="modelData.description" clearable type="textarea" rows="6" />
 			</el-form-item>
 
 			<!-- <el-form-item label="流程类型" prop="type" class="form-item-gap">
@@ -95,6 +100,7 @@
 			</el-form-item> -->
 
 			<el-form-item label="流程管理员" prop="managerUserIds" class="form-item-gap">
+				
 				<div class="flex flex-wrap gap-16">
 					<div v-for="user in selectedManagerUsers" :key="user.id" class="tag-item">
 						<el-avatar class="margin-5-important" :size="28" v-if="user.avatar" :src="user.avatar" />
@@ -108,6 +114,16 @@
 						<el-icon><Plus /></el-icon>
 						选择人员
 					</el-button>
+				</div>
+				<div class="modelIcon">
+					<el-tooltip
+						class="item"
+						content="审批人为空时，可选择转交给流程管理员"
+						effect="light"
+						placement="top"
+					>
+						<el-icon color="#e6a23c" class="margin-left-5"><InfoFilled /></el-icon>
+					</el-tooltip>
 				</div>
 			</el-form-item>
 		</el-form>
@@ -180,8 +196,8 @@ const rules = {
 					callback()
 					return
 				}
-				if (!/^[a-zA-Z_][\-_.0-9_a-zA-Z$]*$/.test(value)) {
-					callback(new Error('只能包含字母、数字、下划线、连字符和点号，且必须以字母或下划线开头'))
+				if (!/^[A-Z_][\-_.0-9_A-Z$]*$/.test(value)) {
+					callback(new Error('只能包含字母、数字、下划线、连字符和点号，且必须以大写字母或下划线开头'))
 					return
 				}
 				callback()
@@ -192,7 +208,7 @@ const rules = {
 	// category: [{ required: true, message: '流程分类不能为空', trigger: 'blur' }],
 	// type: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
 	// visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
-	managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }],
+	// managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }],
 }
 
 // 双向绑定数据
@@ -223,7 +239,7 @@ watch(
 		} else {
 			selectedManagerUsers.value = []
 		}
-		
+
 		console.log('newVal =>', newVal)
 	},
 	{ immediate: true }
@@ -328,6 +344,10 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+.app-containers {
+	width: 90%;
+	// margin: 0 auto;
+}
 // 基础布局样式
 .flex {
 	display: flex;

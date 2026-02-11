@@ -1,13 +1,13 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 14:38:40
- * @LastEditTime: 2025-12-25 15:29:22
+ * @LastEditTime: 2026-02-10 15:30:19
  * @LastEditors: zhangsd
  * @Description: 流程设计器
  * @FilePath: \view\src\views\bpmModel\processManagement\editor\index.vue
 -->
 <template>
-	<div class="app-container" style="height: calc(100vh - 191px)">
+	<div class="app-container" style="height: calc(100vh - 110px)">
 		<!-- 流程设计器，负责绘制流程等 -->
 		<MyProcessDesigner
 			key="designer"
@@ -162,6 +162,10 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+
+.app-container{
+	background-color: #ffffff;
+}
 // 流程属性面板样式（
 .process-panel {
 	&__container {

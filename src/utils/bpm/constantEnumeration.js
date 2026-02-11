@@ -71,7 +71,7 @@ export const BpmProcessInstanceStatus = {
 	RUNNING: 1, // 审批中
 	APPROVE: 2, // 审批通过
 	REJECT: 3, // 审批不通过
-	CANCEL: 4, // 已取消
+	CANCEL: 4, // 已办结
 }
 
 /**
@@ -178,7 +178,7 @@ export const BPM_PROCESS_INSTANCE_STATUS = [
 	},
 	{
 		value: BpmProcessInstanceStatus.CANCEL,
-		label: '已取消',
+		label: '已办结',
 		type: 'info',
 	},
 ]
