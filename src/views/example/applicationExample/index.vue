@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-11 09:51:34
+ * @LastEditTime: 2026-02-12 13:36:34
  * @LastEditors: zhangsd
  * @Description: 业务流程示例
  * @FilePath: \view\src\views\example\applicationExample\index.vue
@@ -21,6 +21,7 @@
 				:cellClickEvent="cellClickEvent"
 				:total="total"
 				:showNum="6"
+				:tableHeight="tableHeight"
 				:defaultWidth="50"
 			/>
 		</div>
@@ -47,7 +48,7 @@ import detail from './detail/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import dayjs from 'dayjs'
 import DropDown from '@/components/DropDown/newIndex.vue' // 补充Dropdown组件导入
-
+import tableParamsStore from '@/store/modules/tableParams'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 import { useRoute, useRouter } from 'vue-router'
 // 引入流程启动器
@@ -65,7 +66,8 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-
+const storeHight = computed(() => tableParamsStore().normalTableHeight)
+const tableHeight = computed(() => storeHight.value -20) //表格高度
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([

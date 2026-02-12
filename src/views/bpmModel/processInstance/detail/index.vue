@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:14:13
- * @LastEditTime: 2026-02-10 17:02:42
+ * @LastEditTime: 2026-02-11 13:44:56
  * @LastEditors: zhangsd
  * @Description: 流程实例详情页面
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\index.vue
@@ -102,7 +102,7 @@
 									v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN"
 									:loading="processInstanceLoading"
 									:model-view="processModelView"
-									style="height: calc(100vh - 20rem) !important"
+									style="height: calc(100vh - 25rem) !important"
 								/>
 							</div>
 						</el-tab-pane>

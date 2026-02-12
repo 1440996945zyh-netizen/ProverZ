@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 11:26:00
- * @LastEditTime: 2026-02-11 10:38:22
+ * @LastEditTime: 2026-02-11 13:43:05
  * @LastEditors: zhangsd
  * @Description: 创建流程
  * @FilePath: \view\src\views\bpmModel\processManagement\components\CreateProcess.vue
@@ -793,7 +793,7 @@ $transition-timing-function: ease;
 }
 </style>
 
-<style>
+<style scoped>
 	.el-card__body {
 		padding: 0 !important;
 	}
