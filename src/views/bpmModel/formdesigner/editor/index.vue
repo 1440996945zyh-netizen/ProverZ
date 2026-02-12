@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-17 11:44:57
- * @LastEditTime: 2026-02-04 10:04:47
+ * @LastEditTime: 2026-02-11 11:32:07
  * @LastEditors: zhangsd
  * @Description: 表单设计器
  * @FilePath: \view\src\views\bpmModel\formdesigner\editor\index.vue
@@ -58,7 +58,7 @@ import { encodeConf, encodeFields, setConfAndFields } from '@/utils/bpm/formCrea
 import { useFormCreateDesigner } from '@/components/FormCreate'
 import { useMessage } from '@/plugins/useMessage'
 import { getDetail, updateForm, insertForm, getModelIdsByForm } from '@/api/system/bpm/form'
-import  BpmModelApi  from '@/api/system/bpm/model'
+import modelApi from '@/api/system/bpm/model'
 const message = useMessage()
 const route = useRoute()
 const router = useRouter()
@@ -155,7 +155,7 @@ const submitForm = async () => {
         ).then(async () => {
           try {
             for (const modelId of modelIds) {
-              await BpmModelApi.deployModel(modelId)
+              await modelApi.deployModel(modelId)
             }
             message.success('关联模型已全部重新发布')
           } catch (e) {
