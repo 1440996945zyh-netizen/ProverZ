@@ -58,7 +58,7 @@ import { encodeConf, encodeFields, setConfAndFields } from '@/utils/bpm/formCrea
 import { useFormCreateDesigner } from '@/components/FormCreate'
 import { useMessage } from '@/plugins/useMessage'
 import { getDetail, updateForm, insertForm, getModelIdsByForm } from '@/api/system/bpm/form'
-import { deployModel } from '@/api/system/bpm/model'
+import  BpmModelApi  from '@/api/system/bpm/model'
 const message = useMessage()
 const route = useRoute()
 const router = useRouter()
@@ -155,7 +155,7 @@ const submitForm = async () => {
         ).then(async () => {
           try {
             for (const modelId of modelIds) {
-              await deployModel(modelId)
+              await BpmModelApi.deployModel(modelId)
             }
             message.success('关联模型已全部重新发布')
           } catch (e) {
