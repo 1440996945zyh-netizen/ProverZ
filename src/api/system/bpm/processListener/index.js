@@ -44,5 +44,12 @@ export const ProcessListenerApi = {
       url: baseApi + `/deleteById/${id}`,
       method: 'delete'
     })
+  },
+  //查询使用该监听的所有流程
+  getListenerModel: async (id) => {
+    return request({
+      url: baseApi + `/getListenerModel/${id}`,
+      method: 'get'
+    })
   }
 }
