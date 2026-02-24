@@ -1,8 +1,8 @@
 <!--
  * @Author: limiam
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2026-1-21 22:19:01
- * @LastEditors: limiam
+ * @LastEditTime: 2026-02-10 16:13:16
+ * @LastEditors: zhangsd
  * @Description: 流程定义
  * @FilePath: \view\src\views\bpmModel\processManagement\definition\index.vue
 -->
@@ -26,8 +26,7 @@
 				:loading="tableLoading"
 				:showPagination="true"
 				:showToolBar="false"
-				:showNum="5"
-				defaultWidth="50"
+				:defaultWidth="20"
 				:total="total"
 			/>
 		</div>
@@ -53,9 +52,11 @@ import DropDown from '@/components/DropDown/newIndex.vue'
 import BpmProcessDefinitionApi from '@/api/system/bpm/definition'
 import { getDetail } from '@/api/system/bpm/form'
 import { setConfAndFields2 } from '@/utils/bpm/formCreate'
-
+import tableParamsStore from '@/store/modules/tableParams'
 defineOptions({ name: 'BpmProcessDefinition' })
-
+const storeHeight = computed(() => tableParamsStore().normalTableHeight)
+// 6. 页面状态变量
+const tableHeight = computed(() => storeHeight.value - 15)
 // 组件实例与路由
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -99,7 +100,7 @@ const selectData = reactive([
 		name: '流程标识Key',
 		type: 'input',
 		modelValue: 'key',
-		span: 8,
+		span: 24,
 		placeholder: '请输入流程标识Key',
 	},
 ])
@@ -126,77 +127,12 @@ const tableColumns = ref([
 	{
 		prop: 'name',
 		label: '流程名称',
-		align: 'center',
+		align: 'left',
 		minWidth: 150,
 	},
-	{
-		prop: 'icon',
-		label: '流程图标',
-		align: 'center',
-		width: 120,
-		render: row => {
-			if (row.icon) {
-				return [
-					h('img', {
-						src: row.icon,
-						style: {
-							width: '24px',
-							height: '24px',
-							borderRadius: '4px',
-							objectFit: 'cover',
-						},
-					}),
-				]
-			}
-			return [h('span', { props: {} }, '—')]
-		},
-	},
-	{
-		prop: 'startUserIds',
-		label: '可见范围',
-		align: 'center',
-		minWidth: 120,
-		render: row => {
-			if (!row.startUsers?.length) {
-				return [h('span', { props: {} }, '全部可见')]
-			} else if (row.startUsers.length === 1) {
-				return [h('span', { props: {} }, row.startUsers[0].nickname)]
-			} else {
-				const tooltipContent = row.startUsers.map(user => user.nickname).join('、')
-				return [
-					h(
-						ElTooltip,
-						{
-							effect: 'dark',
-							placement: 'top',
-							content: tooltipContent,
-						},
-
-						{
-							default: () => h('span', { props: {} }, `${row.startUsers[0].nickname}等 ${row.startUsers.length} 人可见`),
-						},
-					),
-				]
-			}
-		},
-	},
-	{
-		prop: 'categoryName',
-		label: '流程分类',
-		align: 'center',
-		minWidth: 100,
-		render: row => {
-			return [
-				h(
-					ElTag,
-					{
-						type: '',
-					},
-					{ default: () => row.categoryName },
-				),
-			]
-		},
-	},
+	
+	
+	
 	{
 		prop: 'formName',
 		label: '表单信息',
@@ -277,10 +213,7 @@ const tableColumns = ref([
 	},
 ])
 
-// 计算表格高度
-const tableHeight = computed(() => {
-	return window.innerHeight - 220
-})
+
 
 // 行配置
 const rowConfig = { keyField: 'id' }

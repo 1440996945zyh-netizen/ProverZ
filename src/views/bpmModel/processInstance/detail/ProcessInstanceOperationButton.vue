@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:19:11
- * @LastEditTime: 2025-12-23 10:26:13
+ * @LastEditTime: 2026-02-11 09:40:59
  * @LastEditors: zhangsd
  * @Description: 流程实例操作按钮
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\ProcessInstanceOperationButton.vue
@@ -145,7 +145,7 @@
 			<template #reference>
 				<div
 					@click="openPopover('copy')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
@@ -195,7 +195,7 @@
 			<template #reference>
 				<div
 					@click="openPopover('transfer')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
@@ -245,7 +245,7 @@
 			<template #reference>
 				<div
 					@click="openPopover('delegate')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
@@ -295,7 +295,7 @@
 			<template #reference>
 				<div
 					@click="openPopover('addSign')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
@@ -348,7 +348,7 @@
 			<template #reference>
 				<div
 					@click="openPopover('deleteSign')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
@@ -400,7 +400,7 @@
 			<template #reference>
 				<div
 					@click="openPopover('return')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
@@ -455,11 +455,11 @@
 			<template #reference>
 				<div
 					@click="openPopover('cancel')"
-					style="cursor: pointer; border-radius: 12px; padding: 6px"
+					style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 					onmouseover="this.style.backgroundColor = '#f5f5f5'"
 					onmouseout="this.style.backgroundColor = 'transparent'"
 				>
-					<el-icon :size="14"><Reply /></el-icon>
+					<el-icon :size="14"><SwitchButton /></el-icon>
 					&nbsp; 办结
 				</div>
 			</template>
@@ -487,9 +487,9 @@
 			</div>
 		</el-popover>
 		<!-- 【再次提交】 按钮-->
-		<div
+		<!-- <div
 			@click="handleReCreate()"
-			style="cursor: pointer; border-radius: 12px; padding: 6px"
+			style="cursor: pointer; border-radius: 25px; padding: 6px 12px"
 			onmouseover="this.style.backgroundColor = '#f5f5f5'"
 			onmouseout="this.style.backgroundColor = 'transparent'"
 			v-if="
@@ -500,7 +500,7 @@
 		>
 			<el-icon :size="14"><Refresh /></el-icon>
 			&nbsp; 再次提交
-		</div>
+		</div> -->
 	</div>
 
 	<!-- 签名弹窗 -->
@@ -746,12 +746,12 @@ const closePopover = (type, formRef) => {
 const initNextAssigneesFormField = async () => {
 	// 获取修改的流程变量, 暂时只支持流程表单
 	const variables = getUpdatedProcessInstanceVariables()
-	const data = []
-	// const data = await ProcessInstanceApi.getNextApprovalNodes({
-	//   processInstanceId: props.processInstance.id,
-	//   taskId: runningTask.value.id,
-	//   processVariablesStr: JSON.stringify(variables)
-	// })
+	// const data = []
+	const data = await ProcessInstanceApi.getNextApprovalNodes({
+	  processInstanceId: props.processInstance.id,
+	  taskId: runningTask.value.id,
+	  processVariablesStr: JSON.stringify(variables)
+	})
 	if (data && data.length > 0) {
 		const customApproveUsersData = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
 		data.forEach(node => {

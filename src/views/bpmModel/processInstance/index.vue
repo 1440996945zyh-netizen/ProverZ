@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2025-12-23 11:13:32
+ * @LastEditTime: 2026-02-10 16:03:49
  * @LastEditors: zhangsd
  * @Description: 审批中心
  * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
@@ -24,11 +24,8 @@
 					:rowConfig="rowConfig"
 					:tableHeight="tableHeight"
 					name="todoTaskTable"
+					:defaultWidth="15"
 					:loading="loadingTodo"
-					:showPagination="true"
-					:showToolBar="false"
-					:showNum="5"
-					defaultWidth="50"
 					:total="totalTodo"
 				/>
 			</el-tab-pane>
@@ -49,9 +46,7 @@
 					name="doneTaskTable"
 					:loading="loadingDone"
 					:showPagination="true"
-					:showToolBar="false"
-					:showNum="5"
-					defaultWidth="50"
+					:defaultWidth="30"
 					:total="totalDone"
 				/>
 			</el-tab-pane>
@@ -72,9 +67,7 @@
 					name="copyTaskTable"
 					:loading="loadingCopy"
 					:showPagination="true"
-					:showToolBar="false"
-					:showNum="5"
-					defaultWidth="50"
+					:defaultWidth="40"
 					:total="totalCopy"
 				/>
 			</el-tab-pane>
@@ -95,8 +88,7 @@
 					:loading="loadingMyProcess"
 					:showPagination="true"
 					:showToolBar="false"
-					:showNum="5"
-					defaultWidth="50"
+					:defaultWidth="30"
 					:total="totalMyProcess"
 				/>
 			</el-tab-pane>
@@ -114,9 +106,9 @@ import { getProcessInstanceMyPage, getProcessInstanceCopyPage } from '@/api/syst
 import { getTaskTodoPage, getTaskDonePage } from '@/api/system/bpm/task'
 import { CategoryApi } from '@/api/system/bpm/category'
 import DefinitionApi from '@/api/system/bpm/definition'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import * as TaskApi from '@/api/system/bpm/task'
-
+import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
 defineOptions({ name: 'BpmProcessInstanceAll' })
 
 // 组件实例与路由
@@ -148,7 +140,7 @@ const myProcessData = reactive({
 	tableData: [],
 	queryParams: {
 		pageNum: 1,
-		pageSize: 10,
+		pageSize: 20,
 		name: '',
 		processDefinitionKey: undefined,
 		category: undefined,
@@ -178,24 +170,24 @@ const selectDataMyProcess = reactive([
 		type: 'input',
 		// modelValue: 'name',
 		modelValue: 'processDefinitionName',
-		span: 8,
+		span: 12,
 		placeholder: '请输入流程名称',
 	},
-	{
-		name: '流程分类',
-		type: 'select',
-		modelValue: 'category',
-		span: 8,
-		placeholder: '请选择流程分类',
-		selectData: categoryList,
-		selectLabel: 'label',
-		selectValue: 'value',
-	},
+	// {
+	// 	name: '流程分类',
+	// 	type: 'select',
+	// 	modelValue: 'category',
+	// 	span: 8,
+	// 	placeholder: '请选择流程分类',
+	// 	selectData: categoryList,
+	// 	selectLabel: 'label',
+	// 	selectValue: 'value',
+	// },
 	{
 		name: '流程状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 8,
+		span: 12,
 		placeholder: '请选择流程状态',
 		selectData: myProcessData.statusOptions,
 		selectLabel: 'label',
@@ -217,15 +209,15 @@ const tableColumnsMyProcess = ref([
 	{
 		prop: 'name',
 		label: '流程名称',
-		align: 'center',
+		align: 'left',
 		minWidth: 200,
 		fixed: 'left',
 	},
 	{
 		prop: 'summary',
 		label: '摘要',
-		width: 180,
-		fixed: 'left',
+		minWidth: 240,
+		align: 'left',
 		render: row => {
 			if (row.summary && row.summary.length > 0) {
 				return [
@@ -241,17 +233,11 @@ const tableColumnsMyProcess = ref([
 			return [h('span', { props: {} }, '—')]
 		},
 	},
-	{
-		prop: 'categoryName',
-		label: '流程分类',
-		align: 'center',
-		minWidth: 100,
-		fixed: 'left',
-	},
+
 	{
 		prop: 'status',
 		label: '流程状态',
-		align: 'center',
+		align: 'left',
 		minWidth: 200,
 		render: row => {
 			// 审批中状态
@@ -329,46 +315,61 @@ const tableColumnsMyProcess = ref([
 		width: 180,
 		fixed: 'right',
 		render: row => {
-			const dropDownList = [
-				{
-					name: '详情',
-					command: '详情',
-					click: () => handleDetailMyProcess(row),
-					permission: 'bpm:process-instance:cancel',
-				},
-				...(row.status === 1
-					? [
-							{
-								name: '办结',
-								command: '办结',
-								click: () => handleCancelMyProcess(row),
-								permission: 'bpm:process-instance:query',
-								type: 'danger',
-							},
-					  ]
-					: [
-							{
-								name: '重新发起',
-								command: '重新发起',
-								click: () => handleCreateMyProcess(row),
-								permission: undefined,
-							},
-					  ]),
-			]
+			const buttons = []
 
-			return [
+			// 1. 详情按钮 (始终显示)
+			buttons.push(
 				h(
-					DropDown,
+					ElButton,
 					{
-						dropDownList,
-						isInner: true,
-						props: { permission: undefined },
+						onClick: () => handleDetailMyProcess(row),
+						type: 'primary',
+						link: true,
+						icon: 'View', // 对应原详情图标
 					},
 					{
-						default: () => h('span', { class: 'el-icon-more' }),
+						default: () => '详情',
 					}
-				),
-			]
+				)
+			)
+
+			// 2. 根据状态判断显示 办结 还是 重新发起
+			if (row.status == 1) {
+				// 审批中/进行中 状态显示 办结
+				buttons.push(
+					h(
+						ElButton,
+						{
+							onClick: () => handleCancelMyProcess(row),
+							type: 'danger',
+							link: true,
+							icon: 'SwitchButton', // 对应办结图标
+						},
+						{
+							default: () => '办结',
+						}
+					)
+				)
+			} 
+			// else {
+			// 	// 非进行中状态（如已结束、已撤回）显示 重新发起
+			// 	buttons.push(
+			// 		h(
+			// 			ElButton,
+			// 			{
+			// 				onClick: () => handleCreateMyProcess(row),
+			// 				type: 'warning',
+			// 				link: true,
+			// 				icon: 'Refresh', // 对应重新发起图标
+			// 			},
+			// 			{
+			// 				default: () => '重新发起',
+			// 			}
+			// 		)
+			// 	)
+			// }
+
+			return buttons
 		},
 	},
 ])
@@ -469,7 +470,7 @@ const todoData = reactive({
 	tableData: [],
 	queryParams: {
 		pageNum: 1,
-		pageSize: 10,
+		pageSize: 20,
 		name: '',
 		category: undefined,
 		processDefinitionKey: '',
@@ -483,19 +484,19 @@ const selectDataTodo = reactive([
 		type: 'input',
 		// modelValue: 'name',
 		modelValue: 'processDefinitionName',
-		span: 12,
+		span: 24,
 		placeholder: '请输入任务名称',
 	},
-	{
-		name: '流程分类',
-		type: 'select',
-		modelValue: 'category',
-		span: 12,
-		placeholder: '请选择流程分类',
-		selectData: categoryList,
-		selectLabel: 'label',
-		selectValue: 'value',
-	},
+	// {
+	// 	name: '流程分类',
+	// 	type: 'select',
+	// 	modelValue: 'category',
+	// 	span: 12,
+	// 	placeholder: '请选择流程分类',
+	// 	selectData: categoryList,
+	// 	selectLabel: 'label',
+	// 	selectValue: 'value',
+	// },
 ])
 
 const buttonListTodo = reactive([
@@ -511,15 +512,16 @@ const buttonListTodo = reactive([
 const tableColumnsTodo = ref([
 	{
 		prop: 'processInstance.name',
-		label: '流程',
-		align: 'center',
-		width: 180,
+		label: '流程名称',
+		align: 'left',
+		minwidth: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.name || '')],
 	},
 	{
 		prop: 'processInstance.summary',
 		label: '摘要',
-		width: 180,
+		align: 'left',
+		minWidth: 480,
 		render: row => {
 			if (row.processInstance?.summary && row.processInstance.summary.length > 0) {
 				return [
@@ -539,76 +541,82 @@ const tableColumnsTodo = ref([
 		prop: 'processInstance.startUser.userName',
 		label: '发起人',
 		align: 'center',
-		width: 100,
+		minwidth: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.startUser?.userName || '')],
 	},
 	{
 		prop: 'processInstance.createTime',
 		label: '发起时间',
 		align: 'center',
-		width: 180,
+		minwidth: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.createTime ? formatDate(row.processInstance.createTime) : '')],
 	},
 	{
 		prop: 'processInstance.endTime',
 		label: '结束时间',
 		align: 'center',
-		width: 180,
+		minwidth: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.endTime ? formatDate(row.processInstance.endTime) : '')],
 	},
 	{
 		prop: 'name',
 		label: '当前任务',
 		align: 'center',
-		width: 180,
+		minwidth: 180,
+		render: row => [
+			h(
+				ElTag,
+				{
+					type: 'primary',
+				},
+				{
+					default: () => row.processInstance?.name || '',
+				}
+			),
+		],
 	},
+
 	{
 		prop: 'createTime',
 		label: '任务时间',
 		align: 'center',
-		width: 180,
+		minwidth: 180,
 		render: row => [h('span', { props: {} }, row.createTime ? formatDate(row.createTime) : '')],
 	},
-	{
-		prop: 'processInstanceId',
-		label: '流程编号',
-		align: 'center',
-		showOverFlow: true,
-		render: row => [h('span', { props: {} }, row.processInstanceId || '')],
-	},
-	{
-		prop: 'id',
-		label: '任务编号',
-		align: 'center',
-		showOverFlow: true,
-		render: row => [h('span', { props: {} }, row.id || '')],
-	},
+	// {
+	// 	prop: 'processInstanceId',
+	// 	label: '流程编号',
+	// 	align: 'center',
+	// 	showOverFlow: true,
+	// 	render: row => [h('span', { props: {} }, row.processInstanceId || '')],
+	// },
+	// {
+	// 	prop: 'id',
+	// 	label: '任务编号',
+	// 	align: 'center',
+	// 	showOverFlow: true,
+	// 	render: row => [h('span', { props: {} }, row.id || '')],
+	// },
 	{
 		label: '操作',
 		align: 'center',
-		width: 80,
+		width: 120,
 		fixed: 'right',
 		render: row => {
-			const dropDownList = [
-				{
-					name: '办理',
-					command: '办理',
-					click: () => handleAuditTodo(row),
-					permission: undefined,
-					icon: 'Edit',
-				},
-			]
-
 			return [
 				h(
-					DropDown,
+					ElButton,
 					{
-						dropDownList,
-						isInner: true,
-						props: { permission: undefined },
+						onClick: () => {
+							handleAuditTodo(row)
+						},
+						permission: undefined,
+						icon: 'Edit',
+						link: true,
+						type: 'primary',
 					},
 					{
-						default: () => h('span', { class: 'el-icon-more' }),
+						default: () => '办理',
 					}
 				),
 			]
@@ -627,7 +635,7 @@ const getListTodo = async e => {
 		const params = Object.assign(todoData.queryParams, e)
 		const res = await getTaskTodoPage(params)
 		todoData.tableData = res.data.pages
-		todoData.total = res.data.total
+		todoData.total = res.data.totalNum
 	} catch (error) {
 		console.error('获取待办任务列表失败:', error)
 		ElMessage.error('获取列表失败')
@@ -669,7 +677,7 @@ const doneData = reactive({
 	tableData: [],
 	queryParams: {
 		pageNum: 1,
-		pageSize: 10,
+		pageSize: 20,
 		name: '',
 		category: undefined,
 		status: undefined,
@@ -682,31 +690,33 @@ const doneData = reactive({
 		{ value: 5, label: '驳回' },
 	],
 })
-
+/**
+ * 已办任务筛选条件
+ */
 const selectDataDone = reactive([
 	{
 		name: '任务名称',
 		type: 'input',
 		// modelValue: 'name',
 		modelValue: 'processDefinitionName',
-		span: 8,
+		span: 12,
 		placeholder: '请输入任务名称',
 	},
-	{
-		name: '流程分类',
-		type: 'select',
-		modelValue: 'category',
-		span: 8,
-		placeholder: '请选择流程分类',
-		selectData: categoryList,
-		selectLabel: 'label',
-		selectValue: 'value',
-	},
+	// {
+	// 	name: '流程分类',
+	// 	type: 'select',
+	// 	modelValue: 'category',
+	// 	span: 8,
+	// 	placeholder: '请选择流程分类',
+	// 	selectData: categoryList,
+	// 	selectLabel: 'label',
+	// 	selectValue: 'value',
+	// },
 	{
 		name: '审批状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 8,
+		span: 12,
 		placeholder: '请选择审批状态',
 		selectData: doneData.statusOptions,
 		selectLabel: 'label',
@@ -747,15 +757,16 @@ const formatPast2 = milliseconds => {
 const tableColumnsDone = ref([
 	{
 		prop: 'processInstance.name',
-		label: '流程',
-		align: 'center',
+		label: '流程名称',
+		align: 'left',
 		width: 180,
 		render: row => [h('span', { props: {} }, row.processInstance?.name || '')],
 	},
 	{
 		prop: 'processInstance.summary',
 		label: '摘要',
-		width: 180,
+		align: 'left',
+		minWidth: 240,
 		render: row => {
 			if (row.processInstance?.summary && row.processInstance.summary.length > 0) {
 				return [
@@ -783,6 +794,7 @@ const tableColumnsDone = ref([
 		label: '当前任务',
 		align: 'center',
 		width: 180,
+		render: row => [h(ElTag, { type: 'primary' }, { default: () => row.name || '' })],
 	},
 	{
 		prop: 'createTime',
@@ -797,6 +809,21 @@ const tableColumnsDone = ref([
 		align: 'center',
 		width: 180,
 		render: row => [h('span', { props: {} }, row.endTime ? formatDate(row.endTime) : '')],
+	},
+
+	{
+		prop: 'reason',
+		label: '审批建议',
+		align: 'left',
+		minWidth: 180,
+		showOverFlow: true,
+	},
+	{
+		prop: 'durationInMillis',
+		label: '耗时',
+		align: 'center',
+		width: 160,
+		render: row => [h('span', { props: {} }, formatPast2(row.durationInMillis))],
 	},
 	{
 		prop: 'status',
@@ -824,69 +851,40 @@ const tableColumnsDone = ref([
 		},
 	},
 	{
-		prop: 'reason',
-		label: '审批建议',
-		align: 'center',
-		minWidth: 180,
-		showOverFlow: true,
-	},
-	{
-		prop: 'durationInMillis',
-		label: '耗时',
-		align: 'center',
-		width: 160,
-		render: row => [h('span', { props: {} }, formatPast2(row.durationInMillis))],
-	},
-	{
-		prop: 'processInstanceId',
-		label: '流程编号',
-		align: 'center',
-		width: 180,
-		showOverFlow: true,
-		render: row => [h('span', { props: {} }, row.processInstanceId || '')],
-	},
-	{
-		prop: 'id',
-		label: '任务编号',
-		align: 'center',
-		width: 180,
-		showOverFlow: true,
-		render: row => [h('span', { props: {} }, row.id || '')],
-	},
-	{
 		label: '操作',
 		align: 'center',
-		width: 100,
+		width: 180,
 		fixed: 'right',
 		render: row => {
-			const dropDownList = [
-				{
-					name: '撤回',
-					command: '撤回',
-					click: () => handleWithdrawDone(row),
-					permission: undefined,
-					icon: 'Refresh',
-					type: 'warning',
-				},
-				{
-					name: '历史',
-					command: '历史',
-					click: () => handleAuditDone(row),
-					permission: undefined,
-					icon: 'Histogram',
-				},
-			]
-
 			return [
 				h(
-					DropDown,
+					ElButton,
 					{
-						dropDownList,
-						isInner: true,
-						props: { permission: undefined },
+						onClick: () => {
+							handleWithdrawDone(row)
+						},
+						permission: undefined,
+						icon: 'Refresh',
+						link: true,
+						type: 'warning',
 					},
 					{
-						default: () => h('span', { class: 'el-icon-more' }),
+						default: () => '撤回',
+					}
+				),
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							handleAuditDone(row)
+						},
+						permission: undefined,
+						icon: 'Histogram',
+						link: true,
+						type: 'primary',
+					},
+					{
+						default: () => '历史',
 					}
 				),
 			]
@@ -958,7 +956,7 @@ const copyData = reactive({
 	tableData: [],
 	queryParams: {
 		pageNum: 1,
-		pageSize: 10,
+		pageSize: 20,
 		createTime: [],
 	},
 })
@@ -968,13 +966,13 @@ const selectDataCopy = reactive([
 		name: '流程名称',
 		type: 'input',
 		modelValue: 'processInstanceName',
-		span: 8,
+		span: 12,
 		placeholder: '请输入流程名称',
 	},
 	{
 		type: 'daterange', // 搜索框类型
 		modelValue: 'createTime', // 绑定字段
-		span: 16, // 占位，共24
+		span: 12, // 占位，共24
 		name: '发起时间',
 		shortcuts: [],
 	},
@@ -989,17 +987,20 @@ const buttonListCopy = reactive([
 		permission: undefined,
 	},
 ])
-
+/**
+ * 抄送我的表格列
+ */
 const tableColumnsCopy = ref([
 	{
 		prop: 'processInstanceName',
-		label: '流程名',
-		align: 'center',
-		minWidth: 180,
+		label: '流程名称',
+		align: 'left',
+		minWidth: 100,
 	},
 	{
 		prop: 'summary',
 		label: '摘要',
+		align: 'left',
 		minWidth: 180,
 		render: row => {
 			if (row.summary && row.summary.length > 0) {
@@ -1045,8 +1046,8 @@ const tableColumnsCopy = ref([
 	{
 		prop: 'reason',
 		label: '抄送意见',
-		align: 'center',
-		width: 150,
+		align: 'left',
+		width: 200,
 		showOverFlow: true,
 	},
 	{
@@ -1059,29 +1060,23 @@ const tableColumnsCopy = ref([
 	{
 		label: '操作',
 		align: 'center',
-		width: 80,
+		width: 120,
 		fixed: 'right',
 		render: row => {
-			const dropDownList = [
-				{
-					name: '详情',
-					command: '详情',
-					click: () => handleAuditCopy(row),
-					permission: undefined,
-					icon: 'View',
-				},
-			]
-
 			return [
 				h(
-					DropDown,
+					ElButton,
 					{
-						dropDownList,
-						isInner: true,
-						props: { permission: undefined },
+						type: 'primary',
+						permission: undefined,
+						icon: 'View',
+						link: true,
+						onClick: () => {
+							handleAuditCopy(row)
+						},
 					},
 					{
-						default: () => h('span', { class: 'el-icon-more' }),
+						default: () => '详情',
 					}
 				),
 			]

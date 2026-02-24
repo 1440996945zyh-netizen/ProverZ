@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:14:13
- * @LastEditTime: 2025-12-23 14:37:28
+ * @LastEditTime: 2026-02-11 13:44:56
  * @LastEditors: zhangsd
  * @Description: 流程实例详情页面
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\index.vue
@@ -38,15 +38,15 @@
 							style="
 								background-color: #f5f5f5;
 								height: 35px;
-								border-radius: 18px;
+								border-radius: 25px;
 								display: flex;
 								align-items: center;
-								padding: 8px;
+								padding:  6px;
 								gap: 2px;
 							"
 						>
-							<el-avatar :size="28" v-if="processInstance?.startUser?.avatar" :src="processInstance?.startUser?.avatar" />
-							<el-avatar :size="28" v-else-if="processInstance?.startUser?.userName">
+							<el-avatar :size="24" v-if="processInstance?.startUser?.avatar" :src="processInstance?.startUser?.avatar" />
+							<el-avatar :size="24" v-else-if="processInstance?.startUser?.userName">
 								{{ processInstance?.startUser?.userName.substring(0, 1) }}
 							</el-avatar>
 							{{ processInstance?.startUser?.userName }}
@@ -102,7 +102,7 @@
 									v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN"
 									:loading="processInstanceLoading"
 									:model-view="processModelView"
-									style="height: calc(100vh - 20rem) !important"
+									style="height: calc(100vh - 25rem) !important"
 								/>
 							</div>
 						</el-tab-pane>

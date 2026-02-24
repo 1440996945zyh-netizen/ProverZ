@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:21:33
- * @LastEditTime: 2026-02-03 15:09:11
+ * @LastEditTime: 2026-02-10 15:57:44
  * @LastEditors: zhangsd
  * @Description:  流程监听器
  * @FilePath: \view\src\views\bpmModel\processListener\index.vue
@@ -28,12 +28,14 @@
 			@pagination="getList"
 		/>
 		<ProcessListenerForm ref="formRef" @success="getList" />
+		<ModelList ref="modelListRef" />
 	</div>
 </template>
 
 <script setup>
 defineOptions({ name: 'BpmProcessListener' })
 import ProcessListenerForm from './ProcessListenerForm.vue'
+import ModelList from './modelList.vue'
 // 1. 基础依赖导入
 import { formatDate } from '@/utils/common/date'
 import {
@@ -54,6 +56,7 @@ const { proxy } = getCurrentInstance()
 const storeHeight = computed(() => tableParamsStore().normalTableHeight)
 const listenerTableRef = ref(null)
 const formRef = ref(null)
+const modelListRef = ref(null)
 
 // 5. 核心响应式数据
 const data = reactive({
@@ -120,7 +123,7 @@ const tableColumns = ref([
 	{
 		prop: 'listenerName',
 		label: '名称',
-		align: 'center',
+		align: 'left',
 		minWidth: 150,
 	},
 	{
@@ -176,10 +179,7 @@ const tableColumns = ref([
 				h(
 					ElTag,
 					{
-						type:
-							row.listenerValueTypeCode == 'class'
-								? ''
-								: row.listenerValueTypeCode == 'expression' ? 'success' : 'warning',
+						type: row.listenerValueTypeCode == 'class' ? '' : row.listenerValueTypeCode == 'expression' ? 'success' : 'warning',
 					},
 					{
 						default: () => row.listenerValueTypeName || '',
@@ -191,7 +191,7 @@ const tableColumns = ref([
 	{
 		prop: 'listenerValue',
 		label: '值',
-		align: 'center',
+		align: 'left',
 		showOverFlow: true,
 		minWidth: 200,
 	},
@@ -205,7 +205,7 @@ const tableColumns = ref([
 	{
 		label: '操作',
 		align: 'center',
-		width: 180,
+		width: 240,
 		fixed: 'right',
 		render: row => {
 			return [
@@ -236,6 +236,18 @@ const tableColumns = ref([
 					},
 					{ default: () => '删除' }
 				),
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							listenerModel(row.id)
+						},
+						type: 'primary',
+						link: true,
+						permission: 'bpm:processListener:query',
+					},
+					{ default: () => '监听模型' }
+				),
 			]
 		},
 	},
@@ -264,6 +276,12 @@ const getList = async e => {
 const handleQuery = () => {
 	queryParams.value.pageNo = 1
 	getList()
+}
+/**查询监听模型 */
+const listenerModel = id => {
+	nextTick(() => {
+		modelListRef.value.open(id)
+	})
 }
 
 /** 表单打开 */

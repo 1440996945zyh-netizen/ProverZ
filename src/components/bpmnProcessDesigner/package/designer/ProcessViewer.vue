@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:06:54
- * @LastEditTime: 2025-12-16 15:43:34
+ * @LastEditTime: 2026-02-12 14:13:22
  * @LastEditors: zhangsd
  * @Description: 流程预览
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\designer\ProcessViewer.vue
@@ -44,7 +44,7 @@
 		</defs>
 
 		<!-- 审批记录 -->
-		<el-dialog :title="dialogTitle || '审批记录'" v-model="dialogVisible" width="1000px">
+		<Dialog :title="dialogTitle || '审批记录'" v-model:visible="dialogVisible" width="60%" :showFooter="false">
 			<el-row>
 				<el-table :data="selectTasks" size="small" border header-cell-class-name="table-header-gray">
 					<el-table-column label="序号" header-align="center" align="center" type="index" width="50" />
@@ -81,7 +81,7 @@
 					</el-table-column>
 				</el-table>
 			</el-row>
-		</el-dialog>
+		</Dialog>
 
 		<!-- Zoom：放大、缩小 -->
 		<div style="position: absolute; top: 0; left: 0; width: 100%">
@@ -106,7 +106,7 @@ import MoveCanvasModule from 'diagram-js/lib/navigation/movecanvas'
 import { dateFormatter, formatPast2 } from '@/utils/common/date'
 import { BpmProcessInstanceStatus, DICT_TYPE } from '@/utils/bpm/constantEnumeration'
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-
+import Dialog from '@/components/Dialog/index.vue'
 // 定义Props
 const props = defineProps({
 	xml: {

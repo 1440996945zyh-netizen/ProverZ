@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 16:30:08
- * @LastEditTime: 2025-12-25 15:57:44
+ * @LastEditTime: 2026-02-12 16:01:20
  * @LastEditors: zhangsd
  * @Description: 额外设置
  * @FilePath: \view\src\views\bpmModel\processManagement\components\ExtraSettings.vue
@@ -127,6 +127,7 @@
           prefix="{"
           split="}"
           whole
+          style="width: 300px;height: 80px;"
           :options="formFieldOptions4Title"
           placeholder="请插入表单字段（输入 '{' 可以选择表单字段）或输入文本"
           class="title-mention-input"
@@ -611,7 +612,7 @@ const confirmPrintTemplate = (template) => {
 
 // 单选框组样式
 .radio-group {
-  margin-top: 8px;
+  //margin-top: 8px;//
   .el-radio {
     margin-bottom: 4px;
   }

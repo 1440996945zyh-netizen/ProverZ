@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-02 20:41:23
+ * @LastEditTime: 2026-02-11 10:54:03
  * @LastEditors: zhangsd
  * @Description: 业务配置 流程关联业务
  * @FilePath: \view\src\views\bpmModel\businessConfig\index.vue
@@ -22,6 +22,7 @@
 				:tableHeight="tableHeight"
 			/>
 		</div>
+		<!-- 新增/编辑业务关联  -->
 		<Dialog v-model:visible="dialogVisible" :title="title" width="600px">
 			<detail ref="detailRef" />
 			<template #footer>
@@ -30,6 +31,11 @@
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
+		</Dialog>
+
+		<!-- 流程模型预览  -->
+		<Dialog v-model:visible="previewDialogVisible" title="流程模型预览" width="60%" :showFooter="false">
+			<BpmPreviewDialog :loading="previewLoading" :modelId="previewProcModelId" @close="previewDialogVisible = false" />
 		</Dialog>
 	</div>
 </template>
@@ -44,6 +50,7 @@ import Dialog from '@/components/Dialog/index.vue'
 import dayjs from 'dayjs'
 import tableParamsStore from '@/store/modules/tableParams'
 import { CommonStatusEnum, CommonStatusEnumLabel } from '@/utils/bpm/constantEnumeration'
+import BpmPreviewDialog from './detail/bpmPreviewDialog.vue'
 const { proxy } = getCurrentInstance()
 const storeHeight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHeight.value - 25)
@@ -57,7 +64,9 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-
+// 预览流程模型
+const previewDialogVisible = ref(false)
+const previewLoading = ref(false)
 // 表格数据
 const tableData = ref([])
 /**
@@ -71,7 +80,7 @@ const tableColumns = ref([
 		align: 'center',
 	},
 	{
-		label: '业务模块名称',
+		label: '主业务',
 		prop: 'businessName',
 		align: 'left',
 		minWidth: 180,
@@ -79,7 +88,7 @@ const tableColumns = ref([
 	},
 
 	{
-		label: '关联按钮',
+		label: '子业务',
 		prop: 'businessTypeName',
 		align: 'left',
 		minWidth: 150,
@@ -94,7 +103,7 @@ const tableColumns = ref([
 		minWidth: 180,
 		showOverflowTooltip: true,
 		render: row => {
-			return h(ElTag, { type: 'primary' }, { default: () => row.procModelName })
+			return h(ElButton, { type: 'primary', link: true, onClick: () => handlePreview(row) }, { default: () => row.procModelName })
 		},
 	},
 	{
@@ -106,7 +115,7 @@ const tableColumns = ref([
 	{
 		label: '创建时间',
 		prop: 'createTime',
-		align: 'left',
+		align: 'center',
 		minWidth: 180,
 	},
 	{
@@ -237,7 +246,7 @@ const getList = e => {
 /** 新增（补全：表单重置） */
 const add = () => {
 	dialogVisible.value = true
-	title.value = '新增流程-业务关联'
+	title.value = '业务关联'
 	nextTick(() => {
 		detailRef.value.resetForm() // 修复：取消注释，新增时重置表单
 	})
@@ -247,7 +256,7 @@ const add = () => {
 const edit = row => {
 	const editRow = row || clickRow.value
 	dialogVisible.value = true
-	title.value = '编辑' + editRow.businessName + '-' + editRow.procModelName
+	title.value = '业务关联'
 	nextTick(() => {
 		detailRef.value.resetForm()
 		detailRef.value.setFormData(row)
@@ -295,7 +304,24 @@ const handleDelete = row => {
 		})
 		.catch(() => {})
 }
+const previewProcModelId = ref(null)
+/**
+ * 预览流程模型
+ */
+const handlePreview = async (row) => {
+	previewLoading.value = true
+	try {
+		previewDialogVisible.value = true
+		previewProcModelId.value = row.procModelId
+	} catch (err) {
+		console.error('预览流程模型失败：', err)
+		previewProcModelId.value = null
+		proxy.$modal.msgError('预览流程模型失败，请稍后重试')
+	} finally {
+		previewLoading.value = false
 
+	}
+}
 // 初始化加载列表
 getList(queryParams.value)
 </script>

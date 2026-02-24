@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 11:26:00
- * @LastEditTime: 2026-02-03 17:11:34
+ * @LastEditTime: 2026-02-11 13:43:05
  * @LastEditors: zhangsd
  * @Description: 创建流程
  * @FilePath: \view\src\views\bpmModel\processManagement\components\CreateProcess.vue
@@ -47,24 +47,37 @@
 		</div>
 
 		<!-- 主体内容 -->
-		<div class="main-content">
-			<!-- 第一步：基本信息 -->
-			<div v-if="currentStep === 0" class="step-content basic-info">
-				<BasicInfo v-model="formData" :categoryList="categoryList" :userList="userList" :deptList="deptList" ref="basicInfoRef" />
-			</div>
-
+		<div class="main-content" :class="{ 'is-full-screen': currentStep === 2 }">
+			<el-card class="step-content-card" v-if="currentStep === 0">
+				<!-- 第一步：基本信息 -->
+				<div class="step-content basic-info">
+					<BasicInfo
+						v-model="formData"
+						:categoryList="categoryList"
+						:userList="userList"
+						:deptList="deptList"
+						ref="basicInfoRef"
+					/>
+				</div>
+			</el-card>
 			<!-- 第二步：表单设计 -->
-			<div v-if="currentStep === 1" class="step-content form-design">
-				<FormDesign v-model="formData" :formList="formList" ref="formDesignRef" />
-			</div>
+			<el-card class="step-content-card" v-if="currentStep === 1">
+				<div class="step-content form-design">
+					<FormDesign v-model="formData" :formList="formList" ref="formDesignRef" />
+				</div>
+			</el-card>
 
 			<!-- 第三步：流程设计 -->
-			<ProcessDesign v-if="currentStep === 2" v-model="formData" ref="processDesignRef" />
+			<el-card style="padding: 10px !important;" v-if="currentStep === 2">
+				<ProcessDesign v-model="formData" ref="processDesignRef" />
+			</el-card>
 
 			<!-- 第四步：更多设置 -->
-			<div v-show="currentStep === 3" class="step-content extra-settings">
-				<ExtraSettings ref="extraSettingsRef" v-model="formData" />
-			</div>
+			<el-card class="step-content-card" v-show="currentStep === 3">
+				<div class="step-content extra-settings">
+					<ExtraSettings ref="extraSettingsRef" v-model="formData" />
+				</div>
+			</el-card>
 		</div>
 	</div>
 </template>
@@ -187,7 +200,8 @@ const initData = async () => {
 	if (actionType.value === 'definition') {
 		// 流程定义场景（恢复）
 		const definitionId = route.query.id
-		const data = await DefinitionApi.getProcessDefinition(definitionId)
+		const res = await DefinitionApi.getProcessDefinition(definitionId)
+		const data = res.data
 		data.type = data.modelType
 		delete data.modelType
 		data.id = data.modelId
@@ -196,6 +210,11 @@ const initData = async () => {
 			data.simpleModel = JSON.parse(data.simpleModel)
 		}
 		formData.value = data
+		if (formData.value.type === BpmModelType.BPMN) {
+			processData.value = formData.value.bpmnXml
+		} else if (formData.value.type === BpmModelType.SIMPLE) {
+			processData.value = formData.value.simpleModel
+		}
 		formData.value.startUserIds = formData.value.startUserIds || []
 		formData.value.startDeptIds = formData.value.startDeptIds || []
 		formData.value.startUserType = formData.value.startUserIds.length > 0 ? 1 : formData.value.startDeptIds.length > 0 ? 2 : 0
@@ -531,7 +550,7 @@ watch(
 			await initData()
 		}
 	},
-	{ immediate: true }, // 首次加载也执行
+	{ immediate: true } // 首次加载也执行
 )
 /** 初始化 */
 onMounted(async () => {
@@ -546,199 +565,236 @@ onBeforeUnmount(() => {
 })
 </script>
 
+
 <style scoped lang="scss">
-// 全局容器
-.process-container {
-	padding: 5px;
-	border: 1px solid #e1e4eb;
-	border-bottom: none;
-	height: calc(100vh - 110px);
-	position: relative;
-	margin: 0 auto; // 新增：保持容器水平居中，和原效果一致
-	overflow: hidden; // 新增：防止内容溢出容器
-}
+// ========================================================================
+// 设计体系变量 (Design System Variables)
+// ========================================================================
+$primary-color: #409eff;
+$text-primary: #303133;
+$text-regular: #606266;
+$text-secondary: #909399;
+$bg-color: #f5f7fa;
+$border-color-light: #e4e7ed;
+$shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+$shadow-dark: 0 8px 24px 0 rgba(95, 101, 105, 0.1);
 
-// 头部导航栏
-.header-bar {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 50px;
-	background-color: #ffffff;
-	border-bottom: 1px solid #dcdfe6;
-	z-index: 10;
-	display: flex;
-	align-items: center;
-	padding-left: 20px;
-	padding-right: 20px;
-	box-sizing: border-box; // 新增：确保padding不撑大容器
-}
+$spacing-medium: 16px;
+$spacing-large: 24px;
+$spacing-xlarge: 32px;
 
-// 头部左侧
-.header-left {
-	width: 200px;
-	display: flex;
-	align-items: center;
-	overflow: hidden;
-	cursor: pointer;
-	transition: all 0.2s ease; // 新增： hover 过渡效果
+$border-radius-large: 8px;
 
-	// 回退图标（Element Plus 图标）
-	:deep(.el-icon) {
-		font-size: 18px; // 图标大小
-		color: #606266; // 图标默认颜色
-		flex-shrink: 0; // 不被挤压
-		transition: color 0.2s ease;
+$transition-duration: 0.3s;
+$transition-timing-function: ease;
 
-		&:hover {
-			color: #3473ff; // hover 变色，提升体验
-		}
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
 	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
 
-	// 标题文本
+// ========================================================================
+// 基础布局与容器
+// ========================================================================
+
+.process-container {
+	display: flex;
+	flex-direction: column;
+	height: calc(100vh - 60px);
+	background-color: $bg-color;
+	overflow: hidden;
+}
+
+// ========================================================================
+// 头部导航栏 (15% / 70% / 15% Grid)
+// ========================================================================
+
+.header-bar {
+	flex-shrink: 0;
+	height: 60px;
+	background-color: #ffffff;
+	box-shadow: $shadow-light;
+	z-index: 10;
+	box-sizing: border-box;
+
+	// 定义 15% / 70% / 15% 的三列网格布局
+	display: grid;
+	grid-template-columns: 15% 70% 15%;
+	align-items: center;
+	padding: 0 $spacing-large;
+}
+
+.header-left {
+	grid-column: 1;
+	justify-self: start;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	overflow: hidden;
+	height: 100%;
+	.el-icon {
+		font-size: 20px;
+		color: $text-regular;
+		transition: color $transition-duration $transition-timing-function;
+	}
 	.title-text {
-		margin-left: 10px;
-		font-size: 16px;
+		margin-left: $spacing-medium;
+		font-size: 18px;
+		font-weight: 600;
+		color: $text-primary;
 		white-space: nowrap;
 		text-overflow: ellipsis;
 		overflow: hidden;
-		color: #303133; // 标题文字颜色
-		font-weight: 500;
+	}
+	&:hover .el-icon {
+		color: $primary-color;
 	}
 }
 
-// 头部中间（步骤条容器）
 .header-middle {
-	flex: 1;
+	// grid-column: 2;
+	// justify-self: center; // 步骤条在70%的区域内居中
+	width: 100%;
 	display: flex;
-	align-items: center;
 	justify-content: center;
-	height: 100%;
 }
 
-// 步骤条容器
+.header-right {
+	grid-column: 3;
+	justify-self: end;
+	display: flex;
+	gap: $spacing-medium;
+}
+
+// --- 步骤条样式 (无大改动) ---
 .step-container {
-	width: 400px;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	height: 100%;
-	box-sizing: border-box;
+	gap: 130px;
 }
-
-// 步骤项
 .step-item {
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	margin: 0 15px; // 简化间距写法
 	position: relative;
-	height: 100%;
-	color: #c0c4cc; // 统一未激活文字颜色（和原效果一致）
-	transition: color 0.2s ease;
-	box-sizing: border-box;
-
-	// 激活状态
-	&.step-active {
-		color: #3473ff;
-		border-bottom: 2px solid #3473ff;
-		border-bottom-style: solid; // 明确边框样式
+	height: 60px;
+	line-height: 60px;
+	color: $text-secondary;
+	transition: color $transition-duration $transition-timing-function;
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 3px;
+		background-color: $primary-color;
+		border-radius: 2px;
+		transform: scaleX(0);
+		transition: transform $transition-duration $transition-timing-function;
 	}
-
-	// 步骤数字
+	&.step-active {
+		color: $primary-color;
+		&::after {
+			transform: scaleX(1);
+		}
+	}
+	&:hover:not(.step-active) {
+		color: $text-primary;
+	}
 	.step-number {
-		width: 28px;
-		height: 28px;
+		width: 26px;
+		height: 26px;
 		border-radius: 50%;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		margin-right: 8px;
-		border: 2px solid #e4e7ed; // 统一未激活边框颜色
-		background-color: #ffffff;
-		color: #c0c4cc; // 统一未激活数字颜色
-		font-size: 15px;
-		transition: all 0.2s ease;
-		box-sizing: border-box;
-
-		// 数字激活状态
+		border: 2px solid $border-color-light;
+		color: $text-secondary;
+		font-size: 14px;
+		font-weight: bold;
+		transition: all $transition-duration $transition-timing-function;
 		&.number-active {
-			background-color: #3473ff;
+			background-color: $primary-color;
 			color: #ffffff;
-			border-color: #3473ff;
+			border-color: $primary-color;
 		}
 	}
-
-	// 步骤标题
 	.step-title {
 		font-size: 16px;
-		font-weight: bold;
-		white-space: nowrap;
+		font-weight: 500;
 	}
 }
 
-// 头部右侧
-.header-right {
-	width: 200px;
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 8px; // 修正：从 2px 改为 8px，和原效果一致（按钮间距适中）
-	box-sizing: border-box;
+// ========================================================================
+// 主体内容区域 (Conditional Layout)
+// ========================================================================
 
-	// 按钮样式兼容
-	:deep(.el-button) {
-		padding: 8px 16px; // 统一按钮内边距
-		font-size: 14px;
-	}
-}
-
-// 主体内容
 .main-content {
-	margin-top: 50px; // 避开头部导航
-	height: calc(100% - 50px); // 新增：高度自适应容器，不超出父级
-	overflow-y: auto; // 新增：内容超出时纵向滚动
+	flex-grow: 1;
+	overflow-y: auto;
 	box-sizing: border-box;
-	padding: 10px 0; // 新增：上下内边距，优化内容显示
+
+	// 默认状态：使用与头部相同的网格布局
+	display: grid;
+	grid-template-columns: 15% 70% 15%;
+	align-items: start; // 内容从顶部开始对齐
+
+	// [核心改动] 全屏模式：当 .is-full-screen 类存在时
+	&.is-full-screen {
+		display: block; // 切换为普通块布局，打破网格
+		padding: 0; // 移除内边距，让子元素可以100%填充
+
+		// 让直接子元素 (即 ProcessDesign 组件) 占满所有空间
+		> * {
+			height: 100%;
+			width: 100%;
+		}
+	}
 }
 
-// 步骤内容通用样式
+// --- 内容卡片样式 ---
+.step-content-card {
+	grid-column: 2; // 将卡片放置在中间的 70% 列
+	justify-self: center; // 在该列中水平居中
+
+	width: 60%; // 宽度占满中间列
+	max-width: 900px; // 但最大不超过900px，避免在大屏上过宽
+
+	// margin-top: $spacing-large;
+	margin-bottom: $spacing-large;
+	padding: $spacing-large $spacing-xlarge;
+	border-radius: $border-radius-large;
+	border: none;
+	background-color: #ffffff;
+	box-shadow: $shadow-dark;
+	box-sizing: border-box;
+
+	animation: fadeInUp $transition-duration $transition-timing-function;
+}
+
+// --- 卡片内具体内容样式 ---
 .step-content {
 	margin: 0 auto;
 	box-sizing: border-box;
-	padding: 0 10px; // 新增：左右内边距，防止内容贴边
 }
 
-// 第一步：基本信息
-.basic-info {
-	width: 560px;
-}
-
-// 第二步：表单设计
-.form-design {
-	width: 560px;
-}
-
-// 第四步：更多设置
+.basic-info,
+.form-design,
 .extra-settings {
-	width: 700px;
+	width: 100%;
 }
+</style>
 
-// 原有样式保留（兼容可能的引用）
-.border-bottom {
-	border-bottom: 1px solid #dcdfe6;
-}
-
-.text-primary {
-	color: #3473ff;
-}
-
-.bg-primary {
-	background-color: #3473ff;
-}
-
-.border-primary {
-	border-color: #3473ff;
-}
+<style scoped>
+	.el-card__body {
+		padding: 0 !important;
+	}
 </style>

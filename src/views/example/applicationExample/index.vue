@@ -1,3 +1,12 @@
+<!--
+ * @Author: zhangsd
+ * @Date: 2026-02-02 16:11:56
+ * @LastEditTime: 2026-02-12 13:36:34
+ * @LastEditors: zhangsd
+ * @Description: 业务流程示例
+ * @FilePath: \view\src\views\example\applicationExample\index.vue
+-->
+
 <template>
 	<div>
 		<div class="app-container">
@@ -11,7 +20,9 @@
 				:tableData="tableData"
 				:cellClickEvent="cellClickEvent"
 				:total="total"
-				:isShowAdvancedQuery="true"
+				:showNum="6"
+				:tableHeight="tableHeight"
+				:defaultWidth="50"
 			/>
 		</div>
 		<Drawer v-model="drawerVisible" :title="title" size="30%">
@@ -19,7 +30,7 @@
 			<template #footer>
 				<div style="flex: auto">
 					<el-button @click="drawerVisible = false">取消</el-button>
-					<el-button type="primary" @click="handleSubmit">提交</el-button>
+					<!-- <el-button type="primary" @click="handleSubmit">提交</el-button> -->
 					<el-button type="primary" @click="save">保存</el-button>
 				</div>
 			</template>
@@ -28,6 +39,7 @@
 </template>
 
 <script setup name="bpmApplicationExample">
+
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ref, reactive, nextTick, getCurrentInstance } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
@@ -35,11 +47,15 @@ import api from '@/api/example/applicationExample/index.js'
 import detail from './detail/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import dayjs from 'dayjs'
+import DropDown from '@/components/DropDown/newIndex.vue' // 补充Dropdown组件导入
+import tableParamsStore from '@/store/modules/tableParams'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
-import { useRoute } from 'vue-router'
-
+import { useRoute, useRouter } from 'vue-router'
+// 引入流程启动器
+import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
+// 引入流程启动器
+const { startProcess, loading } = useProcessStarter()
 const { proxy } = getCurrentInstance()
-const advancedQuery = ref([])
 const baseTable = ref() // table的ref
 const detailRef = ref() // 明细组件ref
 const drawerVisible = ref(false)
@@ -50,7 +66,8 @@ const queryParams = ref({
 	startPage: 1,
 	pageSize: 10,
 })
-
+const storeHight = computed(() => tableParamsStore().normalTableHeight)
+const tableHeight = computed(() => storeHight.value -20) //表格高度
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
@@ -89,12 +106,45 @@ const tableColumns = ref([
 					{
 						style: { color: '#f56c6c', fontWeight: 'bold' },
 					},
-					`¥ ${row.paymentAmount}`,
+					`¥ ${row.paymentAmount}`
 				),
 			]
 		},
 	},
-
+	{
+		label: '付款类型',
+		prop: 'paymentType',
+		align: 'center',
+		width: 100,
+		render: row => {
+			let type = ''
+			let text = ''
+			switch (row.paymentType) {
+				case 'commercialpayment':
+					type = 'primary'
+					text = '商用付款'
+					break
+				case 'consumablespayment':
+					type = 'warning'
+					text = '耗材付款'
+					break
+				default:
+					type = 'info'
+					text = '--'
+			}
+			return [
+				h(
+					ElTag,
+					{
+						type: type,
+					},
+					{
+						default: () => text,
+					}
+				),
+			]
+		},
+	},
 	{
 		label: '申请人',
 		prop: 'applicantName',
@@ -109,38 +159,44 @@ const tableColumns = ref([
 		showOverflowTooltip: true,
 	},
 	{
+		label: '审批节点',
+		prop: 'currentNodeName',
+		align: 'center',
+		width: 120,
+	},
+	{
+		label: '待办人',
+		prop: 'approverNames',
+		align: 'center',
+		width: 120,
+	},
+	{
 		label: '审批状态',
 		prop: 'approvalStatus',
 		align: 'center',
 		width: 100,
 		render: row => {
 			let type = ''
-			let text = ''
 			switch (row.approvalStatus) {
 				case '0':
 					type = ''
-					text = '待审批'
 					break
-
 				case '1':
 					type = 'warning'
-					text = '审批中'
 					break
 				case '2':
 					type = 'success'
-					text = '审批通过'
 					break
 				case '3':
 					type = 'danger'
-					text = '审批驳回'
 					break
 				case '4':
 					type = 'info'
-					text = '已撤回/作废'
+					
 					break
 				default:
 					type = 'info'
-					text = row.approvalStatus
+					
 			}
 			return [
 				h(
@@ -149,49 +205,79 @@ const tableColumns = ref([
 						type: type,
 					},
 					{
-						default: () => text,
-					},
+						default: () => row.approvalStatusLabel,
+					}
 				),
 			]
 		},
 	},
-
 	{
-		prop: '',
 		label: '操作',
-		width: 200,
 		align: 'center',
+		width: 100,
 		fixed: 'right',
 		render: row => {
+			// 1. 定义锁定状态：审批中(1) 和 审批通过(2) 锁定操作
+			const isLocked = row.approvalStatus == '1' || row.approvalStatus == '2'
+
+			// 2. 构造下拉菜单列表
+			const dropDownList = [
+				{
+					name: '编辑',
+					command: '编辑',
+					click: () => edit(row),
+					icon: 'Edit',
+					disabled: isLocked,
+				},
+				{
+					name: '申请',
+					command: '申请',
+					click: () => handleSubmitPayment(row, 'bpm:application:example:unificationpayment'),
+					icon: 'Finished',
+					disabled: isLocked,
+				},
+				{
+					name: '删除',
+					command: '删除',
+					click: () => handleDelete(row),
+					icon: 'Delete',
+					type: 'danger',
+					disabled: isLocked,
+				},
+				{
+					name: '履历',
+					command: '履历',
+					click: () => handleHistory(row),
+					icon: 'Histogram',
+					type: 'primary',
+				},
+			]
+
+			// --- 动态审批按钮逻辑 ---
+			if (row.paymentType == 'commercialpayment' || row.paymentType == 'consumablespayment') {
+				dropDownList.push({
+					name: '发起',
+					command: '发起',
+					click: () => handleSubmitPayment(row, 'bpm:application:example:' + row.paymentType),
+					icon: 'Finished',
+					disabled: isLocked,
+					type: 'primary',
+				})
+			}
+
+			// 3. 返回 DropDown 组件
 			return [
 				h(
-					ElButton,
+					DropDown,
 					{
-						onClick: () => {
-							edit(row)
-						},
-						type: 'primary',
-						link: true,
-						icon: 'Edit',
+						dropDownList,
+						isInner: true,
+						// 如果 DropDown 内部处理了权限，这里传入对应的 key，否则传空
+						props: { permission: undefined },
 					},
 					{
-						default: () => '编辑',
-					},
-				),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleDelete(row)
-						},
-						type: 'danger',
-						link: true,
-						icon: 'Delete',
-						disabled: row.approvalStatus === 'approved', // 已批准的不能删除
-					},
-					{
-						default: () => '删除',
-					},
+						default: () => h('span', { class: 'el-icon-more' }), // 下拉按钮显示更多图标
+					}
 				),
 			]
 		},
@@ -204,33 +290,47 @@ const selectData = reactive([
 		name: '付款事由',
 		type: 'input',
 		modelValue: 'paymentTitle',
-		span: 8,
+		span: 5,
 		placeholder: '请输入付款事由',
 	},
 	{
 		name: '收款方名称',
 		type: 'input',
 		modelValue: 'payeeName',
-		span: 8,
+		span: 5,
 		placeholder: '请输入收款方名称',
+	},
+	{
+		name: '付款类型',
+		type: 'select',
+		modelValue: 'paymentType',
+		span: 5,
+		placeholder: '请选择付款类型',
+		selectData: [
+			{ label: '商用付款', value: 'commercialpayment' },
+			{ label: '耗材付款', value: 'consumablespayment' },
+		],
+		selectLabel: 'label',
+		selectValue: 'value',
 	},
 	{
 		name: '申请人',
 		type: 'input',
 		modelValue: 'applicantName',
-		span: 8,
+		span: 5,
 		placeholder: '请输入申请人姓名',
 	},
 	{
 		name: '审批状态',
 		type: 'select',
 		modelValue: 'approvalStatus',
-		span: 2,
-		options: [
-			{ label: '待审批', value: '0' },
-			{ label: '审批种', value: '1' },
-			{ label: '已审批', value: '2' },
-			{ label: '已拒绝', value: '3' },
+		span: 4,
+		selectData: [
+			{ label: '未开始', value: '-1' },
+			{ label: '审批中', value: '1' },
+			{ label: '审批通过', value: '2' },
+			{ label: '审批不通过', value: '3' },
+			{ label: '已办结', value: '4' },
 		],
 		placeholder: '请选择审批状态',
 	},
@@ -252,19 +352,11 @@ const cellClickEvent = ({ row }) => {
 	clickRow.value = row
 }
 
-// 接收高级查询数据
-provide('onQuery', data => {
-	console.log('父组件收到高级查询数据：', data)
-	advancedQuery.value = JSON.parse(JSON.stringify(data))
-	getList()
-})
-
 /** 查询列表 */
 const getList = e => {
 	queryParams.value = e || queryParams.value
 	let params = {
 		...queryParams.value,
-		advancedQuery: JSON.stringify(advancedQuery.value),
 	}
 
 	// 处理日期范围
@@ -327,64 +419,99 @@ const edit = row => {
 			})
 	})
 }
+// 初始化全局实例
 const route = useRoute()
-
-const handleSubmit = async () => {
-	if (await detailRef.value.validate()) {
-		try {
-			console.log('route:', route)
-			// 1. 查询流程定义ID
-			const procDefRes = await api.getProcDefId({
-				businessId: route.meta?.menuId,
-				businessTypeCode: 'APPLICATION',
-			})
-
-			if (!procDefRes.data) {
-				proxy.$modal.msgError('获取流程定义ID失败')
-				return
-			}
-
-			const validParams = {
-				expectedPaymentTime: detailRef.value.formData.expectedPaymentTime,
-				payeeName: detailRef.value.formData.payeeName,
-				paymentAmount: detailRef.value.formData.paymentAmount,
-			}
-			// 2. 组合参数进行流程校验
-			const validateParams = {
-				processDefinitionId: procDefRes.data,
-				activityId: 'StartUserNode',
-				processVariablesStr: JSON.stringify(validParams),
-			}
-
-			const validateRes = await ProcessInstanceApi.getApprovalDetail(validateParams)
-
-			// 3. 校验失败处理
-			if (!validateRes.success) {
-				proxy.$modal.msgError(validateRes.msg || '流程校验未通过')
-				return
-			}
-
-			// 4. 校验成功，发起流程
-			const startParams = {
-				processDefinitionId: procDefRes.data,
-				startUserSelectAssignees: {},
-				variables: detailRef.value.formData,
-			}
-
-			const startRes = await ProcessInstanceApi.createProcessInstance(startParams)
-
-			if (startRes.success) {
-				proxy.$modal.msgSuccess(startRes.msg || '流程发起成功')
-				drawerVisible.value = false
-				getList(queryParams.value)
-			} else {
-				proxy.$modal.msgError(startRes.msg || '流程发起失败')
-			}
-		} catch (error) {
-			console.error('流程处理异常:', error)
-			proxy.$modal.msgError(error.response?.data?.msg || '流程处理失败')
-		}
+const router = useRouter()
+/**
+ * 提交商用付款流程
+ * @param param0.processDefinitionId 流程定义ID
+ * @param param0.variables 流程变量
+ */
+const submitCommercialPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitCommercialPayment:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
 	}
+	return api.submitCommercialPayment(params)
+}
+/**
+ * 提交耗材付款申请
+ * @param param0.processDefinitionId 流程定义ID
+ * @param param0.variables 流程变量
+ * @param param0.startUserSelectAssignees 启动用户选择审批人
+ * @param param0.businessId 业务ID
+ * @param param0.rowData 点击行数据
+ * @param param0.processDefinitionId 流程定义ID
+ */
+const submitConsumablesPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitConsumablesPayment:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.submitConsumablesPayment(params)
+}
+/**
+ * 提交综合付款申请
+ * @param param0.rowData 点击行数据
+ * @param param0.processDefinitionId 流程定义ID
+ * @param param0.variables 流程变量
+ * @param param0.startUserSelectAssignees 启动用户选择审批人
+ * @param param0.businessId 业务ID
+ */
+const submitUnificationPayment = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitUnificationPayment:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.submitUnificationPayment(params)
+}
+/**
+ * 处理付款提交
+ * @param row 点击行数据
+ * @param paymentType 付款类型
+ */
+const handleSubmitPayment = (row, paymentType) => {
+	api.getDetail(row.id)
+		.then(res => {
+			if (res && res.data) {
+				// proxy.setFormData(detailRef.value.formData, res.data)
+				startProcess({
+					rowData: res.data, // 点击行数据
+					businessId: route.meta?.menuId, // 业务ID 业务菜单id
+					businessTypeCode: paymentType, // 业务类型编码 按钮权限标识
+					businessSubmit:
+						paymentType == 'bpm:application:example:commercialpayment'
+							? submitCommercialPayment
+							: paymentType == 'bpm:application:example:unificationpayment'
+							? submitUnificationPayment
+							: submitConsumablesPayment, // 业务提交函数
+					onSuccess() {
+						ElMessage.success('提交成功')
+						getList(queryParams.value)
+					},
+					onError(err) {
+						ElMessage.error(err.message)
+						getList(queryParams.value)
+					},
+				})
+			}
+		})
+		.catch(error => {
+			console.error('获取详情失败:', error)
+			proxy.$modal.msgError('获取详情失败')
+		})
 }
 
 /** 保存 */
@@ -440,6 +567,18 @@ const handleDelete = row => {
 		.catch(() => {})
 }
 
+/**
+ * 查看流程履历
+ * @param row 点击行数据
+ */
+const handleHistory = row => {
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: row.procInstId,
+		},
+	})
+}
 // 初始化加载列表
 getList(queryParams.value)
 </script>

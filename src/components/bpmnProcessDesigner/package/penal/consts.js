@@ -539,7 +539,7 @@ export const TIMEOUT_HANDLER_TYPES = [
 
 export const REJECT_HANDLER_TYPES = [
   { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },
-  { label: '驳回到指定节点', value: RejectHandlerType.RETURN_USER_TASK }
+  // { label: '驳回到指定节点', value: RejectHandlerType.RETURN_USER_TASK }
   // { label: '结束任务', value: RejectHandlerType.FINISH_TASK }
 ]
 

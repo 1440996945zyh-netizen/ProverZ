@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-15 11:34:41
- * @LastEditTime: 2026-02-04 11:11:24
+ * @LastEditTime: 2026-02-10 15:55:58
  * @LastEditors: zhangsd
  * @Description: 表单设计器列表页面，负责表单模板的查询、新增、编辑、删除、详情、复制等操作
  * @FilePath: \view\src\views\bpmModel\formdesigner\index.vue
@@ -109,16 +109,34 @@ const tableColumns = ref([
 		label: '表单编号',
 		prop: 'id',
 		align: 'center',
+		width: 200,
 	},
 	{
 		label: '表单名称',
 		prop: 'name',
+		align: 'left',
+		minWidth: 100,
+	},
+	
+	{
+		label: '备注',
+		prop: 'remark',
+		align: 'left',
+	},
+	{
+		label: '创建时间',
+		prop: 'createTime',
 		align: 'center',
+		width: 150,
+		formatter: (row, column, cellValue) => {
+			return formatDate(row.row.createTime)
+		},
 	},
 	{
 		label: '状态',
 		prop: 'status',
 		align: 'center',
+		width: 100,
 		render: row => {
 			return [
 				h(
@@ -134,23 +152,11 @@ const tableColumns = ref([
 		},
 	},
 	{
-		label: '备注',
-		prop: 'remark',
-		align: 'center',
-	},
-	{
-		label: '创建时间',
-		prop: 'createTime',
-		align: 'center',
-		formatter: (row, column, cellValue) => {
-			return formatDate(row.row.createTime)
-		},
-	},
-	{
 		label: '操作',
 		prop: 'operation',
 		fixed: 'right',
 		align: 'center',
+		width: 300,
 		render: row => {
 			return [
 				h(

@@ -259,6 +259,7 @@ watch(
 // 返回值字段容器（替换原 mr-2 缩写）
 .response-field-wrapper {
   margin-right: 8px;
+  width: 160px;
 }
 
 // 箭头分隔符

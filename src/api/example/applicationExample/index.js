@@ -60,6 +60,30 @@ const api = {
 			params: query,
 		})
 	},
+	// 提交耗材付款申请
+	submitConsumablesPayment(data) {
+		return request({
+			url: '/api/internal/bpmApplicationExample/submitConsumablesPayment',
+			method: 'post',
+			data: data,
+		})
+	},
+	// 提交商业付款申请
+	submitCommercialPayment(data) {
+		return request({
+			url: '/api/internal/bpmApplicationExample/submitCommercialPayment',
+			method: 'post',
+			data: data,
+		})
+	},
+
+	submitUnificationPayment(data) {
+		return request({
+			url: '/api/internal/bpmApplicationExample/submitUnificationPayment',
+			method: 'post',
+			data: data,
+		})
+	},
 }
 
 export default api

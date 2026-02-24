@@ -1,18 +1,18 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:20:36
- * @LastEditTime: 2025-12-22 17:33:16
+ * @LastEditTime: 2026-02-09 15:51:36
  * @LastEditors: zhangsd
  * @Description: 签名弹窗
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\SignDialog.vue
 -->
 <template>
-  <el-dialog v-model="signDialogVisible" title="签名" width="935">
+  <Dialog v-model:visible="signDialogVisible" title="签名" width="935">
     <div style="position: relative;">
       <Vue3Signature 
         style="border: 1px solid #ccc; border-style: solid;" 
         ref="signature" 
-        w="900px" 
+        w="100%" 
         h="400px" 
       />
       <el-button
@@ -32,10 +32,11 @@
         <el-button type="primary" @click="submit"> 提交 </el-button>
       </div>
     </template>
-  </el-dialog>
+  </Dialog>
 </template>
 
 <script setup lang="js">
+import Dialog from '@/components/Dialog/index.vue'
 // 显式导入Vue3组合式API
 import { ref, defineEmits, defineExpose } from 'vue'
 // 导入签名组件
@@ -65,6 +66,9 @@ const submit = async () => {
   // const res = await FileApi.updateFile({
   //   file: download.base64ToFile(signature.value.save('image/png'), '签名')
   // })
+  const res = {
+    data: 'base64编码后的签名字符串'
+  }
   emits('success', res.data)
   signDialogVisible.value = false
 }

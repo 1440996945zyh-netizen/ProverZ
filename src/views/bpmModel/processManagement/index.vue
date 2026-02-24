@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2026-02-03 15:49:28
+ * @LastEditTime: 2026-02-09 14:10:20
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
@@ -26,7 +26,7 @@
 				:showPagination="true"
 				:showToolBar="false"
 				:showNum="5"
-				defaultWidth="50"
+				:defaultWidth="30"
 				:total="total"
 			/>
 		</div>
@@ -223,44 +223,22 @@ const selectData = reactive([
 
 // 13. 顶部按钮配置
 const buttonList = reactive([
+
 	{
-		label: '新增流程',
-		type: 'primary',
-		icon: 'Plus',
-		click: () => handleAddProcess,
+		label: '新增', // 按钮名称
+		type: 'primary', // 按钮类型
+		icon: 'Plus', // 按钮图标，支持element-Plus中所有图标
+		click: () => handleAddProcess(), // 回调函数
 		permission: 'bpm:process:insert',
 	},
 ])
 
 // 14. 表格列配置（修复操作列逻辑，匹配流程业务）
 const tableColumns = ref([
-	// {
-	// 	prop: 'id',
-	// 	label: '流程定义id',
-	// 	align: 'center',
-	// 	minWidth: 250,
-	// },
-	// {
-	// 	prop: 'key',
-	// 	label: '流程标识Key',
-	// 	align: 'center',
-	// 	width: 250,
-	// },
-	// {
-	// 	prop: 'category',
-	// 	label: '流程分类',
-	// 	align: 'center',
-	// 	width: 150,
-	// 	render: row => {
-	// 		const option = categoryOptions.find(item => item.value === row.category)
-	// 		// 修复：给原生span添加props对象（即使为空）
-	// 		return [h('span', { props: {} }, option ? option.label : row.category)]
-	// 	},
-	// },
 	{
 		prop: 'name',
 		label: '流程名称',
-		align: 'center',
+		align: 'left',
 		minWidth: 150,
 		showOverFlow: true,
 		render: row => {
@@ -281,7 +259,7 @@ const tableColumns = ref([
 	{
 		prop: 'formName',
 		label: '表单信息',
-		align: 'center',
+		align: 'left',
 		minWidth: 150,
 		showOverFlow: true,
 		render: row => {
@@ -304,45 +282,7 @@ const tableColumns = ref([
 			}
 		},
 	},
-	// {
-	// 	prop: 'version',
-	// 	label: '流程版本',
-	// 	align: 'center',
-	// 	render: row => {
-	// 		return [
-	// 			h(
-	// 				ElTag,
-	// 				{
-	// 					size: 'medium',
-	// 					permission: undefined, // 明确添加permission属性
-	// 				},
-	// 				{ default: () => `v${row.version}` }
-	// 			),
-	// 		]
-	// 	},
-	// },
-	// {
-	// 	prop: 'suspensionState',
-	// 	label: '状态',
-	// 	align: 'center',
-	// 	render: row => {
-	// 		const statusMap = {
-	// 			1: { label: '激活', type: 'success' },
-	// 			2: { label: '挂起', type: 'warning' },
-	// 		}
-	// 		const status = statusMap[row.suspensionState] || { label: '未知', type: '' }
-	// 		return [
-	// 			h(
-	// 				ElTag,
-	// 				{
-	// 					type: status.type,
-	// 					permission: undefined, // 明确添加permission属性
-	// 				},
-	// 				{ default: () => status.label }
-	// 			),
-	// 		]
-	// 	},
-	// },
+
 	{
 		prop: '',
 		label: '发布时间',
