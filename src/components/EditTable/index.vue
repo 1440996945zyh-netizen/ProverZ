@@ -1028,7 +1028,7 @@ defineExpose({
 })
 </script>
 <style scoped lang="scss">
-:deep .el-statistic__content {
+:deep(.el-statistic__content) {
 	font-size: inherit !important;
 }
 .vxe-toolbar {

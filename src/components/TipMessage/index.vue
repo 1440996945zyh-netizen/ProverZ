@@ -15,7 +15,7 @@
 
 <script setup>
 import { InfoFilled, WarningFilled, WarnTriangleFilled, SuccessFilled } from '@element-plus/icons-vue'
-import { defineProps, computed } from 'vue'
+import { computed } from 'vue'
 
 // 定义支持的状态类型
 const props = defineProps({

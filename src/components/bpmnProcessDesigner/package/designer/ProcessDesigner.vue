@@ -122,7 +122,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, computed, provide, defineProps, defineEmits } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed, provide,  defineEmits } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import SvgIcon from '@/components/SvgIcon'
 import Dialog from '@/components/Dialog'

@@ -109,7 +109,7 @@ function handleCurrentChange(val) {
 	padding: 5px 0;
 }
 /* 解决尺寸选择器显示问题 */
-::v-deep .el-pagination__sizes {
+:deep(.el-pagination__sizes ){
 	display: flex;
 	align-items: center;
 	// margin-right: 10px;
@@ -128,7 +128,7 @@ function handleCurrentChange(val) {
 }
 /* 响应式调整 */
 @media screen and (max-width: 768px) {
-	::v-deep .el-pagination__sizes {
+	:deep(.el-pagination__sizes) {
 		min-width: auto;
 		margin-right: 5px;
 	}

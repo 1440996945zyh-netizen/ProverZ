@@ -314,14 +314,15 @@ const handleCustomClose = () => {
 	--el-dialog-padding-secondary: 0px;
 	border-radius: 8px !important;
 }
-:deep .el-dialog .el-dialog__header {
+:deep(.el-dialog .el-dialog__header) {
 	padding: 0px !important;
 	
 }
-:deep .el-dialog .el-dialog__footer {
+:deep(.el-dialog .el-dialog__footer) {
 	padding: 0px !important;
 }
 :deep(.el-dialog__footer){
 	background-color: var(--el-dialog-footer-bg-color);
 }
 </style>
+

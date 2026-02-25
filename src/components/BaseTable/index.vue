@@ -1235,7 +1235,7 @@ defineExpose({
 	justify-content: space-between;
 	padding-left: 5px;
 }
-:deep .el-statistic__content {
+:deep(.el-statistic__content) {
 	font-size: inherit !important;
 }
 // 表格与工具栏的父容器：确保定位上下文，同时控制内部溢出

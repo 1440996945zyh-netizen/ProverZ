@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, defineProps } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 // 引入 hljs（ES 模块方式，适配 Vue3）
 import hljs from 'highlight.js/lib/core'
 import xml from 'highlight.js/lib/languages/xml'

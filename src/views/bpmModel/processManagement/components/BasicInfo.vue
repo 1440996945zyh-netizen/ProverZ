@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 13:38:46
- * @LastEditTime: 2026-02-10 15:41:37
+ * @LastEditTime: 2026-02-24 11:19:58
  * @LastEditors: zhangsd
  * @Description: 基本信息
  * @FilePath: \view\src\views\bpmModel\processManagement\components\BasicInfo.vue
@@ -196,10 +196,10 @@ const rules = {
 					callback()
 					return
 				}
-				if (!/^[A-Z_][\-_.0-9_A-Z$]*$/.test(value)) {
-					callback(new Error('只能包含字母、数字、下划线、连字符和点号，且必须以大写字母或下划线开头'))
-					return
-				}
+				// if (!/^[A-Z_][\-_.0-9_A-Z$]*$/.test(value)) {
+				// 	callback(new Error('只能包含字母、数字、下划线、连字符和点号，且必须以大写字母或下划线开头'))
+				// 	return
+				// }
 				callback()
 			},
 			trigger: 'blur',
