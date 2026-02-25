@@ -229,7 +229,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, inject, toRaw, onMounted, defineProps, defineOptions } from 'vue'
+import { ref, watch, nextTick, inject, toRaw, onMounted,  defineOptions } from 'vue'
 import { getDetail } from '@/api/system/bpm/form'
 import publicApi from '@/api/public'
 // 组件名称定义

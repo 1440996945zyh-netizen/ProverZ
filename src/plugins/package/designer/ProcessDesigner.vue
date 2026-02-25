@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-19 09:17:49
- * @LastEditTime: 2025-12-18 15:18:53
+ * @LastEditTime: 2026-02-25 09:38:00
  * @LastEditors: zhangsd
  * @Description: 流程设计器
  * @FilePath: \view\src\plugins\package\designer\ProcessDesigner.vue
@@ -161,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, defineProps, defineEmits } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount,  defineEmits } from 'vue'
 import SvgIcon from '@/components/SvgIcon'
 import Dialog from '@/components/Dialog'
 import BpmnModeler from 'bpmn-js/lib/Modeler'
