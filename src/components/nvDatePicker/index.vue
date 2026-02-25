@@ -56,7 +56,7 @@
 </template>
 
 <script setup name="Select">
-import { nextTick, onMounted, ref, reactive, defineProps, computed, watch } from 'vue'
+import { nextTick, onMounted, ref, reactive,  computed, watch } from 'vue'
 import BaseTable from '../BaseTable/index.vue'
 import api from '../../api/public/index.js'
 import request from '../../utils/auth/request'

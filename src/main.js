@@ -8,6 +8,11 @@ import locale from 'element-plus/dist/locale/zh-cn.mjs'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
+// 1. 引入全量组件
+import YYComponents from '@yy-framework/all';
+// 2. 引入全量组件样式（元包已整合所有组件样式）
+import '@yy-framework/all/style';
+
 import VxeUIAll from 'vxe-pc-ui'
 import 'vxe-pc-ui/es/style.css'
 import VxeUITable from 'vxe-table'
@@ -124,7 +129,7 @@ app.use(ElementPlus, {
 })
 app.use(VxeUIAll)
 app.use(VxeUITable)
-
+app.use(YYComponents); // 再注册 YY Framework 组件
 // ==================== Number原型方法扩展 ====================
 Number.prototype._toFixed = Number.prototype.toFixed
 

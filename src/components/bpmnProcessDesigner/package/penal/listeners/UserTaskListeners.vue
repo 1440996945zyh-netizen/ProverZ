@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-16 15:47:56
- * @LastEditTime: 2025-12-19 09:39:34
+ * @LastEditTime: 2026-02-25 09:21:23
  * @LastEditors: zhangsd
  * @Description: 用户任务监听器
  * @FilePath: \view\src\components\bpmnProcessDesigner\package\penal\listeners\UserTaskListeners.vue
@@ -253,7 +253,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, inject, defineOptions, defineProps } from 'vue'
+import { ref, watch, nextTick, inject, defineOptions } from 'vue'
 import { ElMessageBox, ElIcon } from 'element-plus'
 import { createListenerObject, updateElementExtensions } from '../../utils'
 import { initListenerForm, initListenerType, eventType, listenerType, fieldType, initListenerForm2 } from './utilSelf'

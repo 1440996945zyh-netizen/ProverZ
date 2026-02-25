@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, toRaw, onBeforeUnmount, defineProps, defineOptions } from 'vue'
+import { ref, watch, nextTick, toRaw, onBeforeUnmount,  defineOptions } from 'vue'
 
 // 组件名称定义
 defineOptions({ name: 'FlowCondition' })

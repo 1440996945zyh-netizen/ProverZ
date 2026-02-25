@@ -1,7 +1,7 @@
 <script setup>
 import {ref} from "vue";
-import "sv-print/dist/style.css";
-import {Designer} from "@sv-print/vue3";
+// import "sv-print/dist/style.css";
+// import {Designer} from "@sv-print/vue3";
 
 let template = ref({});
 let printData = ref({});
