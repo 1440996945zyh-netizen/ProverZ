@@ -10,7 +10,7 @@
  * @param {*} businessSubmit 业务提交
  * @param {*} onSuccess 成功回调
  * @param {*} onError 错误回调
- * 
+ *
  */
 
 import { ref } from 'vue'
@@ -19,31 +19,46 @@ import commonApi from '@/api/system/bpm/common/index.js'
 export function useProcessStarter() {
     const loading = ref(false)
 
-    /**
-     * 表单字段 ↔ 行数据 映射
-     * @param {*} formFields 表单字段配置
-     * @param {*} rowData 行数据
-     * @returns 流程变量
-     * @throws {Error} 表单字段解析失败
-     */
-    function mapFormValues(formFields = [], rowData = {}) {
-        const variables = {}
+  /**
+   * 表单字段 ↔ 行数据 映射
+   * @param {*} formFields 表单字段配置
+   * @param {*} rowData 行数据
+   * @returns 流程变量
+   */
+  function mapFormValues(formFields = [], rowData = {}) {
+    const variables = {}
 
-        formFields.forEach(item => {
-            try {
-                const fieldConfig = JSON.parse(item)
-                const field = fieldConfig.field
+    // 定义递归处理函数
+    const extractFields = (config) => {
+      if (!config) return
 
-                if (rowData[field] !== undefined && rowData[field] !== null) {
-                    variables[field] = rowData[field]
-                }
-            } catch (e) {
-                console.warn('表单字段解析失败', item)
-            }
-        })
+      // 1. 如果当前节点有 field 属性，则进行映射
+      if (config.field) {
+        const field = config.field
+        if (rowData[field] !== undefined && rowData[field] !== null) {
+          variables[field] = rowData[field]
+        }
+      }
 
-        return variables
+      // 2. 如果当前节点有子节点，递归遍历子节点
+      if (config.children && Array.isArray(config.children)) {
+        config.children.forEach(child => extractFields(child))
+      }
     }
+
+    formFields.forEach(item => {
+      try {
+        // 解析单条配置（可能是 elTabs 这种大包裹）
+        const fieldConfig = JSON.parse(item)
+        // 开始递归提取
+        extractFields(fieldConfig)
+      } catch (e) {
+        console.warn('表单字段解析失败', item)
+      }
+    })
+
+    return variables
+  }
 
     /**
      * 流程启动主方法
