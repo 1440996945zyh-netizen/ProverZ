@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>睿航环保-设备全生命周期管理平台</title>
+    <!-- 引入CDN依赖 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .text-red {
+            color: #dc3545 !important;
+        }
+        .text-blue {
+            color: #0d6efd !important;
+        }
+        .text-green {
+            color: #198754 !important;
+        }
+        .text-yellow {
+            color: #ffc107 !important;
+        }
+        .bg-light-gray {
+            background-color: #f1f3f5;
+        }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        /* 顶部通用区 */
+        .top-nav {
+            height: 70px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            padding: 0 20px;
+        }
+        /* 右侧预警区 */
+        .right-alert {
+            width: 280px;
+            background-color: #fff;
+            position: fixed;
+            top: 70px;
+            bottom: 0;
+            right: 0;
+            z-index: 998;
+            border-left: 1px solid #eee;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        /* 主内容区 - 移除左侧边距，适配标签页 */
+        .main-content {
+            margin-right: 280px;
+            margin-top: 70px;
+            padding: 20px;
+            min-height: calc(100vh - 70px);
+        }
+        .content-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        /* 标签页样式优化 */
+        .nav-tabs {
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #666;
+            padding: 10px 20px;
+            margin-right: 5px;
+        }
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            background-color: transparent;
+        }
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border-bottom: 2px solid #e7f1ff;
+            background-color: #f8f9fa;
+        }
+        /* 时间轴样式 */
+        .timeline {
+            position: relative;
+            max-width: 100%;
+            margin: 20px 0;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            background-color: #eee;
+            top: 0;
+            bottom: 0;
+            left: 5px;
+            margin-left: -3px;
+        }
+        .timeline-item {
+            padding: 10px 20px 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 100%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #0d6efd;
+            border-radius: 50%;
+            top: 15px;
+            left: 0;
+            z-index: 1;
+        }
+        .timeline-content {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        /* 响应式适配 */
+        @media (max-width: 1200px) {
+            .right-alert {
+                width: 240px;
+            }
+            .main-content {
+                margin-right: 240px;
+            }
+        }
+        @media (max-width: 768px) {
+            .right-alert {
+                display: none;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+            .nav-tabs .nav-link {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 576px) {
+            .top-nav {
+                height: auto;
+                padding: 10px 15px;
+            }
+            .main-content {
+                margin-top: 90px;
+                padding: 15px;
+            }
+            .nav-tabs {
+                display: flex;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            .nav-tabs .nav-item {
+                flex: 0 0 auto;
+            }
+        }
+        .mobile-toggle {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部通用区 -->
+    <div class="top-nav d-flex flex-wrap align-items-center justify-content-between">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+            <i class="fa fa-industry text-blue fs-4 me-3"></i>
+            <h5 class="mb-0">睿航环保设备智能管控平台</h5>
+        </div>
+        <div class="d-flex align-items-center">
+            <!-- 搜索框 -->
+            <div class="input-group input-group-sm me-3" style="width: 300px;">
+                <input type="text" class="form-control" placeholder="搜索设备名称/编号..." aria-label="设备搜索">
+                <button class="btn btn-outline-primary" type="button"><i class="fa fa-search"></i></button>
+            </div>
+            <!-- 视图切换 -->
+            <div class="btn-group btn-group-sm me-3">
+                <button type="button" class="btn btn-primary" id="listViewBtn">
+                    <i class="fa fa-list"></i> 列表视图
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="detailViewBtn">
+                    <i class="fa fa-file-alt"></i> 详情视图
+                </button>
+            </div>
+            <!-- 导出按钮 -->
+            <button class="btn btn-sm btn-outline-secondary me-3">
+                <i class="fa fa-download"></i> 导出数据
+            </button>
+            <!-- 角色信息 -->
+            <div class="d-flex align-items-center">
+                <i class="fa fa-user-circle me-2"></i>
+                <span>设备管理员</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧预警区 -->
+    <div class="right-alert">
+        <h6 class="mb-3"><i class="fa fa-bell text-red"></i> 实时预警</h6>
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <small><strong>异常告警</strong> | 脱硫塔出口SO₂浓度超标</small>
+            <p class="mb-1 mt-1 text-sm">当前值：85mg/m³，阈值：50mg/m³</p>
+            <button type="button" class="btn btn-sm btn-danger">立即处理</button>
+            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+            <small><strong>保养提醒</strong> | 引风机润滑保养超期</small>
+            <p class="mb-1 mt-1 text-sm">超期天数：3天，责任人：张三</p>
+            <button type="button" class="btn btn-sm btn-warning">派工处理</button>
+            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <hr class="my-3">
+        <h6 class="mb-3"><i class="fa fa-clipboard-list"></i> 待办任务</h6>
+        <div class="list-group list-group-sm mb-3">
+            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-check-circle text-yellow me-2"></i> 设备点检任务</span>
+                <span class="badge bg-warning rounded-pill">5</span>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-file-signature text-blue me-2"></i> 报废审批</span>
+                <span class="badge bg-primary rounded-pill">2</span>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-tools text-green me-2"></i> 保养计划制定</span>
+                <span class="badge bg-success rounded-pill">1</span>
+            </a>
+        </div>
+
+        <hr class="my-3">
+        <h6 class="mb-3"><i class="fa fa-chart-line"></i> 核心指标</h6>
+        <div class="mb-2">
+            <small class="d-flex justify-content-between">
+                <span>设备健康评分</span>
+                <span class="text-green">89分</span>
+            </small>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 89%" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+        <div class="mb-2">
+            <small class="d-flex justify-content-between">
+                <span>维保完成率</span>
+                <span class="text-green">92%</span>
+            </small>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 92%" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+        <div class="mb-2">
+            <small class="d-flex justify-content-between">
+                <span>故障修复率</span>
+                <span class="text-yellow">85%</span>
+            </small>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 - 标签页切换核心阶段 -->
+    <div class="main-content">
+        <div class="content-card">
+            <!-- 核心阶段标签页 -->
+            <ul class="nav nav-tabs" id="deviceLifeCycleTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                        <i class="fa fa-dashboard me-1"></i> 设备概览
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="archive-tab" data-bs-toggle="tab" data-bs-target="#archive" type="button" role="tab">
+                        <i class="fa fa-folder-open me-1"></i> 设备建档
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="monitor-tab" data-bs-toggle="tab" data-bs-target="#monitor" type="button" role="tab">
+                        <i class="fa fa-tachometer-alt me-1"></i> 运行监测
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="maintain-tab" data-bs-toggle="tab" data-bs-target="#maintain" type="button" role="tab">
+                        <i class="fa fa-tools me-1"></i> 运维保养
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="fault-tab" data-bs-toggle="tab" data-bs-target="#fault" type="button" role="tab">
+                        <i class="fa fa-exclamation-triangle me-1"></i> 故障处理
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="asset-tab" data-bs-toggle="tab" data-bs-target="#asset" type="button" role="tab">
+                        <i class="fa fa-exchange-alt me-1"></i> 资产流转
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="trace-tab" data-bs-toggle="tab" data-bs-target="#trace" type="button" role="tab">
+                        <i class="fa fa-history me-1"></i> 档案追溯
+                    </button>
+                </li>
+            </ul>
+
+            <!-- 标签页内容 -->
+            <div class="tab-content" id="deviceLifeCycleTabContent">
+                <!-- 设备概览 -->
+                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备全生命周期核心数据总览</h6>
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="fa fa-refresh"></i> 刷新数据
+                        </button>
+                    </div>
+
+                    <!-- 设备状态统计 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 bg-primary text-white rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>总设备数</span>
+                                    <i class="fa fa-industry fs-4"></i>
+                                </div>
+                                <h3 class="mt-2">48</h3>
+                                <small>脱硫设备：28台 | 脱硝设备：20台</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 bg-success text-white rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>正常运行</span>
+                                    <i class="fa fa-check-circle fs-4"></i>
+                                </div>
+                                <h3 class="mt-2">42</h3>
+                                <small>运行率：87.5%</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 bg-warning text-white rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>待保养</span>
+                                    <i class="fa fa-tools fs-4"></i>
+                                </div>
+                                <h3 class="mt-2">5</h3>
+                                <small>超期：3台 | 待处理：2台</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="p-3 bg-danger text-white rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>故障设备</span>
+                                    <i class="fa fa-exclamation-circle fs-4"></i>
+                                </div>
+                                <h3 class="mt-2">1</h3>
+                                <small>脱硫塔 | 处理中</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 图表展示 -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card-shadow p-3">
+                                <h6 class="mb-3 small">设备健康评分趋势</h6>
+                                <canvas id="healthChart" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card-shadow p-3">
+                                <h6 class="mb-3 small">设备类型分布</h6>
+                                <canvas id="deviceTypeChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 核心设备列表 -->
+                    <div class="mt-4">
+                        <h6 class="mb-3 small">脱硫脱硝核心设备列表</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>设备编号</th>
+                                        <th>设备名称</th>
+                                        <th>设备类型</th>
+                                        <th>运行状态</th>
+                                        <th>健康评分</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>SN2024001</td>
+                                        <td>1#脱硫塔</td>
+                                        <td>脱硫设备</td>
+                                        <td><span class="badge bg-danger">故障</span></td>
+                                        <td>65</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">详情</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>SN2024002</td>
+                                        <td>2#脱硝反应器</td>
+                                        <td>脱硝设备</td>
+                                        <td><span class="badge bg-success">正常</span></td>
+                                        <td>92</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">详情</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>SN2024003</td>
+                                        <td>引风机-01</td>
+                                        <td>辅助设备</td>
+                                        <td><span class="badge bg-warning">待保养</span></td>
+                                        <td>78</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">详情</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设备建档 -->
+                <div class="tab-pane fade" id="archive" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备基础信息建档管理</h6>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-plus"></i> 新增设备
+                        </button>
+                    </div>
+
+                    <!-- 设备基础信息表单 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small">设备编号 <span class="text-red">*</span></label>
+                                <input type="text" class="form-control form-control-sm" value="SN2024001" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">设备名称 <span class="text-red">*</span></label>
+                                <input type="text" class="form-control form-control-sm" value="1#脱硫塔">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">设备类型 <span class="text-red">*</span></label>
+                                <select class="form-select form-select-sm">
+                                    <option selected>脱硫设备</option>
+                                    <option>脱硝设备</option>
+                                    <option>辅助设备</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">规格型号</label>
+                                <input type="text" class="form-control form-control-sm" value="FGD-2000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small">安装位置 <span class="text-red">*</span></label>
+                                <input type="text" class="form-control form-control-sm" value="冶金车间1号区">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">投运时间 <span class="text-red">*</span></label>
+                                <input type="date" class="form-control form-control-sm" value="2024-01-15">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">生产厂家</label>
+                                <input type="text" class="form-control form-control-sm" value="睿航环保设备有限公司">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">质保期</label>
+                                <input type="text" class="form-control form-control-sm" value="2年（2024-01-15至2026-01-14）">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 部件管理 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备部位部件精细化管理</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>部件名称</th>
+                                        <th>规格型号</th>
+                                        <th>厂家</th>
+                                        <th>更换时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>喷淋层</td>
+                                        <td>PL-100</td>
+                                        <td>XX环保</td>
+                                        <td>2024-01-15</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>除雾器</td>
+                                        <td>CW-50</td>
+                                        <td>XX环保</td>
+                                        <td>2024-01-15</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="fa fa-plus"></i> 新增部件
+                        </button>
+                    </div>
+
+                    <!-- 附件上传 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备档案附件管理</h6>
+                        <div class="border rounded p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa fa-file-word text-blue me-2"></i>
+                                <span>1#脱硫塔技术说明书.docx</span>
+                                <button class="btn btn-sm btn-outline-secondary ms-2">预览</button>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa fa-file-pdf text-red me-2"></i>
+                                <span>1#脱硫塔检验报告.pdf</span>
+                                <button class="btn btn-sm btn-outline-secondary ms-2">预览</button>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa fa-upload"></i> 上传附件
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-sm btn-outline-secondary me-2">取消</button>
+                        <button class="btn btn-sm btn-primary">保存信息</button>
+                    </div>
+                </div>
+
+                <!-- 运行监测 -->
+                <div class="tab-pane fade" id="monitor" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备实时运行监测与健康分析</h6>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-refresh"></i> 实时刷新
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary ms-2">
+                                <i class="fa fa-history"></i> 历史数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 实时运行参数 -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted">脱硫效率</small>
+                                <h4 class="mt-1">95.2% <span class="text-green"><i class="fa fa-arrow-up"></i> 0.5%</span></h4>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 95.2%" aria-valuenow="95.2" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted">出口SO₂浓度</small>
+                                <h4 class="mt-1 text-red">85 mg/m³ <span class="text-red"><i class="fa fa-arrow-up"></i> 35</span></h4>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 170%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="50"></div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">阈值：≤50 mg/m³</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted">设备运行温度</small>
+                                <h4 class="mt-1">68℃ <span class="text-yellow"><i class="fa fa-arrow-up"></i> 2℃</span></h4>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 运行参数趋势图 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">核心运行参数趋势（24小时）</h6>
+                        <canvas id="paramChart" height="250"></canvas>
+                    </div>
+
+                    <!-- 设备健康分析 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备健康状态综合分析</h6>
+                        <div class="p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>设备健康评分</span>
+                                <h4 class="mb-0">65 <span class="text-danger">（较差）</span></h4>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div>
+                                <small class="text-muted">评分依据：</small>
+                                <ul class="mt-2 small">
+                                    <li>运行参数异常（-20分）：出口SO₂浓度超标</li>
+                                    <li>未及时保养（-10分）：喷淋层清洗超期</li>
+                                    <li>历史故障（-5分）：上月风机故障1次</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger mt-3">
+                                <i class="fa fa-file-medical"></i> 生成健康报告
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 运维保养 -->
+                <div class="tab-pane fade" id="maintain" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备运维保养全流程管理</h6>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-plus"></i> 新增保养计划
+                        </button>
+                    </div>
+
+                    <!-- 保养计划 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">维保计划制定与执行跟踪</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>计划名称</th>
+                                        <th>保养类型</th>
+                                        <th>周期</th>
+                                        <th>下次执行时间</th>
+                                        <th>责任人</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>引风机润滑保养</td>
+                                        <td>定期保养</td>
+                                        <td>每月</td>
+                                        <td>2024-05-10</td>
+                                        <td>张三</td>
+                                        <td><span class="badge bg-warning">超期</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-warning">派工</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>喷淋层清洗</td>
+                                        <td>定期保养</td>
+                                        <td>每季度</td>
+                                        <td>2024-06-15</td>
+                                        <td>李四</td>
+                                        <td><span class="badge bg-primary">待执行</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">编辑</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 维保履历 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备维保履历时间轴</h6>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-04-15</span>
+                                        <span>日常点检</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">点检人员：张三 | 结果：设备运行正常，建议清洗喷淋层</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-03-20</span>
+                                        <span>故障维修</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">维修人员：李四 | 故障：风机轴承异响 | 处理结果：更换轴承，运行正常</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-01-15</span>
+                                        <span>新机投运</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">投运人员：王五 | 验收结果：各项参数达标，正式投运</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 故障处理 -->
+                <div class="tab-pane fade" id="fault" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备故障告警与事故处理</h6>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-plus"></i> 上报故障
+                        </button>
+                    </div>
+
+                    <!-- 实时告警 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备实时异常告警</h6>
+                        <div class="alert alert-danger p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>脱硫塔出口SO₂浓度超标</strong>
+                                    <p class="small mt-1 mb-0">告警时间：2024-05-13 10:25:30</p>
+                                    <p class="small mb-0">异常参数：85mg/m³（阈值50mg/m³）</p>
+                                </div>
+                                <span class="badge bg-danger">紧急</span>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-danger">确认告警</button>
+                                <button class="btn btn-sm btn-outline-danger ms-2">派工处理</button>
+                                <button class="btn btn-sm btn-outline-secondary ms-2">AI诊断</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 故障记录 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备历史故障记录</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>故障编号</th>
+                                        <th>故障类型</th>
+                                        <th>发生时间</th>
+                                        <th>处理人</th>
+                                        <th>处理状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>FAULT20240513001</td>
+                                        <td>参数超标</td>
+                                        <td>2024-05-13 10:25</td>
+                                        <td>待分配</td>
+                                        <td><span class="badge bg-danger">未处理</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger">处理</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>FAULT20240320001</td>
+                                        <td>设备异响</td>
+                                        <td>2024-03-20 09:15</td>
+                                        <td>李四</td>
+                                        <td><span class="badge bg-success">已处理</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary">查看</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 事故记录 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备安全事故记录</h6>
+                        <div class="border rounded p-3">
+                            <p class="small mb-1">暂无事故记录</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 资产流转 -->
+                <div class="tab-pane fade" id="asset" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备资产调拨与报废管理</h6>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-exchange-alt"></i> 调拨申请
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger ms-2">
+                                <i class="fa fa-trash"></i> 报废申请
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 资产状态 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备核心资产信息</h6>
+                        <div class="p-3 bg-light rounded">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">资产状态</small>
+                                    <p class="mb-0">在用</p>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">采购金额</small>
+                                    <p class="mb-0">¥ 280,000.00</p>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">资产类别</small>
+                                    <p class="mb-0">生产设备</p>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">折旧年限</small>
+                                    <p class="mb-0">10年</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 审批记录 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">资产相关审批记录</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>审批类型</th>
+                                        <th>申请人</th>
+                                        <th>申请时间</th>
+                                        <th>审批状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>保养费用审批</td>
+                                        <td>张三</td>
+                                        <td>2024-04-20</td>
+                                        <td><span class="badge bg-success">已通过</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary">查看</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 资产流转记录 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">资产流转时间轴</h6>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-01-15</span>
+                                        <span>入库投运</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">从睿航环保设备有限公司采购，入库后直接投运至冶金车间1号区</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 档案追溯 -->
+                <div class="tab-pane fade" id="trace" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                        <h6 class="mb-0 text-blue">设备全生命周期档案追溯与分析</h6>
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="fa fa-file-export"></i> 导出履历
+                        </button>
+                    </div>
+
+                    <!-- 设备履历卡片 -->
+                    <div class="mb-4">
+                        <div class="p-4 bg-light rounded">
+                            <h6 class="mb-3 small">设备数字履历核心信息</h6>
+                            <div class="row">
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">设备编号</small>
+                                    <h6 class="mb-0">SN2024001</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">设备名称</small>
+                                    <h6 class="mb-0">1#脱硫塔</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">投运时间</small>
+                                    <h6 class="mb-0">2024-01-15</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">累计运行时长</small>
+                                    <h6 class="mb-0">2860小时</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">保养次数</small>
+                                    <h6 class="mb-0">5次</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">故障次数</small>
+                                    <h6 class="mb-0">2次</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">维保总成本</small>
+                                    <h6 class="mb-0">¥ 12,800.00</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">当前健康评分</small>
+                                    <h6 class="mb-0 text-danger">65分</h6>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <small class="text-muted">资产状态</small>
+                                    <h6 class="mb-0">在用</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 全生命周期时间轴 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备全生命周期关键事件时间轴</h6>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-05-13 10:25</span>
+                                        <span class="text-danger">故障告警</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">脱硫塔出口SO₂浓度超标，当前值85mg/m³，已触发告警</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-04-15 09:30</span>
+                                        <span class="text-primary">日常点检</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">点检人员：张三 | 结果：设备运行正常，建议清洗喷淋层</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-03-20 14:15</span>
+                                        <span class="text-warning">故障维修</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">维修人员：李四 | 故障：风机轴承异响 | 处理结果：更换轴承，运行正常</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-02-10 11:00</span>
+                                        <span class="text-success">保养完成</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">保养类型：润滑保养 | 保养人员：王五 | 结果：符合要求</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-01-15 09:00</span>
+                                        <span class="text-info">新机投运</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">投运人员：赵六 | 验收结果：各项参数达标，正式投运</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-content">
+                                    <small class="d-flex justify-content-between">
+                                        <span class="text-primary">2024-01-10 15:00</span>
+                                        <span class="text-secondary">设备建档</span>
+                                    </small>
+                                    <p class="small mt-1 mb-0">建档人员：管理员 | 完成设备基础信息录入，生成唯一编号SN2024001</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据统计分析 -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 small">设备全生命周期数据统计分析</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card-shadow p-3">
+                                    <h6 class="mb-3 small">维保成本趋势</h6>
+                                    <canvas id="costChart" height="180"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card-shadow p-3">
+                                    <h6 class="mb-3 small">故障类型分布</h6>
+                                    <canvas id="faultTypeChart" height="180"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化所有图表
+        window.onload = function() {
+            // 1. 设备健康评分趋势图
+            const healthChart = new Chart(document.getElementById('healthChart'), {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月'],
+                    datasets: [{
+                        label: '健康评分',
+                        data: [95, 92, 88, 80, 65],
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // 2. 设备类型分布图
+            const deviceTypeChart = new Chart(document.getElementById('deviceTypeChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['脱硫设备', '脱硝设备', '辅助设备'],
+                    datasets: [{
+                        data: [28, 20, 15],
+                        backgroundColor: [
+                            '#0d6efd',
+                            '#198754',
+                            '#ffc107'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+
+            // 3. 核心运行参数趋势图
+            const paramChart = new Chart(document.getElementById('paramChart'), {
+                type: 'line',
+                data: {
+                    labels: ['0时', '4时', '8时', '12时', '16时', '20时', '24时'],
+                    datasets: [
+                        {
+                            label: 'SO₂浓度 (mg/m³)',
+                            data: [45, 48, 52, 65, 78, 82, 85],
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: '脱硫效率 (%)',
+                            data: [96, 95.8, 95.5, 95.3, 95.2, 95.2, 95.2],
+                            borderColor: '#198754',
+                            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 4. 维保成本趋势图
+            const costChart = new Chart(document.getElementById('costChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月'],
+                    datasets: [{
+                        label: '维保成本 (元)',
+                        data: [1200, 1500, 3800, 2500, 3800],
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // 5. 故障类型分布图
+            const faultTypeChart = new Chart(document.getElementById('faultTypeChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['参数超标', '设备异响', '部件损坏', '其他'],
+                    datasets: [{
+                        data: [45, 30, 20, 5],
+                        backgroundColor: [
+                            '#dc3545',
+                            '#ffc107',
+                            '#0d6efd',
+                            '#6c757d'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        };
+
+        // 视图切换交互逻辑
+        document.getElementById('listViewBtn').addEventListener('click', function() {
+            this.classList.add('btn-primary');
+            this.classList.remove('btn-outline-primary');
+            document.getElementById('detailViewBtn').classList.remove('btn-primary');
+            document.getElementById('detailViewBtn').classList.add('btn-outline-primary');
+            alert('已切换至列表视图（实际项目中可替换为真实视图切换逻辑）');
+        });
+
+        document.getElementById('detailViewBtn').addEventListener('click', function() {
+            this.classList.add('btn-primary');
+            this.classList.remove('btn-outline-primary');
+            document.getElementById('listViewBtn').classList.remove('btn-primary');
+            document.getElementById('listViewBtn').classList.add('btn-outline-primary');
+            alert('已切换至详情视图（实际项目中可替换为真实视图切换逻辑）');
+        });
+    </script>
+</body>
+</html>

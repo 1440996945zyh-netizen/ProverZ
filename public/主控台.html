@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>睿航环保设备智能管控平台 - 设备主控台</title>
+    <!-- 引入Bootstrap5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <!-- 引入ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* 全局样式 */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        :root {
+            --primary: #165DFF;
+            --success: #00B42A;
+            --warning: #FF7D00;
+            --danger: #F53F3F;
+            --gray: #86909C;
+            --light: #e9ecef;
+            --dark: #212529;
+            --card-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
+        }
+        .text-primary { color: var(--primary) !important; }
+        .bg-primary { background-color: var(--primary) !important; }
+        .text-success { color: var(--success) !important; }
+        .bg-success { background-color: var(--success) !important; }
+        .text-warning { color: var(--warning) !important; }
+        .bg-warning { background-color: var(--warning) !important; }
+        .text-danger { color: var(--danger) !important; }
+        .bg-danger { background-color: var(--danger) !important; }
+        .text-gray { color: var(--gray) !important; }
+        .bg-gray { background-color: var(--gray) !important; }
+        
+        /* 顶部导航 */
+        .top-nav {
+            height: 80px;
+            background-color: #fff;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            margin: 0;
+        }
+        .top-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .top-nav .logo img {
+            height: 50px;
+        }
+        .top-nav .logo h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+        }
+        .top-nav .refresh-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            flex-wrap: nowrap;
+        }
+        .top-nav .refresh-status .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .top-nav .global-func {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .top-nav .global-func .icon-item {
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+        }
+        .top-nav .global-func .icon-item .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+        .top-nav .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .top-nav .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .top-nav .user-info .user-desc {
+            font-size: 14px;
+        }
+        .top-nav .user-info .user-desc p {
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-top: 80px;
+            padding: 10px;
+            width: 100%;
+            height: calc(100vh - 80px);
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin: 0;
+            overflow: hidden;
+            height: 100%;
+            transition: all 0.2s ease;
+        }
+        #kpiCard {
+            cursor: pointer;
+        }
+        #kpiCard:hover {
+            box-shadow: 0 4px 16px 0 rgba(22, 93, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .non-click-card {
+            cursor: default;
+        }
+        .equal-height-col {
+            height: 100%;
+            padding: 0 6px;
+        }
+        .equal-height-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .equal-height-card .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 15px;
+            margin: 0;
+            flex-shrink: 0;
+        }
+        .equal-height-card .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            overflow: hidden;
+        }
+        .card .card-header .card-tools {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card .card-header .card-tools .btn {
+            font-size: 12px;
+            padding: 2px 8px;
+        }
+        .card .card-header .card-tools .form-select {
+            padding: 2px 6px;
+            font-size: 12px;
+            width: auto;
+        }
+        
+        /* 图表样式 */
+        .chart-box {
+            width: 100%;
+            height: 100%;
+            min-height: 80px;
+        }
+        .kpi-modal-chart {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 15px;
+        }
+        
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #fff;
+        }
+        
+        /* 滚动提示 */
+        .scroll-tip {
+            width: 100%;
+            height: 32px;
+            line-height: 32px;
+            background-color: rgba(245, 63, 63, 0.1);
+            color: var(--danger);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            margin-top: auto;
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        .scroll-tip .scroll-text {
+            animation: scroll 15s linear infinite;
+            position: absolute;
+            left: 100%;
+            white-space: nowrap;
+        }
+        @keyframes scroll {
+            0% { left: 100%; }
+            100% { left: -100%; }
+        }
+        
+        /* 快速操作按钮 */
+        .quick-btn {
+            width: 100%;
+            padding: 10px 0;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--primary);
+            background-color: rgba(22, 93, 255, 0.05);
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .quick-btn:hover {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .quick-btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 核心指标项 */
+        .kpi-item {
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 6px;
+            background-color: #fff;
+            box-shadow: var(--card-shadow);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .kpi-item .kpi-name {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+        .kpi-item .kpi-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 4px 0;
+            color: var(--primary);
+        }
+        .kpi-item .kpi-trend {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        .kpi-item .kpi-trend.up {
+            color: var(--danger);
+        }
+        .kpi-item .kpi-trend.down {
+            color: var(--success);
+        }
+        .kpi-item .kpi-trend.normal {
+            color: var(--gray);
+        }
+        
+        /* 状态统计 */
+        .status-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 6px;
+            align-items: center;
+            height: 100%;
+            padding: 4px 0;
+        }
+        .status-stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+        }
+        .status-stat-item .count {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 2px 0;
+        }
+        .status-stat-item.normal { color: var(--success); }
+        .status-stat-item.warning { color: var(--warning); }
+        .status-stat-item.danger { color: var(--danger); }
+        .status-stat-item.gray { color: var(--gray); }
+        .total-stat {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary);
+            padding: 4px;
+            border-top: 1px dashed var(--light);
+            margin-top: 2px;
+            font-size: 14px;
+        }
+        
+        /* 模态框 */
+        .modal-content {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        #kpiModal .modal-dialog {
+            max-width: 90%;
+            width: 1200px;
+        }
+        #kpiModal .modal-header {
+            border-bottom: 1px solid var(--light);
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+        }
+        #kpiModal .modal-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--primary);
+        }
+        #kpiModal .modal-body {
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #kpiModal .modal-footer {
+            border-top: 1px solid var(--light);
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+        }
+        
+        /* 表格样式 */
+        .table {
+            margin-bottom: 0;
+            font-size: 12px;
+        }
+        .table-responsive {
+            flex: 1;
+            overflow: auto;
+            margin-top: 6px;
+        }
+        
+        /* 全屏行 */
+        .full-screen-row {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            gap: 10px 0;
+        }
+        
+        /* 标签页 */
+        .nav-tabs {
+            margin-bottom: 6px;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .nav-tabs .nav-link {
+            padding: 4px 12px;
+            font-size: 13px;
+        }
+        
+        /* 数字圆圈 */
+        .num-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 auto;
+        }
+        
+        /* 工艺流程 */
+        .process-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
+        }
+        .process-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding: 10px 0;
+        }
+        .process-line-segment {
+            flex: 1;
+            height: 2px;
+            background-color: #e9ecef;
+            margin: 0 8px;
+        }
+        .process-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .step-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        
+        /* 响应式适配 */
+        @media (max-width: 1200px) {
+            .status-stats {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            .top-nav .logo h2 {
+                font-size: 18px;
+            }
+            .refresh-status span {
+                font-size: 13px;
+            }
+            .kpi-item .kpi-value {
+                font-size: 18px;
+            }
+            #kpiModal .modal-dialog {
+                width: 95%;
+            }
+            .kpi-modal-chart {
+                height: 180px;
+            }
+        }
+        @media (max-width: 768px) {
+            .top-nav .logo h2 {
+                font-size: 16px;
+            }
+            .top-nav .refresh-status span:not(:first-child) {
+                display: none;
+            }
+            .card .card-header {
+                font-size: 13px;
+            }
+            .status-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .equal-height-col {
+                padding: 0 4px;
+            }
+            .full-screen-row {
+                gap: 8px 0;
+            }
+            .kpi-item .kpi-value {
+                font-size: 16px;
+            }
+            .num-circle {
+                width: 35px;
+                height: 35px;
+                font-size: 12px;
+            }
+            .kpi-modal-chart {
+                height: 150px;
+            }
+            .step-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            .step-text {
+                font-size: 11px;
+            }
+        }
+        @media (max-width: 576px) {
+            .status-stats {
+                grid-template-columns: 1fr;
+            }
+            .quick-btn {
+                padding: 8px 0;
+                font-size: 12px;
+            }
+            .card .card-body {
+                padding: 6px;
+            }
+            .card .card-header {
+                padding: 8px 10px;
+            }
+            .top-nav {
+                height: 70px;
+            }
+            .main-content {
+                height: calc(100vh - 70px);
+                margin-top: 70px;
+                padding: 6px;
+            }
+            .top-nav .logo img {
+                height: 40px;
+            }
+            .kpi-item .kpi-value {
+                font-size: 14px;
+            }
+            .table th, .table td {
+                padding: 4px;
+            }
+            .kpi-modal-chart {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+        <div class="logo">
+            <img src="https://picsum.photos/50/50" alt="睿航环保logo">
+            <h2>睿航环保设备智能管控平台</h2>
+        </div>
+        <div class="refresh-status">
+            <i class="fa fa-refresh loading text-primary"></i>
+            <span>实时数据刷新中</span>
+            <span>| 最后刷新：2026-02-12 15:30:20</span>
+            <button class="btn btn-sm btn-outline-primary">手动刷新</button>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="global-func">
+                <div class="icon-item">
+                    <i class="fa fa-bell-o"></i>
+                    <span class="badge bg-danger">3</span>
+                </div>
+                <div class="icon-item">
+                    <i class="fa fa-cog"></i>
+                </div>
+                <div class="icon-item">
+                    <i class="fa fa-download"></i>
+                </div>
+            </div>
+            <div class="user-info">
+                <img src="https://picsum.photos/40/40" alt="用户头像">
+                <div class="user-desc">
+                    <p>张三</p>
+                    <p class="text-gray fs-12">设备管理员</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 第一行：核心运行指标 -->
+        <div class="row full-screen-row" style="height: calc(25% - 10px);">
+            <div class="col-12 equal-height-col">
+                <div class="card equal-height-card" id="kpiCard">
+                    <div class="card-header">
+                        <span>核心运行指标统计 <i class="fa fa-arrow-right text-primary"></i> 点击查看详情</span>
+                        <div class="card-tools">
+                            <button class="btn btn-sm btn-outline-primary">指标配置</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 h-100">
+                            <div class="col-md-2 col-sm-3 col-6 h-100">
+                                <div class="kpi-item">
+                                    <p class="kpi-name">脱硫效率</p>
+                                    <div class="kpi-value text-success">98.6%</div>
+                                    <div class="kpi-trend up"><i class="fa fa-caret-up"></i>0.2%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6 h-100">
+                                <div class="kpi-item">
+                                    <p class="kpi-name">脱硝效率</p>
+                                    <div class="kpi-value text-success">92.3%</div>
+                                    <div class="kpi-trend normal"><i class="fa fa-minus"></i>0.0%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6 h-100">
+                                <div class="kpi-item">
+                                    <p class="kpi-name">出口SO₂</p>
+                                    <div class="kpi-value text-danger">38mg/m³</div>
+                                    <div class="kpi-trend up"><i class="fa fa-caret-up"></i>3.0mg/m³</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6 h-100">
+                                <div class="kpi-item">
+                                    <p class="kpi-name">出口NOₓ</p>
+                                    <div class="kpi-value text-success">28mg/m³</div>
+                                    <div class="kpi-trend down"><i class="fa fa-caret-down"></i>2.0mg/m³</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6 h-100">
+                                <div class="kpi-item">
+                                    <p class="kpi-name">风机转速</p>
+                                    <div class="kpi-value">1450r/min</div>
+                                    <div class="kpi-trend normal"><i class="fa fa-minus"></i>0.0r/min</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-6 h-100">
+                                <div class="kpi-item">
+                                    <p class="kpi-name">系统风压</p>
+                                    <div class="kpi-value">2.8kPa</div>
+                                    <div class="kpi-trend normal"><i class="fa fa-minus"></i>0.0kPa</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二行：设备状态 + 核心数据监控 -->
+        <div class="row full-screen-row" style="height: calc(37.5% - 7.5px);">
+            <div class="col-lg-6 equal-height-col">
+                <div class="card equal-height-card non-click-card">
+                    <div class="card-header">
+                        <span>设备状态总览</span>
+                        <div class="card-tools">
+                            <select class="form-select form-select-sm w-auto">
+                                <option value="">全部状态</option>
+                                <option value="normal">正常</option>
+                                <option value="warning">异常</option>
+                                <option value="danger">故障</option>
+                                <option value="gray">停机</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-primary">查看详情</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-2 h-100 d-flex flex-column">
+                        <div class="row g-2" style="height: 180px; flex-shrink: 0;">
+                            <div class="col-2 h-100">
+                                <div id="statusChart" class="chart-box w-100"></div>
+                            </div>
+                            <div class="col-10 h-100">
+                                <div class="status-stats h-100">
+                                    <div class="status-stat-item normal">
+                                        <span class="status-tag bg-success">正常</span>
+                                        <div class="count">86台</div>
+                                        <small>89.5%</small>
+                                    </div>
+                                    <div class="status-stat-item warning">
+                                        <span class="status-tag bg-warning">异常</span>
+                                        <div class="count">6台</div>
+                                        <small>6.2%</small>
+                                    </div>
+                                    <div class="status-stat-item danger">
+                                        <span class="status-tag bg-danger">故障</span>
+                                        <div class="count">3台</div>
+                                        <small>3.1%</small>
+                                    </div>
+                                    <div class="status-stat-item gray">
+                                        <span class="status-tag bg-gray">停机</span>
+                                        <div class="count">1台</div>
+                                        <small>1.2%</small>
+                                    </div>
+                                    <div class="total-stat">总计：96台环保设备</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive mt-2 flex-grow-1" style="overflow-y: auto;">
+                            <table class="table table-sm table-hover mb-0" style="min-height: 150px;">
+                                <thead class="table-light sticky-top top-0">
+                                    <tr>
+                                        <th style="width: 10%;">编号</th>
+                                        <th style="width: 25%;">设备名称</th>
+                                        <th style="width: 15%;">设备类型</th>
+                                        <th style="width: 10%;">所属区域</th>
+                                        <th style="width: 10%;">运行状态</th>
+                                        <th style="width: 20%;">最新巡检时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>TS-001</td>
+                                        <td>脱硫反应器</td>
+                                        <td>脱硫设备</td>
+                                        <td>一区</td>
+                                        <td><span class="status-tag bg-danger">故障</span></td>
+                                        <td>2026-02-11 09:20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TX-005</td>
+                                        <td>脱硝催化剂模块</td>
+                                        <td>脱硝设备</td>
+                                        <td>二区</td>
+                                        <td><span class="status-tag bg-warning">异常</span></td>
+                                        <td>2026-02-12 10:15</td>
+                                    </tr>
+                                    <tr>
+                                        <td>FX-012</td>
+                                        <td>引风机</td>
+                                        <td>辅助设备</td>
+                                        <td>一区</td>
+                                        <td><span class="status-tag bg-warning">异常</span></td>
+                                        <td>2026-02-12 14:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TS-008</td>
+                                        <td>吸收塔</td>
+                                        <td>脱硫设备</td>
+                                        <td>三区</td>
+                                        <td><span class="status-tag bg-success">正常</span></td>
+                                        <td>2026-02-12 15:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TX-010</td>
+                                        <td>脱硝喷枪</td>
+                                        <td>脱硝设备</td>
+                                        <td>二区</td>
+                                        <td><span class="status-tag bg-success">正常</span></td>
+                                        <td>2026-02-12 14:30</td>
+                                    </tr>
+                                    <tr>
+                                        <td>FX-003</td>
+                                        <td>送风机</td>
+                                        <td>辅助设备</td>
+                                        <td>三区</td>
+                                        <td><span class="status-tag bg-success">正常</span></td>
+                                        <td>2026-02-12 13:45</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="scroll-tip mt-2">
+                            <div class="scroll-text">
+                                【故障提醒】TS-001脱硫反应器（一区）：温度超标；【异常提醒】TX-005脱硝催化剂模块（二区）：效率下降、FX-012引风机（一区）：振动值偏高
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 equal-height-col">
+                <div class="card equal-height-card non-click-card">
+                    <div class="card-header">
+                        <span>核心数据实时监控</span>
+                        <div class="card-tools">
+                            <button class="btn btn-sm btn-outline-primary">阈值配置</button>
+                            <button class="btn btn-sm btn-outline-primary">历史曲线</button>
+                        </div>
+                    </div>
+                    <div class="card-body flex-grow-1 d-flex flex-column p-2">
+                        <ul class="nav nav-tabs mb-2" id="dataTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="sinter1-tab" data-bs-toggle="tab" data-bs-target="#sinter1" type="button" role="tab" aria-controls="sinter1" aria-selected="true">1#烧结系统</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sinter2-tab" data-bs-toggle="tab" data-bs-target="#sinter2" type="button" role="tab" aria-controls="sinter2" aria-selected="false">2#烧结系统</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pellet-tab" data-bs-toggle="tab" data-bs-target="#pellet" type="button" role="tab" aria-controls="pellet" aria-selected="false">球团系统</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="jiaoya-tab" data-bs-toggle="tab" data-bs-target="#jiaoya" type="button" role="tab" aria-controls="jiaoya" aria-selected="false">焦亚系统</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other" type="button" role="tab" aria-controls="other" aria-selected="false">其他系统</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content flex-grow-1 h-100" id="dataTabContent">
+                            <!-- 1#烧结系统 -->
+                            <div class="tab-pane fade show active h-100" id="sinter1" role="tabpanel" aria-labelledby="sinter1-tab">
+                                <div class="h-100 d-flex flex-column">
+                                    <div class="process-card mb-2">
+                                        <div class="process-line">
+                                            <div class="process-step">
+                                                <div class="step-icon bg-primary text-white">
+                                                    <i class="fa fa-sign-in"></i>
+                                                </div>
+                                                <div class="step-text">烟气入口</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-secondary text-white">
+                                                    <i class="fa fa-cogs"></i>
+                                                </div>
+                                                <div class="step-text">一级反应器</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-secondary text-white">
+                                                    <i class="fa fa-cogs"></i>
+                                                </div>
+                                                <div class="step-text">二级反应器</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-info text-white">
+                                                    <i class="fa fa-tint"></i>
+                                                </div>
+                                                <div class="step-text">再生器</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-success text-white">
+                                                    <i class="fa fa-sign-out"></i>
+                                                </div>
+                                                <div class="step-text">烟气出口</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 flex-grow-1">
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">SO₂入口</small>
+                                                    <div class="fw-bold text-primary">2850 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">SO₂出口</small>
+                                                    <div class="fw-bold text-success">32 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">NOₓ入口</small>
+                                                    <div class="fw-bold text-primary">320 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 h-100 d-flex">
+                                                                                        <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">NOₓ出口</small>
+                                                    <div class="fw-bold text-success">26 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="sinter1Chart" class="chart-box mt-2 flex-grow-1"></div>
+                                </div>
+                            </div>
+                            <!-- 2#烧结系统 -->
+                            <div class="tab-pane fade h-100" id="sinter2" role="tabpanel" aria-labelledby="sinter2-tab">
+                                <div class="h-100 d-flex flex-column">
+                                    <div class="process-card mb-2">
+                                        <div class="process-line">
+                                            <div class="process-step">
+                                                <div class="step-icon bg-primary text-white">
+                                                    <i class="fa fa-sign-in"></i>
+                                                </div>
+                                                <div class="step-text">烟气入口</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-secondary text-white">
+                                                    <i class="fa fa-cogs"></i>
+                                                </div>
+                                                <div class="step-text">一级反应器</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-secondary text-white">
+                                                    <i class="fa fa-cogs"></i>
+                                                </div>
+                                                <div class="step-text">二级反应器</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-info text-white">
+                                                    <i class="fa fa-tint"></i>
+                                                </div>
+                                                <div class="step-text">再生器</div>
+                                            </div>
+                                            <div class="process-line-segment"></div>
+                                            <div class="process-step">
+                                                <div class="step-icon bg-success text-white">
+                                                    <i class="fa fa-sign-out"></i>
+                                                </div>
+                                                <div class="step-text">烟气出口</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 flex-grow-1">
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">SO₂入口</small>
+                                                    <div class="fw-bold text-primary">2780 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">SO₂出口</small>
+                                                    <div class="fw-bold text-success">35 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">NOₓ入口</small>
+                                                    <div class="fw-bold text-primary">310 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 h-100 d-flex">
+                                            <div class="card border-light shadow-sm w-100">
+                                                <div class="card-body p-2 text-center d-flex flex-column justify-content-center h-100">
+                                                    <small class="text-muted">NOₓ出口</small>
+                                                    <div class="fw-bold text-success">29 mg/m³</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="sinter2Chart" class="chart-box mt-2 flex-grow-1"></div>
+                                </div>
+                            </div>
+                            <!-- 球团系统 -->
+                            <div class="tab-pane fade h-100" id="pellet" role="tabpanel" aria-labelledby="pellet-tab">
+                                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-gray">
+                                    <i class="fa fa-bar-chart-o text-5xl mb-3"></i>
+                                    <p>球团系统暂无实时数据</p>
+                                </div>
+                            </div>
+                            <!-- 焦亚系统 -->
+                            <div class="tab-pane fade h-100" id="jiaoya" role="tabpanel" aria-labelledby="jiaoya-tab">
+                                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-gray">
+                                    <i class="fa fa-bar-chart-o text-5xl mb-3"></i>
+                                    <p>焦亚系统暂无实时数据</p>
+                                </div>
+                            </div>
+                            <!-- 其他系统 -->
+                            <div class="tab-pane fade h-100" id="other" role="tabpanel" aria-labelledby="other-tab">
+                                <div class="h-100 d-flex flex-column justify-content-center align-items-center text-gray">
+                                    <i class="fa fa-bar-chart-o text-5xl mb-3"></i>
+                                    <p>其他系统暂无实时数据</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三行：快速操作 + 报警统计 + 能耗分析 -->
+        <div class="row full-screen-row" style="height: calc(37.5% - 7.5px);">
+            <div class="col-lg-2 equal-height-col">
+                <div class="card equal-height-card non-click-card">
+                    <div class="card-header">
+                        <span>快速操作</span>
+                    </div>
+                    <div class="card-body d-flex flex-column p-3">
+                        <div class="quick-btn">
+                            <i class="fa fa-play"></i> 启动系统
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-pause"></i> 暂停系统
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-stop"></i> 停止系统
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-refresh"></i> 系统复位
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-bell"></i> 报警确认
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-file-text-o"></i> 生成报表
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-calendar-check-o"></i> 巡检计划
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fa fa-user-plus"></i> 维保派单
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 equal-height-col">
+                <div class="card equal-height-card non-click-card">
+                    <div class="card-header">
+                        <span>报警统计分析</span>
+                        <div class="card-tools">
+                            <select class="form-select form-select-sm w-auto">
+                                <option value="day">今日</option>
+                                <option value="week">本周</option>
+                                <option value="month">本月</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body p-2 h-100 d-flex flex-column">
+                        <div id="alarmChart" class="chart-box flex-grow-1"></div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-4">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-danger">12</div>
+                                    <small class="text-muted">紧急报警</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-warning">28</div>
+                                    <small class="text-muted">一般报警</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-primary">86</div>
+                                    <small class="text-muted">报警总数</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 equal-height-col">
+                <div class="card equal-height-card non-click-card">
+                    <div class="card-header">
+                        <span>能耗分析</span>
+                        <div class="card-tools">
+                            <select class="form-select form-select-sm w-auto">
+                                <option value="day">今日</option>
+                                <option value="week">本周</option>
+                                <option value="month">本月</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body p-2 h-100 d-flex flex-column">
+                        <div id="energyChart" class="chart-box flex-grow-1"></div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-primary">2568 kW·h</div>
+                                    <small class="text-muted">今日总能耗</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-success">-5.2%</div>
+                                    <small class="text-muted">较昨日同比</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 核心指标详情模态框 -->
+<div class="modal fade" id="kpiModal" tabindex="-1" aria-labelledby="kpiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-light border-bottom">
+                <h5 class="modal-title" id="kpiModalLabel">核心运行指标详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- 弹窗内核心样式 - 宽度自适应优化 -->
+                <style>
+                    .kpi-detail-card {
+                        border: 1px solid #e0e0e0;
+                        border-radius: 4px;
+                        padding: 10px;
+                        margin-bottom: 15px;
+                        background-color: #fff;
+                        /* 确保卡片宽度100%自适应父容器 */
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .kpi-detail-card .card-title {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #333;
+                        margin: 0 0 8px 0;
+                    }
+                    /* 核心：宽度100%自适应，高度固定合理值，取消任何固定宽度 */
+                    .kpi-detail-chart {
+                        width: 100% !important; /* 强制100%宽度 */
+                        height: 200px;
+                        margin-bottom: 8px;
+                        box-sizing: border-box;
+                    }
+                    .kpi-value-footer {
+                        font-size: 12px;
+                        color: #333;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding-top: 5px;
+                        border-top: 1px solid #f0f0f0;
+                    }
+                    .kpi-current-value {
+                        font-weight: 600;
+                    }
+                    .kpi-threshold {
+                        color: #666;
+                    }
+                    .text-red {
+                        color: #f53f3f !important;
+                    }
+                    .text-green {
+                        color: #00b42a !important;
+                    }
+                    /* 确保列容器宽度自适应，无固定值 */
+                    .row > .col-md-6 {
+                        padding-left: 12px;
+                        padding-right: 12px;
+                        box-sizing: border-box;
+                    }
+                </style>
+
+                <!-- 2列3行布局 - 无固定宽度，完全自适应 -->
+                <div class="row g-4">
+                    <!-- 1. 脱硫效率趋势 -->
+                    <div class="col-md-6">
+                        <div class="kpi-detail-card">
+                            <div class="card-title">脱硫效率趋势（24小时）</div>
+                            <div id="desulfurizationChart" class="kpi-detail-chart"></div>
+                            <div class="kpi-value-footer">
+                                <span>当前值: <span class="kpi-current-value text-green">98.6%</span></span>
+                                <span class="kpi-threshold">阈值: ≥95%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 脱硝效率趋势 -->
+                    <div class="col-md-6">
+                        <div class="kpi-detail-card">
+                            <div class="card-title">脱硝效率趋势（24小时）</div>
+                            <div id="denitrationChart" class="kpi-detail-chart"></div>
+                            <div class="kpi-value-footer">
+                                <span>当前值: <span class="kpi-current-value text-green">92.3%</span></span>
+                                <span class="kpi-threshold">阈值: ≥90%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 出口SO₂浓度趋势 -->
+                    <div class="col-md-6">
+                        <div class="kpi-detail-card">
+                            <div class="card-title">出口SO₂浓度趋势（24小时）</div>
+                            <div id="so2OutChart" class="kpi-detail-chart"></div>
+                            <div class="kpi-value-footer">
+                                <span>当前值: <span class="kpi-current-value text-red">38mg/m³</span></span>
+                                <span class="kpi-threshold">阈值: ≤35mg/m³</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 出口NOₓ浓度趋势 -->
+                    <div class="col-md-6">
+                        <div class="kpi-detail-card">
+                            <div class="card-title">出口NOₓ浓度趋势（24小时）</div>
+                            <div id="noxOutChart" class="kpi-detail-chart"></div>
+                            <div class="kpi-value-footer">
+                                <span>当前值: <span class="kpi-current-value text-green">28mg/m³</span></span>
+                                <span class="kpi-threshold">阈值: ≤50mg/m³</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. 风机转速趋势 -->
+                    <div class="col-md-6">
+                        <div class="kpi-detail-card">
+                            <div class="card-title">风机转速趋势（24小时）</div>
+                            <div id="fanChart" class="kpi-detail-chart"></div>
+                            <div class="kpi-value-footer">
+                                <span>当前值: <span class="kpi-current-value text-green">1450r/min</span></span>
+                                <span class="kpi-threshold">阈值: 1000-1600r/min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. 系统风压趋势 -->
+                    <div class="col-md-6">
+                        <div class="kpi-detail-card">
+                            <div class="card-title">系统风压趋势（24小时）</div>
+                            <div id="pressureChart" class="kpi-detail-chart"></div>
+                            <div class="kpi-value-footer">
+                                <span>当前值: <span class="kpi-current-value text-green">2.8kPa</span></span>
+                                <span class="kpi-threshold">阈值: 2.5-3.5kPa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top justify-content-end">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary btn-sm">导出数据报表</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 页面加载完成后初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设备状态饼图
+            const statusChartDom = document.getElementById('statusChart');
+            const statusChart = echarts.init(statusChartDom);
+            const statusOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'center',
+                    top: 'middle',
+                    textStyle: {
+                        fontSize: 11
+                    }
+                },
+                series: [
+                    {
+                        name: '设备状态',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 12,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            { value: 86, name: '正常', itemStyle: { color: '#00B42A' } },
+                            { value: 6, name: '异常', itemStyle: { color: '#FF7D00' } },
+                            { value: 3, name: '故障', itemStyle: { color: '#F53F3F' } },
+                            { value: 1, name: '停机', itemStyle: { color: '#86909C' } }
+                        ]
+                    }
+                ]
+            };
+            statusChart.setOption(statusOption);
+
+            // 1#烧结系统趋势图
+            const sinter1ChartDom = document.getElementById('sinter1Chart');
+            const sinter1Chart = echarts.init(sinter1ChartDom);
+            const sinter1Option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '浓度 (mg/m³)',
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'SO₂入口',
+                        type: 'line',
+                        data: [2800, 2810, 2820, 2830, 2840, 2845, 2850],
+                        lineStyle: {
+                            color: '#165DFF'
+                        },
+                        itemStyle: {
+                            color: '#165DFF'
+                        }
+                    },
+                    {
+                        name: 'SO₂出口',
+                        type: 'line',
+                        data: [45, 42, 40, 38, 36, 34, 32],
+                        lineStyle: {
+                            color: '#00B42A'
+                        },
+                        itemStyle: {
+                            color: '#00B42A'
+                        }
+                    },
+                    {
+                        name: 'NOₓ出口',
+                        type: 'line',
+                        data: [24, 25, 25, 26, 26, 26, 26],
+                        lineStyle: {
+                            color: '#FF7D00'
+                        },
+                        itemStyle: {
+                            color: '#FF7D00'
+                        }
+                    }
+                ]
+            };
+            sinter1Chart.setOption(sinter1Option);
+
+            // 2#烧结系统趋势图
+            const sinter2ChartDom = document.getElementById('sinter2Chart');
+            const sinter2Chart = echarts.init(sinter2ChartDom);
+            const sinter2Option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '浓度 (mg/m³)',
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'SO₂入口',
+                        type: 'line',
+                        data: [2750, 2760, 2770, 2775, 2780, 2780, 2780],
+                        lineStyle: {
+                            color: '#165DFF'
+                        },
+                        itemStyle: {
+                            color: '#165DFF'
+                        }
+                    },
+                    {
+                        name: 'SO₂出口',
+                        type: 'line',
+                        data: [40, 39, 38, 37, 36, 35, 35],
+                        lineStyle: {
+                            color: '#00B42A'
+                        },
+                        itemStyle: {
+                            color: '#00B42A'
+                        }
+                    },
+                    {
+                        name: 'NOₓ出口',
+                        type: 'line',
+                        data: [27, 28, 28, 29, 29, 29, 29],
+                        lineStyle: {
+                            color: '#FF7D00'
+                        },
+                        itemStyle: {
+                            color: '#FF7D00'
+                        }
+                    }
+                ]
+            };
+            sinter2Chart.setOption(sinter2Option);
+
+            // 报警统计图表
+            const alarmChartDom = document.getElementById('alarmChart');
+            const alarmChart = echarts.init(alarmChartDom);
+            const alarmOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '报警数',
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '紧急报警',
+                        type: 'bar',
+                        data: [2, 1, 3, 2, 3, 1],
+                        itemStyle: {
+                            color: '#F53F3F'
+                        }
+                    },
+                    {
+                        name: '一般报警',
+                        type: 'bar',
+                        data: [5, 4, 6, 5, 7, 1],
+                        itemStyle: {
+                            color: '#FF7D00'
+                        }
+                    }
+                ]
+            };
+            alarmChart.setOption(alarmOption);
+
+            // 能耗分析图表
+            const energyChartDom = document.getElementById('energyChart');
+            const energyChart = echarts.init(energyChartDom);
+            const energyOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '能耗 (kW·h)',
+                        axisLabel: {
+                            fontSize: 11
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '实时能耗',
+                        type: 'line',
+                        data: [320, 280, 450, 520, 480, 518],
+                        lineStyle: {
+                            color: '#165DFF'
+                        },
+                        itemStyle: {
+                            color: '#165DFF'
+                        }
+                    },
+                    {
+                        name: '昨日同期',
+                        type: 'line',
+                        data: [330, 290, 470, 540, 500, 535],
+                        lineStyle: {
+                            color: '#86909C',
+                            type: 'dashed'
+                        },
+                        itemStyle: {
+                            color: '#86909C'
+                        }
+                    }
+                ]
+            };
+            energyChart.setOption(energyOption);
+
+            // 1. 脱硫效率趋势 - 关键：grid边距极致压缩
+        // ---------------- 优化宽度自适应的图表配置 ----------------
+        // 通用图表配置函数（减少重复代码，确保所有图表宽度自适应）
+        function initKpiChart(domId, option) {
+            const chart = echarts.init(document.getElementById(domId));
+            // 强制图表自适应容器宽度
+            chart.setOption({
+                ...option,
+                responsive: true, // 开启响应式
+                maintainAspectRatio: false, // 不保持宽高比，完全自适应
+                grid: {
+                    left: '2%',   // 极致压缩左右边距，利用横向空间
+                    right: '2%',
+                    top: '10%',
+                    bottom: '15%',
+                    containLabel: true
+                }
+            });
+            // 监听容器尺寸变化，实时调整图表
+            new ResizeObserver(() => {
+                chart.resize();
+            }).observe(document.getElementById(domId));
+            return chart;
+        }
+
+        // 1. 脱硫效率趋势
+        const desulfurizationChart = initKpiChart('desulfurizationChart', {
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}%<br/>阈值: ≥95%' },
+            xAxis: {
+                type: 'category',
+                data: ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'],
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: 95,
+                max: 100,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                markLine: { silent: true, lineStyle: { color: '#00b42a' }, data: [{ yAxis: 95 }] },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(0,180,42,0.1)'}, {offset:1,color:'rgba(0,180,42,0.05)'}]) }
+            },
+            series: [{
+                name: '脱硫效率',
+                type: 'line',
+                data: [98.2, 98.1, 98.0, 98.1, 98.3, 98.4, 98.5, 98.5, 98.6, 98.6, 98.6, 98.6],
+                lineStyle: { color: '#00b42a', width: 2 },
+                itemStyle: { color: '#00b42a' },
+                symbol: 'circle',
+                symbolSize: 4,
+                smooth: true
+            }]
+        });
+
+        // 2. 脱硝效率趋势
+        const denitrationChart = initKpiChart('denitrationChart', {
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}%<br/>阈值: ≥90%' },
+            xAxis: {
+                type: 'category',
+                data: ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'],
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: 90,
+                max: 95,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                markLine: { silent: true, lineStyle: { color: '#00b42a' }, data: [{ yAxis: 90 }] },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(0,180,42,0.1)'}, {offset:1,color:'rgba(0,180,42,0.05)'}]) }
+            },
+            series: [{
+                name: '脱硝效率',
+                type: 'line',
+                data: [91.8, 91.9, 92.0, 92.1, 92.2, 92.2, 92.3, 92.3, 92.3, 92.3, 92.3, 92.3],
+                lineStyle: { color: '#00b42a', width: 2 },
+                itemStyle: { color: '#00b42a' },
+                symbol: 'circle',
+                symbolSize: 4,
+                smooth: true
+            }]
+        });
+
+        // 3. 出口SO₂浓度趋势
+        const so2OutChart = initKpiChart('so2OutChart', {
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}mg/m³<br/>阈值: ≤35mg/m³' },
+            xAxis: {
+                type: 'category',
+                data: ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'],
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: 30,
+                max: 40,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                markLine: { silent: true, lineStyle: { color: '#f53f3f', type: 'dashed' }, data: [{ yAxis: 35 }] },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(245,63,63,0.1)'}, {offset:1,color:'rgba(245,63,63,0.05)'}]) }
+            },
+            series: [{
+                name: 'SO₂浓度',
+                type: 'line',
+                data: [32, 34, 35, 37, 38, 37, 36, 34, 37, 36, 38, 37],
+                lineStyle: { color: '#f53f3f', width: 2 },
+                itemStyle: { color: '#f53f3f' },
+                symbol: 'circle',
+                symbolSize: 4,
+                smooth: true
+            }]
+        });
+
+        // 4. 出口NOₓ浓度趋势
+        const noxOutChart = initKpiChart('noxOutChart', {
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}mg/m³<br/>阈值: ≤50mg/m³' },
+            xAxis: {
+                type: 'category',
+                data: ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'],
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: 25,
+                max: 35,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                markLine: { silent: true, lineStyle: { color: '#00b42a' }, data: [{ yAxis: 50 }] },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(0,180,42,0.1)'}, {offset:1,color:'rgba(0,180,42,0.05)'}]) }
+            },
+            series: [{
+                name: 'NOₓ浓度',
+                type: 'line',
+                data: [32, 30, 29, 28, 29, 28, 29, 28, 29, 28, 29, 28],
+                lineStyle: { color: '#00b42a', width: 2 },
+                itemStyle: { color: '#00b42a' },
+                symbol: 'circle',
+                symbolSize: 4,
+                smooth: true
+            }]
+        });
+
+        // 5. 风机转速趋势
+        const fanChart = initKpiChart('fanChart', {
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}r/min<br/>阈值: 1000-1600r/min' },
+            xAxis: {
+                type: 'category',
+                data: ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'],
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: 1400,
+                max: 1460,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(22,93,255,0.1)'}, {offset:1,color:'rgba(22,93,255,0.05)'}]) }
+            },
+            series: [{
+                name: '风机转速',
+                type: 'line',
+                data: [1440, 1442, 1445, 1443, 1446, 1448, 1449, 1450, 1448, 1449, 1450, 1450],
+                lineStyle: { color: '#165DFF', width: 2 },
+                itemStyle: { color: '#165DFF' },
+                symbol: 'circle',
+                symbolSize: 4,
+                smooth: true
+            }]
+        });
+
+        // 6. 系统风压趋势
+        const pressureChart = initKpiChart('pressureChart', {
+            tooltip: { trigger: 'axis', formatter: '{b}: {c}kPa<br/>阈值: 2.5-3.5kPa' },
+            xAxis: {
+                type: 'category',
+                data: ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'],
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisTick: { show: false }
+            },
+            yAxis: {
+                type: 'value',
+                min: 2.5,
+                max: 3.0,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(22,93,255,0.1)'}, {offset:1,color:'rgba(22,93,255,0.05)'}]) }
+            },
+            series: [{
+                name: '系统风压',
+                type: 'line',
+                data: [2.78, 2.80, 2.75, 2.78, 2.80, 2.77, 2.80, 2.78, 2.80, 2.77, 2.80, 2.79],
+                lineStyle: { color: '#165DFF', width: 2 },
+                itemStyle: { color: '#165DFF' },
+                symbol: 'circle',
+                symbolSize: 4,
+                smooth: true
+            }]
+        });
+
+        // ========== 交互逻辑 ==========
+        document.getElementById('kpiCard').addEventListener('click', function() {
+            const kpiModal = new bootstrap.Modal(document.getElementById('kpiModal'));
+            kpiModal.show();
+            // 弹窗显示后强制重绘，确保宽度自适应
+            setTimeout(() => {
+                desulfurizationChart.resize();
+                denitrationChart.resize();
+                so2OutChart.resize();
+                noxOutChart.resize();
+                fanChart.resize();
+                pressureChart.resize();
+            }, 100);
+        });
+
+        window.addEventListener('resize', function() {
+            // 所有图表自适应窗口变化
+            desulfurizationChart.resize();
+            denitrationChart.resize();
+            so2OutChart.resize();
+            noxOutChart.resize();
+            fanChart.resize();
+            pressureChart.resize();
+            statusChart.resize();
+            sinter1Chart.resize();
+            sinter2Chart.resize();
+            alarmChart.resize();
+            energyChart.resize();
+        });
+    });
+</script>
+</body>
+</html>
