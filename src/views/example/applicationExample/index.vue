@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-24 11:06:40
+ * @LastEditTime: 2026-02-26 13:49:45
  * @LastEditors: zhangsd
  * @Description: 业务流程示例
  * @FilePath: \view\src\views\example\applicationExample\index.vue
@@ -162,13 +162,13 @@ const tableColumns = ref([
 		label: '审批节点',
 		prop: 'currentNodeName',
 		align: 'center',
-		width: 120,
+		width: 180,
 	},
 	{
 		label: '待办人',
 		prop: 'approverNames',
 		align: 'center',
-		width: 120,
+		width: 180,
 	},
 	{
 		label: '审批状态',

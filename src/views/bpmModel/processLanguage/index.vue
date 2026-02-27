@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-24 10:29:17
- * @LastEditTime: 2026-02-25 09:42:51
+ * @LastEditTime: 2026-02-25 13:53:15
  * @LastEditors: zhangsd
  * @Description: 常用审批语配置
  * @FilePath: \view\src\views\bpmModel\processLanguage\index.vue
@@ -27,7 +27,6 @@
 	</div>
 </template>
 <script setup>
-
 const visible = ref(false)
 </script>
 
