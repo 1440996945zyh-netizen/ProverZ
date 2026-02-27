@@ -47,7 +47,13 @@
 
 				<!-- 子流程按钮 -->
 				<div v-if="activity.nodeType === NodeType.CHILD_PROCESS_NODE">
-					<el-button type="primary" link size="small" @click="handleChildProcess(activity)" :disabled="!activity.processInstanceId">
+					<el-button
+						type="primary"
+						link
+						size="small"
+						@click="handleChildProcess(activity)"
+						:disabled="!activity.processInstanceId"
+					>
 						查看子流程
 					</el-button>
 				</div>
@@ -96,7 +102,11 @@
 						<div v-for="(user, idx1) in activity.candidateUsers" :key="idx1" class="user-tag">
 							<el-avatar :size="20" :src="user.avatar">{{ user.userName.substring(0, 1) }}</el-avatar>
 							<span class="user-name">{{ user.userName }}</span>
-							<div v-if="props.showStatusIcon" class="user-status-dot" :style="{ backgroundColor: statusIconMap2['-1']?.color }">
+							<div
+								v-if="props.showStatusIcon"
+								class="user-status-dot"
+								:style="{ backgroundColor: statusIconMap2['-1']?.color }"
+							>
 								<el-icon :size="9" color="#FFFFFF"><Clock /></el-icon>
 							</div>
 						</div>
@@ -105,7 +115,10 @@
 
 				<!-- 4. 优化审批意见和签名显示 -->
 				<div v-for="(task, idx) in activity.tasks" :key="'reason-' + idx" class="opinion-wrapper">
-					<div v-if="task.reason && [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)" class="opinion-box">
+					<div
+						v-if="task.reason && [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)"
+						class="opinion-box"
+					>
 						<span class="opinion-label">意见：</span>
 						{{ task.reason }}
 					</div>

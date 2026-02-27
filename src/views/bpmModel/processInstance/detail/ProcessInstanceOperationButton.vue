@@ -824,7 +824,9 @@ const handleAudit = async (pass, formRef) => {
 			}
 			// 签名
 			if (runningTask.value.signEnable) {
-				data.signPicUrl = approveReasonForm.signPicUrl
+				//用文件id替换之前的url，根据查出的id去下载文件图片
+				data.signPicUrl = approveReasonForm.fileId
+				// data.signPicUrl = approveReasonForm.signPicUrl
 			}
 			// 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
 			// TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
@@ -1121,11 +1123,28 @@ const getUpdatedProcessInstanceVariables = () => {
 	})
 	return variables
 }
+// 定义一个变量存储图片的 Blob URL（在 Vue 组件的 data/setup 中声明）
+const signPicBlobUrl = ref('')
 
 /** 处理签名完成 */
-const handleSignFinish = url => {
-	approveReasonForm.signPicUrl = url
-	approveSignFormRef.value.validate('change')
+const handleSignFinish = async (file) => {
+  try {
+    // 1. 请求文件流
+    const res = await publicApi.down(file.id,'blob')
+    // 2. 将 Blob 流转换为可访问的 URL
+    // 先释放旧的 Blob URL，避免内存泄漏
+    if (signPicBlobUrl.value) {
+      URL.revokeObjectURL(signPicBlobUrl.value)
+    }
+    // 生成新的 Blob URL
+    signPicBlobUrl.value = URL.createObjectURL(res.data)
+
+    approveReasonForm.fileId = file.id
+    approveReasonForm.signPicUrl = signPicBlobUrl.value
+    approveSignFormRef.value.validate('change')
+  } catch (error) {
+    console.error('获取图片流失败：', error)
+  }
 }
 const userOptions = ref([]) // 用户列表选项
 // 加载用户选项

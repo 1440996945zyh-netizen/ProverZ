@@ -56,7 +56,7 @@ const submit = async () => {
   message.success('签名上传中请稍等。。。')
   const formData = new FormData()
   formData.append('fileArray', download.base64ToFile(signature.value.save('image/png'), '签名'))
-  formData.append('businessType', '电子签名')
+  formData.append('businessType', 'ELECTRIC_SIGN')
   publicApi.getFileInfo(formData).then(res => {
 		if (res.code === '0000') {
 			message.success('上传成功')
