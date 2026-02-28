@@ -84,6 +84,9 @@
 							:preview-src-list="[approveReasonForm.signPicUrl]"
 						/>
 					</el-form-item>
+					<el-form-item v-if="runningTask.signEnable" label="" prop="signPicUrl">
+						<el-button @click="personalElecSign()">使用电子签</el-button>
+					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="success" @click="handleAudit(true, approveFormRef)">
 							{{ getButtonDisplayName(OperationButtonType.APPROVE) }}
@@ -605,7 +608,26 @@ const approveReasonRule = computed(() => {
 		nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }],
 	}
 })
+//使用电子签
+const personalElecSign = async() =>{
+	const res0 = await ProcessInstanceApi.getPersonalSign()
+	if(res0.data){
 
+		// 1. 请求文件流
+		const res = await publicApi.down(res0.data,'blob')
+		// 2. 将 Blob 流转换为可访问的 URL
+		// 先释放旧的 Blob URL，避免内存泄漏
+		if (signPicBlobUrl.value) {
+		URL.revokeObjectURL(signPicBlobUrl.value)
+		}
+		// 生成新的 Blob URL
+		signPicBlobUrl.value = URL.createObjectURL(res.data)
+
+		approveReasonForm.fileId = res0.data
+		approveReasonForm.signPicUrl = signPicBlobUrl.value
+		approveSignFormRef.value.validate('change')
+	}
+}
 // 拒绝表单
 const rejectFormRef = ref(null)
 const rejectReasonForm = reactive({
