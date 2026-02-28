@@ -310,6 +310,7 @@ function edit(row) {
 		api.getById(editRow.id).then(res => {
 			console.log('编辑')
 			proxy.setFormData(drawerRef.value.formData, res.data)
+			drawerRef.value.formData.roleIds = res.data.roleIds
 			console.log('编辑回显数据', drawerRef.value.formData)
 		})
 	})

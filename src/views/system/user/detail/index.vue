@@ -116,6 +116,7 @@ const formData = reactive({
 	userName: '',
 	idCard: '',
 	deptId: '',
+	roleIds: [],
 	status: '1',
 	isSuperadmin: '0',
 	remark: '',

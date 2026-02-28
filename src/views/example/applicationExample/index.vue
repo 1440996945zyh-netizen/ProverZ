@@ -39,7 +39,6 @@
 </template>
 
 <script setup name="bpmApplicationExample">
-
 import BaseTable from '@/components/BaseTable/index.vue'
 import { ref, reactive, nextTick, getCurrentInstance } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
@@ -64,10 +63,10 @@ const title = ref(null) // 抽屉标题
 const clickRow = ref({})
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
-const tableHeight = computed(() => storeHight.value -20) //表格高度
+const tableHeight = computed(() => storeHight.value - 20) //表格高度
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
@@ -192,11 +191,10 @@ const tableColumns = ref([
 					break
 				case '4':
 					type = 'info'
-					
+
 					break
 				default:
 					type = 'info'
-					
 			}
 			return [
 				h(

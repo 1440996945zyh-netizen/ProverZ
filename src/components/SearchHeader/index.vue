@@ -322,7 +322,7 @@
 	</div>
 </template>
 <script setup name="SearchHeader">
-import { reactive, ref, computed, onMounted, watch, getCurrentInstance, nextTick,inject } from 'vue'
+import { reactive, ref, computed, onMounted, watch, getCurrentInstance, nextTick, inject } from 'vue'
 import Select from '../Select/index.vue'
 import nvDatePicker from '../nvDatePicker/index.vue'
 import RemoteSelect from '../RemoteSelect/index.vue'
@@ -334,7 +334,7 @@ const tableParams = tableParamsStore()
 const emit = defineEmits(['searchClick', 'handleChange'])
 const searchData = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 // 高级查询
 const advancedQueryRef = ref(null)
@@ -605,7 +605,7 @@ const resetSearch = async keys => {
 	// 2. 高级查询清空：调用静默清空方法（无弹窗）
 	if (props.isShowAdvancedQuery && advancedQueryRef.value) {
 		await advancedQueryRef.value.clearAllConditions()
-			// 触发查询事件
+		// 触发查询事件
 		onQuery()
 	}
 }

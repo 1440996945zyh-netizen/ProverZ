@@ -77,15 +77,15 @@
 					</el-form-item>
 					<el-form-item v-if="runningTask.signEnable" label="签名" prop="signPicUrl" ref="approveSignFormRef">
 						<el-button @click="signRef.open()">点击签名</el-button>
+						<el-button @click="personalElecSign()">使用电子签</el-button>
+					</el-form-item>
+					<el-form-item v-if="runningTask.signEnable" label="" prop="signPicUrl">
 						<el-image
 							style="width: 90px; height: 40px; margin-left: 5px"
 							v-if="approveReasonForm.signPicUrl"
 							:src="approveReasonForm.signPicUrl"
 							:preview-src-list="[approveReasonForm.signPicUrl]"
 						/>
-					</el-form-item>
-					<el-form-item v-if="runningTask.signEnable" label="" prop="signPicUrl">
-						<el-button @click="personalElecSign()">使用电子签</el-button>
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="success" @click="handleAudit(true, approveFormRef)">
