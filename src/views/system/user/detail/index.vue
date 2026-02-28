@@ -95,7 +95,7 @@
 				</el-col>
 			</el-row>
 		</el-form>
-		<upload @changeFile="changeFile" :businessId="formData.id" businessType="PERSONAL_SIGN"></upload>
+		<upload @changeFile="changeFile" fileTypeName=".jpeg,.jpg" :businessId="formData.id" businessType="PERSONAL_SIGN"></upload>
 	</div>
 </template>
 
