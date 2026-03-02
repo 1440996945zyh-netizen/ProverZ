@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-26 13:49:45
+ * @LastEditTime: 2026-02-27 14:10:09
  * @LastEditors: zhangsd
  * @Description: 业务流程示例
  * @FilePath: \view\src\views\example\applicationExample\index.vue
@@ -353,8 +353,9 @@ const cellClickEvent = ({ row }) => {
 /** 查询列表 */
 const getList = e => {
 	queryParams.value = e || queryParams.value
-	let params = {
+		let params = {
 		...queryParams.value,
+		...e,
 	}
 
 	// 处理日期范围
