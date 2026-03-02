@@ -41,7 +41,7 @@
 								border-radius: 25px;
 								display: flex;
 								align-items: center;
-								padding:  6px;
+								padding: 6px;
 								gap: 2px;
 							"
 						>
@@ -154,6 +154,7 @@ import { BpmModelType, BpmModelFormType, BPM_PROCESS_INSTANCE_STATUS, TaskStatus
 import { setConfAndFields2 } from '@/utils/bpm/formCreate'
 // import { registerComponent } from '@/utils/routerHelper'
 import * as ProcessInstanceApi from '@/api/system/bpm/processInstance'
+import publicApi from '@/api/public/index.js'
 import { useRoute } from 'vue-router'
 import UserApi from '@/api/system/user'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
@@ -262,7 +263,7 @@ const getApprovalDetail = async () => {
 					detailForm,
 					processDefinition.value.formConf,
 					processDefinition.value.formFields,
-					processInstance.value.formVariables,
+					processInstance.value.formVariables
 				)
 			}
 			nextTick().then(() => {
@@ -288,6 +289,27 @@ const getApprovalDetail = async () => {
 			}
 		}
 
+		// 收集所有异步请求的 Promise
+		const promiseList = []
+		data.activityNodes.forEach(item => {
+			item.tasks?.forEach(item1 => {
+				if (item1.signPicUrl != null) {
+					// 把每个异步请求加入 Promise 列表
+					const promise = publicApi
+						.down(item1.signPicUrl, 'blob')
+						.then(res => {
+							item1.signPicUrl = URL.createObjectURL(res.data)
+						})
+						.catch(err => {
+							console.error('获取签名图片失败：', err)
+						})
+					promiseList.push(promise)
+				}
+			})
+		})
+
+		// 3. 等待所有异步请求完成，再赋值给响应式变量
+		await Promise.all(promiseList)
 		// 获取审批节点，显示 Timeline 的数据
 		activityNodes.value = data.activityNodes
 

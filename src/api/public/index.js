@@ -82,6 +82,19 @@ const api = {
 		})
 	},
 	/**
+	 * 获取文件url
+	 * @param {String} id 文件id
+	 */
+	getfileurl(id) {
+		return axios({
+			url: `${import.meta.env.VITE_APP_BASE_API}/api/internal/file/getfileurl?fileId=${id}`,
+			method: 'get',
+			params: {
+				token: getToken(),
+			},
+		})
+	},
+	/**
 	 * 通过id获取文件信息
 	 * @param {Object} params {businessId:'',businessType:''}
 	 */

@@ -95,6 +95,7 @@
 				</el-col>
 			</el-row>
 		</el-form>
+		<upload @changeFile="changeFile" fileTypeName=".jpeg,.jpg" :businessId="formData.id" businessType="PERSONAL_SIGN"></upload>
 	</div>
 </template>
 
@@ -104,6 +105,7 @@ import { reactive } from 'vue'
 import publicApi from '@/api/public/index'
 import Select from '@/components/Select'
 import RemoteSelect from '@/components/RemoteSelect'
+import upload from '@/components/upload/index'
 const ruleForm = ref()
 const deptOptions = ref([])
 const roleOptions = ref([])
@@ -114,12 +116,17 @@ const formData = reactive({
 	userName: '',
 	idCard: '',
 	deptId: '',
+	roleIds: [],
 	status: '1',
 	isSuperadmin: '0',
 	remark: '',
 	isLabor: '0',
 	sex: '',
 })
+const fileIds = ref([])
+const changeFile = ids => {
+	fileIds.value = ids
+}
 // 表单验证规则
 const rules = reactive({
 	remark: proxy.getRules({
@@ -239,6 +246,7 @@ defineExpose({
 	validate,
 	resetForm,
 	formData,
+	fileIds,
 })
 </script>
 
