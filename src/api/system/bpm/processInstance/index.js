@@ -128,3 +128,11 @@ export const getProcessInstancePrintData = async id => {
 		method: 'get',
 	})
 }
+
+// 获取个人电子签名
+export const getPersonalSign = () => {
+	return request({
+		url: processInstanceApi + 'getPersonalSign',
+		method: 'get',
+	})
+}

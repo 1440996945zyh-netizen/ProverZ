@@ -79,6 +79,7 @@ const save = async () => {
 	if (await drawerRef.value.validate()) {
 		// console.log('保存', drawerRef.value.formData)
 		const params = JSON.parse(JSON.stringify(drawerRef.value.formData)) // 取到子组件的formData
+		params.fileIds = drawerRef.value.fileIds
 		proxy.$modal.confirm('确定保存？').then(() => {
 			console.log('用户点击保存', params)
 			if (params.id) {
@@ -309,6 +310,7 @@ function edit(row) {
 		api.getById(editRow.id).then(res => {
 			console.log('编辑')
 			proxy.setFormData(drawerRef.value.formData, res.data)
+			drawerRef.value.formData.roleIds = res.data.roleIds
 			console.log('编辑回显数据', drawerRef.value.formData)
 		})
 	})

@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 17:19:11
- * @LastEditTime: 2026-02-11 09:40:59
+ * @LastEditTime: 2026-03-02 09:14:34
  * @LastEditors: zhangsd
  * @Description: 流程实例操作按钮
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\ProcessInstanceOperationButton.vue
@@ -62,7 +62,24 @@
 						/>
 					</el-card>
 					<el-form-item :label="`${nodeTypeName}意见`" prop="reason">
-						<el-input v-model="approveReasonForm.reason" :placeholder="`请输入${nodeTypeName}意见`" type="textarea" :rows="4" />
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="approveReasonForm.reason"
+								:placeholder="`请输入${nodeTypeName}意见，点击输入框可选择常用语`"
+								type="textarea"
+								:rows="4"
+								@click.stop
+								@focus="handleInputFocus('APPROVE', $event)"
+								ref="inputRefs.APPROVE"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.APPROVE"
+								:position="phrasesPosition.APPROVE"
+								expression-type="APPROVE"
+								@select="content => handlePhraseSelect('APPROVE', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="approveReasonForm.reason" :placeholder="`请输入${nodeTypeName}意见`" type="textarea" :rows="4" /> -->
 					</el-form-item>
 					<el-form-item label="下一个节点的审批人" prop="nextAssignees" v-if="nextAssigneesActivityNode.length > 0">
 						<div style="margin-left: 10px; margin-top: -15px; margin-bottom: -35px">
@@ -77,6 +94,9 @@
 					</el-form-item>
 					<el-form-item v-if="runningTask.signEnable" label="签名" prop="signPicUrl" ref="approveSignFormRef">
 						<el-button @click="signRef.open()">点击签名</el-button>
+						<el-button @click="personalElecSign()">使用电子签</el-button>
+					</el-form-item>
+					<el-form-item v-if="runningTask.signEnable" label="" prop="signPicUrl">
 						<el-image
 							style="width: 90px; height: 40px; margin-left: 5px"
 							v-if="approveReasonForm.signPicUrl"
@@ -122,7 +142,25 @@
 					label-width="100px"
 				>
 					<el-form-item label="审批意见" prop="reason">
-						<el-input v-model="rejectReasonForm.reason" placeholder="请输入审批意见" type="textarea" :rows="4" />
+						<!-- <el-input v-model="rejectReasonForm.reason" placeholder="请输入审批意见" type="textarea" :rows="4" />
+						  -->
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="rejectReasonForm.reason"
+								placeholder="请输入审批意见，点击输入框可选择常用语"
+								type="textarea"
+								:rows="4"
+								@click.stop
+								@focus="handleInputFocus('REJECT', $event)"
+								ref="inputRefs.REJECT"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.REJECT"
+								:position="phrasesPosition.REJECT"
+								expression-type="REJECT"
+								@select="content => handlePhraseSelect('REJECT', content)"
+							/>
+						</div>
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="danger" @click="handleAudit(false, rejectFormRef)">
@@ -172,7 +210,25 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="抄送意见" prop="copyReason">
-						<el-input v-model="copyForm.copyReason" clearable placeholder="请输入抄送意见" type="textarea" :rows="3" />
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="copyForm.copyReason"
+								clearable
+								placeholder="请输入抄送意见，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('COPY', $event)"
+								ref="inputRefs.COPY"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.COPY"
+								:position="phrasesPosition.COPY"
+								expression-type="COPY"
+								@select="content => handlePhraseSelect('COPY', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="copyForm.copyReason" clearable placeholder="请输入抄送意见" type="textarea" :rows="3" /> -->
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleCopy">
@@ -222,7 +278,26 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
-						<el-input v-model="transferForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" />
+						<!-- <el-input v-model="transferForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" />
+						  -->
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="transferForm.reason"
+								clearable
+								placeholder="请输入审批意见，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('TRANSFER', $event)"
+								ref="inputRefs.TRANSFER"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.TRANSFER"
+								:position="phrasesPosition.TRANSFER"
+								expression-type="TRANSFER"
+								@select="content => handlePhraseSelect('TRANSFER', content)"
+							/>
+						</div>
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleTransfer()">
@@ -272,7 +347,25 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
-						<el-input v-model="delegateForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" />
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="delegateForm.reason"
+								clearable
+								placeholder="请输入审批意见，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('DELEGATE', $event)"
+								ref="inputRefs.DELEGATE"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.DELEGATE"
+								:position="phrasesPosition.DELEGATE"
+								expression-type="DELEGATE"
+								@select="content => handlePhraseSelect('DELEGATE', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="delegateForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" /> -->
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleDelegate()">
@@ -322,7 +415,25 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
-						<el-input v-model="addSignForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" />
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="addSignForm.reason"
+								clearable
+								placeholder="请输入审批意见，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('ADD_SIGN', $event)"
+								ref="inputRefs.ADD_SIGN"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.ADD_SIGN"
+								:position="phrasesPosition.ADD_SIGN"
+								expression-type="ADD_SIGN"
+								@select="content => handlePhraseSelect('ADD_SIGN', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="addSignForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" /> -->
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handlerAddSign('before')">
@@ -379,7 +490,25 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="审批意见" prop="reason">
-						<el-input v-model="deleteSignForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" />
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="deleteSignForm.reason"
+								clearable
+								placeholder="请输入审批意见，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('COMMON', $event)"
+								ref="inputRefs.DELETE_SIGN"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.DELETE_SIGN"
+								:position="phrasesPosition.DELETE_SIGN"
+								expression-type="COMMON"
+								@select="content => handlePhraseSelect('DELETE_SIGN', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="deleteSignForm.reason" clearable placeholder="请输入审批意见" type="textarea" :rows="3" /> -->
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handlerDeleteSign()">减签</el-button>
@@ -432,7 +561,25 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="退回理由" prop="returnReason">
-						<el-input v-model="returnForm.returnReason" clearable placeholder="请输入退回理由" type="textarea" :rows="3" />
+						<div style="position: relative; width: 100%">
+							<el-input
+								v-model="returnForm.returnReason"
+								clearable
+								placeholder="请输入退回理由，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('RETURN', $event)"
+								ref="inputRefs.RETURN"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.RETURN"
+								:position="phrasesPosition.RETURN"
+								expression-type="RETURN"
+								@select="content => handlePhraseSelect('RETURN', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="returnForm.returnReason" clearable placeholder="请输入退回理由" type="textarea" :rows="3" /> -->
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleReturn()">
@@ -477,7 +624,25 @@
 				>
 					<el-form-item label="办结理由" prop="cancelReason">
 						<span style="color: #878c93; font-size: 12px">&nbsp; 办结后，该审批流程将自动结束</span>
-						<el-input v-model="cancelForm.cancelReason" clearable placeholder="请输入办结理由" type="textarea" :rows="3" />
+						<div style="position: relative; width: 100%; margin-top: 8px">
+							<el-input
+								v-model="cancelForm.cancelReason"
+								clearable
+								placeholder="请输入办结理由，点击输入框可选择常用语"
+								type="textarea"
+								:rows="3"
+								@click.stop
+								@focus="handleInputFocus('CANCEL', $event)"
+								ref="inputRefs.CANCEL"
+							/>
+							<CommonApprovalPhrases
+								v-model:visible="phrasesVisible.CANCEL"
+								:position="phrasesPosition.CANCEL"
+								expression-type="CANCEL"
+								@select="content => handlePhraseSelect('CANCEL', content)"
+							/>
+						</div>
+						<!-- <el-input v-model="cancelForm.cancelReason" clearable placeholder="请输入办结理由" type="textarea" :rows="3" /> -->
 					</el-form-item>
 					<el-form-item>
 						<el-button :disabled="formLoading" type="primary" @click="handleCancel()">确认</el-button>
@@ -524,6 +689,7 @@ import {
 import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/bpm/constantEnumeration'
 import SignDialog from './SignDialog.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
+import CommonApprovalPhrases from './CommonApprovalPhrases.vue'
 import { isEmpty } from '@/utils/common/form-validation'
 import useUserStore from '@/store/modules/user'
 import { useMessage } from '@/plugins/useMessage'
@@ -605,7 +771,26 @@ const approveReasonRule = computed(() => {
 		nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }],
 	}
 })
+//使用电子签
+const personalElecSign = async() =>{
+	const res0 = await ProcessInstanceApi.getPersonalSign()
+	if(res0.data){
 
+		// 1. 请求文件流
+		const res = await publicApi.down(res0.data,'blob')
+		// 2. 将 Blob 流转换为可访问的 URL
+		// 先释放旧的 Blob URL，避免内存泄漏
+		if (signPicBlobUrl.value) {
+		URL.revokeObjectURL(signPicBlobUrl.value)
+		}
+		// 生成新的 Blob URL
+		signPicBlobUrl.value = URL.createObjectURL(res.data)
+
+		approveReasonForm.fileId = res0.data
+		approveReasonForm.signPicUrl = signPicBlobUrl.value
+		approveSignFormRef.value.validate('change')
+	}
+}
 // 拒绝表单
 const rejectFormRef = ref(null)
 const rejectReasonForm = reactive({
@@ -824,7 +1009,9 @@ const handleAudit = async (pass, formRef) => {
 			}
 			// 签名
 			if (runningTask.value.signEnable) {
-				data.signPicUrl = approveReasonForm.signPicUrl
+				//用文件id替换之前的url，根据查出的id去下载文件图片
+				data.signPicUrl = approveReasonForm.fileId
+				// data.signPicUrl = approveReasonForm.signPicUrl
 			}
 			// 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
 			// TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
@@ -1121,11 +1308,28 @@ const getUpdatedProcessInstanceVariables = () => {
 	})
 	return variables
 }
+// 定义一个变量存储图片的 Blob URL（在 Vue 组件的 data/setup 中声明）
+const signPicBlobUrl = ref('')
 
 /** 处理签名完成 */
-const handleSignFinish = url => {
-	approveReasonForm.signPicUrl = url
-	approveSignFormRef.value.validate('change')
+const handleSignFinish = async (file) => {
+  try {
+    // 1. 请求文件流
+    const res = await publicApi.down(file.id,'blob')
+    // 2. 将 Blob 流转换为可访问的 URL
+    // 先释放旧的 Blob URL，避免内存泄漏
+    if (signPicBlobUrl.value) {
+      URL.revokeObjectURL(signPicBlobUrl.value)
+    }
+    // 生成新的 Blob URL
+    signPicBlobUrl.value = URL.createObjectURL(res.data)
+
+    approveReasonForm.fileId = file.id
+    approveReasonForm.signPicUrl = signPicBlobUrl.value
+    approveSignFormRef.value.validate('change')
+  } catch (error) {
+    console.error('获取图片流失败：', error)
+  }
 }
 const userOptions = ref([]) // 用户列表选项
 // 加载用户选项
@@ -1142,11 +1346,197 @@ const loadUserOptions = async () => {
 		userOptions.value = []
 	}
 }
+const PHRASE_TYPES = ['APPROVE', 'REJECT', 'COPY', 'TRANSFER', 'DELEGATE', 'ADD_SIGN', 'RETURN', 'DELETE_SIGN', 'CANCEL']
+
+const phrasesVisible = ref(
+  PHRASE_TYPES.reduce((acc, type) => ({ ...acc, [type]: false }), {})
+)
+
+const phrasesPosition = ref(
+  PHRASE_TYPES.reduce((acc, type) => ({ ...acc, [type]: { top: 0, left: 0 } }), {})
+)
+
+//   输入框 refs 统一管理
+const inputRefs = reactive(
+  PHRASE_TYPES.reduce((acc, type) => ({ ...acc, [type]: null }), {})
+)
+
+let isFocusProcessing = false  // 防止 focus 和 click 冲突
+let lastFocusTime = 0  // 记录上次 focus 时间
+/**
+ * 记录当前激活的输入框，用于点击外部关闭判断
+ */
+const activeInputRef = ref(null)
+
+/**
+ * 处理输入框聚焦，显示常用语面板
+ * @param type 常用语类型
+ * @param event 事件对象
+ */
+const handleInputFocus = (type, event) => {
+//   标记正在处理 focus，防止 handleGlobalClick 立即关闭
+  isFocusProcessing = true
+  lastFocusTime = Date.now()
+  
+  // 1. 记录激活输入框
+  activeInputRef.value = event.target
+  
+  // 2. 获取输入框视口坐标
+  const rect = event.target.getBoundingClientRect()
+  const panelWidth = 380
+  const panelGap = 8
+  const screenWidth = window.innerWidth
+  let finalLeft = rect.right + panelGap
+  let finalTop = rect.top - 150
+  
+  // 智能定位：右侧不足时尝试左侧
+  if (finalLeft + panelWidth > screenWidth - 16) {
+    const leftPosition = rect.left - panelWidth - panelGap
+    finalLeft = leftPosition > 16 ? leftPosition : Math.max(16, screenWidth - panelWidth - 48)
+  }
+  
+  //   使用 nextTick 确保 DOM 更新
+  nextTick(() => {
+    phrasesPosition.value[type] = {
+      top: Math.round(finalTop),
+      left: Math.round(finalLeft),
+    }
+    
+    // 互斥显示
+    Object.keys(phrasesVisible.value).forEach(key => {
+      if (key !== type) phrasesVisible.value[key] = false
+    })
+    
+    //   再次 nextTick 确保位置更新后再显示
+    nextTick(() => {
+      phrasesVisible.value[type] = true
+      
+      //   延迟重置标志位，给 handleGlobalClick 缓冲时间
+      setTimeout(() => {
+        isFocusProcessing = false
+      }, 200)
+    })
+  })
+  
+  //  开发环境调试
+  if (import.meta.env.DEV) {
+    console.log('🎯 面板显示:', {
+      type,
+      position: phrasesPosition.value[type],
+      visible: phrasesVisible.value[type],
+      rect: { top: rect.top, right: rect.right }
+    })
+  }
+}
+
+/**
+ * 处理常用语选择
+ * @param type 常用语类型
+ * @param content 选中的常用语
+ */
+const handlePhraseSelect = (type, content) => {
+	const phraseContent = typeof content === 'string' ? content : String(content || '')
+  
+  // 根据类型填充到对应表单
+  const formMap = {
+    APPROVE: () => { approveReasonForm.reason = (approveReasonForm.reason || '') + (approveReasonForm.reason ? '\n' : '') + phraseContent },
+    REJECT: () => { rejectReasonForm.reason = (rejectReasonForm.reason || '') + (rejectReasonForm.reason ? '\n' : '') + phraseContent },
+    COPY: () => { copyForm.copyReason = (copyForm.copyReason || '') + (copyForm.copyReason ? '\n' : '') + phraseContent },
+    TRANSFER: () => { transferForm.reason = (transferForm.reason || '') + (transferForm.reason ? '\n' : '') + phraseContent },
+    DELEGATE: () => { delegateForm.reason = (delegateForm.reason || '') + (delegateForm.reason ? '\n' : '') + phraseContent },
+    ADD_SIGN: () => { addSignForm.reason = (addSignForm.reason || '') + (addSignForm.reason ? '\n' : '') + phraseContent },
+    DELETE_SIGN: () => { deleteSignForm.reason = (deleteSignForm.reason || '') + (deleteSignForm.reason ? '\n' : '') + phraseContent },
+    RETURN: () => { returnForm.returnReason = (returnForm.returnReason || '') + (returnForm.returnReason ? '\n' : '') + phraseContent },
+    CANCEL: () => { cancelForm.cancelReason = (cancelForm.cancelReason || '') + (cancelForm.cancelReason ? '\n' : '') + phraseContent },
+  }
+  
+  formMap[type]?.()
+  
+  // 关闭面板 + 清理状态
+  phrasesVisible.value[type] = false
+  activeInputRef.value = null
+  
+  // 聚焦回输入框
+  nextTick(() => {
+    const textarea = inputRefs[type]?.$el?.querySelector('textarea')
+    if (textarea) {
+      textarea.focus()
+      setTimeout(() => {
+        try {
+          const len = textarea.value?.length || 0
+          textarea.setSelectionRange(len, len)
+        } catch (e) {
+          console.warn('设置光标失败:', e)
+        }
+      }, 30)
+    }
+  })
+}
+
+
+/**
+ * 处理常用语面板关闭
+ * @param type 常用语类型
+ */
+const handlePhrasesClose = type => {
+  phrasesVisible.value[type] = false
+  activeInputRef.value = null
+}
+/**
+ * 
+ * @param e 
+ */
+const handleGlobalClick = (e) => {
+  // 1. 点击在气泡容器内，不关闭
+   if (isFocusProcessing) {
+    console.log('⏸️ 正在处理 focus，跳过关闭')
+    return
+  }
+    if (Date.now() - lastFocusTime < 200) {
+    console.log('⏸️ focus 时间过短，跳过关闭')
+    return
+  }
+    if (e.target.closest('.common-phrases-container')) {
+    console.log('✅ 点击在气泡容器内')
+    return
+  }
+    if (activeInputRef.value === e.target) {
+    console.log('✅ 点击在激活输入框上')
+    return
+  }
+ // 3. 点击在任何输入框内，不关闭
+  const isClickingInput = PHRASE_TYPES.some(type => {
+    const el = inputRefs[type]?.$el
+    const contains = el && (el === e.target || el.contains(e.target))
+    if (contains) console.log(`✅ 点击在 ${type} 输入框内`)
+    return contains
+  })
+  if (isClickingInput) return
+  
+  // 4. 关闭所有面板
+  console.log('❌ 点击外部，关闭所有面板')
+  PHRASE_TYPES.forEach(type => {
+    if (phrasesVisible.value[type]) {
+      phrasesVisible.value[type] = false
+    }
+  })
+  activeInputRef.value = null
+}
 // 组件挂载时加载用户列表
 onMounted(async () => {
-	await loadUserOptions()
+	 await loadUserOptions()
+  //   延迟添加点击监听，避免初始化时的冲突
+  setTimeout(() => {
+    document.addEventListener('click', handleGlobalClick)
+  }, 100)
 })
-
+/**
+ * 组件卸载时移除事件监听
+ */
+onUnmounted(()=>{
+	  document.removeEventListener('click', handleGlobalClick)
+  activeInputRef.value = null
+})
 // 暴露方法给父组件
 defineExpose({ loadTodoTask })
 </script>

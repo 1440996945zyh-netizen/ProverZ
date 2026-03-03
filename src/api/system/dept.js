@@ -51,3 +51,12 @@ export function getListByLevel(deptLevel) {
     params: { deptLevel }
   })
 }
+
+ // 根据父部门ID查询部门列表
+export function getListByParentId(parentId) {
+  return request({
+    url: path + '/getListByParentId',
+    method: 'get',
+    params: { parentId }
+  })
+}
