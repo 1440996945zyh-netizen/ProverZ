@@ -79,7 +79,7 @@ const serviceCompaniesArray = ref([])
 const data = reactive({
 	formData: {
 		id: null,
-		type: '1',
+		unitType: '1',
 		unitName: '',
 		externalCompanyCode: '',
 		principal: '',
@@ -96,13 +96,15 @@ const { formData } = toRefs(data)
 watch(
 	serviceCompaniesArray,
 	newVal => {
+		console.log('watch triggered, newVal:', newVal)
 		if (newVal && Array.isArray(newVal)) {
 			formData.value.serviceCompanies = newVal.join(',')
 		} else {
 			formData.value.serviceCompanies = ''
 		}
+		console.log('formData.serviceCompanies:', formData.value.serviceCompanies)
 	},
-	{ deep: true },
+	{ deep: true, immediate: true },
 )
 
 const serviceUnitOptions = ref([
@@ -114,7 +116,7 @@ const serviceUnitOptions = ref([
 ])
 
 const rules = reactive({
-	type: proxy.getRules({ required: true }),
+	unitType: proxy.getRules({ required: true }),
 	unitName: proxy.getRules({ required: true }),
 	externalCompanyCode: proxy.getRules({ required: true }),
 	phone: proxy.getRules({ required: true }),
@@ -135,7 +137,7 @@ const validate = async () => {
 
 const resetForm = () => {
 	formData.value.id = null
-	formData.value.type = '1'
+	formData.value.unitType = '1'
 	formData.value.unitName = ''
 	formData.value.externalCompanyCode = ''
 	formData.value.principal = ''
@@ -153,6 +155,7 @@ defineExpose({
 	validate,
 	resetForm,
 	formData,
+	serviceCompaniesArray,
 })
 </script>
 

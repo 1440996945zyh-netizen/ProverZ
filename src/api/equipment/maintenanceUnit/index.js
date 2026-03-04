@@ -34,8 +34,9 @@ const api = {
 
 	delete(id) {
 		return request({
-			url: '/api/internal/EMEquipRepairContract/delete/' + id,
+			url: '/api/internal/EMEquipRepairContract/delete',
 			method: 'delete',
+			params: { id },
 		})
 	},
 }

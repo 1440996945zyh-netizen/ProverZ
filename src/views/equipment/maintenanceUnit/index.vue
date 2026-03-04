@@ -11,7 +11,7 @@
 			:loading="loading"
 			:total="total"
 		/>
-		<Dialog v-model:visible="open" :title="title" width="40%">
+		<Dialog v-model:visible="dialogVisible" :title="title" width="40%">
 			<detail ref="detailRef" />
 			<template #footer>
 				<span class="dialog-footer">
@@ -37,7 +37,7 @@ const baseTable = ref()
 const total = ref('')
 const tableData = ref([])
 const loading = ref(false)
-const open = ref(false)
+const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
 
@@ -52,6 +52,7 @@ const data = reactive({
 const { queryParams } = toRefs(data)
 
 const getServiceUnitNames = serviceUnits => {
+	console.log(serviceUnits, 'serviceUnits')
 	if (!serviceUnits) return ''
 	let units = []
 	if (typeof serviceUnits === 'string') {
@@ -69,13 +70,15 @@ const getServiceUnitNames = serviceUnits => {
 		4: '设备安装',
 		5: '设备改造',
 	}
-	return units.map(item => serviceUnitMap[item] || item).join('、')
+	console.log(units, 'units')
+	console.log(units.map(item => serviceUnitMap[item] || item).join(','), 'units.map(item => serviceUnitMap[item] || item).join(', ')')
+	return units.map(item => serviceUnitMap[item] || item).join(',')
 }
 
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{
-		prop: 'unitType',
+		prop: 'type',
 		label: '类型',
 		align: 'center',
 		width: 80,
@@ -84,12 +87,12 @@ const tableColumns = ref([
 				h(
 					ElTag,
 					{
-						type: row.unitType === '1' ? 'primary' : 'success',
+						type: row.type === '1' ? 'primary' : 'success',
 						size: 'default',
 					},
 					{
 						default: () => {
-							return row.unitType === '1' ? '企业' : '个人'
+							return row.type === '1' ? '企业' : '个人'
 						},
 					},
 				),
@@ -97,32 +100,44 @@ const tableColumns = ref([
 		},
 	},
 	{ label: '企业名称/个人姓名', prop: 'unitName', align: 'left', width: 180, showOverFlow: true },
-	{ label: '社会信用代码/身份证号', prop: 'externalCompanyCode', align: 'left', width: 180, showOverFlow: true },
+	{ label: '社会信用代码/身份证号', prop: 'externalCompanyCode', align: 'left', width: 200, showOverFlow: true },
 	{ label: '负责人', prop: 'principal', align: 'center', width: 100 },
 	{ label: '联系方式', prop: 'phone', align: 'center', width: 120 },
+	// {
+	// 	prop: 'contractDateStart',
+	// 	label: '委外合同开始期限',
+	// 	align: 'center',
+	// 	width: 180,
+	// },
+	// {
+	// 	prop: 'contractDateEnd',
+	// 	label: '委外合同结束期限',
+	// 	align: 'center',
+	// 	width: 180,
+	// },
 	{
-		prop: 'contractDateStart',
+		prop: 'contractDateRange',
 		label: '委外合同期限',
 		align: 'center',
 		width: 200,
 		render: row => {
 			if (row.contractDateStart && row.contractDateEnd) {
-				return `${row.contractDateStart} 至 ${row.contractDateEnd}`
+				return h('span', `${row.contractDateStart} 至 ${row.contractDateEnd}`)
 			}
-			return ''
+			return h('span', '')
 		},
 	},
 	{
 		prop: 'serviceCompanies',
 		label: '服务单位',
 		align: 'left',
-		width: 200,
+		minWidth: 200,
 		showOverFlow: true,
 		render: row => {
-			return getServiceUnitNames(row.serviceCompanies)
+			return h('span', getServiceUnitNames(row.serviceCompanies))
 		},
 	},
-	{ label: '维修范围', prop: 'repairType', align: 'left', width: 200, showOverFlow: true },
+	{ label: '维修范围', prop: 'repairType', align: 'left', minWidth: 200, showOverFlow: true },
 	{ label: '备注', prop: 'remark', align: 'left', width: 200, showOverFlow: true },
 	{
 		prop: 'operate',
@@ -207,7 +222,7 @@ const getList = e => {
 }
 
 const cancel = () => {
-	open.value = false
+	dialogVisible.value = false
 	reset()
 }
 
@@ -218,16 +233,15 @@ const reset = () => {
 const handleAdd = () => {
 	reset()
 	title.value = '新增维修单位'
-	open.value = true
+	dialogVisible.value = true
 	nextTick(() => {
 		detailRef.value.resetForm()
 	})
 }
 
 const handleUpdate = row => {
-	reset()
 	title.value = '编辑维修单位'
-	open.value = true
+	dialogVisible.value = true
 	nextTick(() => {
 		detailRef.value.resetForm()
 		api.getById(row.id).then(response => {
@@ -241,14 +255,12 @@ const handleUpdate = row => {
 			detailRef.value.formData.contractDateStart = resData.contractDateStart
 			detailRef.value.formData.contractDateEnd = resData.contractDateEnd
 			if (resData.serviceCompanies) {
-				detailRef.value.formData.serviceCompanies = resData.serviceCompanies
 				if (typeof resData.serviceCompanies === 'string') {
 					detailRef.value.serviceCompaniesArray = resData.serviceCompanies.split(',').filter(item => item && item.trim() !== '')
 				} else {
 					detailRef.value.serviceCompaniesArray = resData.serviceCompanies || []
 				}
 			} else {
-				detailRef.value.formData.serviceCompanies = ''
 				detailRef.value.serviceCompaniesArray = []
 			}
 			detailRef.value.formData.repairType = resData.repairType
@@ -263,13 +275,13 @@ const submitForm = async () => {
 		if (params.id) {
 			api.update(params).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
-				open.value = false
+				dialogVisible.value = false
 				getList()
 			})
 		} else {
 			api.add(params).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
-				open.value = false
+				dialogVisible.value = false
 				getList()
 			})
 		}
