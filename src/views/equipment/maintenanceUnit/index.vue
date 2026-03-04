@@ -51,29 +51,29 @@ const data = reactive({
 })
 const { queryParams } = toRefs(data)
 
-const getServiceUnitNames = serviceUnits => {
-	console.log(serviceUnits, 'serviceUnits')
-	if (!serviceUnits) return ''
-	let units = []
-	if (typeof serviceUnits === 'string') {
-		units = serviceUnits.split(',').filter(item => item && item.trim() !== '')
-	} else if (Array.isArray(serviceUnits)) {
-		units = serviceUnits
-	} else {
-		return ''
-	}
-	if (units.length === 0) return ''
-	const serviceUnitMap = {
-		1: '设备维修',
-		2: '设备保养',
-		3: '设备检测',
-		4: '设备安装',
-		5: '设备改造',
-	}
-	console.log(units, 'units')
-	console.log(units.map(item => serviceUnitMap[item] || item).join(','), 'units.map(item => serviceUnitMap[item] || item).join(', ')')
-	return units.map(item => serviceUnitMap[item] || item).join(',')
-}
+// const getServiceUnitNames = serviceUnits => {
+// 	console.log(serviceUnits, 'serviceUnits')
+// 	if (!serviceUnits) return ''
+// 	let units = []
+// 	if (typeof serviceUnits === 'string') {
+// 		units = serviceUnits.split(',').filter(item => item && item.trim() !== '')
+// 	} else if (Array.isArray(serviceUnits)) {
+// 		units = serviceUnits
+// 	} else {
+// 		return ''
+// 	}
+// 	if (units.length === 0) return ''
+// 	const serviceUnitMap = {
+// 		1: '设备维修',
+// 		2: '设备保养',
+// 		3: '设备检测',
+// 		4: '设备安装',
+// 		5: '设备改造',
+// 	}
+// 	console.log(units, 'units')
+// 	console.log(units.map(item => serviceUnitMap[item] || item).join(','), 'units.map(item => serviceUnitMap[item] || item).join(', ')')
+// 	return units.map(item => serviceUnitMap[item] || item).join(',')
+// }
 
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
@@ -127,16 +127,16 @@ const tableColumns = ref([
 			return h('span', '')
 		},
 	},
-	{
-		prop: 'serviceCompanies',
-		label: '服务单位',
-		align: 'left',
-		minWidth: 200,
-		showOverFlow: true,
-		render: row => {
-			return h('span', getServiceUnitNames(row.serviceCompanies))
-		},
-	},
+	// {
+	// 	prop: 'serviceCompanies',
+	// 	label: '服务单位',
+	// 	align: 'left',
+	// 	minWidth: 200,
+	// 	showOverFlow: true,
+	// 	render: row => {
+	// 		return h('span', getServiceUnitNames(row.serviceCompanies))
+	// 	},
+	// },
 	{ label: '维修范围', prop: 'repairType', align: 'left', minWidth: 200, showOverFlow: true },
 	{ label: '备注', prop: 'remark', align: 'left', width: 200, showOverFlow: true },
 	{
@@ -202,7 +202,7 @@ const buttonList = reactive([
 		label: '新增',
 		type: 'primary',
 		icon: 'Plus',
-		click: () => handleAdd(),
+		click: () => handleAdd,
 		permission: 'equipment:emequiprepaircontract:add',
 	},
 ])

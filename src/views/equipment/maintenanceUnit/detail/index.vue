@@ -79,7 +79,7 @@ const serviceCompaniesArray = ref([])
 const data = reactive({
 	formData: {
 		id: null,
-		unitType: '1',
+		type: '1',
 		unitName: '',
 		externalCompanyCode: '',
 		principal: '',
@@ -93,19 +93,13 @@ const data = reactive({
 })
 const { formData } = toRefs(data)
 
-watch(
-	serviceCompaniesArray,
-	newVal => {
-		console.log('watch triggered, newVal:', newVal)
-		if (newVal && Array.isArray(newVal)) {
-			formData.value.serviceCompanies = newVal.join(',')
-		} else {
-			formData.value.serviceCompanies = ''
-		}
-		console.log('formData.serviceCompanies:', formData.value.serviceCompanies)
-	},
-	{ deep: true, immediate: true },
-)
+watch(serviceCompaniesArray, newVal => {
+	if (newVal && Array.isArray(newVal)) {
+		formData.value.serviceCompanies = newVal.join(',')
+	} else {
+		formData.value.serviceCompanies = ''
+	}
+})
 
 const serviceUnitOptions = ref([
 	{ label: '设备维修', value: '1' },
@@ -116,10 +110,14 @@ const serviceUnitOptions = ref([
 ])
 
 const rules = reactive({
-	unitType: proxy.getRules({ required: true }),
+	type: proxy.getRules({ required: true }),
 	unitName: proxy.getRules({ required: true }),
+	principal: proxy.getRules({ required: true }),
+	contractDateStart: proxy.getRules({ required: true }),
+	contractDateEnd: proxy.getRules({ required: true }),
 	externalCompanyCode: proxy.getRules({ required: true }),
-	phone: proxy.getRules({ required: true }),
+	serviceCompanies: proxy.getRules({ required: true }),
+	phone: proxy.getRules({ required: true, handset: {} }),
 })
 
 const validate = async () => {
@@ -137,7 +135,7 @@ const validate = async () => {
 
 const resetForm = () => {
 	formData.value.id = null
-	formData.value.unitType = '1'
+	formData.value.type = '1'
 	formData.value.unitName = ''
 	formData.value.externalCompanyCode = ''
 	formData.value.principal = ''
