@@ -114,6 +114,22 @@
 						{{ row[item.prop] }}
 					</span>
 				</template>
+				<template #default="{ row }" v-else-if="item.editType === 'upload'">
+					<div v-if="row[item.prop] && row[item.prop].length > 0" style="color: #409eff; font-size: 12px">
+						<el-tooltip effect="dark" placement="top">
+							<template #content>
+								<div v-for="(fileId, index) in row[item.prop]" :key="index" style="margin-bottom: 4px">
+									文件{{ index + 1 }}: {{ fileId }}
+								</div>
+							</template>
+							<span style="cursor: pointer">
+								<el-icon><DocumentIcon /></el-icon>
+								已上传{{ row[item.prop].length }}个文件
+							</span>
+						</el-tooltip>
+					</div>
+					<span v-else style="color: #909399; font-size: 12px">暂无文件</span>
+				</template>
 				<template #edit="{ row }">
 					<span v-if="row.isDisable && item.disable">
 						{{ item.editType === 'select' || item.editType === 'remoteSelect' ? row[item.modelLabel] : row[item.prop] }}
@@ -255,6 +271,27 @@
 						:active-value="item.activeValue"
 						:inactive-value="item.inactiveValue"
 					/>
+					<Upload
+						v-else-if="item.editType === 'upload'"
+						:businessType="item.editRender.props.businessType"
+						:businessId="row.businessId"
+						:fileTypeName="item.editRender.props.fileTypeName || '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx'"
+						:maxSize="item.editRender.props.maxSize || 10"
+						:showUploadBtn="
+							!(!item.notDisabledInRow && row[disabledKey]) &&
+							!isGet &&
+							!item.disabled &&
+							!(item.disabledFunc ? item.disabledFunc(row) : false)
+						"
+						:showRemoveBtn="
+							!(!item.notDisabledInRow && row[disabledKey]) &&
+							!isGet &&
+							!item.disabled &&
+							!(item.disabledFunc ? item.disabledFunc(row) : false)
+						"
+						@changeFile="ids => handleUploadChange(ids, row, item.prop)"
+						style="width: 100%"
+					/>
 				</template>
 			</vxe-column>
 		</vxe-table>
@@ -269,8 +306,14 @@ import Sortable from 'sortablejs'
 import Select from '../Select/index.vue'
 import RemoteSelect from '../RemoteSelect/index.vue'
 import nvDatePicker from '../nvDatePicker/index.vue'
+import Upload from '../upload/index.vue'
+import { ElMessage } from 'element-plus'
+import { Document } from '@element-plus/icons-vue'
+import publicApi from '@/api/public/index.js'
 
 const { proxy } = getCurrentInstance()
+
+const DocumentIcon = Document
 
 const props = defineProps({
 	size: {
@@ -649,7 +692,7 @@ const tableData = computed({
 		emit('update:tableData', val)
 	},
 })
-const emit = defineEmits(['checkbox-change', 'rowSelect-change', 'change', 'input', 'chang_date'])
+const emit = defineEmits(['checkbox-change', 'rowSelect-change', 'change', 'input', 'chang_date', 'uploadChange'])
 // table高度
 const tableParams = tableParamsStore()
 const normalTableHeight = computed(() => tableParams.normalTableHeight)
@@ -680,14 +723,14 @@ watch(
 			height.value = pageTableHeight.value < props.minHeight ? props.minHeight : pageTableHeight.value
 		}
 	},
-	{ immediate: true, deep: true }
+	{ immediate: true, deep: true },
 )
 watch(
 	props.tableColumns,
 	newV => {
 		changeColumns.list = props.tableColumns.filter(item => item.isHidden !== true)
 	},
-	{ deep: true }
+	{ deep: true },
 )
 
 // 列宽度
@@ -908,22 +951,26 @@ const handleBlur = (e, row, label) => {
 	emit('blur', e, row, label) // e是输入值，row是当前行数据
 }
 const changDate = (row, title) => {
-	// console.log('时间选择器触发', row)
-	emit('chang_date', row, title) //row是当前行数据
+	emit('chang_date', row, title)
 }
-// 默认添加事件
+const handleUploadChange = (ids, row, prop) => {
+	row[prop] = ids
+	emit('uploadChange', ids, row, prop)
+}
 const headerCellClickEvent = props.hasAdd
 	? ({ column }) => {
-			if (column.field === props.tableColumns[props.tableColumns.length - 1].prop) {
-				// 最后一列添加事件
+			const lastColumn = props.tableColumns[props.tableColumns.length - 1]
+			if (column.field === lastColumn.prop || (lastColumn.label === '操作' && column.title === '操作')) {
 				let newObj = {}
 				props.tableColumns.forEach(item => {
-					newObj[item.prop] = ''
+					if (item.prop) {
+						newObj[item.prop] = ''
+					}
 				})
+				newObj.row_id = Date.now()
 				tableData.value.push(newObj)
 			}
-			// console.log(`表头单元格点击`, column, props.tableColumns[props.tableColumns.length - 1])
-	  }
+		}
 	: props.headerCellClickEvent
 // 是否需要添加
 const headerCellClassName = props.hasAdd
@@ -932,7 +979,7 @@ const headerCellClassName = props.hasAdd
 				// 最后一列添加事件
 				return 'add'
 			}
-	  }
+		}
 	: props.headerCellClassName
 // 默认表尾事件
 const footerMethod = props.footerConfig
@@ -954,11 +1001,11 @@ const footerMethod = props.footerConfig
 							return functionsObj[item](data, column.field)
 						}
 						return null
-					})
+					}),
 				)
 			})
 			return render
-	  }
+		}
 	: props.footerMethod
 // 计算平均值
 const averageNum = (list, field) => {
