@@ -39,5 +39,17 @@ const api = {
 			params: { id },
 		})
 	},
+	/**
+	 * 根据部门级别查询部门列表
+	 * @param {Number} deptLevel 部门级别
+	 * @returns {Promise}
+	 */
+	getDeptListByLevel(deptLevel) {
+		return request({
+			url: '/api/internal/sysDept/getListByLevel',
+			method: 'get',
+			params: { deptLevel },
+		})
+	},
 }
 export default api
