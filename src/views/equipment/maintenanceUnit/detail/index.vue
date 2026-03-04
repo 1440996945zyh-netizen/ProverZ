@@ -1,25 +1,25 @@
 <template>
 	<div class="formData">
 		<el-form :model="formData" ref="ruleForm" label-width="150px" :rules="rules">
-			<el-form-item label="企业/个人类型" prop="unitType">
-				<el-radio-group v-model="formData.unitType">
+			<el-form-item label="企业/个人类型" prop="type">
+				<el-radio-group v-model="formData.type">
 					<el-radio label="1">企业</el-radio>
 					<el-radio label="2">个人</el-radio>
 				</el-radio-group>
 			</el-form-item>
 
-			<el-form-item :label="formData.unitType === '1' ? '企业名称' : '个人姓名'" prop="unitName">
+			<el-form-item :label="formData.type === '1' ? '企业名称' : '个人姓名'" prop="unitName">
 				<el-input
 					v-model="formData.unitName"
-					:placeholder="formData.unitType === '1' ? '请输入企业名称' : '请输入个人姓名'"
+					:placeholder="formData.type === '1' ? '请输入企业名称' : '请输入个人姓名'"
 					maxlength="200"
 				/>
 			</el-form-item>
 
-			<el-form-item :label="formData.unitType === '1' ? '企业社会信用代码' : '个人身份证号'" prop="externalCompanyCode">
+			<el-form-item :label="formData.type === '1' ? '企业社会信用代码' : '个人身份证号'" prop="externalCompanyCode">
 				<el-input
 					v-model="formData.externalCompanyCode"
-					:placeholder="formData.unitType === '1' ? '请输入企业社会信用代码' : '请输入个人身份证号'"
+					:placeholder="formData.type === '1' ? '请输入企业社会信用代码' : '请输入个人身份证号'"
 					maxlength="50"
 				/>
 			</el-form-item>
@@ -79,7 +79,7 @@ const serviceCompaniesArray = ref([])
 const data = reactive({
 	formData: {
 		id: null,
-		unitType: '1',
+		type: '1',
 		unitName: '',
 		externalCompanyCode: '',
 		principal: '',
@@ -114,7 +114,7 @@ const serviceUnitOptions = ref([
 ])
 
 const rules = reactive({
-	unitType: proxy.getRules({ required: true }),
+	type: proxy.getRules({ required: true }),
 	unitName: proxy.getRules({ required: true }),
 	externalCompanyCode: proxy.getRules({ required: true }),
 	phone: proxy.getRules({ required: true }),
@@ -135,7 +135,7 @@ const validate = async () => {
 
 const resetForm = () => {
 	formData.value.id = null
-	formData.value.unitType = '1'
+	formData.value.type = '1'
 	formData.value.unitName = ''
 	formData.value.externalCompanyCode = ''
 	formData.value.principal = ''
