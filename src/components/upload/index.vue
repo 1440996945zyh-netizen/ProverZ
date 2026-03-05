@@ -1,9 +1,9 @@
 <template>
 	<div class="upload_demo">
 		<el-upload class="upload_demo" v-if="showUploadBtn" :http-request="upload" :show-file-list="false" :accept="fileTypeName">
-			<el-button icon="Upload" plain>点击上传</el-button>
+			<el-button icon="Upload" plain size="small">点击上传</el-button>
 		</el-upload>
-		<div class="el-upload__tip" v-if="showUploadBtn">支持扩展名：{{ fileTypeName }}</div>
+		<div class="el-upload__tip" v-if="showUploadBtn" style="font-size: 11px; margin-top: 4px">支持扩展名：{{ fileTypeName }}</div>
 
 		<ul class="el-upload-list el-upload-list--text">
 			<li v-for="item in fileList" :key="item.id" class="el-upload-list__item is-success">
@@ -62,7 +62,7 @@
 	</div>
 </template>
 <script setup name="Upload">
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import publicApi from '@/api/public/index.js'
 import * as XLSX from 'xlsx'
@@ -89,6 +89,10 @@ const props = defineProps({
 		type: Boolean,
 		default: true,
 	},
+	maxSize: {
+		type: Number,
+		default: 10,
+	},
 })
 const fileList = ref([]) // 上传文件列表
 
@@ -104,7 +108,7 @@ watch(
 				fileList.value = res.data
 			})
 		}
-	}
+	},
 )
 watch(
 	fileList,
@@ -115,7 +119,7 @@ watch(
 		})
 		emit('changeFile', ids)
 	},
-	{ deep: true, immediate: true }
+	{ deep: true, immediate: true },
 )
 const fileInfo = ref([]) // 下载文件
 const fileType = ref('') // 预览文件类型
@@ -128,23 +132,40 @@ const previewVisible = ref(false)
  * 上传附件
  */
 const upload = file => {
-	console.log(file, 'file111')
+	const fileSizeMB = file.file.size / 1024 / 1024
+	if (fileSizeMB > props.maxSize) {
+		ElMessage.error(`文件大小不能超过${props.maxSize}MB`)
+		return
+	}
+	const fileName = file.file.name.toLowerCase()
+	const fileExt = fileName.substring(fileName.lastIndexOf('.'))
+	const allowedExts = props.fileTypeName
+		.toLowerCase()
+		.split(',')
+		.map(ext => ext.trim())
+	if (!allowedExts.includes(fileExt)) {
+		ElMessage.error(`只支持上传${props.fileTypeName}格式的文件`)
+		return
+	}
 	const formData = new FormData()
 	formData.append('fileArray', file.file)
 	formData.append('businessType', props.businessType)
-	console.log(formData, 'formData')
-	publicApi.getFileInfo(formData).then(response => {
-		if (response.code === '0000') {
-			ElMessage({
-				message: '上传附件成功',
-				type: 'success',
-			})
-			response.data.files.forEach(item => {
-				item.name = item.fileName
-				fileList.value.push(item)
-			})
-		}
-	})
+	publicApi
+		.getFileInfo(formData)
+		.then(response => {
+			if (response.code === '0000') {
+				ElMessage.success('上传附件成功')
+				response.data.files.forEach(item => {
+					item.name = item.fileName
+					fileList.value.push(item)
+				})
+			} else {
+				ElMessage.error(response.msg || '上传失败')
+			}
+		})
+		.catch(error => {
+			ElMessage.error('上传失败')
+		})
 }
 /**
  * 下载附件
@@ -279,9 +300,10 @@ onMounted(() => {
 </script>
 <style lang="scss" scoped>
 .el-upload__tip {
-	font-size: 12px;
+	font-size: 11px;
 	color: var(--el-text-color-regular);
-	margin-top: 7px;
+	margin-top: 4px;
+	line-height: 1.4;
 }
 .upload_demo {
 	width: 100% !important;
@@ -290,7 +312,10 @@ onMounted(() => {
 	height: 100%;
 }
 .el-upload-list__item.is-success {
-	height: 30px;
+	height: 24px;
+	line-height: 24px;
+	font-size: 12px;
+	padding: 0 8px;
 }
 .el-upload-list__item:hover .el-icon--view {
 	display: inline-block;
@@ -302,7 +327,7 @@ onMounted(() => {
 .el-upload-list__item .el-icon--view {
 	display: none;
 	position: absolute;
-	top: 8px;
+	top: 5px;
 	right: 30px;
 	cursor: pointer;
 	opacity: 0.75;
@@ -311,7 +336,11 @@ onMounted(() => {
 .el-upload-list__item .el-icon--close {
 	display: none;
 	position: absolute;
-	top: 15px;
+	top: 5px;
+	right: 15px;
+	cursor: pointer;
+	opacity: 0.75;
+	color: #606266;
 }
 .el-upload-list__item-status-label {
 	position: absolute;
@@ -319,6 +348,14 @@ onMounted(() => {
 	top: 3px;
 	line-height: inherit;
 	display: none;
+}
+.el-upload-list__item-name {
+	display: inline-block;
+	max-width: 180px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
 }
 .sketch_content {
 	overflow: auto;

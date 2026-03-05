@@ -71,6 +71,8 @@
 
 <script setup name="maintenanceUnitDetail">
 import { ref, reactive, watch, getCurrentInstance, toRefs } from 'vue'
+import { convertToMysql } from '../../../../utils/common/data'
+import api from '@/api/equipment/maintenanceUnit/index'
 
 const { proxy } = getCurrentInstance()
 
@@ -79,7 +81,7 @@ const serviceCompaniesArray = ref([])
 const data = reactive({
 	formData: {
 		id: null,
-		unitType: '1',
+		type: '1',
 		unitName: '',
 		externalCompanyCode: '',
 		principal: '',
@@ -93,33 +95,36 @@ const data = reactive({
 })
 const { formData } = toRefs(data)
 
-watch(
-	serviceCompaniesArray,
-	newVal => {
-		console.log('watch triggered, newVal:', newVal)
-		if (newVal && Array.isArray(newVal)) {
-			formData.value.serviceCompanies = newVal.join(',')
-		} else {
-			formData.value.serviceCompanies = ''
-		}
-		console.log('formData.serviceCompanies:', formData.value.serviceCompanies)
-	},
-	{ deep: true, immediate: true },
-)
+watch(serviceCompaniesArray, newVal => {
+	if (newVal && Array.isArray(newVal)) {
+		formData.value.serviceCompanies = newVal.join(',')
+	} else {
+		formData.value.serviceCompanies = ''
+	}
+})
 
-const serviceUnitOptions = ref([
-	{ label: '设备维修', value: '1' },
-	{ label: '设备保养', value: '2' },
-	{ label: '设备检测', value: '3' },
-	{ label: '设备安装', value: '4' },
-	{ label: '设备改造', value: '5' },
-])
+const serviceUnitOptions = ref([])
+const getServiceUnit = () => {
+	const params = { deptLevel: '1' }
+	api.getDeptListByLevel(params.deptLevel).then(res => {
+		if (res.code == '0000') {
+			serviceUnitOptions.value = res.data.map(item => ({
+				label: item.deptName,
+				value: item.deptCode,
+			}))
+		}
+	})
+}
 
 const rules = reactive({
-	unitType: proxy.getRules({ required: true }),
+	type: proxy.getRules({ required: true }),
 	unitName: proxy.getRules({ required: true }),
+	principal: proxy.getRules({ required: true }),
+	contractDateStart: proxy.getRules({ required: true }),
+	contractDateEnd: proxy.getRules({ required: true }),
 	externalCompanyCode: proxy.getRules({ required: true }),
-	phone: proxy.getRules({ required: true }),
+	serviceCompanies: proxy.getRules({ required: true }),
+	phone: proxy.getRules({ required: true, handset: {} }),
 })
 
 const validate = async () => {
@@ -137,7 +142,7 @@ const validate = async () => {
 
 const resetForm = () => {
 	formData.value.id = null
-	formData.value.unitType = '1'
+	formData.value.type = '1'
 	formData.value.unitName = ''
 	formData.value.externalCompanyCode = ''
 	formData.value.principal = ''
@@ -150,6 +155,9 @@ const resetForm = () => {
 	formData.value.remark = ''
 	ruleForm.value?.clearValidate()
 }
+onMounted(() => {
+	getServiceUnit()
+})
 
 defineExpose({
 	validate,
