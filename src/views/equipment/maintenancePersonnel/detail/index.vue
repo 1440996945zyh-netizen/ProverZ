@@ -193,7 +193,7 @@ const addCertificate = () => {
 		row_id: Date.now(),
 		certificateName: `证照${nextIndex}`,
 		certificateType: '',
-		expiryDate: '',
+		certificateTime: '',
 		list: [],
 		rowDisabled: false,
 	}
