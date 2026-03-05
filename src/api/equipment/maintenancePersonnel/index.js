@@ -39,11 +39,11 @@ const api = {
 			data: data,
 		})
 	},
-
 	delete(id) {
 		return request({
-			url: '/api/internal/emequiprepairuser/delete/' + id,
+			url: '/api/internal/emequiprepairuser/delete',
 			method: 'delete',
+			params: { id },
 		})
 	},
 }
