@@ -2,7 +2,7 @@
 	<div class="header flex justify-between">
 		<div class="header-left flex items-center">
 			<img class="logo" src="@/assets/logo/logo3.png" alt="" />
-			<span style="margin-left: -0.3125rem">扬奕基础框架</span>
+			<span style="margin-left: -0.3125rem">设备管理系统</span>
 		</div>
 	</div>
 	<div class="login">

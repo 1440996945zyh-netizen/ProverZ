@@ -1,5 +1,5 @@
 <template>
-	<div class="equipment-scrap-operation">
+	<div class="equipment-allocate-operation">
 		<el-form
 			ref="baseFormRef"
 			:model="baseForm"
@@ -9,15 +9,15 @@
 		>
 			<el-row>
 				<el-col :span="12">
-					<el-form-item label="使用单位" prop="useCompanyId">
-					<el-select
-						v-model="baseForm.useCompanyId"
-						placeholder="请选择使用单位"
-						clearable
-						filterable
-						:disabled="readonly"
-						@change="handleCompanyChange"
-					>
+					<el-form-item label="调入单位" prop="toCompanyId">
+						<el-select
+							v-model="baseForm.toCompanyId"
+							placeholder="请选择调入单位"
+							clearable
+							filterable
+							:disabled="readonly"
+							@change="handleCompanyChange"
+						>
 							<el-option
 								v-for="item in companyList"
 								:key="item.value"
@@ -28,15 +28,15 @@
 					</el-form-item>
 				</el-col>
 				<el-col :span="12">
-					<el-form-item label="使用部门" prop="useOrgId">
-					<el-select
-						v-model="baseForm.useOrgId"
-						placeholder="请选择使用部门"
-						clearable
-						filterable
-						:disabled="readonly || !baseForm.useCompanyId"
-						@change="handleDeptChange"
-					>
+					<el-form-item label="调入部门" prop="toOrgId">
+						<el-select
+							v-model="baseForm.toOrgId"
+							placeholder="请选择调入部门"
+							clearable
+							filterable
+							:disabled="readonly || !baseForm.toCompanyId"
+							@change="handleDeptChange"
+						>
 							<el-option
 								v-for="item in deptList"
 								:key="item.value"
@@ -49,12 +49,12 @@
 			</el-row>
 			<el-row>
 				<el-col :span="24">
-					<el-form-item label="申请原因" prop="applyReason">
+					<el-form-item label="调拨原因" prop="applyReason">
 						<el-input
 							v-model="baseForm.applyReason"
 							type="textarea"
 							:rows="4"
-							placeholder="请输入申请原因"
+							placeholder="请输入调拨原因"
 							maxlength="225"
 							show-word-limit
 						/>
@@ -66,11 +66,11 @@
 		<el-card header="设备列表" style="margin-top: 20px">
 			<!-- 非只读模式下显示添加按钮 -->
 			<div v-if="!readonly" class="equip-actions" style="margin-bottom: 15px">
-				<el-button type="primary" icon="Plus" @click="handleShowEquipSelect" :disabled="!baseForm.useOrgId">
+				<el-button type="primary" icon="Plus" @click="handleShowEquipSelect" :disabled="!baseForm.toOrgId">
 					添加设备
 				</el-button>
-				<span v-if="!baseForm.useOrgId" style="color: var(--el-color-warning); margin-left: 10px">
-					请先选择使用部门
+				<span v-if="!baseForm.toOrgId" style="color: var(--el-color-warning); margin-left: 10px">
+					请先选择调入部门
 				</span>
 			</div>
 
@@ -111,7 +111,23 @@
 			@close="handleDialogClose"
 		>
 			<!-- 搜索条件 -->
-			<el-form :model="equipSearchForm" :inline="true" label-width="70px">
+			<el-form :model="equipSearchForm" :inline="true" label-width="85px">
+				<el-form-item label="所属单位" prop="useCompanyId">
+					<el-select
+						v-model="equipSearchForm.useCompanyId"
+						placeholder="请选择所属单位"
+						clearable
+						filterable
+						style="width: 200px"
+					>
+						<el-option
+							v-for="item in companyList"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value"
+						/>
+					</el-select>
+				</el-form-item>
 				<el-form-item label="设备名称" prop="equipName">
 					<el-input v-model="equipSearchForm.equipName" placeholder="请输入设备名称" clearable @keyup.enter="loadEquipList" />
 				</el-form-item>
@@ -183,10 +199,10 @@
 	</div>
 </template>
 
-<script setup name="equipmentScrapOperation">
+<script setup name="equipmentAllocateOperation">
 import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
 import { formatDate } from '@/utils'
-import api from '@/api/equipment/equipmentChangeApply/equipmentScrap'
+import api from '@/api/equipment/equipmentChangeApply/equipmentAllocate'
 import { getListByLevel, getListByParentId } from '@/api/system/dept'
 
 const props = defineProps({
@@ -208,12 +224,12 @@ const baseFormRef = ref()
 
 const baseForm = reactive({
 	id: null,
-	scrapCode: '',
+	allocateCode: '',
 	title: '',
-	useCompanyId: null,
-	useCompanyName: '',
-	useOrgId: null,
-	useOrgName: '',
+	toCompanyId: null,
+	toCompanyName: '',
+	toOrgId: null,
+	toOrgName: '',
 	applyUserId: null,
 	applyUserName: '',
 	applyReason: '',
@@ -221,15 +237,15 @@ const baseForm = reactive({
 })
 
 const baseFormRules = {
-	useCompanyId: [
-		{ required: true, message: '请选择使用单位', trigger: 'change' }
+	toCompanyId: [
+		{ required: true, message: '请选择调入单位', trigger: 'change' }
 	],
-	useOrgId: [
-		{ required: true, message: '请选择使用部门', trigger: 'change' }
+	toOrgId: [
+		{ required: true, message: '请选择调入部门', trigger: 'change' }
 	],
 	applyReason: [
-		{ required: true, message: '请输入申请原因', trigger: 'blur' },
-		{ min: 1, max: 225, message: '申请原因长度在1-225字符之间', trigger: 'blur' }
+		{ required: true, message: '请输入调拨原因', trigger: 'blur' },
+		{ min: 1, max: 225, message: '调拨原因长度在1-225字符之间', trigger: 'blur' }
 	]
 }
 
@@ -237,12 +253,13 @@ const selectedEquipList = ref([])
 
 const dialogVisible = ref(false)
 const equipSearchForm = reactive({
+	useCompanyId: '',
 	equipName: ''
 })
 
 const equipList = ref([])
 const equipLoading = ref(false)
-const preSelectedEquipList = ref([]) // 预选中设备列表（弹窗中已添加但未确认）
+const preSelectedEquipList = ref([])
 
 const equipPagination = reactive({
 	current: 1,
@@ -284,18 +301,18 @@ const loadDeptList = (companyId) => {
 // 处理公司选择变化
 const handleCompanyChange = (value) => {
 	// 清空部门和已选设备
-	baseForm.useOrgId = null
-	baseForm.useOrgName = ''
+	baseForm.toOrgId = null
+	baseForm.toOrgName = ''
 	selectedEquipList.value = []
 
 	if (value) {
 		const selectedCompany = companyList.value.find(item => item.value === value)
 		if (selectedCompany) {
-			baseForm.useCompanyName = selectedCompany.label
+			baseForm.toCompanyName = selectedCompany.label
 		}
 		loadDeptList(value)
 	} else {
-		baseForm.useCompanyName = ''
+		baseForm.toCompanyName = ''
 		deptList.value = []
 	}
 }
@@ -305,12 +322,12 @@ const handleDeptChange = (value) => {
 	if (value) {
 		const selectedDept = deptList.value.find(item => item.value === value)
 		if (selectedDept) {
-			baseForm.useOrgName = selectedDept.label
+			baseForm.toOrgName = selectedDept.label
 		}
 		// 清空已选设备，因为部门变了
 		selectedEquipList.value = []
 	} else {
-		baseForm.useOrgName = ''
+		baseForm.toOrgName = ''
 	}
 }
 
@@ -334,22 +351,24 @@ const getCurrentUserInfo = () => {
 }
 
 const handleShowEquipSelect = () => {
-	if (!baseForm.useOrgId) {
-		proxy.$message.warning('请先选择使用部门')
-		return
-	}
 	dialogVisible.value = true
 	// 初始化预选中列表为当前已选设备
 	preSelectedEquipList.value = [...selectedEquipList.value]
-	loadEquipList()
+	// 清空之前的数据
+	equipList.value = []
+	equipPagination.total = 0
 }
 
 const loadEquipList = () => {
+	if (!equipSearchForm.useCompanyId) {
+		proxy.$message.warning('请先选择所属单位')
+		return
+	}
 	equipLoading.value = true
 	const params = {
 		startPage: equipPagination.current,
 		pageSize: equipPagination.size,
-		useOrgId: baseForm.useOrgId
+		useCompanyId: equipSearchForm.useCompanyId
 	}
 	if (equipSearchForm.equipName) {
 		params.equipName = equipSearchForm.equipName
@@ -405,12 +424,14 @@ const handleConfirmEquip = () => {
 	dialogVisible.value = false
 	preSelectedEquipList.value = []
 	equipSearchForm.equipName = ''
+	equipSearchForm.useCompanyId = ''
 }
 
 const handleDialogClose = () => {
 	dialogVisible.value = false
 	preSelectedEquipList.value = []
 	equipSearchForm.equipName = ''
+	equipSearchForm.useCompanyId = ''
 }
 
 const handleDeleteEquip = (index) => {
@@ -433,14 +454,15 @@ const validate = async () => {
 
 const resetForm = () => {
 	baseFormRef.value?.resetFields()
+	const today = new Date().toISOString().slice(0, 10).replace(/-/g, '')
 	Object.assign(baseForm, {
 		id: null,
-		scrapCode: '',
-		title: '',
-		useCompanyId: null,
-		useCompanyName: '',
-		useOrgId: null,
-		useOrgName: '',
+		allocateCode: '',
+		title: '调拨计划-' + today,
+		toCompanyId: null,
+		toCompanyName: '',
+		toOrgId: null,
+		toOrgName: '',
 		applyUserId: null,
 		applyUserName: '',
 		applyReason: '',
@@ -450,6 +472,7 @@ const resetForm = () => {
 	preSelectedEquipList.value = []
 	deptList.value = []
 	equipSearchForm.equipName = ''
+	equipSearchForm.useCompanyId = ''
 	equipPagination.current = 1
 }
 
@@ -460,8 +483,8 @@ const loadDetailData = (data) => {
 	loadCompanyList()
 
 	// 如果有公司ID，先加载部门列表
-	if (data.useCompanyId) {
-		loadDeptList(data.useCompanyId)
+	if (data.toCompanyId) {
+		loadDeptList(data.toCompanyId)
 	}
 
 	// 设置表单数据
@@ -477,11 +500,6 @@ const loadDetailData = (data) => {
 onMounted(() => {
 	loadCompanyList()
 	getCurrentUserInfo()
-	if (props.mode === 'add') {
-		const today = formatDate(new Date(), 'yyyyMMdd')
-		baseForm.title = '报废计划-' + today
-		console.log('baseForm.title:', baseForm.title)
-	}
 })
 
 defineExpose({
@@ -494,7 +512,7 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.equipment-scrap-operation {
+.equipment-allocate-operation {
 	padding: 20px;
 }
 
