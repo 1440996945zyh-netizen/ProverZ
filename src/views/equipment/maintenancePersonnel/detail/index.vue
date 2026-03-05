@@ -135,7 +135,7 @@ const certificateColumns = reactive([
 	},
 	{
 		label: '到期时间',
-		prop: 'expiryDate',
+		prop: 'certificateTime',
 		editType: 'date',
 		editRender: {},
 		minWidth: 150,
@@ -143,7 +143,7 @@ const certificateColumns = reactive([
 	},
 	{
 		label: '附件',
-		prop: 'fileIds',
+		prop: 'list',
 		editType: 'upload',
 		editRender: {
 			component: Upload,
@@ -184,7 +184,7 @@ const certificateColumns = reactive([
 const certificateEditRules = reactive({
 	certificateName: proxy.getRules({ required: true }),
 	certificateType: proxy.getRules({ required: true }),
-	expiryDate: proxy.getRules({ required: true }),
+	certificateTime: proxy.getRules({ required: true }),
 })
 
 const addCertificate = () => {
@@ -194,7 +194,7 @@ const addCertificate = () => {
 		certificateName: `证照${nextIndex}`,
 		certificateType: '',
 		expiryDate: '',
-		fileIds: [],
+		list: [],
 		rowDisabled: false,
 	}
 	list.value.push(newRow)

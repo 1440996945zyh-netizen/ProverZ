@@ -70,15 +70,15 @@ const getCertificateTypeNames = list => {
 
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
-	{ label: '单位', prop: 'repairContarctName', align: 'left', width: 180, showOverFlow: true },
-	{ label: '姓名', prop: 'repairName', align: 'center', width: 100 },
-	{ label: '身份证号', prop: 'idCard', align: 'center', width: 180 },
-	{ label: '手机号', prop: 'phone', align: 'center', width: 120 },
+	{ label: '单位', prop: 'repairContarctName', align: 'left', minWidth: 180, showOverFlow: true },
+	{ label: '姓名', prop: 'repairName', align: 'center', minWidth: 100 },
+	{ label: '身份证号', prop: 'idCard', align: 'center', minWidth: 180 },
+	{ label: '手机号', prop: 'phone', align: 'center', minWidth: 120 },
 	{
 		prop: 'list',
 		label: '资格证书',
 		align: 'left',
-		width: 300,
+		minWidth: 300,
 		showOverFlow: true,
 		render: row => {
 			return getCertificateTypeNames(row.list)
@@ -101,7 +101,7 @@ const tableColumns = ref([
 						type: 'primary',
 						link: true,
 						icon: 'Edit',
-						permission: 'equipment:maintenancePersonnel:update',
+						permission: 'equipment:emequiprepairuser:update',
 					},
 					{
 						default: () => '编辑',
@@ -116,7 +116,7 @@ const tableColumns = ref([
 						type: 'danger',
 						link: true,
 						icon: 'Delete',
-						permission: 'equipment:maintenancePersonnel:delete',
+						permission: 'equipment:emequiprepairuser:delete',
 					},
 					{
 						default: () => '删除',
