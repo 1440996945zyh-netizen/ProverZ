@@ -1,11 +1,11 @@
 <template>
-	<div class="equipment-scrap-index">
+	<div class="equipment-allocate-index">
 		<BaseTable
 			ref="baseTableRef"
 			:showSearchHeader="false"
 			:tableData="tableData"
 			:tableColumns="tableColumns"
-			name="equipmentScrapTable"
+			name="equipmentAllocateTable"
 			:loading="loading"
 			:total="pagination.total"
 			:pageSize="pagination.size"
@@ -20,7 +20,7 @@
 			<template #footer>
 				<div style="flex: auto; display: flex; justify-content: flex-end; gap: 10px;">
 					<el-button @click="handleClose">关闭</el-button>
-					<el-button v-if="!isReadonly && detailMode === 'add'" type="primary" @click="handleAddSubmit" v-hasPermi="['equipment:equipScrap:add']">
+					<el-button v-if="!isReadonly && detailMode === 'add'" type="primary" @click="handleAddSubmit" v-hasPermi="['equipment:equipAllocate:add']">
 						提交
 					</el-button>
 				</div>
@@ -29,12 +29,12 @@
 	</div>
 </template>
 
-<script setup name="equipmentScrapIndex">
+<script setup name="equipmentAllocateIndex">
 import { ref, reactive, getCurrentInstance, nextTick, watch, onMounted, h } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
 import operation from './operation.vue'
-import api from '@/api/equipment/equipmentChangeApply/equipmentScrap'
+import api from '@/api/equipment/equipmentChangeApply/equipmentAllocate'
 
 const props = defineProps({
 	searchParams: {
@@ -65,10 +65,10 @@ const pagination = reactive({
 })
 
 const currentSearchParams = ref({
-	scrapCode: '',
+	allocateCode: '',
 	title: '',
-	useCompanyId: null,
-	useOrgId: null,
+	toCompanyId: null,
+	toOrgId: null,
 	status: null
 })
 
@@ -82,7 +82,7 @@ const tableColumns = ref([
 		fixed: 'left'
 	},
 	{
-		prop: 'scrapCode',
+		prop: 'allocateCode',
 		label: '申请单号',
 		align: 'center',
 		width: 130,
@@ -95,14 +95,14 @@ const tableColumns = ref([
 		minWidth: 160
 	},
 	{
-		prop: 'useCompanyName',
-		label: '所属单位',
+		prop: 'toCompanyName',
+		label: '调入单位',
 		align: 'left',
 		minWidth: 150
 	},
 	{
-		prop: 'useOrgName',
-		label: '所属部门',
+		prop: 'toOrgName',
+		label: '调入部门',
 		align: 'left',
 		minWidth: 150
 	},
@@ -128,8 +128,8 @@ const tableColumns = ref([
 		}
 	},
 	{
-		prop: 'createTime',
-		label: '创建时间',
+		prop: 'allocateTime',
+		label: '调拨时间',
 		align: 'center',
 		width: 160
 	},
@@ -148,7 +148,7 @@ const tableColumns = ref([
 						type: 'primary',
 						link: true,
 						icon: 'View',
-						permission: 'equipment:equipScrap:query'
+						permission: 'equipment:equipAllocate:query'
 					},
 					{ default: () => '查看' }
 				)
@@ -190,14 +190,14 @@ const handleSearchClick = (params) => {
 const openDrawer = (mode = 'add', data = null) => {
 	detailMode.value = mode
 	if (mode === 'view' && data) {
-		title.value = '查看设备报废申请'
+		title.value = '查看设备调拨申请'
 		isReadonly.value = true
 		nextTick(() => {
 			operationRef.value.resetForm()
 			loadDetail(data.id)
 		})
 	} else if (mode === 'add') {
-		title.value = '新增设备报废申请'
+		title.value = '新增设备调拨申请'
 		isReadonly.value = false
 		nextTick(() => {
 			operationRef.value.resetForm()
@@ -226,12 +226,17 @@ const loadDetail = id => {
 	})
 }
 
+const generateUniqueId = () => {
+	const timestamp = Date.now().toString(36)
+	const random = Math.random().toString(36).substr(2, 5)
+	return timestamp + random
+}
+
 const handleAddSubmit = async () => {
 	if (await operationRef.value.validate()) {
-		proxy.$modal.confirm('确定提交该报废申请？').then(() => {
+		proxy.$modal.confirm('确定提交该调拨申请？').then(() => {
 			const submitData = {
 				...operationRef.value.baseForm,
-				title: '报废计划-' + new Date().toISOString().slice(0, 10).replace(/-/g, ''),
 				equipList: operationRef.value.selectedEquipList.map((equip) => ({
 					equipId: equip.id || equip.equipId,
 					lastChangeInfo: JSON.stringify(equip)
@@ -283,7 +288,7 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.equipment-scrap-index {
+.equipment-allocate-index {
 	padding: 0;
 	height: 100%;
 	display: flex;
