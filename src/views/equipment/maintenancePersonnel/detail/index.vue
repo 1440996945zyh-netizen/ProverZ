@@ -56,6 +56,7 @@ import EditTable from '@/components/EditTable'
 import Select from '@/components/Select/index.vue'
 import Upload from '@/components/upload'
 import api from '@/api/equipment/maintenancePersonnel/index'
+import publicApi from '@/api/public/index.js'
 
 const { proxy } = getCurrentInstance()
 
@@ -88,9 +89,18 @@ const getUnitList = () => {
 		}
 	})
 }
+const certificateTypeOptions = ref([])
+const getCertificateType = () => {
+	publicApi.getLocalSelect({ type: 'DICT', dictType: 'CERTIFICATE_TYPE' }).then(res => {
+		if (res.code === '0000') {
+			certificateTypeOptions.value = res.data
+		}
+	})
+}
 
 onMounted(() => {
 	getUnitList()
+	getCertificateType()
 })
 
 const rules = reactive({
@@ -123,9 +133,7 @@ const certificateColumns = reactive([
 				placeholder: '请选择证书类型',
 			},
 		},
-		dataConfig: {
-			params: { type: 'DICT', dictType: 'CERTIFICATE_TYPE' },
-		},
+		selectData: certificateTypeOptions,
 		selectLabel: 'label',
 		selectValue: 'value',
 		minWidth: 150,
