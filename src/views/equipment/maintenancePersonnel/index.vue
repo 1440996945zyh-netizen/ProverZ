@@ -11,7 +11,7 @@
 			:loading="loading"
 			:total="total"
 		/>
-		<Dialog v-model:visible="open" :title="title" width="50%">
+		<Drawer v-model="open" :title="title" size="70%">
 			<detail ref="detailRef" />
 			<template #footer>
 				<span class="dialog-footer">
@@ -19,17 +19,18 @@
 					<el-button type="primary" @click="submitForm">确定</el-button>
 				</span>
 			</template>
-		</Dialog>
+		</Drawer>
 	</div>
 </template>
 
 <script setup name="maintenancePersonnel">
-import { ref, reactive, getCurrentInstance, toRefs, h } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, h, onMounted } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
-import Dialog from '@/components/Dialog/index.vue'
+import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenancePersonnel/index'
+import { init } from 'echarts'
 
 const { proxy } = getCurrentInstance()
 
@@ -126,13 +127,16 @@ const tableColumns = ref([
 		},
 	},
 ])
+const unitOptions = ref([])
 
 const selectData = reactive([
 	{
 		name: '单位',
-		type: 'input',
-		modelValue: 'repairContarctName',
+		type: 'select',
+		modelValue: 'repairContarctId',
+		modelLabel: 'repairContarctName',
 		span: 12,
+		selectData: unitOptions,
 	},
 	{
 		name: '姓名',
@@ -238,7 +242,21 @@ const handleDelete = row => {
 		.catch(() => {})
 }
 
-getList(queryParams.value)
+const getUnitList = () => {
+	api.queryUnitName({}).then(res => {
+		if (res.code === '0000') {
+			unitOptions.value = res.data.map(item => ({
+				label: item.unitName || item.repairContarctName || item.name,
+				value: item.id || item.unitId || item.repairContarctId,
+			}))
+		}
+	})
+}
+
+onMounted(() => {
+	getUnitList()
+	getList(queryParams.value)
+})
 </script>
 
 <style lang="scss" scoped>

@@ -156,6 +156,7 @@
 						:selectData="item.selectData"
 						:selectLabel="item.selectLabel"
 						:selectValue="item.selectValue"
+						:dataConfig="item.dataConfig"
 						:disabled="
 							(!item.notDisabledInRow && row[disabledKey]) ||
 							isGet ||

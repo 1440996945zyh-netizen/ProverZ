@@ -36,12 +36,12 @@
 						:hasAdd="true"
 						:row-style="{ height: '80px' }"
 					/>
-					<el-button type="primary" link style="margin-top: 10px" @click="addCertificate">
+					<!-- <el-button type="primary" link style="margin-top: 10px" @click="addCertificate">
 						<el-icon style="vertical-align: middle; margin-right: 4px">
 							<Plus />
 						</el-icon>
 						新增证书
-					</el-button>
+					</el-button> -->
 				</div>
 			</el-form-item>
 		</el-form>
@@ -102,7 +102,7 @@ const rules = reactive({
 
 const certificateColumns = reactive([
 	{
-		label: '证照',
+		label: '证照名称',
 		prop: 'certificateName',
 		editType: 'input',
 		editRender: {
@@ -123,12 +123,9 @@ const certificateColumns = reactive([
 				placeholder: '请选择证书类型',
 			},
 		},
-		selectData: [
-			{ label: '职业资格证书', value: '1' },
-			{ label: '技能等级证书', value: '2' },
-			{ label: '特种作业证书', value: '3' },
-			{ label: '其他', value: '4' },
-		],
+		dataConfig: {
+			params: { type: 'DICT', dictType: 'CERTIFICATE_TYPE' },
+		},
 		selectLabel: 'label',
 		selectValue: 'value',
 		minWidth: 150,
@@ -156,7 +153,7 @@ const certificateColumns = reactive([
 	},
 	{
 		prop: '',
-		label: '操作',
+		label: '添加',
 		width: 80,
 		fixed: 'right',
 		align: 'center',

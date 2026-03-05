@@ -11,7 +11,7 @@
 			:loading="loading"
 			:total="total"
 		/>
-		<Dialog v-model:visible="dialogVisible" :title="title" width="40%">
+		<Drawer v-model="dialogVisible" :title="title" size="40%">
 			<detail ref="detailRef" />
 			<template #footer>
 				<span class="dialog-footer">
@@ -19,7 +19,7 @@
 					<el-button type="primary" @click="submitForm">确定</el-button>
 				</span>
 			</template>
-		</Dialog>
+		</Drawer>
 	</div>
 </template>
 
@@ -27,7 +27,7 @@
 import { ref, reactive, computed, getCurrentInstance, toRefs, h } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
-import Dialog from '@/components/Dialog/index.vue'
+import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenanceUnit/index'
 
@@ -78,7 +78,7 @@ const { queryParams } = toRefs(data)
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{
-		prop: 'type',
+		prop: 'entityType',
 		label: '类型',
 		align: 'center',
 		width: 80,
@@ -87,12 +87,34 @@ const tableColumns = ref([
 				h(
 					ElTag,
 					{
-						type: row.type === '1' ? 'primary' : 'success',
+						type: row.entityType === '1' ? 'primary' : 'success',
 						size: 'default',
 					},
 					{
 						default: () => {
-							return row.type === '1' ? '企业' : '个人'
+							return row.entityType === '1' ? '企业' : '个人'
+						},
+					},
+				),
+			]
+		},
+	},
+	{
+		prop: 'outType',
+		label: '内外部',
+		align: 'center',
+		width: 80,
+		render: row => {
+			return [
+				h(
+					ElTag,
+					{
+						type: row.outType === '1' ? 'info' : 'warning',
+						size: 'default',
+					},
+					{
+						default: () => {
+							return row.outType === '1' ? '内部' : '外部'
 						},
 					},
 				),
@@ -103,40 +125,18 @@ const tableColumns = ref([
 	{ label: '社会信用代码/身份证号', prop: 'externalCompanyCode', align: 'left', width: 200, showOverFlow: true },
 	{ label: '负责人', prop: 'principal', align: 'center', width: 100 },
 	{ label: '联系方式', prop: 'phone', align: 'center', width: 120 },
-	// {
-	// 	prop: 'contractDateStart',
-	// 	label: '委外合同开始期限',
-	// 	align: 'center',
-	// 	width: 180,
-	// },
-	// {
-	// 	prop: 'contractDateEnd',
-	// 	label: '委外合同结束期限',
-	// 	align: 'center',
-	// 	width: 180,
-	// },
 	{
 		prop: 'contractDateRange',
 		label: '委外合同期限',
 		align: 'center',
 		width: 200,
 		render: row => {
-			if (row.contractDateStart && row.contractDateEnd) {
+			if (row.outType === '2' && row.contractDateStart && row.contractDateEnd) {
 				return h('span', `${row.contractDateStart} 至 ${row.contractDateEnd}`)
 			}
 			return h('span', '')
 		},
 	},
-	// {
-	// 	prop: 'serviceCompanies',
-	// 	label: '服务单位',
-	// 	align: 'left',
-	// 	minWidth: 200,
-	// 	showOverFlow: true,
-	// 	render: row => {
-	// 		return h('span', getServiceUnitNames(row.serviceCompanies))
-	// 	},
-	// },
 	{ label: '维修范围', prop: 'repairType', align: 'left', minWidth: 200, showOverFlow: true },
 	{ label: '备注', prop: 'remark', align: 'left', width: 200, showOverFlow: true },
 	{
@@ -247,7 +247,8 @@ const handleUpdate = row => {
 		api.getById(row.id).then(response => {
 			const resData = JSON.parse(JSON.stringify(response.data))
 			detailRef.value.formData.id = resData.id
-			detailRef.value.formData.unitType = resData.unitType || '1'
+			detailRef.value.formData.entityType = resData.entityType || '1'
+			detailRef.value.formData.outType = resData.outType || '1'
 			detailRef.value.formData.unitName = resData.unitName
 			detailRef.value.formData.externalCompanyCode = resData.externalCompanyCode
 			detailRef.value.formData.principal = resData.principal
