@@ -51,7 +51,7 @@ defineProps({
 	},
 })
 
-const title = ref('扬奕基础框架')
+const title = ref('设备管理系统')
 const settingsStore = useSettingsStore()
 const sideTheme = computed(() => settingsStore.sideTheme)
 const topNav = computed(() => settingsStore.topNav)
