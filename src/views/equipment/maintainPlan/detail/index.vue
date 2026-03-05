@@ -101,8 +101,8 @@
 					    <el-form-item label="时限（天）" prop="timeLimit">
 								<template #label>
           			  <span>
-										点检时限（天）
-          			    <el-tooltip lass="box-item" effect="dark" content="通过时限计算点检任务截止日期（多少天内完成润滑保养任务）" placement="top">
+										润滑保养时限（天）
+          			    <el-tooltip lass="box-item" effect="dark" content="通过时限计算润滑保养任务截止日期（多少天内完成润滑保养任务）" placement="top">
 											<el-icon><QuestionFilled /></el-icon>
           			    </el-tooltip>
           			  </span>
@@ -141,7 +141,7 @@
       <el-collapse-item title="润滑保养标准" name="2">
 				<template v-slot:title>
 					<div style='display: flex; justify-content: space-between; width: 95%'>
-						<div>点检标准</div>
+						<div>润滑保养标准</div>
 						<div>
 							<el-button type='primary' @click.stop='addStandard'>添加</el-button>
 						</div>
@@ -192,7 +192,7 @@ const formData = ref({
 	planType: '',
 	equipType: '',
 	setDate: [],
-	initialDate: '', 
+	initialDate: '',
   isSingle: '2',
   cycle: '',
   inspectorId: '',
@@ -261,7 +261,7 @@ const equipTypeChange = e => {
 }
 // 获取设备小类
 const getEqptType = () => {
-	if (baseTable.value) 
+	if (baseTable.value)
 		baseTable.value.clearCheckboxRow()
   publicApi.getLocalSelect({type: 'EQUIP_TYPE',categoryLevel:'3'}).then(res => {
     macSmallTypeList.value = res.data
@@ -313,9 +313,9 @@ const checkboxConfig = {
 const checkboxSelection = ref([])
 const tableData = ref([])
 const tableColumns = ref([
-	{ 
-    label: '类型', 
-    prop: 'equipType', 
+	{
+    label: '类型',
+    prop: 'equipType',
     width: 80,
     render: row => {
 			return [
@@ -331,8 +331,8 @@ const tableColumns = ref([
   },
   { label: '设备机构', prop: 'equipInstitutionName',width: 140 },
   { label: '设备部件', prop: 'equipUnitName',width: 140 },
-	{ label: '点检内容', prop: 'content', },
-	{ label: '点检标准', prop: 'standard', },
+	{ label: '润滑保养内容', prop: 'content', },
+	{ label: '润滑保养标准', prop: 'standard', },
 	{
 		prop: '',
 		label: '操作',
@@ -439,7 +439,7 @@ const addStandard = () => {
 	if (!formData.value.equipSmallCategoryId || !formData.value.equipType){
 		return proxy.$message.warning("请选择设备小类和计划周期类型")
 	}
-	
+
 	isShow.value = true
 	nextTick(() => {
 		detailRef.value.formData = formData.value
