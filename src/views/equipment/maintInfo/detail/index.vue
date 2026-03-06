@@ -16,12 +16,9 @@
 								/>
 							</el-form-item>
 						</el-col>
-						<!-- 报修类型字段已隐藏，但保留默认值 '1'（日常维修） -->
-						<el-col :span="8" style="display: none;">
+						<el-col :span="8">
 							<el-form-item label="报修类型" prop="reportTypeCode">
-								<el-select v-model="formData.reportTypeCode" placeholder="请选择报修类型" style="width: 100%" @change="handleReportTypeChange">
-									<el-option label="日常维修" :value="'1'" />
-								</el-select>
+								<el-input v-model="formData.reportTypeName" readonly style="width: 100%" />
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
@@ -100,6 +97,9 @@
 								<el-select v-model="formData.dispatchTypeCode" placeholder="请选择派工类型" style="width: 100%" @change="handleDispatchTypeChange">
 									<el-option label="委内" :value="'1'" />
 									<el-option label="委外" :value="'2'" />
+									<el-option label="定额" :value="'3'" />
+									<el-option label="非定额" :value="'4'" />
+									<el-option label="其他" :value="'5'" />
 								</el-select>
 							</el-form-item>
 						</el-col>
@@ -123,7 +123,13 @@
 									v-model:label="formData.maintLeaderName"
 									:disabled="!formData.maintOrgId"
 									placeholder="请先选择承修单位"
+									@change="handleMaintLeaderChange"
 								/>
+							</el-form-item>
+						</el-col>
+						<el-col :span="8">
+							<el-form-item label="手机号码" prop="maintLeaderMobile">
+								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" maxlength="11" />
 							</el-form-item>
 						</el-col>
 					</el-row>
@@ -147,6 +153,7 @@ import api from '@/api/equipment/maintInfo/index'
 import equipmentInfoApi from '@/api/equipment/equipmentInfo/index'
 import { getListByLevel, listDept } from '@/api/system/dept'
 import publicApi from '@/api/public/index'
+import userApi from '@/api/system/user'
 
 const props = defineProps({
 	readonly: {
@@ -206,14 +213,15 @@ const formData = reactive({
 	maintTypeName: '',
 	isStopped: 0,
 	faultDesc: '',
-	reportTypeCode: '1', // 默认值为日常维修
-	reportTypeName: '日常维修', // 默认值为日常维修
+	reportTypeCode: '', // 报修类型由外部设置
+	reportTypeName: '', // 报修类型由外部设置
 	dispatchTypeCode: '', // 派工类型：1-委内，2-委外
 	dispatchTypeName: '',
 	maintOrgId: null,
 	maintOrgName: '',
 	maintLeaderId: null,
 	maintLeaderName: '',
+	maintLeaderMobile: '',
 	dispatcherId: null,
 	dispatcherName: '',
 	dispatchTime: '',
@@ -277,7 +285,10 @@ const handleMaintTypeChange = (value) => {
 // 处理报修类型变化
 const handleReportTypeChange = (value) => {
 	const typeMap = {
-		'1': '日常维修'
+		'1': '提报',
+		'2': '派工',
+		'3': '点检',
+		'4': '润滑'
 	}
 	formData.reportTypeName = typeMap[value] || ''
 }
@@ -294,28 +305,33 @@ const getCurrentDateTime = () => {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
-// 加载部门列表（根据派工类型：委内=内部部门，委外=外部部门）
+// 加载维修单位列表（根据派工类型）
 const loadDeptList = () => {
 	if (!formData.dispatchTypeCode) {
 		deptList.value = []
 		return
 	}
 
-	// 委内(1)查询内部部门(IN_OUT_TYPE='I')，委外(2)查询外部部门(IN_OUT_TYPE='O')
-	const inOutType = formData.dispatchTypeCode === '1' ? 'I' : 'O'
+	// 校验设备是否已选择
+	if (!formData.equipId) {
+		proxy.$message.warning('请先选择设备')
+		deptList.value = []
+		return
+	}
 
-	// 查询部门列表：DEPT_LEVEL=2（部门级别），IN_OUT_TYPE=I/O（内外部），STATUS=1（在用）
-	listDept({
-		deptLevel: 2,
-		inOutType: inOutType,
-		status: '1'
-	}).then(res => {
+	// 委内(1)查询内部单位(outType=1)，委外/定额/非定额/其他(2/3/4/5)查询外部单位(outType=2)
+	const outType = formData.dispatchTypeCode === '1' ? '1' : '2'
+
+	// 使用新的接口查询维修单位
+	api.getRepairContractByEquipId(formData.equipId, outType).then(res => {
 		if (res.code == '0000') {
 			deptList.value = res.data.map(item => ({
-				label: item.deptName,
-				value: item.id,
+				label: item.unitName,
+				value: item.externalCompanyId,
 			}))
 		}
+	}).catch(() => {
+		deptList.value = []
 	})
 }
 
@@ -338,11 +354,14 @@ const loadUserList = (deptId) => {
 	})
 }
 
-// 派工类型变化时，清空承修单位和维修负责人，重新加载部门列表
+// 派工类型变化时，清空承修单位和维修负责人，重新加载维修单位列表
 const handleDispatchTypeChange = (value) => {
 	const typeMap = {
 		'1': '委内',
-		'2': '委外'
+		'2': '委外',
+		'3': '定额',
+		'4': '非定额',
+		'5': '其他'
 	}
 	formData.dispatchTypeName = typeMap[value] || ''
 
@@ -353,7 +372,7 @@ const handleDispatchTypeChange = (value) => {
 	formData.maintLeaderName = ''
 	userList.value = []
 
-	// 重新加载部门列表
+	// 重新加载维修单位列表
 	if (value) {
 		loadDeptList()
 	} else {
@@ -361,34 +380,44 @@ const handleDispatchTypeChange = (value) => {
 	}
 }
 
-// 部门变化时，清空维修负责人并重新加载用户列表
+// 部门变化时，清空维修负责人和手机号码，加载用户列表
 const handleDeptChange = () => {
 	formData.maintLeaderId = null
 	formData.maintLeaderName = ''
+	formData.maintLeaderMobile = ''
+	userList.value = []
+	// 加载用户列表
 	if (formData.maintOrgId) {
 		loadUserList(formData.maintOrgId)
-	} else {
-		userList.value = []
 	}
 }
 
-// 监听maintOrgId变化，编辑时自动加载用户列表
-watch(() => formData.maintOrgId, (newVal) => {
-	if (newVal && !userList.value.length) {
-		loadUserList(newVal)
+// 维修负责人变化时，查询手机号码
+const handleMaintLeaderChange = (item) => {
+	if (item && item.value) {
+		// 查询用户详情获取手机号码
+		userApi.getById(item.value).then(res => {
+			if (res.code == '0000' && res.data) {
+				formData.maintLeaderMobile = res.data.mobile || ''
+			}
+		}).catch(() => {
+			// 查询失败不处理，允许手动输入
+		})
 	}
-})
+}
 
-// 监听dispatchTypeCode变化，自动设置dispatchTypeName并加载部门列表
+// 监听dispatchTypeCode变化，自动设置dispatchTypeName
 watch(() => formData.dispatchTypeCode, (newVal) => {
 	if (newVal) {
 		const typeMap = {
 			'1': '委内',
-			'2': '委外'
+			'2': '委外',
+			'3': '定额',
+			'4': '非定额',
+			'5': '其他'
 		}
 		formData.dispatchTypeName = typeMap[newVal] || ''
-		// 加载对应的部门列表
-		loadDeptList()
+		// 注意：loadDeptList 在 handleDispatchTypeChange 中调用，这里不再调用
 	}
 })
 
@@ -495,10 +524,10 @@ const resetForm = () => {
 			formData[key] = ''
 			formData.maintTypeName = ''
 		} else if (key === 'reportTypeCode') {
-			formData[key] = '1' // 默认值为日常维修
-			formData.reportTypeName = '日常维修'
+			// 报修类型由外部设置，不重置
+			return
 		} else if (key === 'reportTypeName') {
-			// 报修类型名称在reportTypeCode中已设置，跳过
+			// 报修类型由外部设置，不重置
 			return
 		} else if (key === 'faultFindTime') {
 			// 如果是新增模式，默认当前时间；否则清空
@@ -524,10 +553,6 @@ const resetForm = () => {
 	formData.status = 0
 	// 重置模式
 	internalMode.value = 'add'
-	// 确保报修类型名称有值（如果报修类型代码为'1'）
-	if (formData.reportTypeCode === '1') {
-		formData.reportTypeName = '日常维修'
-	}
 	// 更新验证规则
 	updateRules()
 }
@@ -545,10 +570,6 @@ const validate = () => {
 	})
 }
 
-// 初始化时设置报修类型名称（维修类型不设默认值）
-if (formData.reportTypeCode === '1') {
-	formData.reportTypeName = '日常维修'
-}
 // 如果是新增模式，设置故障发现时间为当前时间
 if (props.mode === 'add' && !formData.faultFindTime) {
 	formData.faultFindTime = getCurrentDateTime()
@@ -606,10 +627,6 @@ const loadImages = async () => {
 onMounted(() => {
 	// 初始化验证规则
 	updateRules()
-	// 如果报修类型代码为'1'，确保报修类型名称为'日常维修'
-	if (formData.reportTypeCode === '1' && !formData.reportTypeName) {
-		formData.reportTypeName = '日常维修'
-	}
 	// 如果已经有派工类型，加载对应的部门列表
 	if (formData.dispatchTypeCode) {
 		loadDeptList()

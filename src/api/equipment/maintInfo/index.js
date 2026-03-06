@@ -110,6 +110,17 @@ const api = {
 			method: 'get',
 		})
 	},
+	// 根据设备ID和类型查询维修单位信息
+	getRepairContractByEquipId(equipId, outType) {
+		return request({
+			url: '/api/internal/EMEquipRepairContract/getRepairContractByEquipId',
+			method: 'get',
+			params: {
+				equipId: equipId,
+				outType: outType
+			}
+		})
+	},
 }
 
 export default api

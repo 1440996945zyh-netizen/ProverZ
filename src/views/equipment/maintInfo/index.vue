@@ -234,8 +234,10 @@ const tableColumns = ref([
 	{ label: '', type: 'checkbox', width: 50, fixed: 'left' },
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '工单号', prop: 'workOrderNo', align: 'left', width: 200 },
+	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 200 },
 	{ label: '设备名称', prop: 'equipName', align: 'left', width: 150 },
 	{ label: '设备编码', prop: 'equipCode', align: 'left', width: 170 },
+	{ label: '所属部门', prop: 'useOrgName', align: 'left', width: 170 },
 
 	{ label: '故障发现时间', prop: 'faultFindTime', align: 'center', width: 180 },
 	{
@@ -301,13 +303,13 @@ const tableColumns = ref([
 	},
 	{ label: '故障描述', prop: 'faultDesc', align: 'left', width: 200 },
 	{ label: '报修类型', prop: 'reportTypeName', align: 'left', width: 120 },
-  { label: '报修时间', prop: 'createTime', align: 'center', width: 180 },
-  { label: '报修人', prop: 'createByName', align: 'left', width: 120 },
+  	{ label: '报修时间', prop: 'createTime', align: 'center', width: 180 },
+ 	 { label: '报修人', prop: 'createByName', align: 'left', width: 120 },
 	{ label: '派工类型', prop: 'dispatchTypeName', align: 'left', width: 120 },
-	{ label: '承修单位', prop: 'maintOrgName', align: 'left', width: 150 },
-	{ label: '维修负责人', prop: 'maintLeaderName', align: 'left', width: 120 },
 	{ label: '派工人', prop: 'dispatcherName', align: 'left', width: 120 },
 	{ label: '派工时间', prop: 'dispatchTime', align: 'center', width: 180 },
+	{ label: '承修单位', prop: 'maintOrgName', align: 'left', width: 150 },
+	{ label: '维修负责人', prop: 'maintLeaderName', align: 'left', width: 120 },
 	{ label: '维修开始时间', prop: 'maintStartTime', align: 'center', width: 180 },
 	{ label: '维修结束时间', prop: 'maintEndTime', align: 'center', width: 180 },
 	{
@@ -803,6 +805,9 @@ const add = () => {
 	isReadonly.value = false
 	nextTick(() => {
 		detailRef.value.resetForm()
+		// 设置报修类型为提报
+		detailRef.value.formData.reportTypeCode = '1'
+		detailRef.value.formData.reportTypeName = '提报'
 		// 设置模式为新增（只显示基本信息）
 		detailRef.value.setMode('add')
 	})
@@ -816,6 +821,9 @@ const dispatch = () => {
 	isReadonly.value = false
 	nextTick(() => {
 		detailRef.value.resetForm()
+		// 设置报修类型为派工
+		detailRef.value.formData.reportTypeCode = '2'
+		detailRef.value.formData.reportTypeName = '派工'
 		// 设置模式为派工（显示全部信息）
 		detailRef.value.setMode('dispatch')
 	})
@@ -897,7 +905,10 @@ const edit = row => {
 				// 如果 reportTypeName 为空，根据 reportTypeCode 设置
 				if (!detailRef.value.formData.reportTypeName && detailRef.value.formData.reportTypeCode) {
 					const typeMap = {
-						'1': '日常维修'
+						'1': '提报',
+						'2': '派工',
+						'3': '点检',
+						'4': '润滑'
 					}
 					detailRef.value.formData.reportTypeName = typeMap[detailRef.value.formData.reportTypeCode] || ''
 				}
@@ -947,7 +958,10 @@ const view = row => {
 				// 如果 reportTypeName 为空，根据 reportTypeCode 设置
 				if (!msg.reportTypeName && msg.reportTypeCode) {
 					const typeMap = {
-						'1': '日常维修'
+						'1': '提报',
+						'2': '派工',
+						'3': '点检',
+						'4': '润滑'
 					}
 					msg.reportTypeName = typeMap[msg.reportTypeCode] || ''
 				}
