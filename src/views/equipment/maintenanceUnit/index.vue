@@ -1,16 +1,38 @@
 <template>
 	<div class="app-container">
-		<BaseTable
-			ref="baseTable"
-			:showSearchHeader="true"
-			:selectData="selectData"
-			:searchClick="getList"
-			:buttonList="buttonList"
-			:tableColumns="tableColumns"
-			:tableData="tableData"
-			:loading="loading"
-			:total="total"
-		/>
+		<div class="statistics-container">
+			<div class="statistics-card total-card">
+				<div class="card-content">
+					<div class="card-title">单位总数</div>
+					<div class="card-value">{{ statistics.total }}</div>
+				</div>
+			</div>
+			<div class="statistics-card internal-card">
+				<div class="card-content">
+					<div class="card-title">内部单位数</div>
+					<div class="card-value">{{ statistics.internal }}</div>
+				</div>
+			</div>
+			<div class="statistics-card external-card">
+				<div class="card-content">
+					<div class="card-title">外部单位数</div>
+					<div class="card-value">{{ statistics.external }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="table-wrapper">
+			<BaseTable
+				ref="baseTable"
+				:showSearchHeader="true"
+				:selectData="selectData"
+				:searchClick="getList"
+				:buttonList="buttonList"
+				:tableColumns="tableColumns"
+				:tableData="tableData"
+				:loading="loading"
+				:total="total"
+			/>
+		</div>
 		<Drawer v-model="dialogVisible" :title="title" size="40%">
 			<detail ref="detailRef" />
 			<template #footer>
@@ -40,6 +62,12 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
+
+const statistics = ref({
+	total: 0,
+	internal: 0,
+	external: 0,
+})
 
 const data = reactive({
 	queryParams: {
@@ -215,8 +243,20 @@ const getList = e => {
 		if (res.code == '0000') {
 			tableData.value = res.data.pages
 			total.value = res.data.totalNum
+			getStatistics()
 		} else {
 			proxy.$message.error(res.msg)
+		}
+	})
+}
+
+const getStatistics = () => {
+	api.getList({ startPage: 1, pageSize: 9999 }).then(res => {
+		if (res.code == '0000') {
+			const allData = res.data.pages || []
+			statistics.value.total = allData.length
+			statistics.value.internal = allData.filter(item => item.outType === '1').length
+			statistics.value.external = allData.filter(item => item.outType === '2').length
 		}
 	})
 }
@@ -278,12 +318,14 @@ const submitForm = async () => {
 				proxy.$modal.msgSuccess(res.msg)
 				dialogVisible.value = false
 				getList()
+				getStatistics()
 			})
 		} else {
 			api.add(params).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
 				dialogVisible.value = false
 				getList()
+				getStatistics()
 			})
 		}
 	}
@@ -297,6 +339,7 @@ const handleDelete = row => {
 		})
 		.then(() => {
 			getList()
+			getStatistics()
 			proxy.$modal.msgSuccess('删除成功')
 		})
 		.catch(() => {})
@@ -307,6 +350,120 @@ getList(queryParams.value)
 
 <style lang="scss" scoped>
 .app-container {
-	padding: 20px;
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	height: calc(100vh - 48px);
+	overflow: hidden;
+}
+
+.statistics-container {
+	margin-bottom: 16px;
+	display: flex;
+	gap: 12px;
+	width: fit-content;
+	flex-shrink: 0;
+}
+
+.table-wrapper {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.statistics-card {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px 28px;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+	border: 1px solid #e8eaed;
+	min-width: 200px;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+}
+
+.card-content {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	position: relative;
+	z-index: 1;
+	min-width: 0;
+	gap: 24px;
+}
+
+.card-title {
+	font-size: 16px;
+	color: #606266;
+	margin: 0;
+	font-weight: 600;
+	letter-spacing: 0.1px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.card-value {
+	font-size: 32px;
+	font-weight: 700;
+	color: #303133;
+	line-height: 1;
+	letter-spacing: -0.5px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.total-card {
+	background: linear-gradient(135deg, rgba(82, 106, 214, 1) 0%, rgba(98, 55, 142, 1) 100%);
+
+	.card-value {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+}
+
+.internal-card {
+	background: linear-gradient(135deg, rgba(59, 152, 234, 1) 0%, rgba(0, 222, 234, 1) 100%);
+
+	.card-value {
+		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+}
+
+.external-card {
+	background: linear-gradient(135deg, rgb(230, 136, 92) 0%, rgba(234, 205, 44, 1) 100%);
+
+	.card-value {
+		background: linear-gradient(135deg, #fa9070 0%, #fee140 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
 }
 </style>
