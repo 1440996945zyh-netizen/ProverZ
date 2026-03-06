@@ -126,6 +126,19 @@ watch(serviceCompaniesArray, newVal => {
 	}
 })
 
+watch(
+	() => formData.value.outType,
+	newVal => {
+		if (newVal === '1') {
+			formData.value.externalCompanyCode = ''
+			formData.value.contractDateStart = null
+			formData.value.contractDateEnd = null
+			formData.value.serviceCompanies = ''
+			serviceCompaniesArray.value = []
+		}
+	}
+)
+
 const serviceUnitOptions = ref([])
 const companyOptions = ref([])
 const getServiceUnit = () => {
