@@ -51,6 +51,25 @@
 				<!-- 派工信息 -->
 				<el-collapse-item title="派工信息" name="dispatch">
 					<el-row :gutter="20">
+						<el-col :span="24">
+							<el-form-item class="dispatch-part-form-item">
+								<div class="dispatch-part-wrapper">
+									<div class="dispatch-part-header">
+										<span class="dispatch-part-title">部位部件</span>
+										<el-button type="primary" plain @click="openPartTreeDialog">添加</el-button>
+									</div>
+									<el-table :data="dispatchPartList" border size="small" max-height="240">
+										<el-table-column prop="equipInstitutionName" label="设备机构名称" min-width="160" />
+										<el-table-column prop="equipUnitName" label="设备部件名称" min-width="160" />
+										<el-table-column label="操作" width="80" align="center">
+											<template #default="{ row }">
+												<el-button link type="danger" @click="removeDispatchPart(row)">删除</el-button>
+											</template>
+										</el-table-column>
+									</el-table>
+								</div>
+							</el-form-item>
+						</el-col>
 						<el-col :span="8">
 							<el-form-item label="派工类型" prop="dispatchTypeCode">
 								<el-select v-model="formData.dispatchTypeCode" placeholder="请选择派工类型" style="width: 100%" @change="handleDispatchTypeChange">
@@ -95,6 +114,28 @@
 				</el-collapse-item>
 			</el-collapse>
 		</el-form>
+
+		<el-dialog v-model="partTreeDialogVisible" title="选择设备零部件" width="640px" append-to-body>
+			<el-input v-model="partTreeFilterText" placeholder="请输入部位/部件名称" clearable />
+			<div v-loading="partTreeLoading" class="part-tree-container">
+				<el-tree
+					ref="partTreeRef"
+					:data="partTreeData"
+					node-key="id"
+					show-checkbox
+					default-expand-all
+					:props="partTreeProps"
+					:filter-node-method="filterPartTreeNode"
+					empty-text="暂无设备零部件数据"
+				/>
+			</div>
+			<template #footer>
+				<div style="display: flex; justify-content: flex-end; gap: 10px;">
+					<el-button @click="partTreeDialogVisible = false">取消</el-button>
+					<el-button type="primary" @click="confirmPartTreeSelection">确定</el-button>
+				</div>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 
@@ -102,6 +143,7 @@
 import { ref, reactive, computed, getCurrentInstance, onMounted, watch, nextTick } from 'vue'
 import Select from '@/components/Select'
 import api from '@/api/equipment/maintInfo/index'
+import equipmentInfoApi from '@/api/equipment/equipmentInfo/index'
 import publicApi from '@/api/public/index'
 import userApi from '@/api/system/user'
 
@@ -126,12 +168,27 @@ const deptList = ref([])
 // 用户列表（维修负责人）
 const userList = ref([])
 
+// 派工部位部件
+const dispatchPartList = ref([])
+const partTreeDialogVisible = ref(false)
+const partTreeLoading = ref(false)
+const partTreeData = ref([])
+const partTreeRef = ref(null)
+const partTreeFilterText = ref('')
+const partTreeProps = {
+	children: 'children',
+	label: 'typeName',
+}
+let partTreeLeafMap = new Map()
+
 // 表单数据
 const formData = reactive({
 	id: null,
 	equipId: null,
 	equipName: '',
 	equipCode: '',
+	equipSmallCategoryId: null,
+	equipSmallCategoryName: '',
 	faultFindTime: '',
 	emergencyLevel: '0',
 	maintTypeCode: '',
@@ -147,6 +204,7 @@ const formData = reactive({
 	maintLeaderId: null,
 	maintLeaderName: '',
 	maintLeaderMobile: '',
+	itemList: [],
 	status: 1, // 派工后状态为1-已派工
 })
 
@@ -171,6 +229,168 @@ const rules = reactive({
 	maintOrgId: [{ required: true, message: '承修单位不能为空', trigger: 'change' }],
 	maintLeaderId: [{ required: true, message: '维修负责人不能为空', trigger: 'change' }],
 })
+
+const getSelectValue = (item) => {
+	return item?.value ?? item?.id ?? ''
+}
+
+const getSelectLabel = (item) => {
+	return item?.label || item?.typeName || item?.name || ''
+}
+
+const normalizeDispatchPartList = (list) => {
+	const map = new Map()
+	;(list || []).forEach(item => {
+		const equipUnitId = item?.equipUnitId || item?.id || item?.value
+		if (!equipUnitId) return
+		map.set(String(equipUnitId), {
+			equipSmallCategoryId: item?.equipSmallCategoryId || formData.equipSmallCategoryId || null,
+			equipSmallCategoryName: item?.equipSmallCategoryName || formData.equipSmallCategoryName || '',
+			equipInstitutionId: item?.equipInstitutionId || item?.parentId || '',
+			equipInstitutionName: item?.equipInstitutionName || item?.parentName || '',
+			equipUnitId: equipUnitId,
+			equipUnitName: item?.equipUnitName || item?.typeName || item?.label || '',
+			sortOrder: item?.sortOrder || 0,
+		})
+	})
+	return Array.from(map.values()).sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
+}
+
+const syncDispatchPartToForm = () => {
+	dispatchPartList.value = dispatchPartList.value.map((item, index) => ({
+		...item,
+		equipSmallCategoryId: item.equipSmallCategoryId || formData.equipSmallCategoryId || null,
+		equipSmallCategoryName: item.equipSmallCategoryName || formData.equipSmallCategoryName || '',
+		sortOrder: index + 1,
+	}))
+	formData.itemList = dispatchPartList.value.map(item => ({
+		equipSmallCategoryId: item.equipSmallCategoryId,
+		equipSmallCategoryName: item.equipSmallCategoryName,
+		equipInstitutionId: item.equipInstitutionId,
+		equipInstitutionName: item.equipInstitutionName,
+		equipUnitId: item.equipUnitId,
+		equipUnitName: item.equipUnitName,
+		sortOrder: item.sortOrder,
+	}))
+}
+
+const filterPartTreeNode = (value, data, node) => {
+	if (!value) return true
+	const keyword = String(value).trim()
+	if (!keyword) return true
+
+	const nodeName = data?.typeName || data?.label || ''
+	if (nodeName.includes(keyword)) return true
+
+	// 父节点命中时保留当前子节点，确保“机构”命中后能看到全部“部件”
+	let parentNode = node?.parent
+	while (parentNode && parentNode.data) {
+		const parentName = parentNode.data?.typeName || parentNode.data?.label || ''
+		if (parentName.includes(keyword)) return true
+		parentNode = parentNode.parent
+	}
+
+	// 子节点命中时保留当前父节点，确保可展开到命中的部件
+	const hasMatchedChild = (children = []) => {
+		return children.some(child => {
+			const childName = child?.typeName || child?.label || ''
+			return childName.includes(keyword) || hasMatchedChild(child?.children || [])
+		})
+	}
+	return hasMatchedChild(data?.children || [])
+}
+
+const loadEquipmentSmallCategory = async () => {
+	if (formData.equipSmallCategoryId || !formData.equipId) {
+		return formData.equipSmallCategoryId
+	}
+	try {
+		const res = await equipmentInfoApi.getById(formData.equipId)
+		if (res.code === '0000' && res.data) {
+			formData.equipSmallCategoryId = res.data.equipSmallCategoryId || null
+			formData.equipSmallCategoryName = res.data.equipSmallCategoryName || ''
+		}
+	} catch (error) {
+		console.error('加载设备小类失败:', error)
+	}
+	return formData.equipSmallCategoryId
+}
+
+const loadPartTreeBySmallCategory = async (smallCategoryId) => {
+	partTreeLoading.value = true
+	partTreeLeafMap = new Map()
+	try {
+		const res = await api.getPartsTreeBySmallCategoryId(smallCategoryId)
+		if (res.code !== '0000') {
+			proxy.$message.error(res.msg || '加载设备零部件树失败')
+			partTreeData.value = []
+			return
+		}
+
+		const rawTree = res.data || []
+		const smallCategoryNode = rawTree.find(item => Number(item?.categoryLevel) === 3)
+		const institutionList = smallCategoryNode ? (smallCategoryNode.children || []) : rawTree
+
+		partTreeData.value = (institutionList || []).map(institution => {
+			const institutionId = getSelectValue(institution)
+			const institutionName = getSelectLabel(institution)
+			const children = (institution.children || []).map(unit => {
+				const equipUnitId = getSelectValue(unit)
+				if (equipUnitId === '' || equipUnitId == null) return null
+				const equipUnitName = getSelectLabel(unit)
+				partTreeLeafMap.set(String(equipUnitId), {
+					equipInstitutionId: institutionId,
+					equipInstitutionName: institutionName,
+					equipUnitId: equipUnitId,
+					equipUnitName: equipUnitName,
+				})
+				return {
+					id: equipUnitId,
+					typeName: equipUnitName,
+				}
+			}).filter(Boolean)
+			return {
+				id: institutionId,
+				typeName: institutionName,
+				children,
+			}
+		}).filter(item => item.id !== '' && item.id != null)
+	} catch (error) {
+		console.error('加载设备零部件树失败:', error)
+		proxy.$message.error('加载设备零部件树失败')
+		partTreeData.value = []
+		partTreeLeafMap = new Map()
+	} finally {
+		partTreeLoading.value = false
+	}
+}
+
+const openPartTreeDialog = async () => {
+	const smallCategoryId = await loadEquipmentSmallCategory()
+	if (!smallCategoryId) {
+		proxy.$message.warning('未获取到设备小类，无法选择部位部件')
+		return
+	}
+	partTreeDialogVisible.value = true
+	partTreeFilterText.value = ''
+	await loadPartTreeBySmallCategory(smallCategoryId)
+	nextTick(() => {
+		const checkedKeys = dispatchPartList.value.map(item => item.equipUnitId).filter(Boolean)
+		partTreeRef.value?.setCheckedKeys(checkedKeys)
+	})
+}
+
+const confirmPartTreeSelection = () => {
+	const checkedKeys = partTreeRef.value?.getCheckedKeys(true) || []
+	dispatchPartList.value = checkedKeys.map(key => partTreeLeafMap.get(String(key))).filter(Boolean)
+	syncDispatchPartToForm()
+	partTreeDialogVisible.value = false
+}
+
+const removeDispatchPart = (row) => {
+	dispatchPartList.value = dispatchPartList.value.filter(item => String(item.equipUnitId) !== String(row.equipUnitId))
+	syncDispatchPartToForm()
+}
 
 // 加载维修单位列表
 const loadDeptList = () => {
@@ -284,6 +504,10 @@ watch(() => formData.dispatchTypeCode, (newVal) => {
 	// 注意：loadDeptList 在 handleDispatchTypeChange 中调用，这里不再调用
 })
 
+watch(() => partTreeFilterText.value, (newVal) => {
+	partTreeRef.value?.filter(newVal)
+})
+
 // 重置表单
 const resetForm = () => {
 	if (formRef.value) {
@@ -294,6 +518,8 @@ const resetForm = () => {
 			formData[key] = null
 		} else if (key === 'status') {
 			formData[key] = 1
+		} else if (Array.isArray(formData[key])) {
+			formData[key] = []
 		} else if (typeof formData[key] === 'number') {
 			formData[key] = null
 		} else {
@@ -302,6 +528,10 @@ const resetForm = () => {
 	})
 	deptList.value = []
 	userList.value = []
+	dispatchPartList.value = []
+	partTreeData.value = []
+	partTreeFilterText.value = ''
+	partTreeLeafMap = new Map()
 }
 
 // 表单验证
@@ -326,6 +556,8 @@ const loadData = (data) => {
 		formData.equipId = data.equipId
 		formData.equipName = data.equipName || ''
 		formData.equipCode = data.equipCode || ''
+		formData.equipSmallCategoryId = data.equipSmallCategoryId || null
+		formData.equipSmallCategoryName = data.equipSmallCategoryName || ''
 		formData.faultFindTime = data.faultFindTime || ''
 		formData.emergencyLevel = data.emergencyLevel || '0'
 		formData.maintTypeCode = data.maintTypeCode || ''
@@ -343,6 +575,8 @@ const loadData = (data) => {
 		formData.maintLeaderId = data.maintLeaderId
 		formData.maintLeaderName = data.maintLeaderName || ''
 		formData.status = data.status || 0
+		dispatchPartList.value = normalizeDispatchPartList(data.itemList || data.dispatchItemList || data.partList || [])
+		syncDispatchPartToForm()
 
 		// 如果维修类型代码存在但名称为空，设置名称
 		if (formData.maintTypeCode && !formData.maintTypeName) {
@@ -365,6 +599,7 @@ const loadData = (data) => {
 				}
 			})
 		}
+		loadEquipmentSmallCategory()
 	}
 }
 
@@ -385,5 +620,44 @@ defineExpose({
 
 <style scoped lang="scss">
 @import '@/assets/styles/formData.scss';
+
+.dispatch-part-wrapper {
+	width: 100%;
+}
+
+.dispatch-part-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.dispatch-part-title {
+	font-size: 14px;
+	font-weight: 500;
+	color: #606266;
+}
+
+.dispatch-part-form-item {
+	width: 100%;
+}
+
+:deep(.dispatch-part-form-item .el-form-item__content) {
+	display: block;
+	width: 100%;
+}
+
+:deep(.dispatch-part-form-item .el-form-item__label) {
+	padding-bottom: 0;
+}
+
+.part-tree-container {
+	margin-top: 12px;
+	max-height: 420px;
+	overflow-y: auto;
+	border: 1px solid #ebeef5;
+	border-radius: 4px;
+	padding: 8px;
+}
 </style>
 

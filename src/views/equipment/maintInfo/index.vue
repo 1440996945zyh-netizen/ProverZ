@@ -304,7 +304,7 @@ const tableColumns = ref([
 	{ label: '故障描述', prop: 'faultDesc', align: 'left', width: 200 },
 	{ label: '报修类型', prop: 'reportTypeName', align: 'left', width: 120 },
   	{ label: '报修时间', prop: 'createTime', align: 'center', width: 180 },
- 	 { label: '报修人', prop: 'createByName', align: 'left', width: 120 },
+ 	{ label: '报修人', prop: 'createByName', align: 'left', width: 120 },
 	{ label: '派工类型', prop: 'dispatchTypeName', align: 'left', width: 120 },
 	{ label: '派工人', prop: 'dispatcherName', align: 'left', width: 120 },
 	{ label: '派工时间', prop: 'dispatchTime', align: 'center', width: 180 },
@@ -1017,6 +1017,15 @@ const saveDispatch = async () => {
 				maintOrgName: submitData.maintOrgName,
 				maintLeaderId: submitData.maintLeaderId,
 				maintLeaderName: submitData.maintLeaderName,
+				itemList: (submitData.itemList || []).map(item => ({
+					equipSmallCategoryId: item.equipSmallCategoryId,
+					equipSmallCategoryName: item.equipSmallCategoryName,
+					equipInstitutionId: item.equipInstitutionId,
+					equipInstitutionName: item.equipInstitutionName,
+					equipUnitId: item.equipUnitId,
+					equipUnitName: item.equipUnitName,
+					sortOrder: item.sortOrder,
+				})),
 				status: 1, // 派工后状态改为1-已派工
 			}
 			api.updateDispatch(dispatchData).then(res => {
