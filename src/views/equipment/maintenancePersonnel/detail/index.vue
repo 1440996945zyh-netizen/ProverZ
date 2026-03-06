@@ -1,25 +1,26 @@
 <template>
 	<div class="formData">
-		<el-form :model="formData" ref="ruleForm" label-width="120px" :rules="rules">
+		<el-form :model="formData" ref="ruleForm" label-width="120px" :rules="rules" :disabled="formDisabled">
 			<el-form-item label="单位" prop="repairContarctId">
 				<Select
 					:selectData="unitOptions"
 					v-model:value="formData.repairContarctId"
 					v-model:label="formData.repairContarctName"
 					placeholder="请选择单位"
+					:disabled="formDisabled"
 				/>
 			</el-form-item>
 
 			<el-form-item label="姓名" prop="repairName">
-				<el-input v-model="formData.repairName" placeholder="请输入姓名" maxlength="50" />
+				<el-input v-model="formData.repairName" placeholder="请输入姓名" maxlength="50" :disabled="formDisabled" />
 			</el-form-item>
 
 			<el-form-item label="身份证号" prop="idCard">
-				<el-input v-model="formData.idCard" placeholder="请输入身份证号" maxlength="18" />
+				<el-input v-model="formData.idCard" placeholder="请输入身份证号" maxlength="18" :disabled="formDisabled" />
 			</el-form-item>
 
 			<el-form-item label="手机号" prop="phone">
-				<el-input v-model="formData.phone" placeholder="请输入手机号" maxlength="11" />
+				<el-input v-model="formData.phone" placeholder="请输入手机号" maxlength="11" :disabled="formDisabled" />
 			</el-form-item>
 
 			<el-form-item label="资格证书">
@@ -33,7 +34,7 @@
 						:editRules="certificateEditRules"
 						:rowConfig="rowConfig"
 						:disabledKey="'rowDisabled'"
-						:hasAdd="true"
+						:hasAdd="!formDisabled"
 						:row-style="{ height: '80px' }"
 					/>
 					<!-- <el-button type="primary" link style="margin-top: 10px" @click="addCertificate">
@@ -63,6 +64,7 @@ const { proxy } = getCurrentInstance()
 const ruleForm = ref()
 const certificateTableRef = ref()
 const rowConfig = { isCurrent: true, isHover: true, keyField: 'row_id' }
+const formDisabled = ref(false)
 
 const data = reactive({
 	formData: {
@@ -241,11 +243,25 @@ const resetForm = () => {
 	ruleForm.value?.clearValidate()
 }
 
+const setFormDisabled = disabled => {
+	formDisabled.value = disabled
+	if (disabled) {
+		list.value.forEach(item => {
+			item.rowDisabled = true
+		})
+	} else {
+		list.value.forEach(item => {
+			item.rowDisabled = false
+		})
+	}
+}
+
 defineExpose({
 	validate,
 	resetForm,
 	formData,
 	list,
+	setFormDisabled,
 })
 </script>
 

@@ -15,8 +15,8 @@
 			<detail ref="detailRef" />
 			<template #footer>
 				<span class="dialog-footer">
-					<el-button @click="cancel">取消</el-button>
-					<el-button type="primary" @click="submitForm">确定</el-button>
+					<el-button @click="cancel">{{ title === '查看详情' ? '关闭' : '取消' }}</el-button>
+					<el-button type="primary" @click="submitForm" v-if="title !== '查看详情'">确定</el-button>
 				</span>
 			</template>
 		</Drawer>
@@ -30,6 +30,7 @@ import BaseTable from '@/components/BaseTable/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenancePersonnel/index'
+import publicApi from '@/api/public/index.js'
 import { init } from 'echarts'
 
 const { proxy } = getCurrentInstance()
@@ -52,47 +53,35 @@ const data = reactive({
 })
 const { queryParams } = toRefs(data)
 
-const getCertificateTypeNames = list => {
-	if (!list || list.length === 0) return ''
-	const certificateTypeMap = {
-		1: '职业资格证书',
-		2: '技能等级证书',
-		3: '特种作业证书',
-		4: '其他',
-	}
-	return list
-		.map(item => {
-			const certName = item.certificateName || ''
-			const typeName = certificateTypeMap[item.certificateType] || ''
-			return certName ? `${certName}(${typeName})` : typeName
-		})
-		.join('、')
-}
-
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '单位', prop: 'repairContarctName', align: 'left', minWidth: 180, showOverFlow: true },
 	{ label: '姓名', prop: 'repairName', align: 'center', minWidth: 100 },
 	{ label: '身份证号', prop: 'idCard', align: 'center', minWidth: 180 },
 	{ label: '手机号', prop: 'phone', align: 'center', minWidth: 120 },
-	{
-		prop: 'list',
-		label: '资格证书',
-		align: 'left',
-		minWidth: 300,
-		showOverFlow: true,
-		render: row => {
-			return getCertificateTypeNames(row.list)
-		},
-	},
+
 	{
 		prop: 'operate',
 		label: '操作',
 		align: 'center',
-		width: 150,
+		width: 200,
 		fixed: 'right',
 		render: row => {
 			return [
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							handleView(row)
+						},
+						type: 'info',
+						link: true,
+						icon: 'View',
+					},
+					{
+						default: () => '详情',
+					},
+				),
 				h(
 					ElButton,
 					{
@@ -185,15 +174,17 @@ const handleAdd = () => {
 	open.value = true
 	nextTick(() => {
 		detailRef.value.resetForm()
+		detailRef.value.setFormDisabled(false)
 	})
 }
 
-const handleUpdate = row => {
+const handleEditOrView = (row, isView = false) => {
 	reset()
-	title.value = '编辑维修人员'
+	title.value = isView ? '查看详情' : '编辑维修人员'
 	open.value = true
 	nextTick(() => {
 		detailRef.value.resetForm()
+		detailRef.value.setFormDisabled(isView)
 		api.getById(row.id).then(response => {
 			const resData = JSON.parse(JSON.stringify(response.data))
 			detailRef.value.formData.id = resData.id
@@ -206,6 +197,10 @@ const handleUpdate = row => {
 		})
 	})
 }
+
+const handleView = row => handleEditOrView(row, true)
+
+const handleUpdate = row => handleEditOrView(row, false)
 
 const submitForm = async () => {
 	if (await detailRef.value.validate()) {
