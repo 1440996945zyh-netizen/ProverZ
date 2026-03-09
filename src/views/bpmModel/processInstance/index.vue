@@ -223,7 +223,10 @@ const tableColumnsMyProcess = ref([
 				return [
 					h(
 						'div',
-						{ class: 'flex flex-col' },
+						{
+              class: 'flex flex-col',
+              style: { gap: '8px' }
+            },
 						row.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -350,7 +353,7 @@ const tableColumnsMyProcess = ref([
 						}
 					)
 				)
-			} 
+			}
 			// else {
 			// 	// 非进行中状态（如已结束、已撤回）显示 重新发起
 			// 	buttons.push(
@@ -527,7 +530,10 @@ const tableColumnsTodo = ref([
 				return [
 					h(
 						'div',
-						{ class: 'flex flex-col' },
+						{
+              class: 'flex flex-col',
+              style: { gap: '8px' }
+            },
 						row.processInstance.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -772,7 +778,10 @@ const tableColumnsDone = ref([
 				return [
 					h(
 						'div',
-						{ class: 'flex flex-col' },
+						{
+              class: 'flex flex-col',
+              style: { gap: '8px' }
+            },
 						row.processInstance.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -1007,7 +1016,10 @@ const tableColumnsCopy = ref([
 				return [
 					h(
 						'div',
-						{ class: 'flex flex-col' },
+						{
+              class: 'flex flex-col',
+              style: { gap: '8px' }
+            },
 						row.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)

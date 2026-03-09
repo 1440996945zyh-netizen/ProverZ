@@ -139,7 +139,10 @@ const tableColumns = ref([
 				return [
 					h(
 						'div',
-						{ class: 'flex flex-col' },
+						{
+              class: 'flex flex-col',
+              style: { gap: '8px' }
+            },
 						row.processInstance.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
 						),
