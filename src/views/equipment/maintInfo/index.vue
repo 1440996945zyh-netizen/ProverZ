@@ -15,7 +15,7 @@
 		@checkbox-change="checkboxChange"
 	/>
 	</div>
-	<el-drawer v-model="open" :title="title" size="55%">
+	<el-drawer v-model="open" :title="title" size="70%">
 		<detail ref="detailRef" :readonly="isReadonly" :mode="detailMode" :onlyDispatch="onlyDispatch" @saved="handleDetailSaved" />
 		<template #footer>
 			<div style="flex: auto; display: flex; justify-content: flex-end; gap: 10px;">
@@ -30,11 +30,11 @@
 		</template>
 	</el-drawer>
 	<!-- 查看抽屉 -->
-	<el-drawer v-model="viewOpen" title="查看设备维修派工信息" size="60%">
+	<el-drawer v-model="viewOpen" title="查看设备维修派工信息" size="70%">
 		<ViewComponent ref="viewRef" :maintInfoId="currentViewId" />
 	</el-drawer>
 	<!-- 派工抽屉 -->
-	<el-drawer v-model="dispatchOpen" title="派工" size="55%">
+	<el-drawer v-model="dispatchOpen" title="派工" size="70%">
 		<DispatchForm ref="dispatchRef" :maintInfoId="currentDispatchId" />
 		<template #footer>
 			<div style="flex: auto; display: flex; justify-content: flex-end; gap: 10px;">
@@ -85,7 +85,7 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="24">
-							<el-form-item label="维修说明" prop="maintRemark">
+							<el-form-item label="维修反馈说明" prop="maintRemark">
 								<el-input
 									v-model="endMaintForm.maintRemark"
 									type="textarea"
@@ -98,6 +98,24 @@
 						</el-col>
 					</el-row>
 				</el-collapse-item>
+				<!-- 维修完成图片 -->
+				<el-collapse-item title="维修完成图片" name="images">
+					<el-form-item label="维修完成图片">
+						<el-upload
+							ref="endMaintUploadRef"
+							:http-request="handleEndMaintImageUpload"
+							list-type="picture-card"
+							:file-list="endMaintImageList"
+							:on-preview="handlePicturePreview"
+							:on-remove="handleEndMaintImageRemove"
+							:before-upload="beforeUpload"
+							accept="image/*"
+						>
+							<el-icon><Plus /></el-icon>
+						</el-upload>
+					</el-form-item>
+				</el-collapse-item>
+
 
 				<!-- 配件更换列表 -->
 				<el-collapse-item title="配件更换列表" name="partReplaceList" style='margin-bottom: 10px'>
@@ -119,23 +137,7 @@
 					/>
 				</el-collapse-item>
 
-				<!-- 维修完成图片 -->
-				<el-collapse-item title="维修完成图片" name="images">
-					<el-form-item label="维修完成图片">
-						<el-upload
-							ref="endMaintUploadRef"
-							:http-request="handleEndMaintImageUpload"
-							list-type="picture-card"
-							:file-list="endMaintImageList"
-							:on-preview="handlePicturePreview"
-							:on-remove="handleEndMaintImageRemove"
-							:before-upload="beforeUpload"
-							accept="image/*"
-						>
-							<el-icon><Plus /></el-icon>
-						</el-upload>
-					</el-form-item>
-				</el-collapse-item>
+
 			</el-collapse>
 		</el-form>
 		<template #footer>
@@ -1017,6 +1019,10 @@ const saveDispatch = async () => {
 				maintOrgName: submitData.maintOrgName,
 				maintLeaderId: submitData.maintLeaderId,
 				maintLeaderName: submitData.maintLeaderName,
+				maintLeaderMobile: submitData.maintLeaderMobile,
+				isSpecialJob: submitData.isSpecialJob,
+				specialJobCode: submitData.specialJobCode,
+				specialJobName: submitData.specialJobName,
 				itemList: (submitData.itemList || []).map(item => ({
 					equipSmallCategoryId: item.equipSmallCategoryId,
 					equipSmallCategoryName: item.equipSmallCategoryName,
