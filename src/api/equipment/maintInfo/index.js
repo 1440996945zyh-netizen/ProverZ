@@ -121,6 +121,13 @@ const api = {
 			}
 		})
 	},
+	// 根据设备小类ID查询设备零部件树（设备小类 -> 设备机构 -> 设备部件）
+	getPartsTreeBySmallCategoryId(smallCategoryId) {
+		return request({
+			url: '/api/v1/internal/maintInfo/getPartsTreeBySmallCategoryId?smallCategoryId=' + smallCategoryId,
+			method: 'get',
+		})
+	},
 }
 
 export default api
