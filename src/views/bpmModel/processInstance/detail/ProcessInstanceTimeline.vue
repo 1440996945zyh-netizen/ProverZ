@@ -122,9 +122,9 @@
 						<span class="opinion-label">意见：</span>
 						{{ task.reason }}
 					</div>
-					<div v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE" class="signature-box">
+					<div v-if="task.fileId && activity.nodeType === NodeType.USER_TASK_NODE" class="signature-box">
 						<span class="opinion-label">签名：</span>
-						<el-image class="signature-img" :src="task.signPicUrl" :preview-src-list="[task.signPicUrl]" />
+						<el-image class="signature-img" :src="task.fileId" :preview-src-list="[task.fileId]" />
 					</div>
 				</div>
 			</div>

@@ -293,12 +293,12 @@ const getApprovalDetail = async () => {
 		const promiseList = []
 		data.activityNodes.forEach(item => {
 			item.tasks?.forEach(item1 => {
-				if (item1.signPicUrl != null) {
+				if (item1.fileId != null) {
 					// 把每个异步请求加入 Promise 列表
 					const promise = publicApi
-						.down(item1.signPicUrl, 'blob')
+						.down(item1.fileId, 'blob')
 						.then(res => {
-							item1.signPicUrl = URL.createObjectURL(res.data)
+							item1.fileId = URL.createObjectURL(res.data)
 						})
 						.catch(err => {
 							console.error('获取签名图片失败：', err)
