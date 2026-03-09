@@ -33,6 +33,8 @@
 								/>
 							</el-form-item>
 						</el-col>
+					</el-row>
+					<el-row :gutter="20">
              <el-col :span="8">
                <el-form-item label="紧急程度" prop="emergencyLevel">
                  <el-radio-group v-model="formData.emergencyLevel">
@@ -42,8 +44,7 @@
                  </el-radio-group>
                </el-form-item>
              </el-col>
-					</el-row>
-					<el-row :gutter="20">
+
 
 						<el-col :span="8">
 							<el-form-item label="维修类型" prop="maintTypeCode">
@@ -151,6 +152,23 @@
 								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" maxlength="11" />
 							</el-form-item>
 						</el-col>
+						<el-col :span="8">
+							<el-form-item label="是否涉及特殊作业" prop="isSpecialJob">
+								<el-select v-model="formData.isSpecialJob" placeholder="请选择是否涉及特殊作业" style="width: 100%" @change="handleIsSpecialJobChange">
+									<el-option label="否" value="0" />
+									<el-option label="是" value="1" />
+								</el-select>
+							</el-form-item>
+						</el-col>
+						<el-col v-if="formData.isSpecialJob === '1'" :span="24">
+							<el-form-item label="特殊作业情况" prop="specialJobCodeList">
+								<el-checkbox-group v-model="formData.specialJobCodeList" @change="handleSpecialJobChange">
+									<el-checkbox v-for="item in specialJobOptions" :key="item.value" :label="item.value">
+										{{ item.label }}
+									</el-checkbox>
+								</el-checkbox-group>
+							</el-form-item>
+						</el-col>
 					</el-row>
 				</el-collapse-item>
 			</el-collapse>
@@ -186,7 +204,7 @@
 </template>
 
 <script setup name="maintInfoDetail">
-import { ref, reactive, computed, getCurrentInstance, onMounted, watch } from 'vue'
+import { ref, reactive, computed, getCurrentInstance, onMounted, watch, nextTick } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import Select from '@/components/Select'
@@ -236,6 +254,7 @@ const deptList = ref([])
 
 // 用户列表（维修负责人）
 const userList = ref([])
+const specialJobOptions = ref([])
 
 // 派工部位部件
 const dispatchPartList = ref([])
@@ -278,6 +297,10 @@ const formData = reactive({
 	maintLeaderId: null,
 	maintLeaderName: '',
 	maintLeaderMobile: '',
+	isSpecialJob: '0',
+	specialJobCode: '',
+	specialJobName: '',
+	specialJobCodeList: [],
 	dispatcherId: null,
 	dispatcherName: '',
 	dispatchTime: '',
@@ -297,6 +320,7 @@ const rules = reactive({
 	dispatchTypeCode: [],
 	maintOrgId: [],
 	maintLeaderId: [],
+	specialJobCodeList: [],
 })
 
 // 根据模式更新验证规则
@@ -306,11 +330,22 @@ const updateRules = () => {
 		rules.dispatchTypeCode = [{ required: true, message: '派工类型不能为空', trigger: 'change' }]
 		rules.maintOrgId = [{ required: true, message: '承修单位不能为空', trigger: 'change' }]
 		rules.maintLeaderId = [{ required: true, message: '维修负责人不能为空', trigger: 'change' }]
+		rules.specialJobCodeList = [{
+			validator: (rule, value, callback) => {
+				if (formData.isSpecialJob === '1' && (!Array.isArray(value) || value.length === 0)) {
+					callback(new Error('请选择特殊作业情况'))
+					return
+				}
+				callback()
+			},
+			trigger: 'change',
+		}]
 	} else {
 		// 新增模式：派工信息字段非必填
 		rules.dispatchTypeCode = []
 		rules.maintOrgId = []
 		rules.maintLeaderId = []
+		rules.specialJobCodeList = []
 	}
 }
 
@@ -356,6 +391,54 @@ const syncDispatchPartToForm = () => {
 		equipUnitName: item.equipUnitName,
 		sortOrder: item.sortOrder,
 	}))
+}
+
+const normalizeSpecialJobOptions = (list = []) => {
+	return list.map(item => ({
+		label: item?.label || item?.dictLabel || item?.name || '',
+		value: String(item?.value ?? item?.dictValue ?? item?.code ?? ''),
+	})).filter(item => item.value)
+}
+
+const syncSpecialJobFields = () => {
+	if (formData.isSpecialJob !== '1') {
+		formData.specialJobCode = ''
+		formData.specialJobName = ''
+		formData.specialJobCodeList = []
+		return
+	}
+
+	const selectedCodes = (formData.specialJobCodeList || []).map(item => String(item)).filter(Boolean)
+	const selectedNames = selectedCodes.map(code => {
+		const match = specialJobOptions.value.find(option => String(option.value) === code)
+		return match?.label || ''
+	}).filter(Boolean)
+
+	formData.specialJobCodeList = selectedCodes
+	formData.specialJobCode = selectedCodes.join(',')
+	formData.specialJobName = selectedNames.join(',')
+}
+
+const loadSpecialJobOptions = async () => {
+	if (specialJobOptions.value.length > 0) {
+		return
+	}
+
+	try {
+		const res = await publicApi.getLocalSelect({
+			type: 'DICT',
+			dictType: 'SPECIAL_OPERATION',
+		})
+		if (res.code === '0000') {
+			specialJobOptions.value = normalizeSpecialJobOptions(res.data || [])
+			syncSpecialJobFields()
+			return
+		}
+		proxy.$message.error(res.msg || '加载特殊作业字典失败')
+	} catch (error) {
+		console.error('加载特殊作业字典失败:', error)
+		proxy.$message.error('加载特殊作业字典失败')
+	}
 }
 
 const filterPartTreeNode = (value, data, node) => {
@@ -634,6 +717,29 @@ const handleMaintLeaderChange = (item) => {
 	}
 }
 
+const handleIsSpecialJobChange = async (value) => {
+	formData.isSpecialJob = String(value || '0')
+	if (formData.isSpecialJob === '1') {
+		await loadSpecialJobOptions()
+		syncSpecialJobFields()
+		nextTick(() => {
+			formRef.value?.clearValidate(['specialJobCodeList'])
+		})
+		return
+	}
+
+	formData.specialJobCode = ''
+	formData.specialJobName = ''
+	formData.specialJobCodeList = []
+	nextTick(() => {
+		formRef.value?.clearValidate(['specialJobCodeList'])
+	})
+}
+
+const handleSpecialJobChange = () => {
+	syncSpecialJobFields()
+}
+
 // 监听dispatchTypeCode变化，自动设置dispatchTypeName
 watch(() => formData.dispatchTypeCode, (newVal) => {
 	if (newVal) {
@@ -651,6 +757,25 @@ watch(() => formData.dispatchTypeCode, (newVal) => {
 
 watch(() => partTreeFilterText.value, (newVal) => {
 	partTreeRef.value?.filter(newVal)
+})
+
+watch(() => [formData.isSpecialJob, formData.specialJobCode], async ([isSpecialJob, specialJobCode]) => {
+	if (String(isSpecialJob) !== '1') {
+		formData.isSpecialJob = '0'
+		formData.specialJobCode = ''
+		formData.specialJobName = ''
+		formData.specialJobCodeList = []
+		return
+	}
+
+	if (specialJobCode && (!Array.isArray(formData.specialJobCodeList) || formData.specialJobCodeList.length === 0)) {
+		formData.specialJobCodeList = String(specialJobCode).split(',').map(item => item.trim()).filter(Boolean)
+	}
+
+	await loadSpecialJobOptions()
+	syncSpecialJobFields()
+}, {
+	immediate: true,
 })
 
 watch(() => formData.itemList, (newVal) => {
@@ -794,6 +919,10 @@ const resetForm = () => {
 	partTreeData.value = []
 	partTreeFilterText.value = ''
 	partTreeLeafMap = new Map()
+	formData.isSpecialJob = '0'
+	formData.specialJobCode = ''
+	formData.specialJobName = ''
+	formData.specialJobCodeList = []
 	// 重置状态
 	formData.status = 0
 	// 重置模式
