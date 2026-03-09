@@ -290,6 +290,7 @@ const handleUpdate = row => {
 			detailRef.value.formData.entityType = resData.entityType || '1'
 			detailRef.value.formData.outType = resData.outType || '1'
 			detailRef.value.formData.unitName = resData.unitName
+			detailRef.value.formData.externalCompanyId = resData.externalCompanyId
 			detailRef.value.formData.externalCompanyCode = resData.externalCompanyCode
 			detailRef.value.formData.principal = resData.principal
 			detailRef.value.formData.phone = resData.phone
