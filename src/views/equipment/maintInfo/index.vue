@@ -90,7 +90,7 @@
 									v-model="endMaintForm.maintRemark"
 									type="textarea"
 									:autosize="{ minRows: 2, maxRows: 4 }"
-									placeholder="请输入维修说明"
+									placeholder="请输入维修反馈说明"
 									maxlength="2000"
 									show-word-limit
 								/>
@@ -134,6 +134,23 @@
 						@checkbox-change="handlePartReplaceCheckboxChange"
 						@selectAllChangeEvent="handlePartReplaceSelectAll"
 						:disabledKey="'rowDisabled'"
+					/>
+				</el-collapse-item>
+
+				<el-collapse-item title="作业工时反馈" name="hourFeedbackList" style='margin-bottom: 10px'>
+					<div class="hour-feedback-header">
+						<el-button type="primary" plain @click="addHourFeedbackRow">新增</el-button>
+					</div>
+					<EditTable
+						ref="hourFeedbackTableRef"
+						:hasAdd="false"
+						:name="'作业工时反馈'"
+						:tableData="hourFeedbackList"
+						:tableColumns="hourFeedbackColumns"
+						:tableHeight="260"
+						:editRules="hourFeedbackEditRules"
+						:rowConfig="hourFeedbackRowConfig"
+						@chang_date="handleHourFeedbackDateChange"
 					/>
 				</el-collapse-item>
 
@@ -239,7 +256,7 @@ const tableColumns = ref([
 	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 200 },
 	{ label: '设备名称', prop: 'equipName', align: 'left', width: 150 },
 	{ label: '设备编码', prop: 'equipCode', align: 'left', width: 170 },
-	{ label: '所属部门', prop: 'useOrgName', align: 'left', width: 170 },
+	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 170 },
 
 	{ label: '故障发现时间', prop: 'faultFindTime', align: 'center', width: 180 },
 	{
@@ -582,22 +599,42 @@ const endMaintenance = async row => {
 	const minutes = String(now.getMinutes()).padStart(2, '0')
 	const seconds = String(now.getSeconds()).padStart(2, '0')
 	const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+	let detailData = { ...row }
+
+	try {
+		const detailRes = await api.getById(row.id)
+		if (detailRes.code === '0000' && detailRes.data) {
+			detailData = detailRes.data
+		} else {
+			ElMessage.warning(detailRes.msg || '未获取到结束维修所需的详情数据')
+		}
+	} catch (error) {
+		console.error('查询结束维修详情失败:', error)
+		ElMessage.warning('查询结束维修详情失败，已使用列表数据初始化')
+	}
 
 	endMaintForm.value = {
-		id: row.id,
+		id: detailData.id || row.id,
+		maintStartTime: detailData.maintStartTime || '',
+		maintOrgId: detailData.maintOrgId || null,
 		maintEndTime: currentTime,
 		maintRemark: '',
 		faultImageIds: [],
 		partReplaceList: [],
+		hourFeedbackList: [],
 	}
 	endMaintImageList.value = []
 	partReplaceList.value = []
+	hourFeedbackList.value = []
+	repairUserOptions.value = []
 	availablePartDetails.value = []
 
+	await loadRepairUserOptions(endMaintForm.value.maintOrgId)
+
 	// 加载可用的配件明细
-	if (row.equipId) {
+	if (detailData.equipId) {
 		try {
-			const res = await api.getAvailableDetailsByEquipId(row.equipId)
+			const res = await api.getAvailableDetailsByEquipId(detailData.equipId)
 			if (res.code === '0000' && res.data) {
 				// 直接绑定到可用配件列表，并初始化currentUsedQuantity字段
 				availablePartDetails.value = (res.data || []).map(item => ({
@@ -1111,13 +1148,16 @@ const saveStartMaintenance = () => {
 // 结束维修相关
 const endMaintVisible = ref(false)
 const endMaintFormRef = ref(null)
-const endMaintActiveNames = ref(['baseData', 'partReplaceList', 'images'])
+const endMaintActiveNames = ref(['baseData', 'partReplaceList', 'hourFeedbackList', 'images'])
 const endMaintForm = ref({
 	id: null,
+	maintStartTime: '',
+	maintOrgId: null,
 	maintEndTime: '',
 	maintRemark: '',
 	faultImageIds: [],
 	partReplaceList: [],
+	hourFeedbackList: [],
 })
 const endMaintImageList = ref([])
 const endMaintUploadRef = ref(null)
@@ -1135,6 +1175,11 @@ const partReplaceTableRef = ref(null)
 const partReplaceList = ref([]) // 用于提交的配件更换列表（勾选后存入）
 const availablePartDetails = ref([]) // 可用的配件明细列表（显示在表格中）
 const partReplaceRowConfig = { isCurrent: true, isHover: true, keyField: 'warehouseOutDetailId' }
+const hourFeedbackTableRef = ref(null)
+const hourFeedbackList = ref([])
+const repairUserOptions = ref([])
+const hourFeedbackRowConfig = { isCurrent: true, isHover: true, keyField: 'tempId' }
+let hourFeedbackRowSeed = 0
 
 // 用于跟踪 currentUsedQuantity 的旧值
 const currentUsedQuantityCache = ref(new Map())
@@ -1159,6 +1204,46 @@ watch(
 				// 更新缓存
 				currentUsedQuantityCache.value.set(id, value)
 			}
+		})
+	},
+	{ deep: true }
+)
+
+watch(
+	() => endMaintForm.value.maintEndTime,
+	(newVal, oldVal) => {
+		const newTime = normalizeDateTimeToMinute(newVal)
+		const oldTime = normalizeDateTimeToMinute(oldVal)
+		hourFeedbackList.value.forEach(row => {
+			if (row.autoEndTime || !row.endTime || row.endTime === oldTime) {
+				row.endTime = newTime
+				row.autoEndTime = true
+			}
+			updateHourFeedbackRowWorkHour(row)
+		})
+	},
+)
+
+watch(
+	() => endMaintForm.value.maintStartTime,
+	(newVal, oldVal) => {
+		const newTime = normalizeDateTimeToMinute(newVal)
+		const oldTime = normalizeDateTimeToMinute(oldVal)
+		hourFeedbackList.value.forEach(row => {
+			if (row.autoStartTime || !row.startTime || row.startTime === oldTime) {
+				row.startTime = newTime
+				row.autoStartTime = true
+			}
+			updateHourFeedbackRowWorkHour(row)
+		})
+	},
+)
+
+watch(
+	() => hourFeedbackList.value.map(item => `${item.tempId}|${item.startTime}|${item.endTime}`),
+	() => {
+		hourFeedbackList.value.forEach(row => {
+			updateHourFeedbackRowWorkHour(row)
 		})
 	},
 	{ deep: true }
@@ -1255,6 +1340,176 @@ const partReplaceEditRules = ref({
 		},
 	}),
 })
+
+const normalizeDateTimeToMinute = (value) => {
+	if (!value) return ''
+	const normalized = String(value).replace('T', ' ')
+	return normalized.length >= 16 ? normalized.slice(0, 16) : normalized
+}
+
+const parseDateTimeValue = (value) => {
+	if (!value) return null
+	const normalized = String(value).replace('T', ' ').trim()
+	const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/)
+	if (!match) {
+		const parsed = new Date(normalized.replace(' ', 'T'))
+		return Number.isNaN(parsed.getTime()) ? null : parsed.getTime()
+	}
+	const [, year, month, day, hour, minute, second = '00'] = match
+	return new Date(
+		Number(year),
+		Number(month) - 1,
+		Number(day),
+		Number(hour),
+		Number(minute),
+		Number(second)
+	).getTime()
+}
+
+const calculateWorkHour = (startTime, endTime) => {
+	if (!startTime || !endTime) return null
+	const start = parseDateTimeValue(startTime)
+	const end = parseDateTimeValue(endTime)
+	if (start == null || end == null || end < start) {
+		return null
+	}
+	return Number(((end - start) / 3600000).toFixed(1))
+}
+
+const updateHourFeedbackRowWorkHour = (row) => {
+	row.workHour = calculateWorkHour(row.startTime, row.endTime)
+}
+
+const loadRepairUserOptions = async (maintOrgId) => {
+	repairUserOptions.value = []
+	if (!maintOrgId) {
+		return
+	}
+
+	try {
+		const res = await api.getRepairUserListByMaintOrgId(maintOrgId)
+		if (res.code === '0000') {
+			repairUserOptions.value = (res.data || []).map(item => ({
+				value: item.repairId,
+				label: item.repairName,
+			}))
+			return
+		}
+		ElMessage.error(res.msg || '加载维修人员失败')
+	} catch (error) {
+		console.error('加载维修人员失败:', error)
+		ElMessage.error('加载维修人员失败')
+	}
+}
+
+const createHourFeedbackRow = () => {
+	const startTime = normalizeDateTimeToMinute(endMaintForm.value.maintStartTime)
+	const endTime = normalizeDateTimeToMinute(endMaintForm.value.maintEndTime)
+	const row = {
+		tempId: `hour-feedback-${Date.now()}-${hourFeedbackRowSeed++}`,
+		maintUserId: null,
+		maintUserName: '',
+		startTime,
+		endTime,
+		workHour: calculateWorkHour(startTime, endTime),
+		workContent: '',
+		remark: '',
+		autoStartTime: true,
+		autoEndTime: true,
+	}
+	return row
+}
+
+const addHourFeedbackRow = () => {
+	hourFeedbackList.value.push(createHourFeedbackRow())
+}
+
+const removeHourFeedbackRow = (row) => {
+	hourFeedbackList.value = hourFeedbackList.value.filter(item => item.tempId !== row.tempId)
+}
+
+const hourFeedbackColumns = reactive([
+	{
+		label: '维修人员',
+		prop: 'maintUserId',
+		modelLabel: 'maintUserName',
+		editType: 'select',
+		editRender: {},
+		selectData: repairUserOptions,
+		selectLabel: 'label',
+		selectValue: 'value',
+		width: 150,
+	},
+	{
+		label: '开始时间',
+		prop: 'startTime',
+		editType: 'datetime',
+		editRender: {},
+		width: 180,
+	},
+	{
+		label: '结束时间',
+		prop: 'endTime',
+		editType: 'datetime',
+		editRender: {},
+		width: 180,
+	},
+	{
+		label: '工时(小时)',
+		prop: 'workHour',
+		width: 110,
+		align: 'right',
+		render: row => [
+			h('span', {}, row.workHour == null ? '' : Number(row.workHour).toFixed(1)),
+		],
+	},
+	{
+		label: '工作内容',
+		prop: 'workContent',
+		editType: 'textarea',
+		editRender: {},
+		minWidth: 220,
+	},
+	{
+		label: '备注',
+		prop: 'remark',
+		editType: 'textarea',
+		editRender: {},
+		minWidth: 180,
+	},
+	{
+		prop: 'operate',
+		label: '操作',
+		width: 90,
+		align: 'center',
+		fixed: 'right',
+		render: row => [
+			h(
+				ElButton,
+				{
+					type: 'danger',
+					link: true,
+					onClick: () => removeHourFeedbackRow(row),
+				},
+				{
+					default: () => '删除',
+				}
+			),
+		],
+	},
+])
+
+const hourFeedbackEditRules = ref({
+	maintUserId: proxy.getRules({ required: true }),
+	startTime: proxy.getRules({ required: true }),
+	endTime: proxy.getRules({ required: true }),
+})
+
+const handleHourFeedbackDateChange = (row) => {
+	row.autoStartTime = false
+	row.autoEndTime = false
+	updateHourFeedbackRowWorkHour(row)
+}
 
 // 配件更换单元格点击事件
 const partReplaceCellClickEvent = (event) => {
@@ -1431,13 +1686,18 @@ const handleEndMaintCancel = () => {
 	// 清空数据
 	endMaintForm.value = {
 		id: null,
+		maintStartTime: '',
+		maintOrgId: null,
 		maintEndTime: '',
 		maintRemark: '',
 		faultImageIds: [],
 		partReplaceList: [],
+		hourFeedbackList: [],
 	}
 	endMaintImageList.value = []
 	partReplaceList.value = []
+	hourFeedbackList.value = []
+	repairUserOptions.value = []
 	availablePartDetails.value = []
 	currentEndMaintRow.value = null
 	// 清空表格的选中状态
@@ -1451,6 +1711,13 @@ const saveEndMaintenance = async () => {
 	if (!endMaintForm.value.maintEndTime) {
 		ElMessage.warning('请选择结束维修时间')
 		return
+	}
+
+	if (hourFeedbackList.value.length > 0 && hourFeedbackTableRef.value) {
+		const validHourFeedback = await hourFeedbackTableRef.value.validAllEvent()
+		if (!validHourFeedback) {
+			return
+		}
 	}
 
 	// 如果有勾选的配件，校验本次使用数量
@@ -1501,6 +1768,24 @@ const saveEndMaintenance = async () => {
 		item.warehouseOutNo && item.warehouseOutDetailId && item.usedQuantity != null && item.usedQuantity > 0
 	)
 
+	const validHourFeedbackList = hourFeedbackList.value.map(item => {
+		const workHour = calculateWorkHour(item.startTime, item.endTime)
+		return {
+			...item,
+			workHour,
+		}
+	})
+	hourFeedbackList.value = validHourFeedbackList
+
+	const invalidHourFeedbackRow = validHourFeedbackList.find(item =>
+		!item.maintUserId || !item.maintUserName || !item.startTime || !item.endTime || item.workHour == null || item.workHour < 0
+	)
+
+	if (invalidHourFeedbackRow) {
+		ElMessage.warning('请完善作业工时反馈信息')
+		return
+	}
+
 	// 准备提交数据
 	const submitData = {
 		...endMaintForm.value,
@@ -1515,6 +1800,17 @@ const saveEndMaintenance = async () => {
 			applicationQuantity: item.applicationQuantity,
 			usedQuantity: item.usedQuantity,
 		})),
+		hourFeedbackList: validHourFeedbackList.map(item => ({
+			id: item.id || null,
+			maintInfoId: endMaintForm.value.id,
+			maintUserId: item.maintUserId,
+			maintUserName: item.maintUserName,
+			startTime: item.startTime,
+			endTime: item.endTime,
+			workHour: item.workHour,
+			workContent: item.workContent,
+			remark: item.remark,
+		})),
 	}
 
 	api.endMaintenance(submitData).then(res => {
@@ -1524,13 +1820,18 @@ const saveEndMaintenance = async () => {
 			// 重置表单
 			endMaintForm.value = {
 				id: null,
+				maintStartTime: '',
+				maintOrgId: null,
 				maintEndTime: '',
 				maintRemark: '',
 				faultImageIds: [],
 				partReplaceList: [],
+				hourFeedbackList: [],
 			}
 			endMaintImageList.value = []
 			partReplaceList.value = []
+			hourFeedbackList.value = []
+			repairUserOptions.value = []
 			availablePartDetails.value = []
 			currentEndMaintRow.value = null
 			// 清空表格的选中状态
@@ -1721,5 +2022,11 @@ getList(queryParams.value)
 
 <style lang="scss" scoped>
 @import '@/assets/styles/formData.scss';
+
+.hour-feedback-header {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 12px;
+}
 </style>
 

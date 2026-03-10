@@ -35,17 +35,15 @@
 						</el-col>
 					</el-row>
 					<el-row :gutter="20">
-             <el-col :span="8">
-               <el-form-item label="紧急程度" prop="emergencyLevel">
-                 <el-radio-group v-model="formData.emergencyLevel">
-                   <el-radio label="0">常规</el-radio>
-                   <el-radio label="1">紧急</el-radio>
-                   <el-radio label="2">特急</el-radio>
-                 </el-radio-group>
-               </el-form-item>
-             </el-col>
-
-
+             			<el-col :span="8">
+							<el-form-item label="紧急程度" prop="emergencyLevel">
+								<el-radio-group v-model="formData.emergencyLevel">
+								<el-radio label="0">常规</el-radio>
+								<el-radio label="1">紧急</el-radio>
+								<el-radio label="2">特急</el-radio>
+								</el-radio-group>
+							</el-form-item>
+						</el-col>
 						<el-col :span="8">
 							<el-form-item label="维修类型" prop="maintTypeCode">
 								<el-radio-group v-model="formData.maintTypeCode" @change="handleMaintTypeChange">

@@ -539,7 +539,7 @@ const loadUserList = (deptId) => {
 
 	publicApi.getLocalSelect({
 		type: 'USER',
-		deptId: deptId
+    companyId: deptId
 	}).then(res => {
 		if (res.code === '0000') {
 			userList.value = res.data.map(item => ({
