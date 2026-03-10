@@ -121,11 +121,31 @@ const api = {
 			}
 		})
 	},
+	// 根据承修单位ID查询维修人员下拉列表
+	getRepairUserListByMaintOrgId(maintOrgId) {
+		return request({
+			url: '/api/v1/internal/maintInfo/getRepairUserListByMaintOrgId',
+			method: 'get',
+			params: {
+				maintOrgId,
+			},
+		})
+	},
 	// 根据设备小类ID查询设备零部件树（设备小类 -> 设备机构 -> 设备部件）
 	getPartsTreeBySmallCategoryId(smallCategoryId) {
 		return request({
 			url: '/api/v1/internal/maintInfo/getPartsTreeBySmallCategoryId?smallCategoryId=' + smallCategoryId,
 			method: 'get',
+		})
+	},
+	// 根据申请单号查询维修项目申请信息
+	getMaintProjApplyByAppNumber(appNumber) {
+		return request({
+			url: '/api/v1/internal/maintInfo/getMaintProjApplyByAppNumber',
+			method: 'get',
+			params: {
+				appNumber,
+			},
 		})
 	},
 }
