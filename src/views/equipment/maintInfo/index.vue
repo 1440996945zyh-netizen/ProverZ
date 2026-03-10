@@ -171,14 +171,35 @@
 	</el-dialog>
 
 	<!-- 验收弹窗 -->
-	<el-dialog v-model="acceptMaintVisible" title="验收通过" width="600px" :close-on-click-modal="false">
-		<el-form :model="acceptMaintForm" label-width="120px">
-			<el-form-item label="验收备注">
+	<el-dialog v-model="acceptMaintVisible" title="验收处理" width="600px" :close-on-click-modal="false" @closed="resetAcceptForm">
+		<el-form ref="acceptMaintFormRef" :model="acceptMaintForm" :rules="acceptMaintRules" label-width="120px">
+			<el-form-item label="验收结果" prop="acceptanceStatus">
+				<el-radio-group v-model="acceptMaintForm.acceptanceStatus" @change="handleAcceptStatusChange">
+					<el-radio :label="1">通过</el-radio>
+					<el-radio :label="2">不通过</el-radio>
+				</el-radio-group>
+			</el-form-item>
+			<el-form-item v-if="acceptMaintForm.acceptanceStatus === 2" label="退回状态" prop="returnStatus">
+				<el-select
+					v-model="acceptMaintForm.returnStatus"
+					placeholder="请选择退回状态"
+					style="width: 100%;"
+					clearable
+				>
+					<el-option
+						v-for="item in acceptReturnStatusOptions"
+						:key="item.value"
+						:label="item.label"
+						:value="item.value"
+					/>
+				</el-select>
+			</el-form-item>
+			<el-form-item label="验收原因" prop="acceptanceRemark">
 				<el-input
 					v-model="acceptMaintForm.acceptanceRemark"
 					type="textarea"
 					:rows="4"
-					placeholder="请输入验收备注（可选）"
+					placeholder="请输入验收原因"
 					maxlength="500"
 					show-word-limit
 				/>
@@ -186,7 +207,7 @@
 		</el-form>
 		<template #footer>
 			<div style="flex: auto; display: flex; justify-content: flex-end; gap: 10px;">
-				<el-button @click="acceptMaintVisible = false">取消</el-button>
+				<el-button @click="handleAcceptDialogCancel">取消</el-button>
 				<el-button type="primary" @click="saveAcceptMaintenance">确定</el-button>
 			</div>
 		</template>
@@ -617,17 +638,22 @@ const endMaintenance = async row => {
 		id: detailData.id || row.id,
 		maintStartTime: detailData.maintStartTime || '',
 		maintOrgId: detailData.maintOrgId || null,
-		maintEndTime: currentTime,
-		maintRemark: '',
-		faultImageIds: [],
-		partReplaceList: [],
-		hourFeedbackList: [],
+		maintEndTime: detailData.maintEndTime || currentTime,
+		maintRemark: detailData.maintRemark || '',
+		faultImageIds: Array.isArray(detailData.faultImageIds) ? [...detailData.faultImageIds] : [],
+		partReplaceList: Array.isArray(detailData.partReplaceList) ? [...detailData.partReplaceList] : [],
+		hourFeedbackList: Array.isArray(detailData.hourFeedbackList) ? [...detailData.hourFeedbackList] : [],
 	}
-	endMaintImageList.value = []
-	partReplaceList.value = []
-	hourFeedbackList.value = []
+	partReplaceList.value = Array.isArray(detailData.partReplaceList) ? [...detailData.partReplaceList] : []
+	hourFeedbackList.value = (detailData.hourFeedbackList || []).map(item => ({
+		...item,
+		tempId: item.tempId || `hour-feedback-${Date.now()}-${hourFeedbackRowSeed++}`,
+		autoStartTime: false,
+		autoEndTime: false,
+	}))
 	repairUserOptions.value = []
 	availablePartDetails.value = []
+	await loadEndMaintImages(endMaintForm.value.id)
 
 	await loadRepairUserOptions(endMaintForm.value.maintOrgId)
 
@@ -637,17 +663,36 @@ const endMaintenance = async row => {
 			const res = await api.getAvailableDetailsByEquipId(detailData.equipId)
 			if (res.code === '0000' && res.data) {
 				// 直接绑定到可用配件列表，并初始化currentUsedQuantity字段
+				const selectedPartMap = new Map(
+					(partReplaceList.value || [])
+						.filter(item => item && item.warehouseOutDetailId != null)
+						.map(item => [item.warehouseOutDetailId, item])
+				)
+				const checkedRows = []
 				availablePartDetails.value = (res.data || []).map(item => ({
 					...item,
-					currentUsedQuantity: null, // 本次使用数量，初始为空，用户编辑后填入
+					currentUsedQuantity: selectedPartMap.has(item.warehouseOutDetailId)
+						? Number(selectedPartMap.get(item.warehouseOutDetailId).usedQuantity)
+						: null,
 				}))
+				availablePartDetails.value.forEach(item => {
+					if (selectedPartMap.has(item.warehouseOutDetailId)) {
+						checkedRows.push(item)
+					}
+				})
 				// 初始化缓存
 				currentUsedQuantityCache.value.clear()
 				availablePartDetails.value.forEach(item => {
 					if (item.warehouseOutDetailId) {
-						currentUsedQuantityCache.value.set(item.warehouseOutDetailId, null)
+						currentUsedQuantityCache.value.set(item.warehouseOutDetailId, item.currentUsedQuantity)
 					}
 				})
+				nextTick(() => {
+					if (partReplaceTableRef.value && typeof partReplaceTableRef.value.setCheckboxRow === 'function') {
+						partReplaceTableRef.value.setCheckboxRow(checkedRows, true)
+					}
+				})
+				updatePartReplaceListFromSelected(checkedRows)
 			} else {
 				availablePartDetails.value = []
 				currentUsedQuantityCache.value.clear()
@@ -662,6 +707,44 @@ const endMaintenance = async row => {
 	}
 
 	endMaintVisible.value = true
+}
+
+const loadEndMaintImages = async (maintInfoId) => {
+	endMaintImageList.value = []
+	if (!maintInfoId) {
+		return
+	}
+	try {
+		const endRes = await publicApi.getBusFiles({
+			businessId: maintInfoId,
+			businessType: 'MAINT_INFO_IMAGE_END',
+		})
+		if (endRes.code !== '0000' || !Array.isArray(endRes.data) || endRes.data.length === 0) {
+			return
+		}
+		const list = await Promise.all(
+			endRes.data.map(async item => {
+				try {
+					const downRes = await publicApi.down(item.id, 'arraybuffer')
+					const blob = new Blob([downRes.data], { type: 'image/jpeg' })
+					return {
+						id: item.id,
+						name: item.fileName || `image-${item.id}.jpg`,
+						url: window.URL.createObjectURL(blob),
+					}
+				} catch (error) {
+					console.error('加载结束维修图片失败:', error)
+					return null
+				}
+			})
+		)
+		endMaintImageList.value = list.filter(item => item != null)
+		if (!endMaintForm.value.faultImageIds || endMaintForm.value.faultImageIds.length === 0) {
+			endMaintForm.value.faultImageIds = endMaintImageList.value.map(item => item.id)
+		}
+	} catch (error) {
+		console.error('查询结束维修图片失败:', error)
+	}
 }
 
 // 处理结束维修（从按钮点击）
@@ -1052,6 +1135,7 @@ const saveDispatch = async () => {
 				id: submitData.id,
 				dispatchTypeCode: submitData.dispatchTypeCode,
 				dispatchTypeName: submitData.dispatchTypeName,
+				mantAppNumber: submitData.mantAppNumber,
 				maintOrgId: submitData.maintOrgId,
 				maintOrgName: submitData.maintOrgName,
 				maintLeaderId: submitData.maintLeaderId,
@@ -1850,10 +1934,57 @@ const saveEndMaintenance = async () => {
 
 // 验收相关
 const acceptMaintVisible = ref(false)
+const acceptMaintFormRef = ref(null)
 const acceptMaintForm = ref({
 	id: null,
+	acceptanceStatus: 1,
+	returnStatus: null,
 	acceptanceRemark: '',
 })
+const acceptReturnStatusOptions = [
+	{ label: '提报', value: 0 },
+	{ label: '已派工', value: 1 },
+	{ label: '维修中', value: 2 },
+]
+const acceptMaintRules = {
+	acceptanceStatus: [{ required: true, message: '请选择验收结果', trigger: 'change' }],
+	returnStatus: [{
+		validator: (_rule, value, callback) => {
+			if (acceptMaintForm.value.acceptanceStatus === 2 && (value == null || value === '')) {
+				callback(new Error('请选择退回状态'))
+				return
+			}
+			callback()
+		},
+		trigger: 'change'
+	}],
+	acceptanceRemark: [{ required: true, message: '请输入验收原因', trigger: 'blur' }],
+}
+
+const resetAcceptForm = () => {
+	acceptMaintForm.value = {
+		id: null,
+		acceptanceStatus: 1,
+		returnStatus: null,
+		acceptanceRemark: '',
+	}
+	if (acceptMaintFormRef.value) {
+		acceptMaintFormRef.value.clearValidate()
+	}
+}
+
+const handleAcceptDialogCancel = () => {
+	acceptMaintVisible.value = false
+}
+
+const handleAcceptStatusChange = value => {
+	if (value === 1) {
+		acceptMaintForm.value.returnStatus = null
+	}
+	if (acceptMaintFormRef.value) {
+		acceptMaintFormRef.value.clearValidate(['returnStatus'])
+	}
+}
 
 // 处理验收（从按钮点击）
 const handleAcceptMaintenance = () => {
@@ -1870,22 +2001,42 @@ const handleAcceptMaintenance = () => {
 	// 打开验收弹窗
 	acceptMaintForm.value = {
 		id: selectedRow.id,
+		acceptanceStatus: 1,
+		returnStatus: null,
 		acceptanceRemark: '',
 	}
 	acceptMaintVisible.value = true
+	nextTick(() => {
+		if (acceptMaintFormRef.value) {
+			acceptMaintFormRef.value.clearValidate()
+		}
+	})
 }
 
 // 保存验收
-const saveAcceptMaintenance = () => {
-	api.acceptMaintenance(acceptMaintForm.value).then(res => {
+const saveAcceptMaintenance = async () => {
+	if (!acceptMaintFormRef.value) {
+		return
+	}
+	try {
+		await acceptMaintFormRef.value.validate()
+	} catch (error) {
+		return
+	}
+
+	const submitData = {
+		id: acceptMaintForm.value.id,
+		status: acceptMaintForm.value.acceptanceStatus === 1 ? 5 : acceptMaintForm.value.returnStatus,
+		isAccepted: acceptMaintForm.value.acceptanceStatus === 1 ? 1 : 0,
+		acceptanceRemark: acceptMaintForm.value.acceptanceRemark,
+		returnStatus: acceptMaintForm.value.acceptanceStatus === 2 ? acceptMaintForm.value.returnStatus : null,
+	}
+
+	api.acceptMaintenance(submitData).then(res => {
 		if (res.code == '0000') {
 			ElMessage.success(res.msg || '验收成功')
 			acceptMaintVisible.value = false
-			// 重置表单
-			acceptMaintForm.value = {
-				id: null,
-				acceptanceRemark: '',
-			}
+			resetAcceptForm()
 			// 刷新列表
 			getList(queryParams.value)
 		} else {

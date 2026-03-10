@@ -121,6 +121,26 @@
 								</el-select>
 							</el-form-item>
 						</el-col>
+						<el-col v-if="isMaintProjApplyVisible" :span="8">
+							<el-form-item label="维修项目申请单" prop="mantAppNumber">
+								<el-select
+									v-model="formData.mantAppNumber"
+									style="width: 100%"
+									filterable
+									clearable
+									:loading="maintProjApplyLoading"
+									placeholder="请选择维修项目申请单"
+									@change="handleMantAppNumberChange"
+								>
+									<el-option
+										v-for="item in maintProjApplyOptions"
+										:key="item.value"
+										:label="item.label"
+										:value="item.value"
+									/>
+								</el-select>
+							</el-form-item>
+						</el-col>
 						<el-col :span="8">
 							<el-form-item label="承修单位" prop="maintOrgId">
 								<Select
@@ -253,6 +273,8 @@ const deptList = ref([])
 // 用户列表（维修负责人）
 const userList = ref([])
 const specialJobOptions = ref([])
+const maintProjApplyLoading = ref(false)
+const maintProjApplyOptions = ref([])
 
 // 派工部位部件
 const dispatchPartList = ref([])
@@ -290,6 +312,7 @@ const formData = reactive({
 	reportTypeName: '', // 报修类型由外部设置
 	dispatchTypeCode: '', // 派工类型：1-委内，2-委外
 	dispatchTypeName: '',
+	mantAppNumber: '',
 	maintOrgId: null,
 	maintOrgName: '',
 	maintLeaderId: null,
@@ -316,9 +339,14 @@ const rules = reactive({
 	maintTypeCode: [{ required: true, message: '维修类型不能为空', trigger: 'change' }],
 	isStopped: [{ required: true, message: '是否停机不能为空', trigger: 'change' }],
 	dispatchTypeCode: [],
+	mantAppNumber: [],
 	maintOrgId: [],
 	maintLeaderId: [],
 	specialJobCodeList: [],
+})
+
+const isMaintProjApplyVisible = computed(() => {
+	return formData.dispatchTypeCode === '3' || formData.dispatchTypeCode === '4'
 })
 
 // 根据模式更新验证规则
@@ -326,6 +354,16 @@ const updateRules = () => {
 	if (internalMode.value === 'dispatch') {
 		// 派工模式：派工信息字段必填
 		rules.dispatchTypeCode = [{ required: true, message: '派工类型不能为空', trigger: 'change' }]
+		rules.mantAppNumber = [{
+			validator: (_rule, value, callback) => {
+				if (isMaintProjApplyVisible.value && !value) {
+					callback(new Error('维修项目申请单不能为空'))
+					return
+				}
+				callback()
+			},
+			trigger: 'change',
+		}]
 		rules.maintOrgId = [{ required: true, message: '承修单位不能为空', trigger: 'change' }]
 		rules.maintLeaderId = [{ required: true, message: '维修负责人不能为空', trigger: 'change' }]
 		rules.specialJobCodeList = [{
@@ -341,6 +379,7 @@ const updateRules = () => {
 	} else {
 		// 新增模式：派工信息字段非必填
 		rules.dispatchTypeCode = []
+		rules.mantAppNumber = []
 		rules.maintOrgId = []
 		rules.maintLeaderId = []
 		rules.specialJobCodeList = []
@@ -560,6 +599,8 @@ const removeDispatchPart = (row) => {
 
 // 处理设备选择变化
 const handleEquipmentChange = (item) => {
+	clearMaintProjApply()
+	clearMaintOrgAndLeader()
 	if (item && item.value) {
 		// 根据设备ID查询设备编码
 		equipmentInfoApi.getById(item.value).then(res => {
@@ -569,6 +610,12 @@ const handleEquipmentChange = (item) => {
 				formData.equipSmallCategoryName = res.data.equipSmallCategoryName || ''
 				dispatchPartList.value = []
 				syncDispatchPartToForm()
+				if (formData.dispatchTypeCode) {
+					loadDeptList()
+					if (isMaintProjApplyVisible.value) {
+						queryMaintProjApplyOptions()
+					}
+				}
 			}
 		}).catch(() => {
 			// 如果查询失败，尝试从 label 中提取（如果包含编码信息）
@@ -638,6 +685,9 @@ const loadDeptList = () => {
 				label: item.unitName,
 				value: item.externalCompanyId,
 			}))
+			if (formData.maintOrgId) {
+				ensureDeptDefaultOption(formData.maintOrgId, formData.maintOrgName)
+			}
 		}
 	}).catch(() => {
 		deptList.value = []
@@ -674,19 +724,21 @@ const handleDispatchTypeChange = (value) => {
 	}
 	formData.dispatchTypeName = typeMap[value] || ''
 
-	// 清空承修单位和维修负责人
-	formData.maintOrgId = null
-	formData.maintOrgName = ''
-	formData.maintLeaderId = null
-	formData.maintLeaderName = ''
-	userList.value = []
+	clearMaintProjApply()
+	clearMaintOrgAndLeader()
 
 	// 重新加载维修单位列表
 	if (value) {
 		loadDeptList()
+		if (value === '3' || value === '4') {
+			queryMaintProjApplyOptions()
+		}
 	} else {
 		deptList.value = []
 	}
+	nextTick(() => {
+		formRef.value?.clearValidate(['mantAppNumber'])
+	})
 }
 
 // 部门变化时，清空维修负责人和手机号码，加载用户列表
@@ -738,6 +790,102 @@ const handleSpecialJobChange = () => {
 	syncSpecialJobFields()
 }
 
+const clearMaintOrgAndLeader = () => {
+	formData.maintOrgId = null
+	formData.maintOrgName = ''
+	formData.maintLeaderId = null
+	formData.maintLeaderName = ''
+	formData.maintLeaderMobile = ''
+	deptList.value = []
+	userList.value = []
+}
+
+const clearMaintProjApply = () => {
+	formData.mantAppNumber = ''
+	maintProjApplyOptions.value = []
+	maintProjApplyLoading.value = false
+}
+
+const getMaintProjAppType = () => {
+	if (formData.dispatchTypeCode === '3') return '1'
+	if (formData.dispatchTypeCode === '4') return '2'
+	return ''
+}
+
+const ensureDeptDefaultOption = (deptId, deptName) => {
+	if (!deptId) return
+	const deptIdStr = String(deptId)
+	const hasOption = deptList.value.some(item => String(item.value) === deptIdStr)
+	if (!hasOption) {
+		deptList.value.unshift({
+			value: deptId,
+			label: deptName || deptIdStr,
+		})
+	}
+}
+
+const queryMaintProjApplyOptions = async () => {
+	if (!isMaintProjApplyVisible.value || !formData.equipId) {
+		maintProjApplyOptions.value = []
+		return
+	}
+	const appType = getMaintProjAppType()
+	if (!appType) {
+		maintProjApplyOptions.value = []
+		return
+	}
+	maintProjApplyLoading.value = true
+	try {
+		const res = await publicApi.getLocalSelect({
+			type: 'MAINT_PROJ_APPLY',
+			equipId: formData.equipId,
+			appType,
+		})
+		if (res.code === '0000') {
+			maintProjApplyOptions.value = (res.data || []).map(item => ({
+				value: item.value,
+				label: item.label,
+			}))
+			return
+		}
+		proxy.$message.error(res.msg || '加载维修项目申请单失败')
+		maintProjApplyOptions.value = []
+	} catch (error) {
+		console.error('加载维修项目申请单失败:', error)
+		proxy.$message.error('加载维修项目申请单失败')
+		maintProjApplyOptions.value = []
+	} finally {
+		maintProjApplyLoading.value = false
+	}
+}
+
+const handleMantAppNumberChange = async (appNumber) => {
+	if (!appNumber) {
+		clearMaintOrgAndLeader()
+		return
+	}
+	try {
+		const res = await api.getMaintProjApplyByAppNumber(appNumber)
+		if (res.code !== '0000' || !res.data) {
+			proxy.$message.warning(res.msg || '未查询到申请单对应维修单位')
+			return
+		}
+		const unitId = res.data.maintenanceUnitId ?? res.data.maintOrgId ?? res.data.MAINTENANCE_UNIT_ID
+		const unitName = res.data.maintenanceUnitName ?? res.data.maintOrgName ?? res.data.MAINTENANCE_UNIT_NAME
+		if (!unitId) {
+			proxy.$message.warning('申请单未匹配到维修单位')
+			return
+		}
+		ensureDeptDefaultOption(unitId, unitName)
+		formData.maintOrgId = unitId
+		formData.maintOrgName = unitName || (deptList.value.find(item => String(item.value) === String(unitId))?.label || '')
+		handleDeptChange()
+	} catch (error) {
+		console.error('根据申请单查询维修单位失败:', error)
+		proxy.$message.error('根据申请单查询维修单位失败')
+	}
+}
+
 // 监听dispatchTypeCode变化，自动设置dispatchTypeName
 watch(() => formData.dispatchTypeCode, (newVal) => {
 	if (newVal) {
@@ -749,13 +897,37 @@ watch(() => formData.dispatchTypeCode, (newVal) => {
 			'5': '其他'
 		}
 		formData.dispatchTypeName = typeMap[newVal] || ''
-		// 注意：loadDeptList 在 handleDispatchTypeChange 中调用，这里不再调用
+		if (isMaintProjApplyVisible.value && maintProjApplyOptions.value.length === 0 && formData.equipId) {
+			queryMaintProjApplyOptions()
+		}
+	} else {
+		clearMaintProjApply()
 	}
 })
 
 watch(() => partTreeFilterText.value, (newVal) => {
 	partTreeRef.value?.filter(newVal)
 })
+
+watch(
+	() => formData.equipId,
+	(newVal, oldVal) => {
+		if (newVal === oldVal) {
+			return
+		}
+		if (!newVal) {
+			clearMaintProjApply()
+			clearMaintOrgAndLeader()
+			return
+		}
+		if (formData.dispatchTypeCode) {
+			loadDeptList()
+			if (isMaintProjApplyVisible.value) {
+				queryMaintProjApplyOptions()
+			}
+		}
+	}
+)
 
 watch(() => [formData.isSpecialJob, formData.specialJobCode], async ([isSpecialJob, specialJobCode]) => {
 	if (String(isSpecialJob) !== '1') {
@@ -914,6 +1086,8 @@ const resetForm = () => {
 		formData.faultImageIds = []
 	}
 	dispatchPartList.value = []
+	deptList.value = []
+	userList.value = []
 	partTreeData.value = []
 	partTreeFilterText.value = ''
 	partTreeLeafMap = new Map()
@@ -921,6 +1095,7 @@ const resetForm = () => {
 	formData.specialJobCode = ''
 	formData.specialJobName = ''
 	formData.specialJobCodeList = []
+	clearMaintProjApply()
 	// 重置状态
 	formData.status = 0
 	// 重置模式

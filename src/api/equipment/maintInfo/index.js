@@ -138,6 +138,16 @@ const api = {
 			method: 'get',
 		})
 	},
+	// 根据申请单号查询维修项目申请信息
+	getMaintProjApplyByAppNumber(appNumber) {
+		return request({
+			url: '/api/v1/internal/maintInfo/getMaintProjApplyByAppNumber',
+			method: 'get',
+			params: {
+				appNumber,
+			},
+		})
+	},
 }
 
 export default api
