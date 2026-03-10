@@ -136,7 +136,7 @@ watch(
 			formData.value.serviceCompanies = ''
 			serviceCompaniesArray.value = []
 		}
-	}
+	},
 )
 
 const serviceUnitOptions = ref([])
