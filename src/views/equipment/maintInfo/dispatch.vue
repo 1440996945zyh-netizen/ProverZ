@@ -578,10 +578,17 @@ const queryMaintProjApplyOptions = async () => {
 	}
 	maintProjApplyLoading.value = true
 	try {
-		const res = await publicApi.getLocalSelect({
+		const params = {
 			type: 'MAINT_PROJ_APPLY',
 			equipId: formData.equipId,
 			appType,
+		}
+		// 修改时传当前维保ID，后端可放行当前记录已绑定的申请单
+		if (formData.id || props.maintInfoId) {
+			params.maintInfoId = formData.id || props.maintInfoId
+		}
+		const res = await publicApi.getLocalSelect({
+			...params,
 		})
 		if (res.code === '0000') {
 			maintProjApplyOptions.value = (res.data || []).map(item => ({
