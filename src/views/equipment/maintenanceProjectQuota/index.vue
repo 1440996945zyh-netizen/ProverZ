@@ -48,25 +48,34 @@ const data = reactive({
 		startPage: 1,
 		pageSize: 20,
 		projectName: undefined,
-		quotaNo: undefined,
+    quotaCode: undefined,
 	},
 })
 const { queryParams } = toRefs(data)
 
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
-	{ label: '定额编号', prop: 'quotaNo', align: 'center', width: 180 },
+	{ label: '定额编号', prop: 'quotaCode', align: 'center', width: 180 },
 	{ label: '维修项目名称', prop: 'projectName', align: 'left', width: 200, showOverFlow: true },
 	{ label: '维修项目内容', prop: 'projectContent', align: 'left', minWidth: 300, showOverFlow: true },
 	{ label: '计量单位', prop: 'unit', align: 'center', width: 100 },
 	{
 		label: '不含税金额',
-		prop: 'amount',
+		prop: 'amountExcludingTax',
 		align: 'right',
 		width: 120,
-		render: row => {
-			return h('span', row.amount ? row.amount.toFixed(2) : '0.00')
-		},
+    render: row => {
+      // 1. 统一转为数字类型，处理 null/undefined/空字符串
+      const val = parseFloat(row.amountExcludingTax);
+
+      // 2. 判断是否为有效数字 (isNaN 会过滤掉 null, "", undefined 等)
+      if (isNaN(val)) {
+        return h('span', '0.00'); // 如果没数据，直接显示为空白（或者写 '0.00'）
+      }
+
+      // 3. 只有有效数字才格式化
+      return h('span', val.toFixed(2));
+    }
 	},
 	{
 		prop: 'operate',
@@ -121,7 +130,7 @@ const selectData = reactive([
 	{
 		name: '定额编号',
 		type: 'input',
-		modelValue: 'quotaNo',
+		modelValue: 'quotaCode',
 		span: 12,
 	},
 ])
@@ -132,7 +141,7 @@ const buttonList = reactive([
 		type: 'primary',
 		icon: 'Plus',
 		click: () => handleAdd,
-		permission: 'equipment:emequiprepaircontract:add',
+		permission: 'equipment:emmaintenanceprojectquota:add',
 	},
 ])
 
@@ -176,11 +185,11 @@ const handleUpdate = row => {
 		api.getById(row.id).then(response => {
 			const resData = JSON.parse(JSON.stringify(response.data))
 			detailRef.value.formData.id = resData.id
-			detailRef.value.formData.quotaNo = resData.quotaNo
+			detailRef.value.formData.quotaCode = resData.quotaCode
 			detailRef.value.formData.projectName = resData.projectName
 			detailRef.value.formData.projectContent = resData.projectContent
 			detailRef.value.formData.unit = resData.unit
-			detailRef.value.formData.amount = resData.amount
+			detailRef.value.formData.amountExcludingTax = resData.amountExcludingTax
 		})
 	})
 }

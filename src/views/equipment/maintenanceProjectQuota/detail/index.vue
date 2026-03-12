@@ -1,8 +1,8 @@
 <template>
 	<div class="formData">
 		<el-form :model="formData" ref="ruleForm" label-width="150px" :rules="rules">
-			<el-form-item label="定额编号" prop="quotaNo">
-				<el-input v-model="formData.quotaNo" placeholder="系统自动生成" disabled />
+			<el-form-item label="定额编号" prop="quotaCode">
+				<el-input v-model="formData.quotaCode" placeholder="系统自动生成" disabled />
 			</el-form-item>
 
 			<el-form-item label="维修项目名称" prop="projectName">
@@ -17,8 +17,8 @@
 				<el-input v-model="formData.unit" placeholder="请输入计量单位" maxlength="50" />
 			</el-form-item>
 
-			<el-form-item label="不含税金额" prop="amount">
-				<el-input-number v-model="formData.amount" :precision="2" :min="0" :max="999999999.99" placeholder="请输入不含税金额" style="width: 100%" />
+			<el-form-item label="不含税金额" prop="amountExcludingTax">
+				<el-input-number v-model="formData.amountExcludingTax" :precision="2" :min="0" :max="999999999.99" placeholder="请输入不含税金额" style="width: 100%" />
 			</el-form-item>
 		</el-form>
 	</div>
@@ -33,11 +33,11 @@ const ruleForm = ref()
 const data = reactive({
 	formData: {
 		id: null,
-		quotaNo: '',
+    quotaCode: '',
 		projectName: '',
 		projectContent: '',
 		unit: '',
-		amount: null,
+    amountExcludingTax: null,
 	},
 })
 const { formData } = toRefs(data)
@@ -46,7 +46,7 @@ const rules = reactive({
 	projectName: proxy.getRules({ required: true }),
 	projectContent: proxy.getRules({ required: true }),
 	unit: proxy.getRules({ required: true }),
-	amount: proxy.getRules({ required: true }),
+  amountExcludingTax: proxy.getRules({ required: true }),
 })
 
 const validate = async () => {
@@ -64,11 +64,11 @@ const validate = async () => {
 
 const resetForm = () => {
 	formData.value.id = null
-	formData.value.quotaNo = ''
+	formData.value.quotaCode = ''
 	formData.value.projectName = ''
 	formData.value.projectContent = ''
 	formData.value.unit = ''
-	formData.value.amount = null
+	formData.value.amountExcludingTax = null
 	ruleForm.value?.clearValidate()
 }
 
