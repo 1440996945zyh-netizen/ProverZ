@@ -2,7 +2,7 @@
 	<div class="formData">
 		<el-form :model="formData" ref="ruleForm" :rules="rules" label-position="top">
 			<div class="section-title">
-				<span class="title-text">设备信息</span>
+				<span class="title-text">申请信息</span>
 			</div>
 			<el-row :gutter="20" class="section-content">
 				<el-col :xs="24" :sm="12" :md="12" :lg="12">
@@ -12,9 +12,18 @@
 				</el-col>
 				<el-col :xs="24" :sm="12" :md="12" :lg="12">
 					<el-form-item label="设备名称" prop="equipName">
-						<el-select v-model="formData.equipName" placeholder="请选择设备名称" style="width: 100%">
-							<el-option v-for="item in equipmentNameOptions" :key="item.id" :label="item.name" :value="item.id" />
-						</el-select>
+						<Select
+							:dataConfig="{ params: { type: 'EQUIPMENT' } }"
+							v-model:value="formData.equipId"
+							v-model:label="formData.equipName"
+							placeholder="请选择设备（可搜索）"
+							@change="handleEquipmentChange"
+						/>
+					</el-form-item>
+				</el-col>
+				<el-col :xs="24" :sm="12" :md="12" :lg="24">
+					<el-form-item label="申请事项" prop="appContent">
+						<el-input v-model="formData.appContent" type="textarea" :rows="4" placeholder="请输入申请事项" maxlength="1000" />
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -37,10 +46,7 @@
 			<div v-if="isQuotaProject" class="quota-section">
 				<div class="quota-header">
 					<span class="quota-title">维修项目定额表</span>
-					<el-button type="primary" @click="openQuotaDialog" size="default">
-						<el-icon><Plus /></el-icon>
-						选择维修项目定额
-					</el-button>
+					<el-button type="primary" @click="openQuotaDialog" size="default">选择维修项目定额</el-button>
 				</div>
 				<el-table :data="quotaTableData" border style="width: 100%" class="quota-table">
 					<el-table-column prop="quotaNo" label="定额编号" width="180" />
@@ -48,16 +54,16 @@
 					<el-table-column prop="projContent" label="维修项目内容" min-width="200" show-overflow-tooltip />
 					<el-table-column prop="unit" label="计量单位" width="120" />
 					<el-table-column prop="unitPrice" label="不含税金额" width="150" align="right"></el-table-column>
+
 					<el-table-column prop="taxRate" label="税率(%)" width="150">
 						<template #default="scope">
-							<el-select
-								v-model="scope.row.taxRate"
+							<Select
+								:dataConfig="{ params: { type: 'DICT', dictType: 'TAX_RATE' } }"
+								v-model:value="scope.row.taxRate"
+								v-model:label="scope.row.taxRate"
 								placeholder="请选择税率"
-								style="width: 100%"
 								@change="handleTaxRateChange(scope.row)"
-							>
-								<el-option v-for="item in taxRateOptions" :key="item.value" :label="item.label" :value="item.value" />
-							</el-select>
+							/>
 						</template>
 					</el-table-column>
 					<el-table-column prop="taxAmount" label="含税金额" width="150" align="right"></el-table-column>
@@ -77,7 +83,7 @@
 					<el-form-item label="预算金额" prop="budgetAmount">
 						<el-input-number
 							v-model="formData.budgetAmount"
-							:precision="2"
+							:precision="4"
 							:min="0"
 							:disabled="isQuotaProject"
 							style="width: 100%"
@@ -85,10 +91,6 @@
 					</el-form-item>
 				</el-col>
 			</el-row>
-
-			<el-form-item label="申请事项" prop="appContent">
-				<el-input v-model="formData.appContent" type="textarea" :rows="4" placeholder="请输入申请事项" maxlength="1000" />
-			</el-form-item>
 		</el-form>
 
 		<Dialog v-model:visible="quotaDialogVisible" title="选择维修项目定额" width="70%" class="quota-dialog">
@@ -116,7 +118,7 @@
 </template>
 
 <script setup name="maintenanceProjectApplyDetail">
-import { ref, reactive, getCurrentInstance, toRefs, watch } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, watch, h } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
@@ -142,6 +144,7 @@ const data = reactive({
 		maintenanceUnitName: '',
 		budgetAmount: 0,
 		remark: '',
+		list: [],
 	},
 })
 const { formData } = toRefs(data)
@@ -153,27 +156,12 @@ const equipmentTypeOptions = ref([
 	{ id: 3, name: '设备类型3' },
 ])
 
-const equipmentNameOptions = ref([
-	{ id: 1, name: '设备名称1' },
-	{ id: 2, name: '设备名称2' },
-	{ id: 3, name: '设备名称3' },
-])
-
 const projectTypeOptions = ref([
 	{ id: 1, name: '定额' },
 	{ id: 2, name: '非定额' },
 ])
 
 const isQuotaProject = ref(false)
-
-// 税率选项（从字典获取）
-const taxRateOptions = ref([
-	{ label: '0%', value: 0 },
-	{ label: '3%', value: 3 },
-	{ label: '6%', value: 6 },
-	{ label: '9%', value: 9 },
-	{ label: '13%', value: 13 },
-])
 
 // 维修项目定额表数据
 const quotaTableData = ref([])
@@ -190,17 +178,18 @@ const selectedQuotas = ref([])
 const quotaTableColumns = ref([
 	{ label: '', type: 'checkbox', width: 50 },
 
-	{ label: '定额编号', prop: 'quotaNo', align: 'center', width: 180 },
-	{ label: '维修项目名称', prop: 'projName', align: 'left', width: 200, showOverFlow: true },
-	{ label: '维修项目内容', prop: 'projContent', align: 'left', minWidth: 300, showOverFlow: true },
+	{ label: '定额编号', prop: 'quotaCode', align: 'center', width: 180 },
+	{ label: '维修项目名称', prop: 'projectName', align: 'left', width: 200, showOverFlow: true },
+	{ label: '维修项目内容', prop: 'projectContent', align: 'left', minWidth: 300, showOverFlow: true },
 	{ label: '计量单位', prop: 'unit', align: 'center', width: 100 },
 	{
 		label: '不含税金额',
-		prop: 'unitPrice',
+		prop: 'amountExcludingTax',
 		align: 'right',
 		width: 120,
 		render: row => {
-			return row.unitPrice ? row.unitPrice.toFixed(2) : '0.00'
+			const num = parseFloat(row.amountExcludingTax) || 0
+			return h('span', num.toFixed(4))
 		},
 	},
 ])
@@ -279,17 +268,17 @@ const confirmQuotaSelection = () => {
 	}
 
 	selectedQuotas.value.forEach(quota => {
-		const existingIndex = quotaTableData.value.findIndex(item => item.quotaId === quota.id)
+		const existingIndex = quotaTableData.value.findIndex(item => item.id === quota.id)
 		if (existingIndex === -1) {
 			quotaTableData.value.push({
-				quotaId: quota.id,
-				quotaNo: quota.quotaNo,
-				projName: quota.projName,
-				projContent: quota.projContent,
+				id: quota.id,
+				quotaNo: quota.quotaCode,
+				projName: quota.projectName,
+				projContent: quota.projectContent,
 				unit: quota.unit,
-				unitPrice: quota.unitPrice,
+				unitPrice: Number(quota.amountExcludingTax).toFixed(4),
 				taxRate: 0,
-				taxAmount: quota.unitPrice,
+				taxAmount: Number(quota.amountExcludingTax).toFixed(4),
 			})
 		}
 	})
@@ -301,8 +290,8 @@ const confirmQuotaSelection = () => {
 // 计算含税金额
 const calculateTaxAmount = row => {
 	if (row.unitPrice && row.taxRate !== undefined) {
-		const taxRate = row.taxRate / 100
-		row.taxAmount = row.unitPrice * (1 + taxRate)
+		const taxRate = Number(row.taxRate) / 100
+		row.taxAmount = Number((row.unitPrice * (1 + taxRate)).toFixed(4))
 	} else {
 		row.taxAmount = row.unitPrice || 0
 	}
@@ -313,6 +302,7 @@ const calculateBudgetAmount = () => {
 	formData.value.budgetAmount = quotaTableData.value.reduce((sum, row) => {
 		return sum + (row.taxAmount || 0)
 	}, 0)
+	formData.value.list = quotaTableData.value
 }
 
 // 税率变化处理
@@ -334,6 +324,23 @@ const handleProjectTypeChange = value => {
 const deleteRow = index => {
 	quotaTableData.value.splice(index, 1)
 	calculateBudgetAmount()
+}
+
+const initQuotaTableData = list => {
+	if (!list || list.length === 0) {
+		quotaTableData.value = []
+		return
+	}
+	quotaTableData.value = list.map(item => ({
+		id: item.id,
+		quotaNo: item.quotaNo,
+		projName: item.projName,
+		projContent: item.projContent,
+		unit: item.unit,
+		unitPrice: Number(item.unitPrice).toFixed(4),
+		taxRate: Number(item.taxRate),
+		taxAmount: Number(item.taxAmount).toFixed(4),
+	}))
 }
 
 const rules = reactive({
@@ -371,6 +378,7 @@ const resetForm = () => {
 	formData.value.maintenanceUnitName = ''
 	formData.value.budgetAmount = 0
 	formData.value.remark = ''
+	formData.value.list = []
 	quotaTableData.value = []
 	ruleForm.value?.clearValidate()
 }
@@ -379,6 +387,7 @@ defineExpose({
 	validate,
 	resetForm,
 	formData,
+	initQuotaTableData,
 })
 </script>
 
@@ -453,42 +462,6 @@ defineExpose({
 		font-weight: 500;
 		font-size: 14px;
 		padding-bottom: 8px;
-	}
-}
-
-.quota-dialog {
-	:deep(.el-dialog) {
-		max-height: 80vh;
-		display: flex;
-		flex-direction: column;
-	}
-
-	:deep(.el-dialog__body) {
-		flex: 1;
-		overflow: hidden;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-	}
-
-	:deep(.dialog-body) {
-		flex: 1;
-		overflow: hidden;
-		padding: 20px 24px;
-		display: flex;
-		flex-direction: column;
-	}
-
-	:deep(.base-table-container) {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-	}
-
-	:deep(.vxe-table) {
-		flex: 1;
-		overflow: auto;
 	}
 }
 </style>

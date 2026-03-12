@@ -11,6 +11,7 @@
 				:tableData="tableData"
 				:loading="loading"
 				:total="total"
+				:show-pagination="true"
 			/>
 		</div>
 		<Drawer v-model="dialogVisible" :title="title" size="70%">
@@ -36,7 +37,7 @@ import api from '@/api/equipment/maintenanceProjectApply/index'
 const { proxy } = getCurrentInstance()
 
 const baseTable = ref()
-const total = ref('')
+const total = ref(0)
 const tableData = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -67,7 +68,11 @@ const tableColumns = ref([
 		align: 'right',
 		width: 120,
 		render: row => {
-			return h('span', row.budgetAmount ? row.budgetAmount.toFixed(2) : '0.00')
+			const value = Number(row.budgetAmount)
+			const formattedValue = !isNaN(value)
+				? value.toLocaleString('zh-CN', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+				: '0.0000'
+			return h('span', { style: { color: '#f56c6c', fontWeight: 'bold' } }, `¥${formattedValue}`)
 		},
 	},
 	{
@@ -190,6 +195,8 @@ const handleUpdate = row => {
 			detailRef.value.formData.maintenanceUnitName = resData.maintenanceUnitName
 			detailRef.value.formData.budgetAmount = resData.budgetAmount
 			detailRef.value.formData.remark = resData.remark
+			detailRef.value.formData.list = resData.list || []
+			detailRef.value.initQuotaTableData(resData.list || [])
 		})
 	})
 }
