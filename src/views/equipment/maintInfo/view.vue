@@ -166,27 +166,37 @@
 			</div>
 
 			<div class="view-side">
-				<el-card class="timeline-card" shadow="never">
+				<el-card class="timeline-card" shadow="always">
 					<template #header>
 						<div class="card-header">
 							<span>操作记录</span>
 						</div>
 					</template>
 					<el-empty v-if="timelineList.length === 0" description="暂无操作记录" />
-					<el-timeline v-else>
-						<el-timeline-item
-							v-for="(item, index) in timelineList"
-							:key="`${item.title}-${index}`"
-							:timestamp="item.time"
-							placement="top"
-							:color="item.color"
-						>
-							<el-card class="timeline-item-card" shadow="hover">
-								<h4>{{ item.title }}</h4>
-								<p v-for="(line, lineIndex) in item.lines" :key="lineIndex">{{ line }}</p>
-							</el-card>
-						</el-timeline-item>
-					</el-timeline>
+					<template v-else>
+						<div class="custom-timeline">
+							<div
+								v-for="(item, index) in timelineList"
+								:key="`${item.title}-${index}`"
+								class="timeline-item"
+							>
+								<div class="timeline-dot" :class="getDotClass(item.actionCode, index, timelineList.length)"></div>
+								<div class="dot-label" v-if="index === 0 && timelineList.length > 1">结束</div>
+								<div class="dot-label" v-else-if="index === timelineList.length - 1 && timelineList.length > 1">开始</div>
+
+								<div class="timeline-card-inner">
+									<div class="card-time">{{ item.time }}</div>
+									<div class="card-title">{{ item.title }}</div>
+									<div class="card-content">
+										<div class="content-item" v-for="(line, lineIndex) in item.lines" :key="lineIndex">
+											<span class="content-label">{{ line.label }}</span>
+											<span class="content-value">{{ line.value }}</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</template>
 				</el-card>
 			</div>
 		</div>
@@ -516,7 +526,7 @@ const parseSnapshotJson = snapshotJson => {
 const appendLine = (lines, label, value, formatter) => {
 	const text = formatter ? formatter(value) : getTextOrEmpty(value)
 	if (!text || text === '-') return
-	lines.push(`${label}：${text}`)
+	lines.push({ label, value: text })
 }
 
 const buildTimelineItem = logItem => {
@@ -529,51 +539,50 @@ const buildTimelineItem = logItem => {
 	const lines = []
 	let title = getTextOrEmpty(logItem.actionName) || '操作记录'
 
+	lines.push({ label: '操作人', value: operatorName })
+
 	if (actionCode === 'REPORT') {
 		title = '提报'
-		lines.push(`${operatorName} 提交了报修信息`)
+		lines.push({ label: '操作动作', value: '提交了报修信息' })
 		appendLine(lines, '报修类型', snapshot.reportTypeName || formData.reportTypeName)
 		appendLine(lines, '故障发现时间', snapshot.faultFindTime || formData.faultFindTime, formatDateTime)
 	} else if (actionCode === 'DISPATCH') {
 		title = '派工'
-		lines.push(`${operatorName} 完成派工`)
+		lines.push({ label: '操作动作', value: '完成派工' })
 		appendLine(lines, '派工类型', snapshot.dispatchTypeName || getDispatchTypeText(snapshot.dispatchTypeCode, formData.dispatchTypeName))
 		appendLine(lines, '承修单位', snapshot.maintOrgName || formData.maintOrgName)
 		appendLine(lines, '维修负责人', snapshot.maintLeaderName || formData.maintLeaderName)
 	} else if (actionCode === 'START_MAINT') {
 		title = '开始维修'
-		lines.push(`${operatorName} 开始维修`)
+		lines.push({ label: '操作动作', value: '开始维修' })
 		appendLine(lines, '开始时间', snapshot.maintStartTime || logItem.operateTime, formatDateTime)
 	} else if (actionCode === 'END_MAINT') {
 		title = '维修完成'
-		lines.push(`${operatorName} 完成维修`)
+		lines.push({ label: '操作动作', value: '完成维修' })
 		appendLine(lines, '维修时长', snapshot.maintDuration, value => `${formatNumber(value)} 小时`)
 		appendLine(lines, '故障时长', snapshot.faultDuration, value => `${formatNumber(value)} 小时`)
 		appendLine(lines, '维修说明', snapshot.maintRemark || remark)
 	} else if (actionCode === 'ACCEPT_PASS') {
 		title = '验收通过'
-		lines.push(`${operatorName} 验收通过`)
+		lines.push({ label: '操作动作', value: '验收通过' })
 		appendLine(lines, '验收备注', snapshot.acceptanceRemark || remark)
 	} else if (actionCode === 'ACCEPT_REJECT') {
 		const returnStatus = snapshot.returnStatusName || getStatusText(snapshot.returnStatus)
 		title = returnStatus && returnStatus !== '-' ? `验收不通过（退回至${returnStatus}）` : '验收不通过'
-		lines.push(`${operatorName} 验收不通过`)
+		lines.push({ label: '操作动作', value: '验收不通过' })
 		appendLine(lines, '退回状态', returnStatus)
 		appendLine(lines, '验收备注', snapshot.acceptanceRemark || remark)
 	} else if (actionCode === 'CANCEL') {
 		title = '作废'
-		lines.push(`${operatorName} 作废了记录`)
+		lines.push({ label: '操作动作', value: '作废了记录' })
 		appendLine(lines, '作废备注', remark || snapshot.cancelRemark)
 	} else {
-		lines.push(`${operatorName} 执行了${title}`)
+		lines.push({ label: '操作动作', value: `执行了${title}` })
 		appendLine(lines, '备注', remark)
 	}
 
-	if (lines.length === 0) {
-		lines.push(`${operatorName} 执行了${title}`)
-	}
-
 	return {
+		actionCode,
 		title,
 		time: formatDateTime(logItem.operateTime),
 		rawTime: logItem.operateTime,
@@ -582,85 +591,115 @@ const buildTimelineItem = logItem => {
 	}
 }
 
+const getDotClass = (actionCode, index, total) => {
+	const classes = []
+	if (index === 0 && total > 1) classes.push('dot-end')
+	else if (index === total - 1 && total > 1) classes.push('dot-start')
+
+	const colorMap = {
+		REPORT: 'dot-blue',
+		DISPATCH: 'dot-green',
+		START_MAINT: 'dot-orange',
+		END_MAINT: 'dot-gray',
+		ACCEPT_PASS: 'dot-green',
+		ACCEPT_REJECT: 'dot-red',
+		CANCEL: 'dot-gray',
+	}
+	classes.push(colorMap[actionCode] || 'dot-blue')
+	return classes.join(' ')
+}
+
 const buildFallbackTimelineList = () => {
 	const list = []
 
 	if (formData.createTime) {
 		list.push({
+			actionCode: 'REPORT',
 			title: '提报',
 			time: formatDateTime(formData.createTime),
 			rawTime: formData.createTime,
 			color: '#409EFF',
 			lines: [
-				`${formData.createByName || '系统'} 提交了报修信息`,
-				`报修类型：${getDisplayValue(formData.reportTypeName)}`,
-				`故障发现时间：${formatDateTime(formData.faultFindTime)}`
+				{ label: '操作人', value: formData.createByName || '系统' },
+				{ label: '操作动作', value: '提交了报修信息' },
+				{ label: '报修类型', value: getDisplayValue(formData.reportTypeName) },
+				{ label: '故障发现时间', value: formatDateTime(formData.faultFindTime) }
 			]
 		})
 	}
-
 	if (formData.dispatchTime || formData.dispatcherName || formData.maintOrgName || formData.maintLeaderName) {
 		list.push({
+			actionCode: 'DISPATCH',
 			title: '派工',
 			time: formatDateTime(formData.dispatchTime),
 			rawTime: formData.dispatchTime,
 			color: '#67C23A',
 			lines: [
-				`${formData.dispatcherName || '系统'} 完成派工`,
-				`派工类型：${getDispatchTypeText(formData.dispatchTypeCode, formData.dispatchTypeName)}`,
-				`承修单位：${getDisplayValue(formData.maintOrgName)}`,
-				`维修负责人：${getDisplayValue(formData.maintLeaderName)}`
+				{ label: '操作人', value: formData.dispatcherName || '系统' },
+				{ label: '操作动作', value: '完成派工' },
+				{ label: '派工类型', value: getDispatchTypeText(formData.dispatchTypeCode, formData.dispatchTypeName) },
+				{ label: '承修单位', value: getDisplayValue(formData.maintOrgName) },
+				{ label: '维修负责人', value: getDisplayValue(formData.maintLeaderName) }
 			]
 		})
 	}
 
 	if (formData.maintStartTime) {
 		list.push({
+			actionCode: 'START_MAINT',
 			title: '开始维修',
 			time: formatDateTime(formData.maintStartTime),
 			rawTime: formData.maintStartTime,
 			color: '#E6A23C',
 			lines: [
-				`${formData.maintLeaderName || '系统'} 开始维修`
+				{ label: '操作人', value: formData.maintLeaderName || '系统' },
+				{ label: '操作动作', value: '开始维修' }
 			]
 		})
 	}
 
 	if (formData.maintEndTime || formData.maintRemark || partReplaceList.value.length > 0 || hourFeedbackList.value.length > 0) {
 		list.push({
+			actionCode: 'END_MAINT',
 			title: '维修完成',
 			time: formatDateTime(formData.maintEndTime),
 			rawTime: formData.maintEndTime,
 			color: '#909399',
 			lines: [
-				`${formData.maintLeaderName || '系统'} 完成维修`,
-				`维修说明：${getDisplayValue(formData.maintRemark)}`
+				{ label: '操作人', value: formData.maintLeaderName || '系统' },
+				{ label: '操作动作', value: '完成维修' },
+				{ label: '维修说明', value: getDisplayValue(formData.maintRemark) }
 			]
 		})
 	}
 
 	if (hasAcceptanceRecord.value) {
 		list.push({
+			actionCode: acceptanceResultText.value === '通过' ? 'ACCEPT_PASS' : 'ACCEPT_REJECT',
 			title: acceptanceDisplayText.value === '-' ? '验收记录' : acceptanceDisplayText.value,
 			time: formatDateTime(formData.acceptanceTime || formData.updateTime),
 			rawTime: formData.acceptanceTime || formData.updateTime,
 			color: acceptanceResultText.value === '通过' ? '#67C23A' : '#F56C6C',
 			lines: [
-				`${formData.accepterName || '系统'} 提交了验收记录`,
-				`验收备注：${getDisplayValue(formData.acceptanceRemark)}`
+				{ label: '操作人', value: formData.accepterName || '系统' },
+				{ label: '操作动作', value: '提交了验收记录' },
+				{ label: '验收结果', value: acceptanceResultText.value },
+				{ label: '验收备注', value: getDisplayValue(formData.acceptanceRemark) }
 			]
 		})
 	}
 
 	if (Number(formData.status) === 7 || formData.cancelTime || formData.cancelByName || formData.cancelRemark) {
 		list.push({
+			actionCode: 'CANCEL',
 			title: '作废',
 			time: formatDateTime(formData.cancelTime || formData.updateTime),
 			rawTime: formData.cancelTime || formData.updateTime,
 			color: '#909399',
 			lines: [
-				`${formData.cancelByName || '系统'} 作废了记录`,
-				`作废备注：${getDisplayValue(formData.cancelRemark)}`
+				{ label: '操作人', value: formData.cancelByName || '系统' },
+				{ label: '操作动作', value: '作废了记录' },
+				{ label: '作废备注', value: getDisplayValue(formData.cancelRemark) }
 			]
 		})
 	}
@@ -767,18 +806,35 @@ defineExpose({
 
 <style scoped lang="scss">
 .maint-info-view-wrapper {
-	padding: 20px;
+	height: calc(100vh - 80px); /* 占据抽屉主体高度 */
+	padding: 0;
 
 	.view-layout {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 420px;
 		gap: 20px;
-		align-items: start;
+		height: 100%;
 	}
 
 	.view-main,
 	.view-side {
 		min-width: 0;
+		height: 100%;
+		overflow-y: auto;
+		padding: 20px;
+		box-sizing: border-box;
+
+		/* 增加滚动条样式 */
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: #dcdfe6;
+			border-radius: 3px;
+		}
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
 	}
 
 	.info-card {
@@ -820,33 +876,147 @@ defineExpose({
 		cursor: pointer;
 	}
 
-	.timeline-card {
-		position: sticky;
-		top: 20px;
-
-		:deep(.el-timeline) {
-			padding-left: 16px;
-		}
-
-		:deep(.el-timeline-item__content) {
-			min-width: 0;
-		}
+	.custom-timeline {
+		position: relative;
+		padding-left: 40px; /* 增大内边距，给左侧 label 留空间 */
+		margin-top: 20px;
+		margin-left: 20px; /* 把整个线条往右边移一点 */
 	}
 
-	.timeline-item-card {
-		h4 {
-			margin: 0 0 8px 0;
-			font-size: 16px;
-			font-weight: 500;
-		}
-
-		p {
-			margin: 4px 0;
-			color: #606266;
-			line-height: 1.6;
-			word-break: break-word;
-		}
+	.custom-timeline::before {
+		content: '';
+		position: absolute;
+		left: 0px;
+		top: 10px;
+		bottom: 10px;
+		width: 2px;
+		background: linear-gradient(to bottom, #3662e3 0%, #4299e1 25%, #48bb78 50%, #ed8936 75%, #e53e3e 100%);
+		border-radius: 1px;
 	}
+
+	.timeline-item {
+		position: relative;
+		margin-bottom: 24px;
+	}
+
+	.timeline-item:last-child {
+		margin-bottom: 0;
+	}
+
+	.timeline-dot {
+		position: absolute;
+		left: -27px;
+		top: 14px;
+		width: 16px;
+		height: 16px;
+		border-radius: 50%;
+		border: 3px solid #ffffff;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+		z-index: 3;
+	}
+
+	.dot-start {
+		width: 20px;
+		height: 20px;
+		left: -29px;
+		top: 12px;
+		box-shadow: 0 0 0 3px rgba(54, 98, 227, 0.3);
+	}
+
+	.dot-end {
+		width: 20px;
+		height: 20px;
+		left: -29px;
+		top: 12px;
+		box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.3);
+	}
+
+	.dot-label {
+		position: absolute;
+		left: -65px;
+		top: 10px;
+		font-size: 12px;
+		color: #667085;
+		background-color: #ffffff;
+		padding: 2px 8px;
+		border-radius: 12px;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+		white-space: nowrap;
+	}
+
+	.timeline-card-inner {
+		background: #ffffff;
+		border-radius: 12px;
+		padding: 20px;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+		transition: all 0.3s ease;
+		border: 1px solid #f0f2f5;
+	}
+
+	.timeline-card-inner:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+		border-color: #e8eaed;
+	}
+
+	.card-time {
+		font-size: 13px;
+		color: #667085;
+		margin-bottom: 12px;
+		display: flex;
+		align-items: center;
+	}
+
+	.card-time::before {
+		content: '';
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background-color: currentColor;
+		margin-right: 8px;
+	}
+
+	.card-title {
+		font-size: 16px;
+		font-weight: 600;
+		color: #1d2939;
+		margin-bottom: 16px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid #f0f2f5;
+	}
+
+	.card-content {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 12px;
+	}
+
+	.content-item {
+		font-size: 14px;
+		color: #475467;
+		display: flex;
+		flex-direction: row; /* 水平排列 */
+		align-items: center; /* 居中对齐 */
+	}
+
+	.content-label {
+		font-size: 12px;
+		color: #667085;
+		margin-right: 8px; /* 右侧增加一点间距 */
+	}
+
+	.content-value {
+		font-weight: 500;
+		color: #1d2939;
+		flex: 1; /* 值太长时可以自适应 */
+		word-break: break-all;
+	}
+
+	.dot-blue { color: #3662e3; background-color: #3662e3; }
+	.dot-green { color: #48bb78; background-color: #48bb78; }
+	.dot-orange { color: #ed8936; background-color: #ed8936; }
+	.dot-gray { color: #667085; background-color: #667085; }
+	.dot-red { color: #e53e3e; background-color: #e53e3e; }
 }
 
 @media screen and (max-width: 1400px) {

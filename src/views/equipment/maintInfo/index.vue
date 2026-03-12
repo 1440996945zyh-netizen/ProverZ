@@ -1,19 +1,46 @@
 <template>
 	<div class="app-container">
-	<BaseTable
-		ref="baseTable"
-		:showSearchHeader="true"
-		:selectData="selectData"
-		:searchClick="getList"
-		:buttonList="buttonList"
-		:tableColumns="tableColumns"
-		:tableData="tableData"
-		:loading="loading"
-		:cellClickEvent="cellClickEvent"
-		:total="total"
-		:checkbox-config="checkboxConfig"
-		@checkbox-change="checkboxChange"
-	/>
+		<div class="statistics-container">
+			<div class="statistics-card report-card">
+				<div class="card-content">
+					<div class="card-title">提报</div>
+					<div class="card-value">{{ statistics.reportCount || 0 }}</div>
+				</div>
+			</div>
+			<div class="statistics-card dispatch-card">
+				<div class="card-content">
+					<div class="card-title">已派工</div>
+					<div class="card-value">{{ statistics.dispatchCount || 0 }}</div>
+				</div>
+			</div>
+			<div class="statistics-card finish-card">
+				<div class="card-content">
+					<div class="card-title">维修完成</div>
+					<div class="card-value">{{ statistics.finishCount || 0 }}</div>
+				</div>
+			</div>
+			<div class="statistics-card accept-card">
+				<div class="card-content">
+					<div class="card-title">已验收</div>
+					<div class="card-value">{{ statistics.acceptCount || 0 }}</div>
+				</div>
+			</div>
+		</div>
+		<BaseTable
+			ref="baseTable"
+			:showSearchHeader="true"
+			:selectData="selectData"
+			:searchClick="getList"
+			:buttonList="buttonList"
+			:tableColumns="tableColumns"
+			:tableData="tableData"
+			:loading="loading"
+			:cellClickEvent="cellClickEvent"
+			:total="total"
+			:checkbox-config="checkboxConfig"
+			@checkbox-change="checkboxChange"
+			:tableHeight="statsTableHeight"
+		/>
 	</div>
 	<el-drawer v-model="open" :title="title" size="70%">
 		<detail ref="detailRef" :readonly="isReadonly" :mode="detailMode" :onlyDispatch="onlyDispatch" @saved="handleDetailSaved" />
@@ -48,8 +75,8 @@
 
 	<!-- 开始维修弹窗 -->
 	<el-dialog v-model="startMaintVisible" title="开始维修" width="500px" :close-on-click-modal="false">
-		<el-form :model="startMaintForm" label-width="120px">
-			<el-form-item label="开始维修时间" required>
+		<el-form :model="startMaintForm" label-width="120px" style="padding: 10px 0;">
+			<el-form-item label="开始维修时间" required style="margin-bottom: 0;">
 				<el-date-picker
 					v-model="startMaintForm.maintStartTime"
 					type="datetime"
@@ -908,6 +935,33 @@ const checkboxChange = data => {
 	// 注意：允许用户勾选多条数据（用于批量作废等操作），维修按钮会根据选中数量自动显示/隐藏
 }
 
+// 统计数据
+const statistics = ref({
+	reportCount: 0,
+	dispatchCount: 0,
+	finishCount: 0,
+	acceptCount: 0,
+})
+
+// 表格高度（减去统计卡片占用的空间）
+const statsTableHeight = computed(() => {
+	return window.innerHeight - 240
+})
+
+// 获取统计数据
+const getStatistics = () => {
+	api.getStatusCount(queryParams.value).then(res => {
+		if (res.code == '0000') {
+			statistics.value = {
+				reportCount: res.data.reportCount || 0,
+				dispatchCount: res.data.dispatchCount || 0,
+				finishCount: res.data.finishCount || 0,
+				acceptCount: res.data.acceptCount || 0,
+			}
+		}
+	})
+}
+
 // 点击查询的事件
 const getList = e => {
 	loading.value = true
@@ -922,6 +976,7 @@ const getList = e => {
 		}
 		checkboxSelection.value = []
 	})
+	getStatistics()
 }
 
 // 新增事件（只录入基本信息，状态为0-提报）
@@ -935,8 +990,12 @@ const add = () => {
 		// 设置报修类型为提报
 		detailRef.value.formData.reportTypeCode = '1'
 		detailRef.value.formData.reportTypeName = '提报'
+		// 设置维修类型默认值为计划维修
+		detailRef.value.formData.maintTypeCode = '1'
+		detailRef.value.formData.maintTypeName = '计划维修'
 		// 设置模式为新增（只显示基本信息）
 		detailRef.value.setMode('add')
+		detailRef.value.clearValidation && detailRef.value.clearValidation()
 	})
 }
 
@@ -951,8 +1010,12 @@ const dispatch = () => {
 		// 设置报修类型为派工
 		detailRef.value.formData.reportTypeCode = '2'
 		detailRef.value.formData.reportTypeName = '派工'
+		// 设置维修类型默认值为计划维修
+		detailRef.value.formData.maintTypeCode = '1'
+		detailRef.value.formData.maintTypeName = '计划维修'
 		// 设置模式为派工（显示全部信息）
 		detailRef.value.setMode('dispatch')
+		detailRef.value.clearValidation && detailRef.value.clearValidation()
 	})
 }
 
@@ -1018,7 +1081,11 @@ const edit = row => {
 				// 逐个赋值，确保响应式更新
 				Object.keys(msg).forEach(key => {
 					if (detailRef.value.formData.hasOwnProperty(key)) {
-						detailRef.value.formData[key] = msg[key]
+						if (key === 'maintLeaderId' || key === 'maintLeaderName') {
+							detailRef.value.formData[key] = msg[key] ? (typeof msg[key] === 'string' ? msg[key].split(',') : msg[key]) : []
+						} else {
+							detailRef.value.formData[key] = msg[key]
+						}
 					}
 				})
 				// 如果 maintTypeName 为空，根据 maintTypeCode 设置
@@ -1122,11 +1189,11 @@ const dispatchWork = row => {
 
 // 派工取消
 const dispatchCancel = () => {
+	if (dispatchRef.value) {
+		dispatchRef.value.clearValidation && dispatchRef.value.clearValidation()
+	}
 	dispatchOpen.value = false
 	currentDispatchId.value = null
-	if (dispatchRef.value) {
-		dispatchRef.value.resetForm()
-	}
 }
 
 // 保存派工
@@ -1143,8 +1210,8 @@ const saveDispatch = async () => {
 				mantAppNumber: submitData.mantAppNumber,
 				maintOrgId: submitData.maintOrgId,
 				maintOrgName: submitData.maintOrgName,
-				maintLeaderId: submitData.maintLeaderId,
-				maintLeaderName: submitData.maintLeaderName,
+				maintLeaderId: Array.isArray(submitData.maintLeaderId) ? submitData.maintLeaderId.join(',') : submitData.maintLeaderId,
+				maintLeaderName: Array.isArray(submitData.maintLeaderName) ? submitData.maintLeaderName.join(',') : submitData.maintLeaderName,
 				maintLeaderMobile: submitData.maintLeaderMobile,
 				isSpecialJob: submitData.isSpecialJob,
 				specialJobCode: submitData.specialJobCode,
@@ -2102,6 +2169,8 @@ const save = async () => {
 		proxy.$modal.confirm('确定保存?').then(() => {
 			// 深拷贝表单数据
 			const submitData = JSON.parse(JSON.stringify(detailRef.value.formData))
+			submitData.maintLeaderId = Array.isArray(submitData.maintLeaderId) ? submitData.maintLeaderId.join(',') : submitData.maintLeaderId
+			submitData.maintLeaderName = Array.isArray(submitData.maintLeaderName) ? submitData.maintLeaderName.join(',') : submitData.maintLeaderName
 
 			if (title.value == '修改设备维修派工信息') {
 				api.update(submitData).then(res => {
@@ -2150,6 +2219,9 @@ const save = async () => {
 
 // 取消事件
 const cancel = () => {
+	if (detailRef.value) {
+		detailRef.value.clearValidation && detailRef.value.clearValidation()
+	}
 	open.value = false
 }
 
@@ -2181,6 +2253,121 @@ getList(queryParams.value)
 
 .hour-feedback-header {
 	display: none;
+}
+
+.app-container {
+	padding: 10px 24px;
+}
+
+.statistics-container {
+	margin-bottom: 10px;
+	display: flex;
+	gap: 12px;
+	width: fit-content;
+}
+
+.statistics-card {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 24px;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+	border: 1px solid #e8eaed;
+	min-width: 160px;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+}
+
+.card-content {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	position: relative;
+	z-index: 1;
+	min-width: 0;
+	gap: 24px;
+	width: 100%;
+}
+
+.card-title {
+	font-size: 16px;
+	color: #606266;
+	margin: 0;
+	font-weight: 600;
+	letter-spacing: 0.1px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.card-value {
+	font-size: 32px;
+	font-weight: 700;
+	color: #303133;
+	line-height: 1;
+	letter-spacing: -0.5px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.report-card {
+	background: linear-gradient(135deg, rgba(82, 106, 214, 1) 0%, rgba(98, 55, 142, 1) 100%);
+	.card-value {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+}
+
+.dispatch-card {
+	background: linear-gradient(135deg, rgba(230, 162, 60, 1) 0%, rgba(214, 114, 33, 1) 100%);
+	.card-value {
+		background: linear-gradient(135deg, #e6a23c 0%, #d67221 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+}
+
+.finish-card {
+	background: linear-gradient(135deg, rgba(59, 152, 234, 1) 0%, rgba(0, 222, 234, 1) 100%);
+	.card-value {
+		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+}
+
+.accept-card {
+	background: linear-gradient(135deg, rgba(103, 194, 58, 1) 0%, rgba(53, 142, 13, 1) 100%);
+	.card-value {
+		background: linear-gradient(135deg, #67c23a 0%, #358e0d 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
 }
 </style>
 
