@@ -65,6 +65,9 @@ const api = {
 			url: '/api/internal/file/upload',
 			method: 'post',
 			data: query,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
 		})
 	},
 	/**

@@ -30,7 +30,7 @@
 		</template>
 	</el-drawer>
 	<!-- 查看抽屉 -->
-	<el-drawer v-model="viewOpen" title="查看设备维修派工信息" size="70%">
+	<el-drawer v-model="viewOpen" title="查看设备维修派工信息" size="80%">
 		<ViewComponent ref="viewRef" :maintInfoId="currentViewId" />
 	</el-drawer>
 	<!-- 派工抽屉 -->
@@ -137,10 +137,13 @@
 					/>
 				</el-collapse-item>
 
-				<el-collapse-item title="作业工时反馈" name="hourFeedbackList" style='margin-bottom: 10px'>
-					<div class="hour-feedback-header">
-						<el-button type="primary" plain @click="addHourFeedbackRow">新增</el-button>
-					</div>
+				<el-collapse-item name="hourFeedbackList" style='margin-bottom: 10px'>
+					<template #title>
+						<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding-right: 15px;">
+							<span style="font-size: 14px; font-weight: 500;">作业工时反馈</span>
+							<el-button type="primary" plain @click.stop="addHourFeedbackRow" style="height: 28px; padding: 0 12px;">新增</el-button>
+						</div>
+					</template>
 					<EditTable
 						ref="hourFeedbackTableRef"
 						:hasAdd="false"
@@ -2175,9 +2178,7 @@ getList(queryParams.value)
 @import '@/assets/styles/formData.scss';
 
 .hour-feedback-header {
-	display: flex;
-	justify-content: flex-end;
-	margin-bottom: 12px;
+	display: none;
 }
 </style>
 

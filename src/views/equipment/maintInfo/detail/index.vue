@@ -18,7 +18,7 @@
 						</el-col>
 						<el-col :span="8">
 							<el-form-item label="报修类型" prop="reportTypeCode">
-								<el-input v-model="formData.reportTypeName" readonly style="width: 100%" />
+								<el-input v-model="formData.reportTypeName" disabled style="width: 100%" />
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
@@ -167,18 +167,20 @@
 						</el-col>
 						<el-col :span="8">
 							<el-form-item label="手机号码" prop="maintLeaderMobile">
-								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" maxlength="11" />
+								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" maxlength="11" disabled />
 							</el-form-item>
 						</el-col>
-						<el-col :span="8">
+						</el-row>
+						<el-row :gutter="20">
+						<el-col :span="5">
 							<el-form-item label="是否涉及特殊作业" prop="isSpecialJob">
-								<el-select v-model="formData.isSpecialJob" placeholder="请选择是否涉及特殊作业" style="width: 100%" @change="handleIsSpecialJobChange">
-									<el-option label="否" value="0" />
-									<el-option label="是" value="1" />
-								</el-select>
+								<el-radio-group v-model="formData.isSpecialJob" @change="handleIsSpecialJobChange">
+									<el-radio label="0">否</el-radio>
+									<el-radio label="1">是</el-radio>
+								</el-radio-group>
 							</el-form-item>
 						</el-col>
-						<el-col v-if="formData.isSpecialJob === '1'" :span="24">
+						<el-col v-if="formData.isSpecialJob === '1'" :span="19">
 							<el-form-item label="特殊作业情况" prop="specialJobCodeList">
 								<el-checkbox-group v-model="formData.specialJobCodeList" @change="handleSpecialJobChange">
 									<el-checkbox v-for="item in specialJobOptions" :key="item.value" :label="item.value">
@@ -198,7 +200,15 @@
 		</el-dialog>
 
 		<el-dialog v-model="partTreeDialogVisible" title="选择设备零部件" width="640px" append-to-body>
-			<el-input v-model="partTreeFilterText" placeholder="请输入部位/部件名称" clearable />
+			<div class="part-tree-search-wrapper">
+				<el-input
+					v-model="partTreeFilterText"
+					placeholder="请输入部位/部件名称进行搜索..."
+					clearable
+					prefix-icon="Search"
+					class="part-tree-search-input"
+				/>
+			</div>
 			<div v-loading="partTreeLoading" class="part-tree-container">
 				<el-tree
 					ref="partTreeRef"
@@ -1313,6 +1323,14 @@ defineExpose({
 	border: 1px solid #ebeef5;
 	border-radius: 4px;
 	padding: 8px;
+}
+
+.part-tree-search-wrapper {
+	margin-bottom: 4px;
+}
+
+.part-tree-search-input {
+	width: 100%;
 }
 </style>
 
