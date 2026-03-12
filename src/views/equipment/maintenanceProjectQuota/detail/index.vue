@@ -20,13 +20,7 @@
       </el-form-item>
 
       <el-form-item label="计量单位" prop="unit">
-        <el-select
-          v-model="formData.unit"
-          placeholder="请选择计量单位"
-          clearable
-          filterable
-          style="width: 100%"
-        >
+        <el-select v-model="formData.unit" placeholder="请选择计量单位" clearable filterable style="width: 100%">
           <el-option
             v-for="item in unitOptions"
             :key="item.value"
@@ -45,6 +39,17 @@
           placeholder="请输入不含税金额"
           style="width: 100%"
         />
+      </el-form-item>
+
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="formData.status" placeholder="请选择状态" style="width: 100%">
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
   </div>
@@ -65,25 +70,27 @@ const data = reactive({
     projectContent: '',
     unit: '',
     amountExcludingTax: null,
+    status: '1',
   },
   unitOptions: [],
+  statusOptions: [
+    { label: '生效', value: '1' },
+    { label: '失效', value: '0' },
+  ],
 })
-const { formData, unitOptions } = toRefs(data)
+const { formData, unitOptions, statusOptions } = toRefs(data)
 
 const rules = reactive({
   projectName: proxy.getRules({ required: true }),
   projectContent: proxy.getRules({ required: true }),
   unit: proxy.getRules({ required: true }),
   amountExcludingTax: proxy.getRules({ required: true }),
+  status: proxy.getRules({ required: true }),
 })
 
 const loadUnitOptions = async () => {
   try {
-    const res = await publicApi.getLocalSelect({
-      type: 'DICT',
-      dictType: 'E_UNIT',
-    })
-
+    const res = await publicApi.getLocalSelect({ type: 'DICT', dictType: 'E_UNIT' })
     if (res.code === '0000' && Array.isArray(res.data)) {
       unitOptions.value = res.data.map(item => {
         const label = item.label ?? item.dictLabel ?? item.name ?? ''
@@ -94,7 +101,6 @@ const loadUnitOptions = async () => {
       })
       return
     }
-
     unitOptions.value = []
     proxy.$message.error(res.msg || '加载计量单位失败')
   } catch (error) {
@@ -106,7 +112,7 @@ const loadUnitOptions = async () => {
 
 const validate = async () => {
   let flag = false
-  await ruleForm.value.validate((valid) => {
+  await ruleForm.value.validate(valid => {
     if (valid) {
       flag = true
     } else {
@@ -124,6 +130,7 @@ const resetForm = () => {
   formData.value.projectContent = ''
   formData.value.unit = ''
   formData.value.amountExcludingTax = null
+  formData.value.status = '1'
   ruleForm.value?.clearValidate()
 }
 
