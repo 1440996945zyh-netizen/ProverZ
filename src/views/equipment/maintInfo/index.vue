@@ -487,23 +487,25 @@ const tableColumns = ref([
 				)
 			)
 			// 删除按钮
-			buttons.push(
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleDelete(row)
+			if (row.status === 0 || row.status === 7) {
+				buttons.push(
+					h(
+						ElButton,
+						{
+							onClick: () => {
+								handleDelete(row)
+							},
+							type: 'danger',
+							link: true,
+							icon: 'Delete',
+							permission: 'equipment:maintInfo:delete',
 						},
-						type: 'danger',
-						link: true,
-						icon: 'Delete',
-						permission: 'equipment:maintInfo:delete',
-					},
-					{
-						default: () => '删除',
-					}
+						{
+							default: () => '删除',
+						}
+					)
 				)
-			)
+			}
 			return buttons
 		},
 	},
@@ -964,7 +966,7 @@ const cancelMaintForm = ref({
 // 作废事件
 const cancelWorkOrder = () => {
 	// 先检查是否有选中的记录
-	const selectedRows = baseTable.value?.getSelectionRows() || []
+	const selectedRows = checkboxSelection.value || []
 	if (!selectedRows || selectedRows.length === 0) {
 		proxy.$message.warning('请先选择要作废的记录')
 		return

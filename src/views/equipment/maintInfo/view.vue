@@ -352,7 +352,7 @@ const currentAcceptanceInfo = computed(() => {
 		return {
 			result: '待验收',
 			time: '-',
-			accepter: 'currentViewId-',
+			accepter: '-',
 			returnStatus: '-',
 			remark: '-',
 		}
