@@ -186,21 +186,21 @@ const tableColumns = ref([
 
 /* 树形表格配置 - 懒加载 */
 const treeConfig = reactive({
-	children: 'children',
-	hasChild: 'hasChildren',
-	lazy: true,
-	loadMethod: async ({ row }) => {
-		tableLoading.value = true
-		try {
-			const res = await api.getByParentId(row.id)
-			return res.data.map(item => ({
-				...item,
-				hasChildren: item.categoryLevel < 5, // 设备部件不能再有子级
-			}))
-		} finally {
-			tableLoading.value = false
-		}
-	},
+  children: 'children',
+  hasChild: 'hasChildren',
+  // lazy: true,
+  // loadMethod: async ({ row }) => {
+  // 	tableLoading.value = true
+  // 	try {
+  // 		const res = await api.getByParentId(row.id)
+  // 		return res.data.map(item => ({
+  // 			...item,
+  // 			hasChildren: item.categoryLevel < 5, // 设备部件不能再有子级
+  // 		}))
+  // 	} finally {
+  // 		tableLoading.value = false
+  // 	}
+  // },
 })
 
 /* 表格加载 */
@@ -231,18 +231,35 @@ const buttonList = reactive([
  * 查询主列表数据
  */
 const getList = e => {
-	tableLoading.value = true
-	queryParams.value = e
-	api.partsTree(queryParams.value)
-		.then(response => {
-			equipmentTypeList.value = response.data.map(item => ({
-				...item,
-				hasChildren: item.categoryLevel < 5, // 设备部件不能再有子级
-			}))
-		})
-		.finally(() => {
-			tableLoading.value = false
-		})
+  tableLoading.value = true
+  queryParams.value = e
+  const hasSearchCondition = queryParams.value && queryParams.value.typeName
+  api.partsTree(queryParams.value)
+    .then(response => {
+      equipmentTypeList.value = response.data.map(item => ({
+        ...item,
+        hasChildren: item.categoryLevel < 5, // 设备部件不能再有子级
+      }))
+      if (hasSearchCondition) {
+        // 如果有搜索条件，等待 DOM 更新后，自动展开所有树节点
+        nextTick(() => {
+          if (equipmentTypeTableRef.value) {
+            equipmentTypeTableRef.value.toggleTreeEvent()
+          }
+        })
+      } else {
+        // 如果没有搜索条件，确保树是收起的 (可选：如果默认配置已经是收起，此步可省略)
+        // 如果 treeConfig 中设置了 expandAll: true，这里需要强制收起
+        nextTick(() => {
+          if (equipmentTypeTableRef.value) {
+            equipmentTypeTableRef.value.clearTreeExpand()
+          }
+        })
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false
+    })
 }
 
 /**
