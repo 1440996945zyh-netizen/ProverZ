@@ -74,7 +74,7 @@ const tableColumns = ref([
 						onClick: () => {
 							handleView(row)
 						},
-						type: 'info',
+						type: 'primary',
 						link: true,
 						icon: 'View',
 					},
