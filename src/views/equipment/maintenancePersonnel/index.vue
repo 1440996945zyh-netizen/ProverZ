@@ -254,8 +254,4 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-.app-container {
-	padding: 20px;
-}
-</style>
+<style lang="scss" scoped></style>
