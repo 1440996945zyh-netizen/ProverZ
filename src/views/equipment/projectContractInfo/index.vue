@@ -11,16 +11,18 @@
 				:tableData="tableData"
 				:loading="loading"
 				:total="total"
-				:showNum="6"
-				:defaultWidth="60"
+				:show-pagination="true"
+				:tableHeight="storeHight"
+				:showNum="5"
+				defaultWidth="60"
 			/>
 		</div>
-		<Drawer v-model="dialogVisible" :title="title" size="40%">
-			<detail ref="detailRef" />
+		<Drawer v-model="dialogVisible" :title="title" size="30%">
+			<detail ref="detailRef" :is-view-mode="isViewMode" />
 			<template #footer>
 				<span class="dialog-footer">
-					<el-button @click="cancel">取消</el-button>
-					<el-button type="primary" @click="submitForm">确定</el-button>
+					<el-button @click="cancel">{{ title === '查看详情' ? '关闭' : '取消' }}</el-button>
+					<el-button type="primary" @click="submitForm" v-if="title !== '查看详情'">确定</el-button>
 				</span>
 			</template>
 		</Drawer>
@@ -28,22 +30,26 @@
 </template>
 
 <script setup name="projectContractInfo">
-import { ref, reactive, computed, getCurrentInstance, toRefs, h } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, h, computed } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/projectContractInfo/index'
+import tableParamsStore from '@/store/modules/tableParams'
 
 const { proxy } = getCurrentInstance()
 
 const baseTable = ref()
-const total = ref('')
+const total = ref(0)
 const tableData = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
+const isViewMode = ref(false)
+
+const storeHight = computed(() => tableParamsStore().pageTableHeight)
 
 const data = reactive({
 	queryParams: {
@@ -65,35 +71,25 @@ const selectData = reactive([
 		name: '合同名称',
 		type: 'input',
 		modelValue: 'contractName',
-		span: 4,
+		span: 6,
 	},
 	{
 		name: '合同编号',
 		type: 'input',
 		modelValue: 'contractCode',
-		span: 4,
+		span: 6,
 	},
 
-	{
-		name: '合同状态',
-		type: 'select',
-		modelValue: 'status',
-		span: 4,
-		dataConfig: {
-			params: { type: 'DICT', dictType: 'CONTRACT_STATUS' },
-		},
-	},
 	{
 		name: '合同开始日期',
 		type: 'date',
 		modelValue: 'startDate',
 		span: 6,
 	},
-
 	{
-		name: '合同截止日期',
+		name: '合同开始日期',
 		type: 'date',
-		modelValue: 'endDate',
+		modelValue: 'startDate',
 		span: 6,
 	},
 ])
@@ -132,10 +128,24 @@ const tableColumns = ref([
 		prop: 'operate',
 		label: '操作',
 		align: 'center',
-		width: 150,
+		width: 200,
 		fixed: 'right',
 		render: row => {
 			return [
+				h(
+					ElButton,
+					{
+						onClick: () => {
+							handleView(row)
+						},
+						type: 'primary',
+						link: true,
+						icon: 'View',
+					},
+					{
+						default: () => '详情',
+					},
+				),
 				h(
 					ElButton,
 					{
@@ -173,66 +183,105 @@ const tableColumns = ref([
 
 const getList = e => {
 	loading.value = true
-	queryParams.value = { ...queryParams.value, ...e }
-	api.getList(queryParams.value)
-		.then(response => {
-			tableData.value = response.rows
-			total.value = response.total
-			loading.value = false
-		})
-		.catch(() => {
-			loading.value = false
-		})
+	queryParams.value = e
+	api.getList(e).then(res => {
+		loading.value = false
+		if (res.code == '0000') {
+			tableData.value = res.data.pages
+			total.value = res.data.totalNum
+		} else {
+			proxy.$message.error(res.msg)
+		}
+	})
 }
 
 const handleAdd = () => {
+	reset()
 	title.value = '新增项目合同'
+	isViewMode.value = false
 	dialogVisible.value = true
-	detailRef.value.reset()
+	nextTick(() => {
+		detailRef.value.resetForm()
+	})
 }
 
-const handleUpdate = row => {
-	title.value = '编辑项目合同'
+const handleEditOrView = (row, isView = false) => {
+	reset()
+	title.value = isView ? '查看详情' : '编辑项目合同'
+	isViewMode.value = isView
 	dialogVisible.value = true
-	detailRef.value.setForm(row)
-}
-
-const handleDelete = row => {
-	proxy.$modal.confirm('是否确认删除该项目合同？').then(() => {
-		api.delete(row.id).then(() => {
-			proxy.$modal.msgSuccess('删除成功')
-			getList()
+	nextTick(() => {
+		detailRef.value.resetForm()
+		api.getById(row.id).then(response => {
+			const resData = JSON.parse(JSON.stringify(response.data))
+			detailRef.value.formData.id = resData.id
+			detailRef.value.formData.contractName = resData.contractName
+			detailRef.value.formData.contractCode = resData.contractCode
+			detailRef.value.formData.contractAmount = resData.contractAmount
+			detailRef.value.formData.startDate = resData.startDate
+			detailRef.value.formData.endDate = resData.endDate
+			detailRef.value.formData.applyScope = resData.applyScope
+			detailRef.value.formData.status = resData.status
 		})
 	})
 }
 
-const buttonList = ref([
+const handleView = row => handleEditOrView(row, true)
+
+const handleUpdate = row => handleEditOrView(row, false)
+
+const handleDelete = row => {
+	proxy.$modal
+		.confirm('确定删除？')
+		.then(function () {
+			return api.delete(row.id)
+		})
+		.then(() => {
+			getList()
+			proxy.$modal.msgSuccess('删除成功')
+		})
+		.catch(() => {})
+}
+
+const buttonList = reactive([
 	{
 		label: '新增',
-		icon: 'Plus',
 		type: 'primary',
-		click: handleAdd,
+		icon: 'Plus',
+		click: () => handleAdd,
 		permission: 'equipment:econtractinfocontract:add',
 	},
 ])
 
-const submitForm = () => {
-	detailRef.value.validate().then(() => {
-		api.save(detailRef.value.formData).then(() => {
-			proxy.$modal.msgSuccess('操作成功')
-			dialogVisible.value = false
-			getList()
-		})
-	})
+const submitForm = async () => {
+	if (await detailRef.value.validate()) {
+		const params = detailRef.value.formData
+		if (params.id) {
+			api.update(params).then(res => {
+				proxy.$modal.msgSuccess(res.msg)
+				dialogVisible.value = false
+				getList()
+			})
+		} else {
+			api.add(params).then(res => {
+				proxy.$modal.msgSuccess(res.msg)
+				dialogVisible.value = false
+				getList()
+			})
+		}
+	}
 }
 
 const cancel = () => {
 	dialogVisible.value = false
+	reset()
 }
+
+const reset = () => {
+	detailRef.value?.resetForm()
+}
+
+getList(queryParams.value)
 </script>
 
-<style scoped>
-.table-wrapper {
-	margin-top: 20px;
-}
-</style>
+<style lang="scss" scoped></style>

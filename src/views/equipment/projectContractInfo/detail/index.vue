@@ -1,16 +1,16 @@
 <template>
 	<div class="formData">
-		<el-form :model="formData" ref="ruleForm" label-width="150px" :rules="rules">
+		<el-form :model="formData" ref="ruleForm" label-width="120px" :rules="rules" :disabled="isViewMode">
 			<el-form-item label="合同名称" prop="contractName">
-				<el-input v-model="formData.contractName" placeholder="请输入合同名称" maxlength="255" />
+				<el-input v-model="formData.contractName" placeholder="请输入合同名称" maxlength="255" :disabled="isViewMode" />
 			</el-form-item>
 
 			<el-form-item label="合同编号" prop="contractCode">
-				<el-input v-model="formData.contractCode" placeholder="请输入合同编号" maxlength="255" />
+				<el-input v-model="formData.contractCode" placeholder="请输入合同编号" maxlength="255" :disabled="isViewMode" />
 			</el-form-item>
 
 			<el-form-item label="合同金额" prop="contractAmount">
-				<el-input v-model="formData.contractAmount" placeholder="请输入合同金额" type="number" />
+				<el-input v-model="formData.contractAmount" placeholder="请输入合同金额" type="number" :disabled="isViewMode" />
 			</el-form-item>
 
 			<el-form-item label="合同开始日期" prop="startDate">
@@ -20,6 +20,7 @@
 					placeholder="请选择开始日期"
 					value-format="YYYY-MM-DD"
 					style="width: 100%"
+					:disabled="isViewMode"
 				/>
 			</el-form-item>
 
@@ -30,15 +31,23 @@
 					placeholder="请选择结束日期"
 					value-format="YYYY-MM-DD"
 					style="width: 100%"
+					:disabled="isViewMode"
 				/>
 			</el-form-item>
 
 			<el-form-item label="适用范围" prop="applyScope">
-				<el-input v-model="formData.applyScope" type="textarea" :rows="3" placeholder="请输入适用范围" maxlength="255" />
+				<el-input
+					v-model="formData.applyScope"
+					type="textarea"
+					:rows="3"
+					placeholder="请输入适用范围"
+					maxlength="255"
+					:disabled="isViewMode"
+				/>
 			</el-form-item>
 
 			<el-form-item label="合同状态" prop="status">
-				<el-radio-group v-model="formData.status">
+				<el-radio-group v-model="formData.status" :disabled="isViewMode">
 					<el-radio label="1">有效</el-radio>
 					<el-radio label="2">无效</el-radio>
 				</el-radio-group>
@@ -48,7 +57,14 @@
 </template>
 
 <script setup name="projectContractInfoDetail">
-import { ref, reactive, watch, getCurrentInstance, toRefs, onMounted } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs } from 'vue'
+
+const props = defineProps({
+	isViewMode: {
+		type: Boolean,
+		default: false,
+	},
+})
 
 const { proxy } = getCurrentInstance()
 
@@ -90,7 +106,7 @@ const validate = async () => {
 	return flag
 }
 
-const reset = () => {
+const resetForm = () => {
 	formData.value.id = null
 	formData.value.contractName = ''
 	formData.value.contractCode = ''
@@ -99,24 +115,12 @@ const reset = () => {
 	formData.value.endDate = null
 	formData.value.applyScope = ''
 	formData.value.status = '1'
-	ruleForm.value.resetFields()
-}
-
-const setForm = row => {
-	formData.value.id = row.id
-	formData.value.contractName = row.contractName
-	formData.value.contractCode = row.contractCode
-	formData.value.contractAmount = row.contractAmount
-	formData.value.startDate = row.startDate
-	formData.value.endDate = row.endDate
-	formData.value.applyScope = row.applyScope
-	formData.value.status = row.status
+	ruleForm.value?.clearValidate()
 }
 
 defineExpose({
-	reset,
-	setForm,
 	validate,
+	resetForm,
 	formData,
 })
 </script>
