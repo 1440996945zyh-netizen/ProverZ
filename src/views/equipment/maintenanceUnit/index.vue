@@ -12,6 +12,7 @@
 				:tableData="tableData"
 				:loading="loading"
 				:total="total"
+				:tableHeight="tableHeight"
 			/>
 		</div>
 		<Drawer v-model="dialogVisible" :title="title" size="40%">
@@ -34,6 +35,10 @@ import StatsCard from '@/components/statsCard/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenanceUnit/index'
+import tableParamsStore from '@/store/modules/tableParams'
+
+const storeHeight = computed(() => tableParamsStore().normalTableHeight)
+const tableHeight = computed(() => storeHeight.value - 130)
 
 const { proxy } = getCurrentInstance()
 const totalItem = ref([])
@@ -242,15 +247,18 @@ const getStatistics = () => {
 			let arr = [
 				{
 					total: allData.length,
-					name: "单位总数",
-					startColor: '#0000FF', endColor: '#87CEFA'
-				},{
+					name: '单位总数',
+					startColor: '#0000FF',
+					endColor: '#87CEFA',
+				},
+				{
 					total: statistics.value.internal,
-					name: "内部单位总数"
-				},{
+					name: '内部单位总数',
+				},
+				{
 					total: statistics.value.external,
-					name: "外部单位总数"
-				}
+					name: '外部单位总数',
+				},
 			]
 			totalItem.value = arr
 		}
@@ -429,7 +437,6 @@ getList(queryParams.value)
 	line-height: 1;
 	letter-spacing: -0.5px;
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-
 }
 
 .total-card {
@@ -452,7 +459,6 @@ getList(queryParams.value)
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
 	}
-	
 }
 
 .external-card {

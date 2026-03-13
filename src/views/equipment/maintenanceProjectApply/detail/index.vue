@@ -259,6 +259,7 @@ const getQuotaList = params => {
 		...params,
 		projectName: params.projectName,
 		quotaCode: params.quotaCode,
+		status: '1',
 	}
 	quotaApi
 		.getList(queryParams)
