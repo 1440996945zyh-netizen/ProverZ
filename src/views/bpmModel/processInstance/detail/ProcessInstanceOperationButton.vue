@@ -1011,6 +1011,7 @@ const handleAudit = async (pass, formRef) => {
 			if (runningTask.value.signEnable) {
 				//用文件id替换之前的url，根据查出的id去下载文件图片
 				data.signPicUrl = approveReasonForm.fileId
+				data.fileIds = [approveReasonForm.fileId]
 				// data.signPicUrl = approveReasonForm.signPicUrl
 			}
 			// 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
