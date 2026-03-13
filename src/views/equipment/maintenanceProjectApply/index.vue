@@ -151,7 +151,7 @@ const tableColumns = ref([
 						},
 						type: 'danger',
 						link: true,
-						icon: 'Delete',
+						icon: 'CircleClose',
 						permission: 'equipment:emaintprojapply:delete',
 					},
 					{

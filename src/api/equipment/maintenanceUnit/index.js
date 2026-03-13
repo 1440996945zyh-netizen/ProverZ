@@ -51,5 +51,12 @@ const api = {
 			params: { deptLevel },
 		})
 	},
+	getOutTypeNum(params) {
+		return request({
+			url: '/api/internal/EMEquipRepairContract/getOutTypeNum',
+			method: 'get',
+			params: params,
+		})
+	},
 }
 export default api
