@@ -1,31 +1,6 @@
 <template>
 	<div class="app-container">
-		<div class="statistics-container">
-			<div class="statistics-card report-card">
-				<div class="card-content">
-					<div class="card-title">提报</div>
-					<div class="card-value">{{ statistics.reportCount || 0 }}</div>
-				</div>
-			</div>
-			<div class="statistics-card dispatch-card">
-				<div class="card-content">
-					<div class="card-title">已派工</div>
-					<div class="card-value">{{ statistics.dispatchCount || 0 }}</div>
-				</div>
-			</div>
-			<div class="statistics-card finish-card">
-				<div class="card-content">
-					<div class="card-title">维修完成</div>
-					<div class="card-value">{{ statistics.finishCount || 0 }}</div>
-				</div>
-			</div>
-			<div class="statistics-card accept-card">
-				<div class="card-content">
-					<div class="card-title">已验收</div>
-					<div class="card-value">{{ statistics.acceptCount || 0 }}</div>
-				</div>
-			</div>
-		</div>
+		<StatsCard :totalItem="totalItem"></StatsCard>
 		<BaseTable
 			ref="baseTable"
 			:showSearchHeader="true"
@@ -268,6 +243,7 @@
 
 <script setup name="maintInfo">
 import BaseTable from '@/components/BaseTable/index.vue'
+import StatsCard from '@/components/statsCard/index.vue'
 import EditTable from '@/components/EditTable'
 import detail from './detail/index.vue'
 import DispatchForm from './dispatch.vue'
@@ -279,6 +255,7 @@ import { ElButton, ElTag, ElMessage, ElInputNumber } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
 const { proxy } = getCurrentInstance()
+const totalItem = ref([])
 
 const baseTable = ref()
 const detailRef = ref(null)
@@ -958,6 +935,24 @@ const getStatistics = () => {
 				finishCount: res.data.finishCount || 0,
 				acceptCount: res.data.acceptCount || 0,
 			}
+			totalItem.value = [
+				{
+					total: statistics.value.reportCount,
+					name: '提报',
+				},
+				{
+					total: statistics.value.dispatchCount,
+					name: '已派工',
+				},
+				{
+					total: statistics.value.finishCount,
+					name: '维修完成',
+				},
+				{
+					total: statistics.value.acceptCount,
+					name: '已验收',
+				},
+			]
 		}
 	})
 }
@@ -2257,117 +2252,6 @@ getList(queryParams.value)
 
 .app-container {
 	padding: 10px 24px;
-}
-
-.statistics-container {
-	margin-bottom: 10px;
-	display: flex;
-	gap: 12px;
-	width: fit-content;
-}
-
-.statistics-card {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 10px 24px;
-	border-radius: 8px;
-	background: #fff;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	position: relative;
-	overflow: hidden;
-	border: 1px solid #e8eaed;
-	min-width: 160px;
-
-	&::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
-		pointer-events: none;
-		z-index: 0;
-	}
-
-	&:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	}
-}
-
-.card-content {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	position: relative;
-	z-index: 1;
-	min-width: 0;
-	gap: 24px;
-	width: 100%;
-}
-
-.card-title {
-	font-size: 16px;
-	color: #606266;
-	margin: 0;
-	font-weight: 600;
-	letter-spacing: 0.1px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.card-value {
-	font-size: 32px;
-	font-weight: 700;
-	color: #303133;
-	line-height: 1;
-	letter-spacing: -0.5px;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.report-card {
-	background: linear-gradient(135deg, rgba(82, 106, 214, 1) 0%, rgba(98, 55, 142, 1) 100%);
-	.card-value {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-}
-
-.dispatch-card {
-	background: linear-gradient(135deg, rgba(230, 162, 60, 1) 0%, rgba(214, 114, 33, 1) 100%);
-	.card-value {
-		background: linear-gradient(135deg, #e6a23c 0%, #d67221 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-}
-
-.finish-card {
-	background: linear-gradient(135deg, rgba(59, 152, 234, 1) 0%, rgba(0, 222, 234, 1) 100%);
-	.card-value {
-		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-}
-
-.accept-card {
-	background: linear-gradient(135deg, rgba(103, 194, 58, 1) 0%, rgba(53, 142, 13, 1) 100%);
-	.card-value {
-		background: linear-gradient(135deg, #67c23a 0%, #358e0d 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
 }
 </style>
 
