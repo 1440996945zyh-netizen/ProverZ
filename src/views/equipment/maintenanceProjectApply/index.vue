@@ -12,6 +12,7 @@
 				:loading="loading"
 				:total="total"
 				:show-pagination="true"
+				:tableHeight="storeHight"
 			/>
 		</div>
 		<Drawer v-model="dialogVisible" :title="title" size="70%">
@@ -27,12 +28,13 @@
 </template>
 
 <script setup name="maintenanceProjectApply">
-import { ref, reactive, getCurrentInstance, toRefs, h } from 'vue'
-import { ElButton } from 'element-plus'
+import { ref, reactive, getCurrentInstance, toRefs, h, computed } from 'vue'
+import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenanceProjectApply/index'
+import tableParamsStore from '@/store/modules/tableParams'
 
 const { proxy } = getCurrentInstance()
 
@@ -43,6 +45,8 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
+
+const storeHight = computed(() => tableParamsStore().pageTableHeight)
 
 const data = reactive({
 	queryParams: {
@@ -57,10 +61,18 @@ const { queryParams } = toRefs(data)
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '申请单号', prop: 'appNumber', align: 'center', width: 180 },
-	{ label: '使用部门', prop: 'usingDeptName', align: 'left', width: 150, showOverFlow: true },
-	{ label: '设备类型', prop: 'equipTypeId', align: 'left', width: 150, showOverFlow: true },
 	{ label: '设备名称', prop: 'equipName', align: 'left', width: 200, showOverFlow: true },
-	{ label: '维修项目类型', prop: 'appType', align: 'center', width: 120 },
+	{ label: '维修单位', prop: 'maintenanceUnitName', align: 'left', width: 180, showOverFlow: true },
+	// { label: '使用部门', prop: 'usingDeptName', align: 'left', width: 150, showOverFlow: true },
+	// { label: '设备类型', prop: 'equipTypeId', align: 'left', width: 150, showOverFlow: true },
+
+	{
+		label: '维修项目类型',
+		prop: 'appType',
+		align: 'center',
+		width: 120,
+		render: row => h(ElTag, { type: row.appType === '1' ? '' : 'warning' }, row.appType === '1' ? '定额' : '非定额'),
+	},
 	{ label: '申请事项', prop: 'appContent', align: 'left', minWidth: 300, showOverFlow: true },
 	{
 		label: '预算金额',
@@ -239,15 +251,5 @@ getList(queryParams.value)
 <style lang="scss" scoped>
 .app-container {
 	padding: 24px;
-	display: flex;
-	flex-direction: column;
-	height: calc(100vh - 48px);
-	overflow: hidden;
-}
-
-.table-wrapper {
-	flex: 1;
-	min-height: 0;
-	overflow: hidden;
 }
 </style>

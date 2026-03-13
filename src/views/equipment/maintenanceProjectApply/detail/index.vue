@@ -5,12 +5,22 @@
 				<span class="title-text">申请信息</span>
 			</div>
 			<el-row :gutter="20" class="section-content">
-				<el-col :xs="24" :sm="12" :md="12" :lg="12">
+				<el-col :xs="24" :sm="12" :md="12" :lg="8">
 					<el-form-item label="申请单号" prop="appNumber">
 						<el-input v-model="formData.appNumber" placeholder="系统自动生成" disabled />
 					</el-form-item>
 				</el-col>
-				<el-col :xs="24" :sm="12" :md="12" :lg="12">
+				<el-col :xs="24" :sm="12" :md="12" :lg="8">
+					<el-form-item label="维修单位" prop="maintenanceUnitName">
+						<Select
+							:selectData="maintenanceUnitOptions"
+							v-model:value="formData.maintenanceUnitId"
+							v-model:label="formData.maintenanceUnitName"
+							placeholder="请选择维修单位"
+						/>
+					</el-form-item>
+				</el-col>
+				<el-col :xs="24" :sm="12" :md="12" :lg="8">
 					<el-form-item label="设备名称" prop="equipName">
 						<Select
 							:dataConfig="{ params: { type: 'EQUIPMENT' } }"
@@ -49,16 +59,16 @@
 					<el-button type="primary" @click="openQuotaDialog" size="default">选择维修项目定额</el-button>
 				</div>
 				<el-table :data="quotaTableData" border style="width: 100%" class="quota-table">
-					<el-table-column prop="quotaNo" label="定额编号" width="180" />
-					<el-table-column prop="projName" label="维修项目名称" width="200" />
-					<el-table-column prop="projContent" label="维修项目内容" min-width="200" show-overflow-tooltip />
+					<el-table-column prop="quotaCode" label="定额编号" width="180" />
+					<el-table-column prop="projectName" label="维修项目名称" width="200" />
+					<el-table-column prop="projectContent" label="维修项目内容" min-width="200" show-overflow-tooltip />
 					<el-table-column prop="unit" label="计量单位" width="120" />
-					<el-table-column prop="unitPrice" label="不含税金额" width="150" align="right"></el-table-column>
+					<el-table-column prop="amountExcludingTax" label="不含税金额" width="150" align="right"></el-table-column>
 
 					<el-table-column prop="taxRate" label="税率(%)" width="150">
 						<template #default="scope">
 							<Select
-								:dataConfig="{ params: { type: 'DICT', dictType: 'TAX_RATE' } }"
+								:selectData="taxRateOptions"
 								v-model:value="scope.row.taxRate"
 								v-model:label="scope.row.taxRate"
 								placeholder="请选择税率"
@@ -66,7 +76,7 @@
 							/>
 						</template>
 					</el-table-column>
-					<el-table-column prop="taxAmount" label="含税金额" width="150" align="right"></el-table-column>
+					<el-table-column prop="amountIncludingTax" label="含税金额" width="150" align="right"></el-table-column>
 					<el-table-column label="操作" width="120" align="center">
 						<template #default="scope">
 							<el-button type="danger" link @click="deleteRow(scope.$index)">
@@ -118,12 +128,14 @@
 </template>
 
 <script setup name="maintenanceProjectApplyDetail">
-import { ref, reactive, getCurrentInstance, toRefs, watch, h } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, watch, h, onMounted } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
 import Select from '@/components/Select/index.vue'
 import quotaApi from '@/api/equipment/maintenanceProjectQuota/index'
+import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
+import publicApi from '@/api/public/index.js'
 
 const { proxy } = getCurrentInstance()
 
@@ -161,6 +173,9 @@ const projectTypeOptions = ref([
 	{ id: 2, name: '非定额' },
 ])
 
+const maintenanceUnitOptions = ref([])
+const taxRateOptions = ref([])
+
 const isQuotaProject = ref(false)
 
 // 维修项目定额表数据
@@ -187,10 +202,6 @@ const quotaTableColumns = ref([
 		prop: 'amountExcludingTax',
 		align: 'right',
 		width: 120,
-		render: row => {
-			const num = parseFloat(row.amountExcludingTax) || 0
-			return h('span', num.toFixed(4))
-		},
 	},
 ])
 
@@ -199,13 +210,13 @@ const quotaSelectData = reactive([
 	{
 		name: '维修项目名称',
 		type: 'input',
-		modelValue: 'projName',
+		modelValue: 'projectName',
 		span: 12,
 	},
 	{
 		name: '定额编号',
 		type: 'input',
-		modelValue: 'quotaNo',
+		modelValue: 'quotaCode',
 		span: 12,
 	},
 ])
@@ -229,8 +240,8 @@ const getQuotaList = params => {
 	quotaLoading.value = true
 	const queryParams = {
 		...params,
-		projName: params.projName,
-		quotaNo: params.quotaNo,
+		projectName: params.projectName,
+		quotaCode: params.quotaCode,
 	}
 	quotaApi
 		.getList(queryParams)
@@ -268,17 +279,23 @@ const confirmQuotaSelection = () => {
 	}
 
 	selectedQuotas.value.forEach(quota => {
-		const existingIndex = quotaTableData.value.findIndex(item => item.id === quota.id)
+		const existingIndex = quotaTableData.value.findIndex(item => item.quotaId === quota.id)
 		if (existingIndex === -1) {
+			const defaultTaxRate = taxRateOptions.value.length > 0 ? taxRateOptions.value[0].value : 0
+			const amountExcludingTaxNum = Number(quota.amountExcludingTax)
+			const amountExcludingTax = !isNaN(amountExcludingTaxNum) ? amountExcludingTaxNum.toFixed(4) : '0.0000'
+			const taxRate = Number(defaultTaxRate) / 100
+			const amountIncludingTaxNum = Number(amountExcludingTax) * (1 + taxRate)
+			const amountIncludingTax = !isNaN(amountIncludingTaxNum) ? amountIncludingTaxNum.toFixed(4) : '0.0000'
 			quotaTableData.value.push({
 				id: quota.id,
-				quotaNo: quota.quotaCode,
-				projName: quota.projectName,
-				projContent: quota.projectContent,
+				quotaCode: quota.quotaCode,
+				projectName: quota.projectName,
+				projectContent: quota.projectContent,
 				unit: quota.unit,
-				unitPrice: Number(quota.amountExcludingTax).toFixed(4),
-				taxRate: 0,
-				taxAmount: Number(quota.amountExcludingTax).toFixed(4),
+				amountExcludingTax: amountExcludingTax,
+				taxRate: defaultTaxRate,
+				amountIncludingTax: amountIncludingTax,
 			})
 		}
 	})
@@ -289,24 +306,26 @@ const confirmQuotaSelection = () => {
 
 // 计算含税金额
 const calculateTaxAmount = row => {
-	if (row.unitPrice && row.taxRate !== undefined) {
+	const amountExcludingTaxNum = Number(row.amountExcludingTax)
+	if (!isNaN(amountExcludingTaxNum) && row.taxRate !== undefined) {
 		const taxRate = Number(row.taxRate) / 100
-		row.taxAmount = Number((row.unitPrice * (1 + taxRate)).toFixed(4))
+		row.amountIncludingTax = Number((amountExcludingTaxNum * (1 + taxRate)).toFixed(4))
 	} else {
-		row.taxAmount = row.unitPrice || 0
+		row.amountIncludingTax = !isNaN(amountExcludingTaxNum) ? amountExcludingTaxNum : 0
 	}
 }
 
 // 计算预算金额
 const calculateBudgetAmount = () => {
 	formData.value.budgetAmount = quotaTableData.value.reduce((sum, row) => {
-		return sum + (row.taxAmount || 0)
+		return sum + (row.amountIncludingTax || 0)
 	}, 0)
 	formData.value.list = quotaTableData.value
 }
 
 // 税率变化处理
 const handleTaxRateChange = row => {
+	console.log(row, 'row')
 	calculateTaxAmount(row)
 	calculateBudgetAmount()
 }
@@ -317,6 +336,7 @@ const handleProjectTypeChange = value => {
 	if (!isQuotaProject.value) {
 		quotaTableData.value = []
 		formData.value.budgetAmount = 0
+		formData.value.list = []
 	}
 }
 
@@ -324,23 +344,6 @@ const handleProjectTypeChange = value => {
 const deleteRow = index => {
 	quotaTableData.value.splice(index, 1)
 	calculateBudgetAmount()
-}
-
-const initQuotaTableData = list => {
-	if (!list || list.length === 0) {
-		quotaTableData.value = []
-		return
-	}
-	quotaTableData.value = list.map(item => ({
-		id: item.id,
-		quotaNo: item.quotaNo,
-		projName: item.projName,
-		projContent: item.projContent,
-		unit: item.unit,
-		unitPrice: Number(item.unitPrice).toFixed(4),
-		taxRate: Number(item.taxRate),
-		taxAmount: Number(item.taxAmount).toFixed(4),
-	}))
 }
 
 const rules = reactive({
@@ -364,6 +367,30 @@ const validate = async () => {
 	return flag
 }
 
+const getMaintenanceUnitList = () => {
+	maintenancePersonnelApi.queryUnitName({}).then(res => {
+		if (res.code === '0000') {
+			maintenanceUnitOptions.value = res.data.map(item => ({
+				label: item.unitName || item.repairContarctName || item.name,
+				value: item.id || item.unitId || item.repairContarctId,
+			}))
+		}
+	})
+}
+
+const getTaxRateList = () => {
+	publicApi.getLocalSelect({ type: 'DICT', dictType: 'TAX_RATE' }).then(res => {
+		if (res.code === '0000') {
+			taxRateOptions.value = res.data
+		}
+	})
+}
+
+onMounted(() => {
+	getMaintenanceUnitList()
+	getTaxRateList()
+})
+
 const resetForm = () => {
 	formData.value.id = null
 	formData.value.usingDeptId = ''
@@ -378,7 +405,6 @@ const resetForm = () => {
 	formData.value.maintenanceUnitName = ''
 	formData.value.budgetAmount = 0
 	formData.value.remark = ''
-	formData.value.list = []
 	quotaTableData.value = []
 	ruleForm.value?.clearValidate()
 }
@@ -387,7 +413,6 @@ defineExpose({
 	validate,
 	resetForm,
 	formData,
-	initQuotaTableData,
 })
 </script>
 
