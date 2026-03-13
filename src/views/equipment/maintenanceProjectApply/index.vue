@@ -74,6 +74,7 @@ const tableColumns = ref([
 		width: 120,
 		render: row => h(ElTag, { type: row.appType === '1' ? '' : 'warning' }, row.appType === '1' ? '定额' : '非定额'),
 	},
+
 	{ label: '申请事项', prop: 'appContent', align: 'left', minWidth: 300, showOverFlow: true },
 	{
 		label: '预算金额',
@@ -86,6 +87,37 @@ const tableColumns = ref([
 				? value.toLocaleString('zh-CN', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
 				: '0.0000'
 			return h('span', { style: { color: '#f56c6c', fontWeight: 'bold' } }, `¥${formattedValue}`)
+		},
+	},
+	{
+		label: '状态',
+		prop: 'statuslabel',
+		align: 'center',
+		width: 120,
+		fixed: 'right',
+		render: row => {
+			const statusMap = {
+				0: { label: '未发起', type: 'info' },
+				1: { label: '审批中', type: 'warning' },
+				2: { label: '审批通过', type: 'success' },
+				3: { label: '审批不通过', type: 'danger' },
+				4: { label: '已办结', type: 'success' },
+				5: { label: '作废', type: 'danger' },
+			}
+			const status = statusMap[row.status] || { label: '未知', type: 'info' }
+			return [
+				h(
+					ElTag,
+					{
+						type: status.type,
+					},
+					{
+						default: () => {
+							return status.label
+						},
+					},
+				),
+			]
 		},
 	},
 	{
@@ -253,8 +285,4 @@ const handleDelete = row => {
 getList(queryParams.value)
 </script>
 
-<style lang="scss" scoped>
-.app-container {
-	padding: 24px;
-}
-</style>
+<style lang="scss" scoped></style>
