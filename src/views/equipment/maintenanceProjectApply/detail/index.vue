@@ -17,6 +17,7 @@
 							v-model:value="formData.maintenanceUnitId"
 							v-model:label="formData.maintenanceUnitName"
 							placeholder="请选择维修单位"
+							:disabled="isViewMode"
 						/>
 					</el-form-item>
 				</el-col>
@@ -28,12 +29,20 @@
 							v-model:label="formData.equipName"
 							placeholder="请选择设备（可搜索）"
 							@change="handleEquipmentChange"
+							:disabled="isViewMode"
 						/>
 					</el-form-item>
 				</el-col>
 				<el-col :xs="24" :sm="12" :md="12" :lg="24">
 					<el-form-item label="申请事项" prop="appContent">
-						<el-input v-model="formData.appContent" type="textarea" :rows="4" placeholder="请输入申请事项" maxlength="1000" />
+						<el-input
+							v-model="formData.appContent"
+							type="textarea"
+							:rows="4"
+							placeholder="请输入申请事项"
+							maxlength="1000"
+							:disabled="isViewMode"
+						/>
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -44,9 +53,9 @@
 			<el-row :gutter="20" class="section-content">
 				<el-col :xs="24" :sm="12" :md="12" :lg="12">
 					<el-form-item label="维修项目类型" prop="appType">
-						<el-radio-group v-model="formData.appType" @change="handleProjectTypeChange">
-							<el-radio v-for="item in projectTypeOptions" :key="item.id" :label="item.id">
-								{{ item.name }}
+						<el-radio-group v-model="formData.appType" @change="handleProjectTypeChange" :disabled="isViewMode">
+							<el-radio v-for="item in projectTypeOptions" :key="item.value" :label="item.value">
+								{{ item.label }}
 							</el-radio>
 						</el-radio-group>
 					</el-form-item>
@@ -56,7 +65,7 @@
 			<div v-if="isQuotaProject" class="quota-section">
 				<div class="quota-header">
 					<span class="quota-title">维修项目定额表</span>
-					<el-button type="primary" @click="openQuotaDialog" size="default">选择维修项目定额</el-button>
+					<el-button type="primary" @click="openQuotaDialog" size="default" v-if="!isViewMode">选择维修项目定额</el-button>
 				</div>
 				<el-table :data="quotaTableData" border style="width: 100%" class="quota-table">
 					<el-table-column prop="quotaCode" label="定额编号" width="180" />
@@ -73,11 +82,12 @@
 								v-model:label="scope.row.taxRate"
 								placeholder="请选择税率"
 								@change="handleTaxRateChange(scope.row)"
+								:disabled="isViewMode"
 							/>
 						</template>
 					</el-table-column>
 					<el-table-column prop="amountIncludingTax" label="含税金额" width="150" align="right"></el-table-column>
-					<el-table-column label="操作" width="120" align="center">
+					<el-table-column label="操作" width="120" align="center" v-if="!isViewMode">
 						<template #default="scope">
 							<el-button type="danger" link @click="deleteRow(scope.$index)">
 								<el-icon><Delete /></el-icon>
@@ -95,7 +105,7 @@
 							v-model="formData.budgetAmount"
 							:precision="4"
 							:min="0"
-							:disabled="isQuotaProject"
+							:disabled="isQuotaProject || isViewMode"
 							style="width: 100%"
 						/>
 					</el-form-item>
@@ -137,6 +147,13 @@ import quotaApi from '@/api/equipment/maintenanceProjectQuota/index'
 import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
 import publicApi from '@/api/public/index.js'
 
+const props = defineProps({
+	isViewMode: {
+		type: Boolean,
+		default: false,
+	},
+})
+
 const { proxy } = getCurrentInstance()
 
 const ruleForm = ref()
@@ -169,8 +186,8 @@ const equipmentTypeOptions = ref([
 ])
 
 const projectTypeOptions = ref([
-	{ id: 1, name: '定额' },
-	{ id: 2, name: '非定额' },
+	{ value: '1', label: '定额' },
+	{ value: '2', label: '非定额' },
 ])
 
 const maintenanceUnitOptions = ref([])
@@ -332,7 +349,7 @@ const handleTaxRateChange = row => {
 
 // 维修项目类型变化时处理
 const handleProjectTypeChange = value => {
-	isQuotaProject.value = value === 1
+	isQuotaProject.value = value === '1'
 	if (!isQuotaProject.value) {
 		quotaTableData.value = []
 		formData.value.budgetAmount = 0
@@ -371,8 +388,8 @@ const getMaintenanceUnitList = () => {
 	maintenancePersonnelApi.queryUnitName({}).then(res => {
 		if (res.code === '0000') {
 			maintenanceUnitOptions.value = res.data.map(item => ({
-				label: item.unitName || item.repairContarctName || item.name,
-				value: item.id || item.unitId || item.repairContarctId,
+				label: item.unitName,
+				value: item.externalCompanyId,
 			}))
 		}
 	})
@@ -405,14 +422,33 @@ const resetForm = () => {
 	formData.value.maintenanceUnitName = ''
 	formData.value.budgetAmount = 0
 	formData.value.remark = ''
+	formData.value.list = []
 	quotaTableData.value = []
+	isQuotaProject.value = false
 	ruleForm.value?.clearValidate()
+}
+
+const initQuotaTableData = list => {
+	isQuotaProject.value = formData.value.appType === '1'
+	if (list && list.length > 0) {
+		quotaTableData.value = list.map(item => ({
+			id: item.id,
+			quotaCode: item.quotaCode,
+			projectName: item.projectName,
+			projectContent: item.projectContent,
+			unit: item.unit,
+			amountExcludingTax: item.amountExcludingTax,
+			taxRate: item.taxRate,
+			amountIncludingTax: item.amountIncludingTax,
+		}))
+	}
 }
 
 defineExpose({
 	validate,
 	resetForm,
 	formData,
+	initQuotaTableData,
 })
 </script>
 

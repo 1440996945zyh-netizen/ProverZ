@@ -16,11 +16,11 @@
 			/>
 		</div>
 		<Drawer v-model="dialogVisible" :title="title" size="70%">
-			<detail ref="detailRef" />
+			<detail ref="detailRef" :is-view-mode="isViewMode" />
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="cancel">取消</el-button>
-					<el-button type="primary" @click="submitForm">确定</el-button>
+					<el-button type="primary" @click="submitForm" v-if="!isViewMode">确定</el-button>
 				</span>
 			</template>
 		</Drawer>
@@ -45,6 +45,7 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
+const isViewMode = ref(false)
 
 const storeHight = computed(() => tableParamsStore().pageTableHeight)
 
@@ -99,15 +100,15 @@ const tableColumns = ref([
 					ElButton,
 					{
 						onClick: () => {
-							handleUpdate(row)
+							handleView(row)
 						},
 						type: 'primary',
 						link: true,
-						icon: 'Edit',
-						permission: 'equipment:emaintprojapply:update',
+						icon: 'View',
+						permission: 'equipment:emaintprojapply:getById',
 					},
 					{
-						default: () => '编辑',
+						default: () => '详情',
 					},
 				),
 				h(
@@ -122,7 +123,7 @@ const tableColumns = ref([
 						permission: 'equipment:emaintprojapply:delete',
 					},
 					{
-						default: () => '删除',
+						default: () => '作废',
 					},
 				),
 			]
@@ -181,14 +182,16 @@ const reset = () => {
 const handleAdd = () => {
 	reset()
 	title.value = '新增维修项目申请'
+	isViewMode.value = false
 	dialogVisible.value = true
 	nextTick(() => {
 		detailRef.value.resetForm()
 	})
 }
 
-const handleUpdate = row => {
-	title.value = '编辑维修项目申请'
+const handleView = row => {
+	title.value = '维修项目申请详情'
+	isViewMode.value = true
 	dialogVisible.value = true
 	nextTick(() => {
 		detailRef.value.resetForm()
@@ -201,14 +204,16 @@ const handleUpdate = row => {
 			detailRef.value.formData.equipId = resData.equipId
 			detailRef.value.formData.equipName = resData.equipName
 			detailRef.value.formData.appNumber = resData.appNumber
-			detailRef.value.formData.appType = resData.appType
 			detailRef.value.formData.appContent = resData.appContent
 			detailRef.value.formData.maintenanceUnitId = resData.maintenanceUnitId
 			detailRef.value.formData.maintenanceUnitName = resData.maintenanceUnitName
 			detailRef.value.formData.budgetAmount = resData.budgetAmount
 			detailRef.value.formData.remark = resData.remark
+			detailRef.value.formData.appType = resData.appType
 			detailRef.value.formData.list = resData.list || []
-			detailRef.value.initQuotaTableData(resData.list || [])
+			if (resData.list && resData.list.length > 0) {
+				detailRef.value.initQuotaTableData(resData.list)
+			}
 		})
 	})
 }
@@ -234,13 +239,13 @@ const submitForm = async () => {
 
 const handleDelete = row => {
 	proxy.$modal
-		.confirm('确定删除？')
+		.confirm('确定作废？')
 		.then(function () {
 			return api.delete(row.id)
 		})
 		.then(() => {
 			getList()
-			proxy.$modal.msgSuccess('删除成功')
+			proxy.$modal.msgSuccess('作废成功')
 		})
 		.catch(() => {})
 }

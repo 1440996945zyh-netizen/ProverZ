@@ -16,20 +16,20 @@ const api = {
 		})
 	},
 
-	save(data) {
-		if (data.id) {
-			return request({
-				url: '/api/internal/EContractInfoContract/update',
-				method: 'put',
-				data: data,
-			})
-		} else {
-			return request({
-				url: '/api/internal/EContractInfoContract/add',
-				method: 'post',
-				data: data,
-			})
-		}
+	add(data) {
+		return request({
+			url: '/api/internal/EContractInfoContract/add',
+			method: 'post',
+			data: data,
+		})
+	},
+
+	update(data) {
+		return request({
+			url: '/api/internal/EContractInfoContract/update',
+			method: 'put',
+			data: data,
+		})
 	},
 
 	delete(id) {
