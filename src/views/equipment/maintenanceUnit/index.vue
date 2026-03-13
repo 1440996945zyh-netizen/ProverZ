@@ -1,25 +1,6 @@
 <template>
 	<div class="app-container">
-		<div class="statistics-container">
-			<div class="statistics-card total-card">
-				<div class="card-content">
-					<div class="card-title">单位总数</div>
-					<div class="card-value">{{ statistics.total }}</div>
-				</div>
-			</div>
-			<div class="statistics-card internal-card">
-				<div class="card-content">
-					<div class="card-title">内部单位数</div>
-					<div class="card-value">{{ statistics.internal }}</div>
-				</div>
-			</div>
-			<div class="statistics-card external-card">
-				<div class="card-content">
-					<div class="card-title">外部单位数</div>
-					<div class="card-value">{{ statistics.external }}</div>
-				</div>
-			</div>
-		</div>
+		<StatsCard :totalItem="totalItem"></StatsCard>
 		<div class="table-wrapper">
 			<BaseTable
 				ref="baseTable"
@@ -49,12 +30,13 @@
 import { ref, reactive, computed, getCurrentInstance, toRefs, h } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
+import StatsCard from '@/components/statsCard/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenanceUnit/index'
 
 const { proxy } = getCurrentInstance()
-
+const totalItem = ref([])
 const baseTable = ref()
 const total = ref('')
 const tableData = ref([])
@@ -257,6 +239,20 @@ const getStatistics = () => {
 			statistics.value.total = allData.length
 			statistics.value.internal = allData.filter(item => item.outType === '1').length
 			statistics.value.external = allData.filter(item => item.outType === '2').length
+			let arr = [
+				{
+					total: allData.length,
+					name: "单位总数",
+					startColor: '#0000FF', endColor: '#87CEFA'
+				},{
+					total: statistics.value.internal,
+					name: "内部单位总数"
+				},{
+					total: statistics.value.external,
+					name: "外部单位总数"
+				}
+			]
+			totalItem.value = arr
 		}
 	})
 }
@@ -433,6 +429,7 @@ getList(queryParams.value)
 	line-height: 1;
 	letter-spacing: -0.5px;
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
 }
 
 .total-card {
@@ -447,7 +444,7 @@ getList(queryParams.value)
 }
 
 .internal-card {
-	background: linear-gradient(135deg, rgba(59, 152, 234, 1) 0%, rgba(0, 222, 234, 1) 100%);
+	background: linear-gradient(135deg, rgb(9, 132, 240) 0%, rgba(0, 222, 234, 1) 100%);
 
 	.card-value {
 		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -455,6 +452,7 @@ getList(queryParams.value)
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
 	}
+	
 }
 
 .external-card {
