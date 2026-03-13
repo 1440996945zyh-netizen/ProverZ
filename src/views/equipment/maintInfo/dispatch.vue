@@ -107,8 +107,8 @@
 									:selectData="deptList"
 									v-model:value="formData.maintOrgId"
 									v-model:label="formData.maintOrgName"
-									:disabled="!formData.dispatchTypeCode"
-									:placeholder="formData.dispatchTypeCode ? '请选择承修单位' : '请先选择派工类型'"
+									:disabled="!formData.dispatchTypeCode || isMaintProjApplyVisible"
+									:placeholder="isMaintProjApplyVisible ? '将从申请单自动带出' : (formData.dispatchTypeCode ? '请选择承修单位' : '请先选择派工类型')"
 									@change="handleDeptChange"
 								/>
 							</el-form-item>
@@ -122,12 +122,13 @@
 									:disabled="!formData.maintOrgId"
 									placeholder="请先选择承修单位"
 									@change="handleMaintLeaderChange"
+									multiple
 								/>
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
 							<el-form-item label="手机号码" prop="maintLeaderMobile">
-								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" maxlength="11" disabled />
+								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" disabled />
 							</el-form-item>
 						</el-col>
 						</el-row>
@@ -156,10 +157,10 @@
 
 		<el-dialog v-model="partTreeDialogVisible" title="选择设备零部件" width="640px" append-to-body>
 			<div class="part-tree-search-wrapper">
-				<el-input 
-					v-model="partTreeFilterText" 
-					placeholder="请输入部位/部件名称进行搜索..." 
-					clearable 
+				<el-input
+					v-model="partTreeFilterText"
+					placeholder="请输入部位/部件名称进行搜索..."
+					clearable
 					prefix-icon="Search"
 					class="part-tree-search-input"
 				/>
@@ -252,8 +253,8 @@ const formData = reactive({
 	mantAppNumber: '',
 	maintOrgId: null,
 	maintOrgName: '',
-	maintLeaderId: null,
-	maintLeaderName: '',
+	maintLeaderId: [],
+	maintLeaderName: [],
 	maintLeaderMobile: '',
 	isSpecialJob: '0',
 	specialJobCode: '',
@@ -734,8 +735,8 @@ const handleDispatchTypeChange = (newVal) => {
 // 承修单位变化
 const handleDeptChange = () => {
 	// 清空维修负责人和手机号码
-	formData.maintLeaderId = null
-	formData.maintLeaderName = ''
+	formData.maintLeaderId = []
+	formData.maintLeaderName = []
 	formData.maintLeaderMobile = ''
 	userList.value = []
 	// 加载对应的用户列表
@@ -746,16 +747,27 @@ const handleDeptChange = () => {
 
 // 维修负责人变化时，查询手机号码
 const handleMaintLeaderChange = (item) => {
-	if (item && item.value) {
-		// 查询用户详情获取手机号码
-		userApi.getById(item.value).then(res => {
-			if (res.code === '0000' && res.data) {
-				formData.maintLeaderMobile = res.data.mobile || ''
-			}
-		}).catch(() => {
-			// 查询失败不处理，允许手动输入
-		})
+	const itemArray = Array.isArray(item) ? item : (item ? [item] : [])
+	if (itemArray.length === 0) {
+		formData.maintLeaderMobile = ''
+		return
 	}
+
+	let mobileList = []
+	let promises = itemArray.map(i => {
+		if (i && i.value) {
+			return userApi.getById(i.value).then(res => {
+				if (res.code === '0000' && res.data && res.data.mobile) {
+					// 保证顺序，可直接 push 或按索引这里暂简单push
+					mobileList.push(res.data.mobile)
+				}
+			}).catch(() => {})
+		}
+		return Promise.resolve()
+	})
+	Promise.all(promises).then(() => {
+		formData.maintLeaderMobile = mobileList.join(',')
+	})
 }
 
 watch(
@@ -812,6 +824,19 @@ const resetForm = () => {
 	formData.specialJobName = ''
 	formData.specialJobCodeList = []
 	clearMaintProjApply()
+	setTimeout(() => {
+		if (formRef.value) {
+			formRef.value.clearValidate()
+		}
+	}, 100)
+}
+
+const clearValidation = () => {
+	setTimeout(() => {
+		if (formRef.value) {
+			formRef.value.clearValidate()
+		}
+	}, 100)
 }
 
 // 表单验证
@@ -853,8 +878,8 @@ const loadData = (data) => {
 		formData.mantAppNumber = data.mantAppNumber || ''
 		formData.maintOrgId = data.maintOrgId
 		formData.maintOrgName = data.maintOrgName || ''
-		formData.maintLeaderId = data.maintLeaderId
-		formData.maintLeaderName = data.maintLeaderName || ''
+		formData.maintLeaderId = data.maintLeaderId ? (typeof data.maintLeaderId === 'string' ? data.maintLeaderId.split(',') : data.maintLeaderId) : []
+		formData.maintLeaderName = data.maintLeaderName ? (typeof data.maintLeaderName === 'string' ? data.maintLeaderName.split(',') : data.maintLeaderName) : []
 		formData.maintLeaderMobile = data.maintLeaderMobile || ''
 		formData.isSpecialJob = String(data.isSpecialJob ?? '0')
 		formData.specialJobCode = data.specialJobCode || ''
@@ -908,6 +933,7 @@ defineExpose({
 	loadData,
 	loadDeptList,
 	loadUserList,
+	clearValidation,
 })
 </script>
 

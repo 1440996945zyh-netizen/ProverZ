@@ -147,8 +147,8 @@
 									:selectData="deptList"
 									v-model:value="formData.maintOrgId"
 									v-model:label="formData.maintOrgName"
-									:disabled="!formData.dispatchTypeCode"
-									:placeholder="formData.dispatchTypeCode ? '请选择承修单位' : '请先选择派工类型'"
+									:disabled="!formData.dispatchTypeCode || isMaintProjApplyVisible"
+									:placeholder="isMaintProjApplyVisible ? '将从申请单自动带出' : (formData.dispatchTypeCode ? '请选择承修单位' : '请先选择派工类型')"
 									@change="handleDeptChange"
 								/>
 							</el-form-item>
@@ -162,12 +162,13 @@
 									:disabled="!formData.maintOrgId"
 									placeholder="请先选择承修单位"
 									@change="handleMaintLeaderChange"
+									multiple
 								/>
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
 							<el-form-item label="手机号码" prop="maintLeaderMobile">
-								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" maxlength="11" disabled />
+								<el-input v-model="formData.maintLeaderMobile" placeholder="请输入手机号码" disabled />
 							</el-form-item>
 						</el-col>
 						</el-row>
@@ -325,8 +326,8 @@ const formData = reactive({
 	mantAppNumber: '',
 	maintOrgId: null,
 	maintOrgName: '',
-	maintLeaderId: null,
-	maintLeaderName: '',
+	maintLeaderId: [],
+	maintLeaderName: [],
 	maintLeaderMobile: '',
 	isSpecialJob: '0',
 	specialJobCode: '',
@@ -348,6 +349,7 @@ const rules = reactive({
 	faultFindTime: [{ required: true, message: '故障发现时间不能为空', trigger: 'change' }],
 	maintTypeCode: [{ required: true, message: '维修类型不能为空', trigger: 'change' }],
 	isStopped: [{ required: true, message: '是否停机不能为空', trigger: 'change' }],
+	faultDesc: [{ required: true, message: '故障描述不能为空', trigger: 'blur' }],
 	dispatchTypeCode: [],
 	mantAppNumber: [],
 	maintOrgId: [],
@@ -753,8 +755,8 @@ const handleDispatchTypeChange = (value) => {
 
 // 部门变化时，清空维修负责人和手机号码，加载用户列表
 const handleDeptChange = () => {
-	formData.maintLeaderId = null
-	formData.maintLeaderName = ''
+	formData.maintLeaderId = []
+	formData.maintLeaderName = []
 	formData.maintLeaderMobile = ''
 	userList.value = []
 	// 加载用户列表
@@ -765,16 +767,27 @@ const handleDeptChange = () => {
 
 // 维修负责人变化时，查询手机号码
 const handleMaintLeaderChange = (item) => {
-	if (item && item.value) {
-		// 查询用户详情获取手机号码
-		userApi.getById(item.value).then(res => {
-			if (res.code == '0000' && res.data) {
-				formData.maintLeaderMobile = res.data.mobile || ''
-			}
-		}).catch(() => {
-			// 查询失败不处理，允许手动输入
-		})
+	const itemArray = Array.isArray(item) ? item : (item ? [item] : [])
+	if (itemArray.length === 0) {
+		formData.maintLeaderMobile = ''
+		return
 	}
+
+	let mobileList = []
+	let promises = itemArray.map(i => {
+		if (i && i.value) {
+			return userApi.getById(i.value).then(res => {
+				if (res.code === '0000' && res.data && res.data.mobile) {
+					// 保证顺序，可直接 push 或按索引这里暂简单push
+					mobileList.push(res.data.mobile)
+				}
+			}).catch(() => {})
+		}
+		return Promise.resolve()
+	})
+	Promise.all(promises).then(() => {
+		formData.maintLeaderMobile = mobileList.join(',')
+	})
 }
 
 const handleIsSpecialJobChange = async (value) => {
@@ -1119,6 +1132,21 @@ const resetForm = () => {
 	internalMode.value = 'add'
 	// 更新验证规则
 	updateRules()
+	console.log('1111')
+
+	setTimeout(() => {
+		if (formRef.value) {
+			formRef.value.clearValidate()
+		}
+	}, 100)
+}
+
+const clearValidation = () => {
+	setTimeout(() => {
+		if (formRef.value) {
+			formRef.value.clearValidate()
+		}
+	}, 100)
 }
 
 // 表单验证
@@ -1229,6 +1257,7 @@ defineExpose({
 	setMode,
 	loadImages,
 	loadDeptList,
+	clearValidation,
 })
 </script>
 

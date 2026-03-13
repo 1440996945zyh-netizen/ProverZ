@@ -1,6 +1,6 @@
 <template>
 	<el-form ref="ruleForm" :model="form" :rules="rules" label-width="80px">
-		<el-collapse v-model="collapseOpen">
+		<el-collapse :v-model="collapseOpen">
 			<el-collapse-item title="基本信息" name="1">
 				<!-- 基本信息 -->
 				<el-row :gutter="20" style="margin-left: 0px">

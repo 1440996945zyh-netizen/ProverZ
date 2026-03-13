@@ -148,6 +148,13 @@ const api = {
 			},
 		})
 	},
+	getStatusCount(params) {
+		return request({
+			url: '/api/v1/internal/maintInfo/getStatusCount',
+			method: 'get',
+			params: params,
+		})
+	},
 }
 
 export default api
