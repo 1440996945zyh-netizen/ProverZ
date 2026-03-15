@@ -353,7 +353,7 @@ const cellClickEvent = ({ row }) => {
 /** 查询列表 */
 const getList = e => {
 	queryParams.value = e || queryParams.value
-		let params = {
+	let params = {
 		...queryParams.value,
 		...e,
 	}
@@ -486,6 +486,8 @@ const handleSubmitPayment = (row, paymentType) => {
 		.then(res => {
 			if (res && res.data) {
 				// proxy.setFormData(detailRef.value.formData, res.data)
+				//其他传参案例
+				// res.data.paramsJSON = JSON.stringify({ bagayalu: '1001', amount: 5000 })
 				startProcess({
 					rowData: res.data, // 点击行数据
 					businessId: route.meta?.menuId, // 业务ID 业务菜单id
