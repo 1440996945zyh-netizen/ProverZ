@@ -197,9 +197,9 @@ const tableColumns = ref([
 
 const selectData = reactive([
 	{
-		name: '使用部门',
+		name: '申请单号',
 		type: 'input',
-		modelValue: 'usingDeptName',
+		modelValue: 'appNumber',
 		span: 12,
 	},
 	{
