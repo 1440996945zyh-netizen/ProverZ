@@ -21,48 +21,49 @@
 //   });
 // }
 // customTranslate.js
-import defaultTranslationsCN from './zh'; // 导入默认中文翻译
+import defaultTranslationsCN from './zh';
+
 /**
- * bpmn-js 翻译核心函数（适配官方规范）
- * @param {Object} customTranslations 翻译字典（如 zh.js）
+ * 优化后的翻译核心函数
  */
 export default function createCustomTranslate(customTranslations = {}) {
-   // 合并默认翻译和自定义翻译
+  // 合并字典
   const translations = {
-    // 默认英文兜底
-    'Append EndEvent': 'Append EndEvent',
-    'Append Gateway': 'Append Gateway',
-    'Append Task': 'Append Task',
-    'Exclusive Gateway': 'Exclusive Gateway',
-    'Parallel Gateway': 'Parallel Gateway',
-    'Inclusive Gateway': 'Inclusive Gateway',
-    'Event-based Gateway': 'Event-based Gateway',
-    
-        // 默认中文翻译
     ...defaultTranslationsCN,
-    
-    // 用户自定义翻译（最高优先级）
     ...customTranslations
   };
-  
-  return function translate(key, replacements = {}) {
-    // 获取翻译文本
-    let text = translations[key];
-    
-    // 如果没找到翻译，返回原始key（或者可以返回key）
+
+  // 创建一个全小写的副本，用于模糊匹配
+  const lowercaseMap = {};
+  Object.keys(translations).forEach(key => {
+    lowercaseMap[key.toLowerCase()] = translations[key];
+  });
+
+  return function translate(template, replacements = {}) {
+    replacements = replacements || {};
+
+    // 1. 尝试直接匹配（最高优先级）
+    let text = translations[template];
+
+    // 2. 如果没找到，尝试忽略大小写匹配（解决 Intermediate throw event 等问题）
     if (text === undefined) {
-      console.warn(`Missing translation for key: "${key}"`);
-      text = key;
+      text = lowercaseMap[template.toLowerCase()] || template;
     }
-    
-    // 替换占位符
-    if (replacements && typeof replacements === 'object') {
-      Object.keys(replacements).forEach((placeholder) => {
-        const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
-        text = text.replace(regex, replacements[placeholder]);
-      });
-    }
-    
-    return text;
+
+    // 3. 递归替换占位符 {key}
+    return text.replace(/{([^}]+)}/g, function (_, key) {
+      let replacementValue = replacements[key];
+
+      if (replacementValue !== undefined && replacementValue !== null) {
+        // 尝试翻译占位符里的值 (例如 {type} 里的 "User Task")
+        // 同样支持忽略大小写匹配
+        const translatedValue = translations[replacementValue] ||
+          lowercaseMap[replacementValue.toString().toLowerCase()] ||
+          replacementValue;
+        return translatedValue;
+      }
+
+      return '{' + key + '}';
+    });
   };
 }

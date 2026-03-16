@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2026-02-05 14:00:39
+ * @LastEditTime: 2026-03-16 16:59:21
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -658,8 +658,13 @@ const buttonList = reactive([
 /**
  * 查询主列表数据
  */
-const getList = params => {
+const getList = e => {
 	tableLoading.value = true
+	
+	let params = {
+		...e,
+		...pagination
+	}
 	listMenu(params)
 		.then(response => {
 			menuList.value = response.data.map(item => ({

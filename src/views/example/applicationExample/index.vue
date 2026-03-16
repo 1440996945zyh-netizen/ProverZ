@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-27 14:10:09
+ * @LastEditTime: 2026-03-16 17:19:34
  * @LastEditors: zhangsd
  * @Description: 业务流程示例
  * @FilePath: \view\src\views\example\applicationExample\index.vue
@@ -11,7 +11,7 @@
 	<div>
 		<div class="app-container">
 			<BaseTable
-				ref="baseTable"
+				ref="applicationExampleTableRef"
 				:showSearchHeader="true"
 				:selectData="selectData"
 				:searchClick="getList"
@@ -23,6 +23,7 @@
 				:showNum="6"
 				:tableHeight="tableHeight"
 				:defaultWidth="50"
+
 			/>
 		</div>
 		<Drawer v-model="drawerVisible" :title="title" size="30%">
@@ -40,7 +41,7 @@
 
 <script setup name="bpmApplicationExample">
 import BaseTable from '@/components/BaseTable/index.vue'
-import { ref, reactive, nextTick, getCurrentInstance } from 'vue'
+import { ref, reactive, nextTick, getCurrentInstance, onMounted } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import api from '@/api/example/applicationExample/index.js'
 import detail from './detail/index.vue'
@@ -55,7 +56,7 @@ import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
 // 引入流程启动器
 const { startProcess, loading } = useProcessStarter()
 const { proxy } = getCurrentInstance()
-const baseTable = ref() // table的ref
+const applicationExampleTableRef = ref() // table的ref
 const detailRef = ref() // 明细组件ref
 const drawerVisible = ref(false)
 const total = ref('') // 数据总数
@@ -324,7 +325,7 @@ const selectData = reactive([
 		modelValue: 'approvalStatus',
 		span: 4,
 		selectData: [
-			{ label: '未开始', value: '-1' },
+			{ label: '未开始', value: '0' },
 			{ label: '审批中', value: '1' },
 			{ label: '审批通过', value: '2' },
 			{ label: '审批不通过', value: '3' },
@@ -352,10 +353,10 @@ const cellClickEvent = ({ row }) => {
 
 /** 查询列表 */
 const getList = e => {
-	queryParams.value = e || queryParams.value
+	const pagination = applicationExampleTableRef.value?.buildQueryParams() 
 	let params = {
-		...queryParams.value,
 		...e,
+		...pagination,
 	}
 
 	// 处理日期范围
@@ -500,11 +501,11 @@ const handleSubmitPayment = (row, paymentType) => {
 							: submitConsumablesPayment, // 业务提交函数
 					onSuccess() {
 						ElMessage.success('提交成功')
-						getList(queryParams.value)
+						getList()
 					},
 					onError(err) {
 						ElMessage.error(err.message)
-						getList(queryParams.value)
+						getList()
 					},
 				})
 			}
@@ -527,7 +528,7 @@ const save = async () => {
 					.then(res => {
 						proxy.$modal.msgSuccess(res.msg || '修改成功')
 						drawerVisible.value = false
-						getList(queryParams.value)
+						getList()
 					})
 					.catch(error => {
 						console.error('修改失败:', error)
@@ -538,7 +539,7 @@ const save = async () => {
 					.then(res => {
 						proxy.$modal.msgSuccess(res.msg || '新增成功')
 						drawerVisible.value = false
-						getList(queryParams.value)
+						getList()
 					})
 					.catch(error => {
 						console.error('新增失败:', error)
@@ -557,7 +558,7 @@ const handleDelete = row => {
 		.then(() => {
 			api.deleteById(deleteRow.id)
 				.then(res => {
-					getList(queryParams.value)
+					getList()
 					proxy.$modal.msgSuccess(res.msg || '删除成功')
 				})
 				.catch(error => {
@@ -580,8 +581,9 @@ const handleHistory = row => {
 		},
 	})
 }
-// 初始化加载列表
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 
 <style lang="less" scoped>

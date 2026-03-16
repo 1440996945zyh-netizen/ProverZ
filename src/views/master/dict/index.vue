@@ -2,7 +2,7 @@
 	<div>
 		<div class="app-container">
 			<BaseTable
-				ref="baseTable"
+				ref="dictTableRef"
 				:showSearchHeader="true"
 				:selectData="selectData"
 				:searchClick="getList"
@@ -37,7 +37,7 @@
 
 <script setup name="dict">
 import BaseTable from '@/components/BaseTable/index.vue'
-import { ref, reactive, provide } from 'vue'
+import { ref, reactive, provide, onMounted } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import api from '@/api/master/dict/index.js'
 import detail from './detail/index.vue'
@@ -51,7 +51,7 @@ provide('onQuery', data => {
 	// 处理数据...
 	getList()
 })
-const baseTable = ref() // table的ref
+const dictTableRef = ref() // table的ref
 const detailRef = ref() // 明细组件ref
 const drawerListRef = ref() //明细列表
 const dictVisible = ref(false)
@@ -61,7 +61,7 @@ const title = ref(null) // 抽屉标题
 const clickRow = ref({})
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 const tableId = ref('dict_1760148546264')
 // 表格数据
@@ -172,10 +172,12 @@ const cellClickEvent = ({ row }) => {
 
 /** 查询字典类型列表 */
 const getList = e => {
-	queryParams.value = e
+	let pagination = dictTableRef.value?.buildQueryParams()
 	let params ={
-		...queryParams.value,
+		...e,
+		...pagination,
 		advancedQuery:JSON.stringify(advancedQuery.value),
+
 	}
 	api.getAllDictTypeList(params).then(response => {
 		tableData.value = response.data.pages
@@ -218,13 +220,13 @@ const save = async () => {
 				api.updateDictType(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					dictVisible.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			} else {
 				api.insertDictType(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					dictVisible.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			}
 		})
@@ -247,13 +249,15 @@ const handleDelete = row => {
 		.confirm('确定删除？')
 		.then(res => {
 			api.deleteDictTypeById(deleteRow.id).then(res => {
-				getList(queryParams.value)
+				getList()
 				proxy.$modal.msgSuccess(res.msg)
 			})
 		})
 		.catch(() => {})
 }
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped>
 // @import '../../../assets/styles/searchform.scss';

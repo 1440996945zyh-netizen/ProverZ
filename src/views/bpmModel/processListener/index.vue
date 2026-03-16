@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:21:33
- * @LastEditTime: 2026-02-10 15:57:44
+ * @LastEditTime: 2026-03-16 17:12:27
  * @LastEditors: zhangsd
  * @Description:  流程监听器
  * @FilePath: \view\src\views\bpmModel\processListener\index.vue
@@ -62,7 +62,7 @@ const modelListRef = ref(null)
 const data = reactive({
 	queryParams: {
 		startPage: 1,
-		pageSize: 10,
+	 pageSize: 20, 
 		name: undefined,
 		type: undefined,
 	},
@@ -256,9 +256,10 @@ const tableColumns = ref([
 // 10. 核心业务方法
 /** 查询列表 */
 const getList = async e => {
+	let pagination = listenerTableRef.value?.buildQueryParams()
 	let params = {
-		...queryParams.value,
 		...e,
+		...pagination,
 	}
 	tableLoading.value = true
 	try {
