@@ -57,18 +57,18 @@ const { queryParams } = toRefs(data)
  */
 const selectData = reactive([
   {
-    name: '年份',
-    type: 'year',
-    modelValue: 'year',
-    span: 12,
-  },
-  {
     name: '费用类型',
     type: 'select',
     modelValue: 'costType',
     span: 12,
     selectData: [],
     clearable: true,
+  },
+  {
+    name: '年份',
+    type: 'year',
+    modelValue: 'year',
+    span: 12,
   },
 ])
 
@@ -184,16 +184,16 @@ const loadCostTypeOptions = async () => {
       dictType: 'EXPENSE_TYPE',
     })
     if (res.code === '0000' && Array.isArray(res.data)) {
-      selectData[1].selectData = res.data.map(item => ({
+      selectData[0].selectData = res.data.map(item => ({
         label: item.label ?? item.dictLabel ?? item.name ?? '',
         value: item.value ?? item.dictValue ?? item.id ?? '',
       }))
       return
     }
-    selectData[1].selectData = []
+    selectData[0].selectData = []
     proxy.$message.error(res.msg || '加载费用类型失败')
   } catch (error) {
-    selectData[1].selectData = []
+    selectData[0].selectData = []
     console.error('加载费用类型字典失败:', error)
     proxy.$message.error('加载费用类型失败')
   }
