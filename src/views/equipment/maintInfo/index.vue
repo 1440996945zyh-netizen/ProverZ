@@ -914,28 +914,39 @@ const checkboxChange = data => {
 
 // 统计数据
 const statistics = ref({
+	totalCount: 0,
 	reportCount: 0,
 	dispatchCount: 0,
+	maintCount: 0,
 	finishCount: 0,
 	acceptCount: 0,
+	cancelCount: 0,
 })
 
 // 表格高度（减去统计卡片占用的空间）
 const statsTableHeight = computed(() => {
-	return window.innerHeight - 240
+	return window.innerHeight - 260
 })
 
 // 获取统计数据
 const getStatistics = () => {
-	api.getStatusCount(queryParams.value).then(res => {
+	api.getStatusCount({}).then(res => {
 		if (res.code == '0000') {
 			statistics.value = {
+				totalCount: res.data.totalCount || 0,
 				reportCount: res.data.reportCount || 0,
 				dispatchCount: res.data.dispatchCount || 0,
+				maintCount: res.data.maintCount || 0,
 				finishCount: res.data.finishCount || 0,
 				acceptCount: res.data.acceptCount || 0,
+				cancelCount: res.data.cancelCount || 0,
 			}
 			totalItem.value = [
+				{
+					total: statistics.value.totalCount,
+					name: '总数',
+					startColor: '#2B5797', endColor: '#123456'
+				},
 				{
 					total: statistics.value.reportCount,
 					name: '提报',
@@ -945,6 +956,10 @@ const getStatistics = () => {
 					name: '已派工',
 				},
 				{
+					total: statistics.value.maintCount,
+					name: '维修中',
+				},
+				{
 					total: statistics.value.finishCount,
 					name: '维修完成',
 				},
@@ -952,6 +967,10 @@ const getStatistics = () => {
 					total: statistics.value.acceptCount,
 					name: '已验收',
 				},
+				{
+					total: statistics.value.cancelCount,
+					name: '作废',
+				}
 			]
 		}
 	})
