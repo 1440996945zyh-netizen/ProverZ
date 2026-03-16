@@ -100,7 +100,7 @@ const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '合同名称', prop: 'contractName', align: 'left', width: 200, showOverFlow: true },
 	{ label: '合同编号', prop: 'contractCode', align: 'center', width: 150 },
-	{ label: '合同类型', prop: 'contractType', align: 'center', width: 120 },
+	{ label: '合同类型', prop: 'contractTypeLabel', align: 'center', width: 120 },
 	{ label: '合同金额', prop: 'contractAmount', align: 'center', width: 120 },
 	{ label: '合同开始日期', prop: 'startDate', align: 'center', width: 150 },
 	{ label: '合同截止日期', prop: 'endDate', align: 'center', width: 150 },
@@ -285,28 +285,7 @@ const reset = () => {
 	detailRef.value?.resetForm()
 }
 
-const loadContractTypeOptions = async () => {
-	try {
-		const res = await publicApi.getLocalSelect({ type: 'DICT', dictType: 'CONTRACT_TYPE' })
-		if (res.code === '0000' && Array.isArray(res.data)) {
-			contractTypeOptions.value = res.data.map(item => ({
-				label: item.label ?? item.dictLabel ?? item.name ?? '',
-				value: item.value ?? item.dictValue ?? item.id ?? '',
-			}))
-			return
-		}
-		contractTypeOptions.value = []
-		proxy.$message.error(res.msg || '加载合同类型失败')
-	} catch (error) {
-		contractTypeOptions.value = []
-		console.error('加载合同类型字典失败:', error)
-		proxy.$message.error('加载合同类型失败')
-	}
-}
-
-onMounted(() => {
-	loadContractTypeOptions()
-})
+onMounted(() => {})
 
 getList(queryParams.value)
 </script>

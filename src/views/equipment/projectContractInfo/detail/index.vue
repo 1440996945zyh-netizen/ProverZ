@@ -13,7 +13,7 @@
 				<Select
 					:dataConfig="{ params: { type: 'DICT', dictType: 'CONTRACT_TYPE' } }"
 					v-model:value="formData.contractType"
-					v-model:label="formData.contractType"
+					v-model:label="formData.contractTypeLabel"
 				/>
 			</el-form-item>
 
@@ -91,6 +91,7 @@ const data = reactive({
 		applyScope: '',
 		status: '1',
 		contractType: '',
+		contractTypeLabel: '',
 	},
 })
 const { formData } = toRefs(data)
@@ -124,6 +125,7 @@ const resetForm = () => {
 	formData.value.contractName = ''
 	formData.value.contractCode = ''
 	formData.value.contractType = ''
+	formData.value.contractTypeLabel = ''
 	formData.value.contractAmount = null
 	formData.value.startDate = null
 	formData.value.endDate = null
