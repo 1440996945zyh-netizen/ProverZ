@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2026-03-16 16:59:21
+ * @LastEditTime: 2026-03-16 18:55:10
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -663,7 +663,7 @@ const getList = e => {
 	
 	let params = {
 		...e,
-		...pagination
+		
 	}
 	listMenu(params)
 		.then(response => {
