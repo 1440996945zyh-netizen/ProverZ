@@ -925,7 +925,7 @@ const statistics = ref({
 
 // 表格高度（减去统计卡片占用的空间）
 const statsTableHeight = computed(() => {
-	return window.innerHeight - 240
+	return window.innerHeight - 260
 })
 
 // 获取统计数据
