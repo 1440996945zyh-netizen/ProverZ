@@ -2,7 +2,7 @@
 	<div class="app-container">
 		<el-row :gutter="20">
 			<!--部门数据-->
-			<el-col :span="5" style="padding-right: 0px !important">
+			<el-col :span="4" style="padding-right: 0px !important">
 				<div class="head-container">
 					<el-input v-model="deptName" placeholder="请输入部门名称" clearable prefix-icon="Search" style="margin-bottom: 20px" />
 				</div>
@@ -20,9 +20,9 @@
 					/>
 				</div>
 			</el-col>
-			<el-col :span="19" style="padding-left: 0px !important">
+			<el-col :span="20" style="padding-left: 0px !important">
 				<BaseTable
-					ref="baseTable"
+					ref="userTableRef"
 					:showSearchHeader="true"
 					:selectData="selectData"
 					:searchClick="getList"
@@ -55,10 +55,11 @@ import Drawer from '@/components/Drawer/index.vue'
 
 import tableParamsStore from '@/store/modules/tableParams'
 import { ElButton, ElSwitch, ElTag } from 'element-plus'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import publicApi from '@/api/public/index'
 const heightDiv = ref(window.innerHeight - 150)
 const userVisible = ref(false) //新增修改抽屉
+const userTableRef = ref(null) // table的ref
 
 const drawerRef = ref(null) // 明细组件ref
 const { proxy } = getCurrentInstance()
@@ -70,7 +71,7 @@ const clickRow = ref({}) //点击当前行
 
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 	deptId: '',
 })
 // 保存
@@ -86,13 +87,13 @@ const save = async () => {
 				api.updateUser(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					userVisible.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			} else {
 				api.insertUser(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					userVisible.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			}
 		})
@@ -252,7 +253,7 @@ watch(deptName, val => {
 })
 /** 搜索按钮操作 */
 function handleQuery() {
-	getList(queryParams.value)
+	getList()
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
@@ -263,7 +264,7 @@ function handleDelete(row) {
 			return api.deletebyid([row.id])
 		})
 		.then(() => {
-			getList(queryParams.value)
+			getList()
 			proxy.$modal.msgSuccess('删除成功')
 		})
 		.catch(() => {})
@@ -280,7 +281,7 @@ const handleStatusChange = row => {
 		})
 		.then(() => {
 			proxy.$modal.msgSuccess(text + '成功')
-			getList(queryParams.value)
+			getList()
 		})
 		.catch(function () {})
 }
@@ -319,8 +320,14 @@ function edit(row) {
 /**点击查询的事件 */
 const getList = e => {
 	buttonList[1].disabled = true //控制重置密码按钮
-	queryParams.value = Object.assign(queryParams.value, e)
-	api.listUser(queryParams.value).then(res => {
+	console.log('查询拉查询拉', e)
+	const pagination = userTableRef.value?.buildQueryParams() 
+	let params = {
+		...e,
+		...pagination,
+	}
+	console.log('查询拉查询拉', params)
+	api.listUser(params).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
@@ -341,7 +348,9 @@ const cellClickEvent = ({ row }) => {
 	buttonList[1].disabled = false
 }
 getDeptTree()
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped>
 .head-container {

@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-15 11:34:41
- * @LastEditTime: 2026-02-10 15:55:58
+ * @LastEditTime: 2026-03-16 17:09:51
  * @LastEditors: zhangsd
  * @Description: 表单设计器列表页面，负责表单模板的查询、新增、编辑、删除、详情、复制等操作
  * @FilePath: \view\src\views\bpmModel\formdesigner\index.vue
@@ -270,8 +270,12 @@ const handleCellClick = (row, prop) => {
 const getTableList = async e => {
 	try {
 		isTableLoading.value = true
-		queryParams.value = e
-		const res = await getFormPage(e)
+		let pagination = formDesignerTableRef.value?.buildQueryParams()
+		let params = {
+			...pagination,
+			...e
+		}
+		const res = await getFormPage(params)
 		tableData.value = res.data.pages
 		totalCount.value = res.data.totalNum
 

@@ -64,7 +64,7 @@ const showPopover = ref(false)
 // 查询参数
 const queryParams = reactive({
 	pageNum: 1,
-	pageSize: 10,
+ pageSize: 20, 
 	name: '',
 	category: undefined,
 	processDefinitionKey: '',
@@ -264,7 +264,7 @@ const cellClickEvent = ({ row }) => {
  */
 const handleQuery = () => {
 	queryParams.pageNum = 1
-	getList()
+	getList(todoTaskTableRef.value?.buildQueryParams())
 	showPopover.value = false
 }
 
@@ -277,7 +277,7 @@ const resetQuery = () => {
 	queryParams.processDefinitionKey = ''
 	queryParams.createTime = []
 	queryParams.pageNum = 1
-	getList()
+	getList(todoTaskTableRef.value?.buildQueryParams())
 }
 
 /**
@@ -312,7 +312,7 @@ onMounted(async () => {
 		processDefinitionList.value = definitionData.data.pages
 
 		// 获取待办任务列表
-		await getList()
+		await getList(todoTaskTableRef.value?.buildQueryParams())
 	} catch (error) {
 		console.error('初始化失败:', error)
 		ElMessage.error('初始化失败')

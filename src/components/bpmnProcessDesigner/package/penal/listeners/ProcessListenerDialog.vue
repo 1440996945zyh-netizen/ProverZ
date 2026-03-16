@@ -47,7 +47,7 @@ const clickRow = ref({}) // 点击的当前行数据
 // 分页查询参数（适配 BaseTable）
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+ pageSize: 20, 
 	type: '',
 	status: CommonStatusEnum.ENABLE,
 })

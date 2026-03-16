@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-24 10:29:17
- * @LastEditTime: 2026-02-28 15:40:03
+ * @LastEditTime: 2026-03-16 18:38:52
  * @LastEditors: zhangsd
  * @Description: 常用审批语配置
  * @FilePath: \view\src\views\bpmModel\processLanguage\index.vue
@@ -21,6 +21,11 @@
 			:loading="tableLoading"
 			:showPagination="true"
 			:total="total"
+			v-model:pagination="queryParams"
+			:checkboxConfig="checkboxConfig"
+			:rowConfig="{ keyField: 'id' }"
+			@checkbox-change="handleCheckboxChange"
+			@checkbox-all="handleSelectAllChange"
 		/>
 		<!-- 常用审批语详情弹窗 -->
 		<ProcessLanguageDetail ref="detailDialogRef" @success="handleDialogSuccess" @close="handleDialogClose" />
@@ -59,7 +64,7 @@ const storeHeight = computed(() => tableParamsStore().normalTableHeight)
 const data = reactive({
 	queryParams: {
 		startPage: 1,
-		pageSize: 20,
+		pageSize: 30,
 		content: undefined, // 快捷语内容（搜索）
 		expressionType: undefined, // 类型（搜索）
 		status: undefined, // 状态（搜索）
@@ -68,6 +73,23 @@ const data = reactive({
 	total: 0,
 	tableLoading: false,
 })
+/**
+ * 常用审批语表格复选框配置
+ */
+const checkboxConfig = {}
+const selectedRows = ref([])
+const handleCheckboxChange = selectedRows => {
+	console.log('当前选中行：', selectedRows)
+	// 可将选中行保存到响应式变量中，用于后续操作
+	selectedRows.value = selectedRows
+}
+
+// 处理全选变化
+const handleSelectAllChange = ({ checked, records }) => {
+  console.log(' 全选操作:', checked, records)
+  
+  
+}
 /**
  * 常用审批语分页查询参数
  */
@@ -136,6 +158,7 @@ const buttonList = reactive([
  * 常用审批语表格列配置
  */
 const tableColumns = ref([
+	{ type: 'checkbox', width: 50, fixed: 'left', align: 'center' },
 	{
 		prop: '',
 		label: '编号',
@@ -154,7 +177,6 @@ const tableColumns = ref([
 		label: '类型',
 		align: 'center',
 		width: 120,
-		
 	},
 	{
 		prop: 'status',
@@ -232,9 +254,11 @@ const tableColumns = ref([
  * @param e
  */
 const getList = async e => {
+	let pagination = languageTableRef.value?.buildQueryParams()
+	console.log('查询常用审批语分页参数:', e)
 	let params = {
-		...queryParams.value,
 		...e,
+		...pagination,
 	}
 	tableLoading.value = true
 	try {
@@ -248,6 +272,11 @@ const getList = async e => {
 	}
 }
 
+const checkboxChange = selectedRows => {
+	console.log('当前选中行：', selectedRows)
+	// 可将选中行保存到响应式变量中，用于后续操作
+	selectedRows.value = selectedRows
+}
 /**
  * 打开常用审批语表单
  * @param type create/update
@@ -319,6 +348,7 @@ const initBaseInfo = () => {
 onMounted(() => {
 	initBaseInfo()
 	getList()
+	// languageTableRef.value?.query()
 })
 </script>
 

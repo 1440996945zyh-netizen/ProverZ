@@ -1,7 +1,7 @@
 <template>
 	<div class="app-container">
 		<BaseTable
-			ref="baseTable"
+			ref="versionTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -34,6 +34,7 @@ import { ElButton, ElSwitch, ElTag } from 'element-plus'
 import { ref } from 'vue'
 import publicApi from '@/api/public/index'
 const versionVisiable = ref(false) //新增修改抽屉
+const versionTableRef = ref(null) // table的ref
 
 const drawerRef = ref(null) // 明细组件ref
 const { proxy } = getCurrentInstance()
@@ -43,7 +44,7 @@ const clickRow = ref({}) //点击当前行
 
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 // 保存
 /** 提交按钮 */
@@ -55,13 +56,13 @@ const save = async () => {
 				api.updateVersion(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					versionVisiable.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			} else {
 				api.insertVersion(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					versionVisiable.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			}
 		})
@@ -78,17 +79,17 @@ const tableColumns = ref([
 		prop: 'versionType',
 		label: '版本类型',
 		render: row => {
-		return [
+			return [
 				h(
-				ElTag,
-				{
-					type: row.versionType=='10'?"success":row.versionType=='20'?"warning":"danger",
-					link: true,
-				},
-				{
-					default: () => row.versionType=='10'?"手持":row.versionType=='20'?"车载":"跑垛",
-				}
-				)
+					ElTag,
+					{
+						type: row.versionType == '10' ? 'success' : row.versionType == '20' ? 'warning' : 'danger',
+						link: true,
+					},
+					{
+						default: () => (row.versionType == '10' ? '手持' : row.versionType == '20' ? '车载' : '跑垛'),
+					}
+				),
 			]
 		},
 	},
@@ -182,7 +183,7 @@ const buttonList = reactive([
 ])
 /** 搜索按钮操作 */
 function handleQuery() {
-	getList(queryParams.value)
+	getList()
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
@@ -193,7 +194,7 @@ function handleDelete(row) {
 			return api.deletebyid([row.id])
 		})
 		.then(() => {
-			getList(queryParams.value)
+			getList()
 			proxy.$modal.msgSuccess('删除成功')
 		})
 		.catch(() => {})
@@ -209,7 +210,7 @@ const handleStatusChange = row => {
 		})
 		.then(() => {
 			proxy.$modal.msgSuccess(text + '成功')
-			getList(queryParams.value)
+			getList()
 		})
 		.catch(function () {})
 }
@@ -228,8 +229,12 @@ function edit(row) {
 
 /**点击查询的事件 */
 const getList = e => {
-	queryParams.value = e
-	api.listVersion(queryParams.value).then(res => {
+	let pagination = versionTableRef.value?.buildQueryParams()
+	let params = {
+		...e,
+		...pagination
+	}
+	api.listVersion(params).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
@@ -247,7 +252,9 @@ const add = () => {
 const cellClickEvent = ({ row }) => {
 	clickRow.value = row
 }
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped>
 .head-container {

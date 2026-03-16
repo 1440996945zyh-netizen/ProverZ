@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-23 14:57:27
- * @LastEditTime: 2026-02-10 15:59:45
+ * @LastEditTime: 2026-03-16 15:14:03
  * @LastEditors: zhangsd
  * @Description: 任务列表页面
  * @FilePath: \view\src\views\bpmModel\task\manager\index.vue
@@ -11,7 +11,7 @@
 	<!-- 流程实例管理 -->
 	<div class="app-container">
 		<BaseTable
-			ref="baseTableRef"
+			ref="managerTaskTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -52,7 +52,7 @@ import tableParamsStore from '@/store/modules/tableParams'
 // 初始化全局实例
 const router = useRouter()
 const message = useMessage() // 消息提示实例
-const baseTableRef = ref(null) // BaseTable 引用
+const managerTaskTableRef = ref(null) // BaseTable 引用
 
 // 响应式数据
 const loading = ref(false) // 列表加载状态
@@ -238,18 +238,19 @@ const tableColumns = ref([
  * 查询列表数据
  * @param {Object} params 搜索参数
  */
-const getList = async (params = queryParams.value) => {
+const getList = async (params = {}) => {
 	loading.value = true
 	try {
 		// 合并查询参数
-		const query = { ...queryParams.value, ...params }
+		let pagination = managerTaskTableRef.value?.buildQueryParams()
+		const query = { ...params, ...pagination }
 		const res = await TaskApi.getTaskManagerPage(query)
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 
 		// 更新查询参数
 		// queryParams.value = { ...query }
-		loading.value = false
+	loading.value = false
 	} finally {
 		loading.value = false
 	}

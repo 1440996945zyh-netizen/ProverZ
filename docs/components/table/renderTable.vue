@@ -14,7 +14,7 @@ const baseTable = ref() // table的ref
 const total = ref(0) // 数据总数
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+ pageSize: 20, 
 })
 // 表格数据
 const tableData = ref([])
