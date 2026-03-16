@@ -64,7 +64,7 @@
 
 			<div v-if="isQuotaProject" class="quota-section">
 				<div class="quota-header">
-					<span class="quota-title">维修项目定额表</span>
+					<span class="quota-title">维修项目定额信息</span>
 					<el-button type="primary" @click="openQuotaDialog" size="default" v-if="!isViewMode">选择维修项目定额</el-button>
 				</div>
 				<el-table :data="quotaTableData" border style="width: 100%" class="quota-table">
@@ -141,6 +141,7 @@
 				:show-pagination="true"
 				@checkbox-all="selectAllChangeEvent"
 				@checkboxChange="quotaCheckboxChange"
+				:tableHeight="tableHeight"
 			/>
 			<template #footer>
 				<span class="dialog-footer">
@@ -161,6 +162,8 @@ import Select from '@/components/Select/index.vue'
 import quotaApi from '@/api/equipment/maintenanceProjectQuota/index'
 import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
 import publicApi from '@/api/public/index.js'
+import tableParamsStore from '@/store/modules/tableParams'
+const tableHeight = computed(() => tableParamsStore().drawerPageTableHeight)
 
 const props = defineProps({
 	isViewMode: {
