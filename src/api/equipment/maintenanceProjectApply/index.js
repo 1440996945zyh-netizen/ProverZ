@@ -34,9 +34,25 @@ const api = {
 
 	delete(id) {
 		return request({
+			url: '/api/internal/EMaintProjApply/deleteProJect',
+			method: 'post',
+			data: { id },
+		})
+	},
+
+	projectApplyStart(data) {
+		return request({
+			url: '/api/internal/EMaintProjApply/projectApplyStart',
+			method: 'post',
+			data: data,
+		})
+	},
+
+	void(id) {
+		return request({
 			url: '/api/internal/EMaintProjApply/delete',
-			method: 'delete',
-			params: { id },
+			method: 'post',
+			data: { id },
 		})
 	},
 }

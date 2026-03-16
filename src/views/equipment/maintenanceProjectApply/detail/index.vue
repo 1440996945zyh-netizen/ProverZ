@@ -64,14 +64,27 @@
 
 			<div v-if="isQuotaProject" class="quota-section">
 				<div class="quota-header">
-					<span class="quota-title">维修项目定额表</span>
+					<span class="quota-title">维修项目定额信息</span>
 					<el-button type="primary" @click="openQuotaDialog" size="default" v-if="!isViewMode">选择维修项目定额</el-button>
 				</div>
 				<el-table :data="quotaTableData" border style="width: 100%" class="quota-table">
 					<el-table-column prop="quotaCode" label="定额编号" width="180" />
 					<el-table-column prop="projectName" label="维修项目名称" width="200" />
 					<el-table-column prop="projectContent" label="维修项目内容" min-width="200" show-overflow-tooltip />
-					<el-table-column prop="unit" label="计量单位" width="120" />
+
+					<el-table-column prop="projectNum" label="计件数量" width="120">
+						<template #default="scope">
+							<el-input-number
+								v-model="scope.row.projectNum"
+								:min="1"
+								:precision="0"
+								@change="handleProjectNumChange(scope.row)"
+								@input="handleProjectNumChange(scope.row)"
+								:disabled="isViewMode"
+								style="width: 100%"
+							/>
+						</template>
+					</el-table-column>
 					<el-table-column prop="amountExcludingTax" label="不含税金额" width="150" align="right"></el-table-column>
 
 					<el-table-column prop="taxRate" label="税率(%)" width="150">
@@ -86,6 +99,7 @@
 							/>
 						</template>
 					</el-table-column>
+					<el-table-column prop="unit" label="计量单位" width="120" />
 					<el-table-column prop="amountIncludingTax" label="含税金额" width="150" align="right"></el-table-column>
 					<el-table-column label="操作" width="120" align="center" v-if="!isViewMode">
 						<template #default="scope">
@@ -100,7 +114,7 @@
 
 			<el-row :gutter="20" class="section-content">
 				<el-col :xs="24" :sm="12" :md="12" :lg="12">
-					<el-form-item label="预算金额" prop="budgetAmount">
+					<el-form-item label="预算金额（元，含税）" prop="budgetAmount">
 						<el-input-number
 							v-model="formData.budgetAmount"
 							:precision="4"
@@ -125,7 +139,9 @@
 				:checkbox-config="quotaCheckboxConfig"
 				:total="quotaTotal"
 				:show-pagination="true"
+				@checkbox-all="selectAllChangeEvent"
 				@checkboxChange="quotaCheckboxChange"
+				:tableHeight="tableHeight"
 			/>
 			<template #footer>
 				<span class="dialog-footer">
@@ -138,7 +154,7 @@
 </template>
 
 <script setup name="maintenanceProjectApplyDetail">
-import { ref, reactive, getCurrentInstance, toRefs, watch, h, onMounted } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, watch, h, onMounted, nextTick } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
@@ -146,6 +162,8 @@ import Select from '@/components/Select/index.vue'
 import quotaApi from '@/api/equipment/maintenanceProjectQuota/index'
 import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
 import publicApi from '@/api/public/index.js'
+import tableParamsStore from '@/store/modules/tableParams'
+const tableHeight = computed(() => tableParamsStore().drawerPageTableHeight)
 
 const props = defineProps({
 	isViewMode: {
@@ -242,7 +260,7 @@ const quotaSelectData = reactive([
 const quotaCheckboxConfig = {
 	highlight: true,
 	strict: false,
-	reserve: false,
+	reserve: true,
 	showHeader: true,
 }
 
@@ -267,6 +285,17 @@ const getQuotaList = params => {
 			if (res.code === '0000') {
 				quotaList.value = res.data.pages || []
 				quotaTotal.value = res.data.totalNum || 0
+
+				nextTick(() => {
+					if (quotaTableRef.value && quotaTableData.value.length > 0) {
+						const selectedIds = quotaTableData.value.map(item => item.quotaId)
+						quotaList.value.forEach(row => {
+							if (selectedIds.includes(row.id)) {
+								quotaTableRef.value.setCheckboxRow([row], true)
+							}
+						})
+					}
+				})
 			} else {
 				proxy.$message.error(res.msg || '获取定额列表失败')
 				quotaList.value = []
@@ -296,6 +325,10 @@ const confirmQuotaSelection = () => {
 		return
 	}
 
+	const selectedIds = selectedQuotas.value.map(quota => quota.id)
+
+	let duplicateCount = 0
+
 	selectedQuotas.value.forEach(quota => {
 		const existingIndex = quotaTableData.value.findIndex(item => item.quotaId === quota.id)
 		if (existingIndex === -1) {
@@ -304,9 +337,10 @@ const confirmQuotaSelection = () => {
 			const amountExcludingTax = !isNaN(amountExcludingTaxNum) ? amountExcludingTaxNum.toFixed(4) : '0.0000'
 			const taxRate = Number(defaultTaxRate) / 100
 			const amountIncludingTaxNum = Number(amountExcludingTax) * (1 + taxRate)
-			const amountIncludingTax = !isNaN(amountIncludingTaxNum) ? amountIncludingTaxNum.toFixed(4) : '0.0000'
+			const amountIncludingTax = !isNaN(amountIncludingTaxNum) ? Number(amountIncludingTaxNum.toFixed(4)) : 0
 			quotaTableData.value.push({
 				id: quota.id,
+				quotaId: quota.id,
 				quotaCode: quota.quotaCode,
 				projectName: quota.projectName,
 				projectContent: quota.projectContent,
@@ -314,31 +348,56 @@ const confirmQuotaSelection = () => {
 				amountExcludingTax: amountExcludingTax,
 				taxRate: defaultTaxRate,
 				amountIncludingTax: amountIncludingTax,
+				projectNum: 1,
 			})
 		}
 	})
 
+	const toRemove = quotaTableData.value.filter(item => !selectedIds.includes(item.quotaId))
+	toRemove.forEach(item => {
+		const index = quotaTableData.value.findIndex(row => row.quotaId === item.quotaId)
+		if (index > -1) {
+			quotaTableData.value.splice(index, 1)
+		}
+	})
+
+	if (toRemove.length > 0) {
+		proxy.$message.info(`已移除 ${toRemove.length} 条未选中的数据`)
+	}
+
+	console.log('quotaTableData before calculate:', quotaTableData.value)
 	calculateBudgetAmount()
+	console.log('budgetAmount after calculate:', formData.value.budgetAmount)
 	quotaDialogVisible.value = false
 }
 
 // 计算含税金额
 const calculateTaxAmount = row => {
 	const amountExcludingTaxNum = Number(row.amountExcludingTax)
+	const projectNum = Number(row.projectNum) || 1
 	if (!isNaN(amountExcludingTaxNum) && row.taxRate !== undefined) {
 		const taxRate = Number(row.taxRate) / 100
-		row.amountIncludingTax = Number((amountExcludingTaxNum * (1 + taxRate)).toFixed(4))
+		const baseAmount = amountExcludingTaxNum * projectNum
+		row.amountIncludingTax = Number((baseAmount * (1 + taxRate)).toFixed(4))
 	} else {
-		row.amountIncludingTax = !isNaN(amountExcludingTaxNum) ? amountExcludingTaxNum : 0
+		const baseAmount = amountExcludingTaxNum * projectNum
+		row.amountIncludingTax = !isNaN(baseAmount) ? Number(baseAmount.toFixed(4)) : 0
 	}
 }
 
 // 计算预算金额
 const calculateBudgetAmount = () => {
 	formData.value.budgetAmount = quotaTableData.value.reduce((sum, row) => {
-		return sum + (row.amountIncludingTax || 0)
+		const amount = Number(row.amountIncludingTax) || 0
+		return sum + amount
 	}, 0)
 	formData.value.list = quotaTableData.value
+}
+
+// 计件数量变化处理
+const handleProjectNumChange = row => {
+	calculateTaxAmount(row)
+	calculateBudgetAmount()
 }
 
 // 税率变化处理
@@ -434,13 +493,15 @@ const initQuotaTableData = list => {
 	if (list && list.length > 0) {
 		quotaTableData.value = list.map(item => ({
 			id: item.id,
+			quotaId: item.quotaId || item.id,
 			quotaCode: item.quotaCode,
 			projectName: item.projectName,
 			projectContent: item.projectContent,
 			unit: item.unit,
 			amountExcludingTax: item.amountExcludingTax,
 			taxRate: item.taxRate,
-			amountIncludingTax: item.amountIncludingTax,
+			amountIncludingTax: Number(item.amountIncludingTax) || 0,
+			projectNum: item.projectNum || 1,
 		}))
 	}
 }

@@ -9,7 +9,7 @@
 				:buttonList="buttonList"
 				:tableColumns="tableColumns"
 				:tableData="tableData"
-				:loading="loading"
+				:loading="tableLoading"
 				:total="total"
 				:show-pagination="true"
 				:tableHeight="storeHight"
@@ -28,20 +28,29 @@
 </template>
 
 <script setup name="maintenanceProjectApply">
-import { ref, reactive, getCurrentInstance, toRefs, h, computed } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, h, computed, nextTick } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
+import { Edit, View, CircleClose, Promotion } from '@element-plus/icons-vue'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
+import DropDown from '@/components/DropDown/newIndex.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/maintenanceProjectApply/index'
 import tableParamsStore from '@/store/modules/tableParams'
+import { useRoute, useRouter } from 'vue-router'
+import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
 
 const { proxy } = getCurrentInstance()
+
+const route = useRoute()
+const router = useRouter()
+
+const { startProcess, loading } = useProcessStarter()
 
 const baseTable = ref()
 const total = ref(0)
 const tableData = ref([])
-const loading = ref(false)
+const tableLoading = ref(false)
 const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
@@ -91,7 +100,7 @@ const tableColumns = ref([
 	},
 	{
 		label: '状态',
-		prop: 'statuslabel',
+		prop: 'processStatusLable',
 		align: 'center',
 		width: 120,
 		fixed: 'right',
@@ -104,7 +113,7 @@ const tableColumns = ref([
 				4: { label: '已办结', type: 'success' },
 				5: { label: '作废', type: 'danger' },
 			}
-			const status = statusMap[row.status] || { label: '未知', type: 'info' }
+			const status = statusMap[row.processStatus] || { label: '未知', type: 'info' }
 			return [
 				h(
 					ElTag,
@@ -124,38 +133,61 @@ const tableColumns = ref([
 		prop: 'operate',
 		label: '操作',
 		align: 'center',
-		width: 150,
+		width: 120,
 		fixed: 'right',
 		render: row => {
+			const dropDownList = []
+
+			dropDownList.push(
+				{
+					name: '详情',
+					command: '详情',
+					click: () => handleView(row),
+					permission: 'equipment:emaintprojapply:getById',
+					icon: View,
+				},
+				{
+					name: '编辑',
+					command: '编辑',
+					click: () => handleEdit(row),
+					permission: 'equipment:emequiprepaircontract:update',
+					icon: Edit,
+				},
+				{
+					name: '发起',
+					command: '发起',
+					click: () => handleSubmit(row),
+					permission: 'equipment:emaintprojapply:submit',
+					icon: Promotion,
+				},
+				{
+					name: '删除',
+					command: '删除',
+					click: () => handleDelete(row),
+					type: 'danger',
+					permission: 'equipment:emaintprojapply:deleteProJect',
+					icon: 'Delete',
+				},
+				{
+					name: '作废',
+					command: '作废',
+					click: () => handleVoid(row),
+					type: 'danger',
+					permission: 'equipment:emaintprojapply:void',
+					icon: CircleClose,
+				},
+			)
+
 			return [
 				h(
-					ElButton,
+					DropDown,
 					{
-						onClick: () => {
-							handleView(row)
-						},
-						type: 'primary',
-						link: true,
-						icon: 'View',
-						permission: 'equipment:emaintprojapply:getById',
+						dropDownList,
+						isInner: true,
+						props: { permission: undefined },
 					},
 					{
-						default: () => '详情',
-					},
-				),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleDelete(row)
-						},
-						type: 'danger',
-						link: true,
-						icon: 'CircleClose',
-						permission: 'equipment:emaintprojapply:delete',
-					},
-					{
-						default: () => '作废',
+						default: () => h('span', { class: 'el-icon-more' }),
 					},
 				),
 			]
@@ -165,9 +197,9 @@ const tableColumns = ref([
 
 const selectData = reactive([
 	{
-		name: '使用部门',
+		name: '申请单号',
 		type: 'input',
-		modelValue: 'usingDeptName',
+		modelValue: 'appNumber',
 		span: 12,
 	},
 	{
@@ -189,10 +221,10 @@ const buttonList = reactive([
 ])
 
 const getList = e => {
-	loading.value = true
+	tableLoading.value = true
 	queryParams.value = e
 	api.getList(e).then(res => {
-		loading.value = false
+		tableLoading.value = false
 		if (res.code == '0000') {
 			tableData.value = res.data.pages
 			total.value = res.data.totalNum
@@ -250,6 +282,35 @@ const handleView = row => {
 	})
 }
 
+const handleEdit = row => {
+	title.value = '编辑维修项目申请'
+	isViewMode.value = false
+	dialogVisible.value = true
+	nextTick(() => {
+		detailRef.value.resetForm()
+		api.getById(row.id).then(response => {
+			const resData = JSON.parse(JSON.stringify(response.data))
+			detailRef.value.formData.id = resData.id
+			detailRef.value.formData.usingDeptId = resData.usingDeptId
+			detailRef.value.formData.usingDeptName = resData.usingDeptName
+			detailRef.value.formData.equipTypeId = resData.equipTypeId
+			detailRef.value.formData.equipId = resData.equipId
+			detailRef.value.formData.equipName = resData.equipName
+			detailRef.value.formData.appNumber = resData.appNumber
+			detailRef.value.formData.appContent = resData.appContent
+			detailRef.value.formData.maintenanceUnitId = resData.maintenanceUnitId
+			detailRef.value.formData.maintenanceUnitName = resData.maintenanceUnitName
+			detailRef.value.formData.budgetAmount = resData.budgetAmount
+			detailRef.value.formData.remark = resData.remark
+			detailRef.value.formData.appType = resData.appType
+			detailRef.value.formData.list = resData.list || []
+			if (resData.list && resData.list.length > 0) {
+				detailRef.value.initQuotaTableData(resData.list)
+			}
+		})
+	})
+}
+
 const submitForm = async () => {
 	if (await detailRef.value.validate()) {
 		const params = detailRef.value.formData
@@ -269,11 +330,61 @@ const submitForm = async () => {
 	}
 }
 
+const submitMaintenanceProjectApply = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitMaintenanceProjectApply:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.projectApplyStart(params)
+}
+
+const handleSubmit = row => {
+	api.getById(row.id)
+		.then(res => {
+			if (res && res.data) {
+				startProcess({
+					rowData: res.data,
+					businessId: route.meta?.menuId,
+					businessTypeCode: 'bpm:equipment:controller:projectApplyStart',
+					businessSubmit: submitMaintenanceProjectApply,
+					onSuccess() {
+						proxy.$modal.msgSuccess('发起成功')
+						getList(queryParams.value)
+					},
+					onError(err) {
+						proxy.$modal.msgError(err.message)
+					},
+				})
+			}
+		})
+		.catch(error => {
+			console.error('获取详情失败:', error)
+			proxy.$modal.msgError('获取详情失败')
+		})
+}
+
 const handleDelete = row => {
+	proxy.$modal
+		.confirm('确定删除？')
+		.then(function () {
+			return api.delete(row.id)
+		})
+		.then(() => {
+			getList()
+			proxy.$modal.msgSuccess('删除成功')
+		})
+		.catch(() => {})
+}
+
+const handleVoid = row => {
 	proxy.$modal
 		.confirm('确定作废？')
 		.then(function () {
-			return api.delete(row.id)
+			return api.void(row.id)
 		})
 		.then(() => {
 			getList()

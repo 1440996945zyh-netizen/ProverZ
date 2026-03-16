@@ -87,9 +87,9 @@ const selectData = reactive([
 		span: 6,
 	},
 	{
-		name: '合同开始日期',
+		name: '合同结束日期',
 		type: 'date',
-		modelValue: 'startDate',
+		modelValue: 'endDate',
 		span: 6,
 	},
 ])

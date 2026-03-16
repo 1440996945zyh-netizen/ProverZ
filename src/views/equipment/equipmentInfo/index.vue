@@ -58,9 +58,9 @@ const tableData = ref([])
 const loading = ref(false)
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
-	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 120 },
-	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 120 },
-	{ label: '设备名称', prop: 'equipName', align: 'left', width: 150 },
+	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 170 },
+	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 170 },
+	{ label: '设备名称', prop: 'equipName', align: 'left', },
 	{ label: '设备编号', prop: 'equipCode', align: 'left', width: 180 },
 	{ label: '规格', prop: 'specificCode', align: 'left', width: 120 },
 	{ label: '型号', prop: 'modelNumber', align: 'left', width: 120 },
