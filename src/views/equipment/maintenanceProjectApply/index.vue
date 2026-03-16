@@ -161,6 +161,13 @@ const tableColumns = ref([
 					icon: Promotion,
 				},
 				{
+					name: '审批历史',
+					command: '审批历史',
+					click: () => handleHistory(row),
+					icon: 'Histogram',
+					type: 'primary',
+				},
+				{
 					name: '删除',
 					command: '删除',
 					click: () => handleDelete(row),
@@ -366,7 +373,15 @@ const handleSubmit = row => {
 			proxy.$modal.msgError('获取详情失败')
 		})
 }
-
+//审批历史
+const handleHistory = row => {
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: row.procInstId,
+		},
+	})
+}
 const handleDelete = row => {
 	proxy.$modal
 		.confirm('确定删除？')
