@@ -5,7 +5,12 @@
 				<el-row :gutter="24">
 					<el-col :span="6">
 						<el-form-item label="采购单主题" prop="purchaseTitle">
-							<el-input v-model="form.purchaseTitle" placeholder="请输入采购单主题" :disabled="formDisabled" maxlength="200" />
+							<el-input
+								v-model="form.purchaseTitle"
+								placeholder="请输入采购单主题"
+								:disabled="formDisabled"
+								maxlength="200"
+							/>
 						</el-form-item>
 					</el-col>
 					<el-col :span="6">
@@ -20,7 +25,13 @@
 					</el-col>
 					<el-col :span="6">
 						<el-form-item label="采购类型" prop="purchaseTypeCode">
-							<el-select v-model="form.purchaseTypeCode" placeholder="请选择采购类型" :disabled="formDisabled" style="width: 100%" @change="handlePurchaseTypeChange">
+							<el-select
+								v-model="form.purchaseTypeCode"
+								placeholder="请选择采购类型"
+								:disabled="formDisabled"
+								style="width: 100%"
+								@change="handlePurchaseTypeChange"
+							>
 								<el-option label="比价" value="01" />
 								<el-option label="招标" value="02" />
 								<el-option label="定点服务" value="03" />
@@ -30,23 +41,23 @@
 					<el-col :span="6" v-if="form.purchaseTypeCode === '03'">
 						<el-form-item label="定点服务类别" prop="fixedServiceCategoryCode">
 							<Select
-								:dataConfig="{ url: '/api/internal/public/getDictListByType/FIX_SERVICE' }"
+								:dataConfig="{ url: '/api/internal/public/getDictListByType/FIXEDPOINT_SERVICE' }"
 								v-model:value="form.fixedServiceCategoryCode"
 								v-model:label="form.fixedServiceCategoryName"
 								:disabled="formDisabled"
 							/>
 						</el-form-item>
 					</el-col>
-<!--					<el-col :span="8">-->
-<!--						<el-form-item label="含税金额" prop="taxIncludedAmount">-->
-<!--							<el-input v-model="form.taxIncludedAmount" placeholder="自动计算" :disabled="true" />-->
-<!--						</el-form-item>-->
-<!--					</el-col>-->
-<!--					<el-col :span="8">-->
-<!--						<el-form-item label="不含税金额" prop="taxExcludedAmount">-->
-<!--							<el-input v-model="form.taxExcludedAmount" placeholder="自动计算" :disabled="true" />-->
-<!--						</el-form-item>-->
-<!--					</el-col>-->
+					<!--					<el-col :span="8">-->
+					<!--						<el-form-item label="含税金额" prop="taxIncludedAmount">-->
+					<!--							<el-input v-model="form.taxIncludedAmount" placeholder="自动计算" :disabled="true" />-->
+					<!--						</el-form-item>-->
+					<!--					</el-col>-->
+					<!--					<el-col :span="8">-->
+					<!--						<el-form-item label="不含税金额" prop="taxExcludedAmount">-->
+					<!--							<el-input v-model="form.taxExcludedAmount" placeholder="自动计算" :disabled="true" />-->
+					<!--						</el-form-item>-->
+					<!--					</el-col>-->
 					<el-col :span="24" v-if="form.purchaseStatus === 1">
 						<el-form-item label="失败原因" prop="failureReason">
 							<el-input v-model="form.failureReason" type="textarea" :rows="3" :disabled="true" maxlength="500" />
@@ -60,22 +71,38 @@
 				<template #title>
 					<div style="width: 100%; display: flex; justify-content: space-between">
 						<span>物资采购明细</span>
-						<div style="display: flex;">
-              <div style="margin-right: 16px">
-                <el-statistic group-separator="," :precision="2" :value-style="{ fontSize: '15px',color: 'blue' }" :value="Number(form.taxIncludedAmount) || 0">
-                  <template v-slot:prefix>
-                    <span style="font-size: 15px">总金额：</span>
-                  </template>
-                </el-statistic>
-              </div>
-              <div style="margin-right: 16px">
-                <el-statistic group-separator="," :precision="2" :value-style="{ fontSize: '15px',color: 'blue' }" :value="Number(form.taxExcludedAmount) || 0">
-                  <template v-slot:prefix>
-                    <span style="font-size: 15px">不含税金额：</span>
-                  </template>
-                </el-statistic>
-              </div>
-							<el-button plain size="medium" @click.stop="addDetail" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">
+						<div style="display: flex">
+							<div style="margin-right: 16px">
+								<el-statistic
+									group-separator=","
+									:precision="2"
+									:value-style="{ fontSize: '15px', color: 'blue' }"
+									:value="Number(form.taxIncludedAmount) || 0"
+								>
+									<template v-slot:prefix>
+										<span style="font-size: 15px">总金额：</span>
+									</template>
+								</el-statistic>
+							</div>
+							<div style="margin-right: 16px">
+								<el-statistic
+									group-separator=","
+									:precision="2"
+									:value-style="{ fontSize: '15px', color: 'blue' }"
+									:value="Number(form.taxExcludedAmount) || 0"
+								>
+									<template v-slot:prefix>
+										<span style="font-size: 15px">不含税金额：</span>
+									</template>
+								</el-statistic>
+							</div>
+							<el-button
+								plain
+								size="medium"
+								@click.stop="addDetail"
+								:disabled="formDisabled"
+								style="margin: 8px 10px 0px 0px"
+							>
 								待采购清单
 							</el-button>
 						</div>
@@ -95,32 +122,32 @@
 				/>
 			</el-collapse-item>
 
-      <!-- 比价信息 -->
-      <el-collapse-item v-if="form.purchaseTypeCode === '01'" title="比价信息" name="comparisonList">
-<!--        <template #title>-->
-<!--          <div style="width: 100%; display: flex; justify-content: space-between">-->
-<!--            <span>比价信息</span>-->
-<!--            <div style="display: flex">-->
-<!--              <el-button type="primary" @click.stop="addComparison" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">-->
-<!--                新增-->
-<!--              </el-button>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </template>-->
-        <EditTable
-          ref="comparisonTableRef"
-          :name="'比价信息'"
-          :tableData="comparisonList"
-          :tableColumns="comparisonColumns"
-          :tableHeight="tableHeightBj"
-          :cellClickEvent="comparisonCellClickEvent"
-          :headerCellClickEvent="comparisonHeaderCellClickEvent"
-          :editRules="comparisonEditRules"
-          :rowConfig="rowConfig"
-		  :hasAdd="true"
-          :disabledKey="'rowDisabled'"
-        />
-      </el-collapse-item>
+			<!-- 比价信息 -->
+			<el-collapse-item v-if="form.purchaseTypeCode === '01'" title="比价信息" name="comparisonList">
+				<!--        <template #title>-->
+				<!--          <div style="width: 100%; display: flex; justify-content: space-between">-->
+				<!--            <span>比价信息</span>-->
+				<!--            <div style="display: flex">-->
+				<!--              <el-button type="primary" @click.stop="addComparison" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">-->
+				<!--                新增-->
+				<!--              </el-button>-->
+				<!--            </div>-->
+				<!--          </div>-->
+				<!--        </template>-->
+				<EditTable
+					ref="comparisonTableRef"
+					:name="'比价信息'"
+					:tableData="comparisonList"
+					:tableColumns="comparisonColumns"
+					:tableHeight="tableHeightBj"
+					:cellClickEvent="comparisonCellClickEvent"
+					:headerCellClickEvent="comparisonHeaderCellClickEvent"
+					:editRules="comparisonEditRules"
+					:rowConfig="rowConfig"
+					:hasAdd="true"
+					:disabledKey="'rowDisabled'"
+				/>
+			</el-collapse-item>
 		</el-collapse>
 	</el-form>
 
@@ -157,7 +184,6 @@ const applicationDetailTableRef = ref() // 申报物资明细表格ref
 
 const rowConfig = { isCurrent: true, isHover: true, keyField: 'row_id' }
 
-
 // 表单数据
 const formData = reactive({
 	form: {
@@ -170,8 +196,8 @@ const formData = reactive({
 		purchaseTypeName: '',
 		fixedServiceCategoryCode: '',
 		fixedServiceCategoryName: '',
-		taxIncludedAmount: 0.00,
-		taxExcludedAmount: 0.00,
+		taxIncludedAmount: 0.0,
+		taxExcludedAmount: 0.0,
 		purchaseStatus: 0,
 		failureReason: '',
 	},
@@ -210,13 +236,13 @@ const detailColumns = reactive([
 	{
 		label: '申请单号',
 		prop: 'applicationNo',
-    align: 'center',
-		width: 150
+		align: 'center',
+		width: 150,
 	},
 	{
 		label: '物资名称',
 		prop: 'materialName',
-		minWidth: 150
+		minWidth: 150,
 	},
 	// {
 	// 	label: '物资类别',
@@ -226,13 +252,13 @@ const detailColumns = reactive([
 	{
 		label: '规格型号',
 		prop: 'specificationModel',
-		width: 100
+		width: 100,
 	},
 	{
 		label: '单位',
 		prop: 'unit',
-    align: 'center',
-		width: 80
+		align: 'center',
+		width: 80,
 	},
 	{
 		label: '申报数量',
@@ -317,7 +343,7 @@ const detailColumns = reactive([
 		prop: '',
 		label: '操作',
 		width: 80,
-    fixed: 'right',
+		fixed: 'right',
 		align: 'center',
 		render: row => {
 			return [
@@ -334,7 +360,7 @@ const detailColumns = reactive([
 					},
 					{
 						default: () => '删除',
-					}
+					},
 				),
 			]
 		},
@@ -392,7 +418,7 @@ const comparisonColumns = reactive([
 					},
 					{
 						default: () => '删除',
-					}
+					},
 				),
 			]
 		},
@@ -468,7 +494,11 @@ const addDetail = () => {
 // 保存选择的申报物资明细
 const saveApplicationDetails = () => {
 	// 判断是否选择明细
-	if (!applicationDetailTableRef.value || !applicationDetailTableRef.value.checkData || applicationDetailTableRef.value.checkData.length < 1) {
+	if (
+		!applicationDetailTableRef.value ||
+		!applicationDetailTableRef.value.checkData ||
+		applicationDetailTableRef.value.checkData.length < 1
+	) {
 		proxy.$message.warning('请选择申报物资明细！')
 		return
 	}
@@ -602,9 +632,8 @@ const comparisonHeaderCellClickEvent = even => {
 	}
 }
 
-
 // 采购类型变化处理
-const handlePurchaseTypeChange = (value) => {
+const handlePurchaseTypeChange = value => {
 	const typeMap = {
 		'01': '比价',
 		'02': '招商',
@@ -642,23 +671,24 @@ const handlePurchaseTypeChange = (value) => {
 
 // 监听明细数据变化，自动计算金额
 watch(
-	() => detailList.map(d => ({
-		purchaseQuantity: d.purchaseQuantity,
-		taxRate: d.taxRate,
-		taxIncludedUnitPrice: d.taxIncludedUnitPrice,
-		taxExcludedUnitPrice: d.taxExcludedUnitPrice,
-	})),
+	() =>
+		detailList.map(d => ({
+			purchaseQuantity: d.purchaseQuantity,
+			taxRate: d.taxRate,
+			taxIncludedUnitPrice: d.taxIncludedUnitPrice,
+			taxExcludedUnitPrice: d.taxExcludedUnitPrice,
+		})),
 	() => {
 		detailList.forEach(row => {
 			calculateDetailAmounts(row)
 		})
 		calculateMainAmounts()
 	},
-	{ deep: true }
+	{ deep: true },
 )
 
 // 计算明细的含税金额、不含税金额和税额
-const calculateDetailAmounts = (row) => {
+const calculateDetailAmounts = row => {
 	if (!row.purchaseQuantity || row.purchaseQuantity <= 0) {
 		row.taxIncludedAmount = null
 		row.taxExcludedAmount = null
@@ -672,7 +702,7 @@ const calculateDetailAmounts = (row) => {
 	// 如果含税单价存在，计算含税金额和不含税金额
 	if (row.taxIncludedUnitPrice && row.taxIncludedUnitPrice > 0) {
 		// 含税金额 = 含税单价 * 数量，保留2位小数
-		const taxIncludedAmount = Math.round((row.taxIncludedUnitPrice * quantity) * 100) / 100
+		const taxIncludedAmount = Math.round(row.taxIncludedUnitPrice * quantity * 100) / 100
 		row.taxIncludedAmount = parseFloat(taxIncludedAmount.toFixed(2))
 
 		// 计算不含税单价 = 含税单价 / (1 + 税率/100)，保留2位小数
@@ -680,7 +710,7 @@ const calculateDetailAmounts = (row) => {
 		row.taxExcludedUnitPrice = parseFloat(taxExcludedUnitPrice.toFixed(2))
 
 		// 不含税金额 = 不含税单价 * 数量，保留2位小数
-		const taxExcludedAmount = Math.round((taxExcludedUnitPrice * quantity) * 100) / 100
+		const taxExcludedAmount = Math.round(taxExcludedUnitPrice * quantity * 100) / 100
 		row.taxExcludedAmount = parseFloat(taxExcludedAmount.toFixed(2))
 
 		// 计算税额 = 含税金额 - 不含税金额，保留2位小数
@@ -690,15 +720,15 @@ const calculateDetailAmounts = (row) => {
 	// 如果不含税单价存在，计算不含税金额和含税金额
 	else if (row.taxExcludedUnitPrice && row.taxExcludedUnitPrice > 0) {
 		// 不含税金额 = 不含税单价 * 数量，保留2位小数
-		const taxExcludedAmount = Math.round((row.taxExcludedUnitPrice * quantity) * 100) / 100
+		const taxExcludedAmount = Math.round(row.taxExcludedUnitPrice * quantity * 100) / 100
 		row.taxExcludedAmount = parseFloat(taxExcludedAmount.toFixed(2))
 
 		// 计算含税单价 = 不含税单价 * (1 + 税率/100)，保留2位小数
-		const taxIncludedUnitPrice = Math.round((row.taxExcludedUnitPrice * (1 + taxRate / 100)) * 100) / 100
+		const taxIncludedUnitPrice = Math.round(row.taxExcludedUnitPrice * (1 + taxRate / 100) * 100) / 100
 		row.taxIncludedUnitPrice = parseFloat(taxIncludedUnitPrice.toFixed(2))
 
 		// 含税金额 = 含税单价 * 数量，保留2位小数
-		const taxIncludedAmount = Math.round((taxIncludedUnitPrice * quantity) * 100) / 100
+		const taxIncludedAmount = Math.round(taxIncludedUnitPrice * quantity * 100) / 100
 		row.taxIncludedAmount = parseFloat(taxIncludedAmount.toFixed(2))
 
 		// 计算税额 = 含税金额 - 不含税金额，保留2位小数
@@ -901,4 +931,3 @@ defineExpose({
 <style lang="scss" scoped>
 @import '@/assets/styles/formData.scss';
 </style>
-

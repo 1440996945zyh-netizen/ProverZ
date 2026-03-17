@@ -20,94 +20,47 @@
 			<div style="flex: auto">
 				<el-button @click="purchaseVisible = false">{{ title === '查看详情' ? '关闭' : '取消' }}</el-button>
 				<template v-if="title !== '查看详情'">
-					<el-button type="primary" @click="save" v-hasPermi="['equipment:materialPurchase:add', 'equipment:materialPurchase:update']">保存</el-button>
+					<el-button
+						type="primary"
+						@click="save"
+						v-hasPermi="['equipment:materialPurchase:add', 'equipment:materialPurchase:update']"
+					>
+						保存
+					</el-button>
 				</template>
 			</div>
 		</template>
 	</el-drawer>
-
-	<!-- 失败原因对话框 -->
-	<!-- <el-dialog v-model="failureDialogVisible" title="采购失败原因" width="500px">
-		<el-form :model="failureForm" label-width="100px">
-			<el-form-item label="失败原因" required>
-				<el-input
-					v-model="failureForm.failureReason"
-					type="textarea"
-					:rows="4"
-					placeholder="请输入采购失败原因"
-					maxlength="500"
-					show-word-limit
-				/>
-			</el-form-item>
-		</el-form>
-		<template #footer>
-			<div style="flex: auto">
-				<el-button @click="failureDialogVisible = false">取消</el-button>
-				<el-button type="danger" @click="confirmFailure">确定</el-button>
-			</div>
-		</template>
-	</el-dialog> -->
-
-	<!-- 审核弹窗 -->
-	<el-dialog v-model="approvalVisible" title="审核" width="500px">
-		<el-form :model="approvalForm" label-width="100px">
-			<el-form-item label="审核结果">
-				<el-radio-group v-model="approvalForm.status">
-					<el-radio :label="1">通过</el-radio>
-					<el-radio :label="2">驳回</el-radio>
-				</el-radio-group>
-			</el-form-item>
-			<el-form-item label="审核备注">
-				<el-input
-					v-model="approvalForm.approvalRemark"
-					type="textarea"
-					:rows="4"
-					placeholder="请输入审核备注"
-					maxlength="500"
-					show-word-limit
-				/>
-			</el-form-item>
-		</el-form>
-		<template #footer>
-			<div class="dialog-footer">
-				<el-button @click="approvalVisible = false">取消</el-button>
-				<el-button type="primary" @click="handleApprove">确定</el-button>
-			</div>
-		</template>
-	</el-dialog>
 </template>
 <script setup name="materialPurchase">
 /**--------------引用------------ */
 import BaseTable from '@/components/BaseTable/index.vue'
 import detail from './detail/index.vue'
 import { ref, reactive, nextTick, h, getCurrentInstance, toRaw, watch } from 'vue'
-import { ElButton, ElTag, ElDialog, ElForm, ElFormItem, ElInput, ElRadioGroup, ElRadio, ElTable, ElTableColumn } from 'element-plus'
+import { ElButton, ElTag, ElTable, ElTableColumn } from 'element-plus'
+import { Edit, View, Delete, Promotion, Histogram } from '@element-plus/icons-vue'
+import DropDown from '@/components/DropDown/newIndex.vue'
 import materialPurchaseApi from '@/api/equipment/materialPurchase/index'
-const { proxy } = getCurrentInstance() // 相当于vue2里的this
+import { useRoute, useRouter } from 'vue-router'
+import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
+const { proxy } = getCurrentInstance()
+
+const route = useRoute()
+const router = useRouter()
+
+const { startProcess, loading } = useProcessStarter()
 
 /**--------------变量定义------------ */
-const tableData = ref([]) // 表数据
-const title = ref('') // 详情标题
-const total = ref('') // 数据总数
-const purchaseVisible = ref(false) // 是否显示详情
-const detailRef = ref(null) // 明细组件ref
-const isAdd = ref(false) // 是否新增
-const clickRow = ref(null) // 点击的行数据
-const failureDialogVisible = ref(false) // 是否显示失败原因对话框
-const failureForm = reactive({
-	id: null,
-	failureReason: '',
-}) // 失败原因表单
-const approvalVisible = ref(false) // 是否显示审核弹窗
-const approvalForm = reactive({
-	id: null,
-	status: 1, // 默认通过
-	approvalRemark: '',
-})
+const tableData = ref([])
+const title = ref('')
+const total = ref('')
+const purchaseVisible = ref(false)
+const detailRef = ref(null)
+const isAdd = ref(false)
+const clickRow = ref(null)
 
 const baseTable = ref(null)
 const selectData = reactive([
-	// 查询条件
 	{ name: '采购单号', type: 'input', modelValue: 'purchaseNo', span: 8 },
 	{ name: '采购单主题', type: 'input', modelValue: 'purchaseTitle', span: 8 },
 	{ name: '供应商名称', type: 'input', modelValue: 'supplierName', span: 8 },
@@ -122,81 +75,7 @@ const selectData = reactive([
 			{ value: '03', label: '定点服务' },
 		],
 	},
-	{
-		name: '采购状态',
-		type: 'select',
-		modelValue: 'purchaseStatus',
-		span: 2,
-		clearable: true,
-		selectData: [
-			{ value: '0', label: '待审核' },
-			{ value: 1, label: '审核通过' },
-			{ value: 2, label: '驳回' },
-		],
-	},
 ])
-
-// 行点击事件
-const cellClickEvent = ({ row }) => {
-	clickRow.value = row
-	// 更新审核按钮状态
-	updateApprovalButton()
-}
-
-// 更新审核按钮状态
-const updateApprovalButton = () => {
-	if (clickRow.value && clickRow.value.purchaseStatus === 0) {
-		// 状态为待审核，启用按钮
-		buttonList[1].disabled = false
-	} else {
-		// 其他状态，禁用按钮
-		buttonList[1].disabled = true
-	}
-}
-
-// 批量审核处理（从右上角按钮点击）
-const handleBatchApproval = () => {
-	// 检查是否有选中的行
-	if (!clickRow.value) {
-		proxy.$message.warning('请先选择要审核的记录')
-		return
-	}
-	// 检查选中的行状态是否为待审核
-	if (clickRow.value.purchaseStatus !== 0) {
-		proxy.$message.warning('只能审核状态为"待审核"的记录')
-		return
-	}
-	// 打开审核弹窗
-	openApprovalDialog(clickRow.value)
-}
-
-// 打开审核弹窗
-const openApprovalDialog = row => {
-	approvalForm.id = row.id
-	approvalForm.status = 1 // 默认通过
-	approvalForm.approvalRemark = ''
-	approvalVisible.value = true
-}
-
-// 获取状态标签
-const getStatusLabel = (status) => {
-	const statusMap = {
-		0: '待审核',
-		1: '审核通过',
-		2: '驳回',
-	}
-	return statusMap[status] || '未知'
-}
-
-// 获取状态类型
-const getStatusType = (status) => {
-	const typeMap = {
-		0: 'warning',
-		1: 'success',
-		2: 'danger',
-	}
-	return typeMap[status] || 'info'
-}
 
 // 查看详情事件（只读）
 const viewDetail = row => {
@@ -257,16 +136,20 @@ const DetailTable = {
 		loadDetailList()
 
 		// 监听 detailList 变化，更新行数
-		watch(detailList, (newList) => {
-			if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
-				nextTick(() => {
-					props.onRowCountChange(newList.length)
-				})
-			}
-		}, { immediate: false })
+		watch(
+			detailList,
+			newList => {
+				if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
+					nextTick(() => {
+						props.onRowCountChange(newList.length)
+					})
+				}
+			},
+			{ immediate: false },
+		)
 
 		// 格式化金额（千分位）
-		const formatAmount = (value) => {
+		const formatAmount = value => {
 			if (value == null || value === '') {
 				return '-'
 			}
@@ -285,74 +168,78 @@ const DetailTable = {
 				return h('div', { style: 'padding: 20px; text-align: center; color: #999;' }, '暂无明细数据')
 			}
 			return h('div', { class: 'detail-table-wrapper' }, [
-				h(ElTable, {
-					data: detailList.value,
-					border: true,
-					size: 'small',
-					style: 'width: 100%'
-				}, [
-					h(ElTableColumn, { prop: 'applicationNo', label: '申请单号', align: 'center', width: 150 }),
-					h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
-					h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 100 }),
-					h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
-					h(ElTableColumn, { 
-						prop: 'applicationQuantity', 
-						label: '申报数量', 
-						align: 'right', 
-						width: 100,
-						formatter: (row) => {
-							return row.applicationQuantity != null ? row.applicationQuantity : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'purchaseQuantity', 
-						label: '采购数量', 
-						align: 'right', 
-						width: 110,
-						formatter: (row) => {
-							return row.purchaseQuantity != null ? row.purchaseQuantity : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'taxRate', 
-						label: '税率(%)', 
-						align: 'right', 
-						width: 100,
-						formatter: (row) => {
-							return row.taxRate != null ? row.taxRate : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'taxIncludedUnitPrice', 
-						label: '单价', 
-						align: 'right', 
-						width: 100,
-						formatter: (row) => {
-							return row.taxIncludedUnitPrice != null ? formatAmount(row.taxIncludedUnitPrice) : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'taxIncludedAmount', 
-						label: '金额', 
-						align: 'right', 
-						width: 110,
-						formatter: (row) => {
-							return row.taxIncludedAmount != null ? formatAmount(row.taxIncludedAmount) : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'taxExcludedAmount', 
-						label: '不含税金额', 
-						align: 'right', 
-						width: 110,
-						formatter: (row) => {
-							return row.taxExcludedAmount != null ? formatAmount(row.taxExcludedAmount) : '-'
-						}
-					}),
-				])
+				h(
+					ElTable,
+					{
+						data: detailList.value,
+						border: true,
+						size: 'small',
+						style: 'width: 100%',
+					},
+					[
+						h(ElTableColumn, { prop: 'applicationNo', label: '申请单号', align: 'center', width: 150 }),
+						h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
+						h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 100 }),
+						h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
+						h(ElTableColumn, {
+							prop: 'applicationQuantity',
+							label: '申报数量',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.applicationQuantity != null ? row.applicationQuantity : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'purchaseQuantity',
+							label: '采购数量',
+							align: 'right',
+							width: 110,
+							formatter: row => {
+								return row.purchaseQuantity != null ? row.purchaseQuantity : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'taxRate',
+							label: '税率(%)',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.taxRate != null ? row.taxRate : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'taxIncludedUnitPrice',
+							label: '单价',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.taxIncludedUnitPrice != null ? formatAmount(row.taxIncludedUnitPrice) : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'taxIncludedAmount',
+							label: '金额',
+							align: 'right',
+							width: 110,
+							formatter: row => {
+								return row.taxIncludedAmount != null ? formatAmount(row.taxIncludedAmount) : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'taxExcludedAmount',
+							label: '不含税金额',
+							align: 'right',
+							width: 110,
+							formatter: row => {
+								return row.taxExcludedAmount != null ? formatAmount(row.taxExcludedAmount) : '-'
+							},
+						}),
+					],
+				),
 			])
 		}
-	}
+	},
 }
 
 const tableColumns = ref([
@@ -361,7 +248,7 @@ const tableColumns = ref([
 		type: 'expand',
 		width: 50,
 		fixed: 'left',
-		expandSlot: DetailTable
+		expandSlot: DetailTable,
 	},
 	{ label: '序号', type: 'seq', width: 50, align: 'center', fixed: 'left' },
 	{
@@ -382,7 +269,7 @@ const tableColumns = ref([
 							viewDetail(row)
 						},
 					},
-					row.purchaseNo
+					row.purchaseNo,
 				),
 			]
 		},
@@ -395,27 +282,33 @@ const tableColumns = ref([
 	{ label: '不含税金额', prop: 'taxExcludedAmount', align: 'right', width: 120, isThousandth: true },
 	{ label: '采购人', prop: 'createByName', align: 'left', width: 100 },
 	{ label: '采购时间', prop: 'createTime', align: 'center', width: 150 },
-	{ label: '审核人', prop: 'approvalByName', align: 'left', width: 100 },
-	{ label: '审核时间', prop: 'approvalTime', align: 'center', width: 150 },
-	{ label: '审核备注', prop: 'approvalRemark', align: 'left', minWidth: 150 },
 	{
-		label: '采购状态',
-		prop: 'purchaseStatus',
+		label: '状态',
+		prop: 'processStatus',
 		align: 'center',
 		width: 100,
 		fixed: 'right',
 		render: row => {
+			const statusMap = {
+				0: { label: '未发起', type: 'info' },
+				1: { label: '审批中', type: 'warning' },
+				2: { label: '审批通过', type: 'success' },
+				3: { label: '审批不通过', type: 'danger' },
+				4: { label: '已办结', type: 'success' },
+				5: { label: '作废', type: 'danger' },
+			}
+			const status = statusMap[row.processStatus] || { label: '未知', type: 'info' }
 			return [
 				h(
 					ElTag,
 					{
-						type: getStatusType(row.purchaseStatus),
+						type: status.type,
 					},
 					{
 						default: () => {
-							return getStatusLabel(row.purchaseStatus)
+							return status.label
 						},
-					}
+					},
 				),
 			]
 		},
@@ -423,67 +316,71 @@ const tableColumns = ref([
 	{
 		prop: '',
 		label: '操作',
-		width: 150,
+		width: 120,
 		fixed: 'right',
 		align: 'center',
 		render: row => {
-			const buttons = []
+			const dropDownList = []
 
-			buttons.push(
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							edit(row)
-						},
-						type: 'primary',
-						link: true,
-						icon: 'Edit',
-						disabled: row.purchaseStatus === 1, // 审核通过后不可编辑
-					},
-					{ default: () => '编辑' }
-				),
-				// h(
-				// 	ElButton,
-				// 	{
-				// 		onClick: () => {
-				// 			handleFailure(row)
-				// 		},
-				// 		type: 'danger',
-				// 		link: true,
-				// 		icon: 'Close',
-				// 		disabled: row.purchaseStatus === 1, // 已失败的不能再标记失败
-				// 		permission: 'equipment:materialPurchase:update',
-				// 	},
-				// 	{ default: () => '失败' }
-				// ),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleDelete(row)
-						},
-						type: 'danger',
-						link: true,
-						icon: 'Delete',
-						permission: 'equipment:materialPurchase:delete',
-						disabled: row.purchaseStatus === 1, // 审核通过后不可删除
-					},
-					{ default: () => '删除' }
-				)
+			dropDownList.push(
+				{
+					name: '详情',
+					command: '详情',
+					click: () => viewDetail(row),
+					icon: View,
+				},
+				{
+					name: '编辑',
+					command: '编辑',
+					click: () => edit(row),
+					icon: Edit,
+					disabled: row.processStatus !== '0',
+				},
+				{
+					name: '发起',
+					command: '发起',
+					click: () => handleSubmit(row),
+					icon: Promotion,
+					disabled: row.processStatus !== '0',
+				},
+				{
+					name: '审批历史',
+					command: '审批历史',
+					click: () => handleHistory(row),
+					icon: Histogram,
+					type: 'primary',
+				},
+				{
+					name: '删除',
+					command: '删除',
+					click: () => handleDelete(row),
+					type: 'danger',
+					icon: Delete,
+					permission: 'equipment:materialPurchase:delete',
+					disabled: row.processStatus !== '0',
+				},
 			)
 
-			return buttons
+			return [
+				h(
+					DropDown,
+					{
+						dropDownList,
+						isInner: true,
+						props: { permission: undefined },
+					},
+					{
+						default: () => h('span', { class: 'el-icon-more' }),
+					},
+				),
+			]
 		},
 	},
 ])
 
 const queryParams = ref({
-	// 分页变量
 	startPage: 1,
 	pageSize: 20,
-	// 明确设置采购状态为 null，避免默认选中
-	purchaseStatus: null,
 })
 
 /**--------------方法------------ */
@@ -492,12 +389,6 @@ const getList = e => {
 	if (e) {
 		queryParams.value = { ...queryParams.value, ...e }
 	}
-	// 确保采购状态为空时不传递该参数
-	if (queryParams.value.purchaseStatus === '' || queryParams.value.purchaseStatus === null || queryParams.value.purchaseStatus === undefined) {
-		delete queryParams.value.purchaseStatus
-	}
-	buttonList[1].disabled = true // 查询时禁用审核按钮
-	clickRow.value = null // 清空选中的行
 	materialPurchaseApi.getList(queryParams.value).then(res => {
 		if (res.code === '0000' && res.data) {
 			tableData.value = res.data.pages
@@ -588,60 +479,6 @@ const save = async () => {
 	}
 }
 
-// 失败事件（已注释）
-// const handleFailure = row => {
-// 	failureForm.id = row.id
-// 	failureForm.failureReason = row.failureReason || ''
-// 	failureDialogVisible.value = true
-// }
-
-// 确认失败（已注释）
-// const confirmFailure = () => {
-// 	if (!failureForm.failureReason || failureForm.failureReason.trim() === '') {
-// 		proxy.$message.warning('请输入采购失败原因')
-// 		return
-// 	}
-// 	proxy.$modal
-// 		.confirm('确定标记为失败?')
-// 		.then(res => {
-// 			materialPurchaseApi.markAsFailed(failureForm.id, failureForm.failureReason.trim()).then(res => {
-// 				if (res.code == '0000') {
-// 					proxy.$message.success(res.msg)
-// 					failureDialogVisible.value = false
-// 					failureForm.id = null
-// 					failureForm.failureReason = ''
-// 					getList(queryParams.value)
-// 				} else {
-// 					proxy.$message.error(res.msg)
-// 				}
-// 			})
-// 		})
-// 		.catch(err => {})
-// }
-
-// 审核事件
-const handleApprove = () => {
-	if (approvalForm.status === null || approvalForm.status === undefined) {
-		proxy.$message.warning('请选择审核结果')
-		return
-	}
-	const statusName = approvalForm.status === 1 ? '审核通过' : '驳回'
-	proxy.$modal.confirm(`确定${statusName}?`).then(() => {
-		materialPurchaseApi
-			.approve(approvalForm.id, approvalForm.status, approvalForm.approvalRemark)
-			.then(res => {
-				proxy.$message.success(res.msg)
-				approvalVisible.value = false
-				clickRow.value = null // 清空选中行
-				buttonList[1].disabled = true // 禁用审核按钮
-				getList(queryParams.value)
-			})
-			.catch(err => {
-				proxy.$message.error(err.msg || '审核失败')
-			})
-	})
-}
-
 // 删除事件
 const handleDelete = row => {
 	const deleteRow = row
@@ -660,34 +497,77 @@ const handleDelete = row => {
 		.catch(err => {})
 }
 
+// 发起流程
+const submitMaterialPurchaseProcess = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitMaterialPurchaseProcess:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return materialPurchaseApi.materialPurchaseStart(params)
+}
+
+const handleSubmit = row => {
+	proxy.$modal
+		.confirm('确定发起审批流程？')
+		.then(() => {
+			materialPurchaseApi
+				.getById(row.id)
+				.then(res => {
+					if (res && res.data) {
+						startProcess({
+							rowData: res.data,
+							businessId: route.meta?.menuId,
+							businessTypeCode: 'bpm:equipment:controller:materialPurchaseStart',
+							businessSubmit: submitMaterialPurchaseProcess,
+							onSuccess() {
+								proxy.$modal.msgSuccess('发起成功')
+								getList(queryParams.value)
+							},
+							onError(err) {
+								proxy.$modal.msgError(err.message)
+							},
+						})
+					}
+				})
+				.catch(error => {
+					console.error('获取详情失败:', error)
+					proxy.$modal.msgError('获取详情失败')
+				})
+		})
+		.catch(() => {})
+}
+
+// 审批历史
+const handleHistory = row => {
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: row.procInstId,
+		},
+	})
+}
+
 // 初始化方法
 const init = async () => {
-	// 重置查询参数，确保采购状态为空
 	queryParams.value = {
 		startPage: 1,
 		pageSize: 20,
-		purchaseStatus: null,
 	}
 	getList(null)
 }
 
 // 按钮列表
 const buttonList = reactive([
-	// 搜索区域的按钮
 	{
 		label: '新建',
 		type: 'primary',
 		icon: 'Plus',
 		click: () => add,
 		permission: 'equipment:materialPurchase:add',
-	},
-	{
-		label: '审核',
-		type: 'primary',
-		icon: 'View',
-		click: handleBatchApproval,
-		permission: 'equipment:materialPurchase:approve',
-		disabled: true, // 默认禁用，点击行后根据状态启用
 	},
 ])
 
@@ -700,4 +580,3 @@ init()
 	background: #f5f7fa;
 }
 </style>
-
