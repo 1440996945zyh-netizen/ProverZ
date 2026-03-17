@@ -76,8 +76,8 @@
 
 			<el-table :data="selectedEquipList" border style="width: 100%">
 				<el-table-column type="index" label="序号" width="60" align="center" />
-				<el-table-column label="所属单位" prop="useCompanyName" min-width="120" />
-				<el-table-column label="所属部门" prop="useOrgName" min-width="120" />
+				<el-table-column label="使用单位" prop="useCompanyName" min-width="120" />
+				<el-table-column label="使用部门" prop="useOrgName" min-width="120" />
 				<el-table-column label="设备名称" prop="equipName" min-width="120" />
 				<el-table-column label="设备编号" prop="equipCode" min-width="120" />
 				<el-table-column label="设备小类" prop="equipSmallCategoryName" min-width="100" />
@@ -126,8 +126,8 @@
 				<div class="left-table">
 					<el-table :data="equipList" border height="50vh" v-loading="equipLoading">
 						<el-table-column type="index" label="序号" width="50" align="center" />
-						<el-table-column label="所属单位" prop="useCompanyName" min-width="120" />
-						<el-table-column label="所属部门" prop="useOrgName" min-width="120" />
+						<el-table-column label="使用单位" prop="useCompanyName" min-width="120" />
+						<el-table-column label="使用部门" prop="useOrgName" min-width="120" />
 						<el-table-column label="设备名称" prop="equipName" min-width="120" />
 						<el-table-column label="设备编号" prop="equipCode" min-width="120" />
 						<el-table-column label="设备小类" prop="equipSmallCategoryName" min-width="100" />

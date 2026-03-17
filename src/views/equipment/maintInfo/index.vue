@@ -50,7 +50,7 @@
 
 	<!-- 开始维修弹窗 -->
 	<el-dialog v-model="startMaintVisible" title="开始维修" width="500px" :close-on-click-modal="false">
-		<el-form :model="startMaintForm" label-width="120px" style="padding: 10px 0;">
+		<el-form :model="startMaintForm" label-position="top" class="formData">
 			<el-form-item label="开始维修时间" required style="margin-bottom: 0;">
 				<el-date-picker
 					v-model="startMaintForm.maintStartTime"
@@ -71,7 +71,7 @@
 
 	<!-- 结束维修抽屉 -->
 	<el-drawer v-model="endMaintVisible" title="结束维修" size="80%" >
-		<el-form :model="endMaintForm" ref="endMaintFormRef" :rules="endMaintRules" :inline="true" label-position="top">
+		<el-form :model="endMaintForm" ref="endMaintFormRef" :rules="endMaintRules" :inline="true" label-position="top" class="formData">
 			<el-collapse v-model="endMaintActiveNames">
 				<el-collapse-item title="基本信息" name="baseData">
 					<el-row :gutter="24">
@@ -177,7 +177,7 @@
 
 	<!-- 验收弹窗 -->
 	<el-dialog v-model="acceptMaintVisible" title="验收处理" width="600px" :close-on-click-modal="false" @closed="resetAcceptForm">
-		<el-form ref="acceptMaintFormRef" :model="acceptMaintForm" :rules="acceptMaintRules" label-width="120px">
+		<el-form ref="acceptMaintFormRef" :model="acceptMaintForm" :rules="acceptMaintRules" label-position="top" class="formData">
 			<el-form-item label="验收结果" prop="acceptanceStatus">
 				<el-radio-group v-model="acceptMaintForm.acceptanceStatus" @change="handleAcceptStatusChange">
 					<el-radio :label="1">通过</el-radio>
@@ -220,7 +220,7 @@
 
 	<!-- 作废弹窗 -->
 	<el-dialog v-model="cancelMaintVisible" title="作废工单" width="600px" :close-on-click-modal="false">
-		<el-form :model="cancelMaintForm" label-width="120px">
+		<el-form :model="cancelMaintForm" label-position="top" class="formData">
 			<el-form-item label="作废备注">
 				<el-input
 					v-model="cancelMaintForm.cancelRemark"
@@ -248,6 +248,7 @@ import EditTable from '@/components/EditTable'
 import detail from './detail/index.vue'
 import DispatchForm from './dispatch.vue'
 import ViewComponent from './view.vue'
+import DropDown from '@/components/DropDown/newIndex'
 import api from '@/api/equipment/maintInfo/index'
 import publicApi from '@/api/public/index'
 import { ref, reactive, nextTick, h, getCurrentInstance, computed, watch } from 'vue'
@@ -427,90 +428,56 @@ const tableColumns = ref([
 	{
 		prop: '',
 		label: '操作',
-		width: 270,
-		fixed: 'right',
+		width: 100,
 		align: 'center',
+		fixed: 'right',
 		render: row => {
-			const buttons = []
-			// 派工按钮（只在状态为0-提报时显示）
-			if (row.status === 0) {
-				buttons.push(
-					h(
-						ElButton,
-						{
-							onClick: () => {
-								dispatchWork(row)
-							},
-							type: 'success',
-							link: true,
-							icon: 'Edit',
-							permission: 'equipment:maintInfo:addDis',
-						},
-						{
-							default: () => '派工',
-						}
-					)
-				)
-			}
-			// 修改按钮（只在提报和已派工状态下显示）
-			if (row.status === 0 || row.status === 1) {
-				buttons.push(
-					h(
-						ElButton,
-						{
-							onClick: () => {
-								edit(row)
-							},
-							type: 'primary',
-							link: true,
-							icon: 'Edit',
-							permission: 'equipment:maintInfo:update',
-						},
-						{
-							default: () => '修改',
-						}
-					)
-				)
-			}
-			// 查看按钮
-			buttons.push(
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							view(row)
-						},
-						type: 'primary',
-						link: true,
-						icon: 'View',
-						permission: 'equipment:maintInfo:view',
-					},
-					{
-						default: () => '查看',
-					}
-				)
-			)
-			// 删除按钮
-			if (row.status === 0 || row.status === 7) {
-				buttons.push(
-					h(
-						ElButton,
-						{
-							onClick: () => {
-								handleDelete(row)
-							},
-							type: 'danger',
-							link: true,
-							icon: 'Delete',
-							permission: 'equipment:maintInfo:delete',
-						},
-						{
-							default: () => '删除',
-						}
-					)
-				)
-			}
-			return buttons
+			const dropDownList = [
+				{
+					name: '派工',
+					command: '派工',
+					type: 'success',
+					link: true,
+					icon: 'Edit',
+					click: () => dispatchWork(row),
+					permission: 'equipment:maintInfo:addDis',
+					vif: row.status === 0
+				},
+				{
+					name: '修改',
+					command: '修改',
+					type: 'primary',
+					link: true,
+					icon: 'Edit',
+					click: () => edit(row),
+					permission: 'equipment:maintInfo:update',
+					vif: row.status === 0 || row.status === 1
+				},
+				{
+					name: '查看',
+					command: '查看',
+					type: 'primary',
+					link: true,
+					icon: 'View',
+					click: () => view(row),
+					permission: 'equipment:maintInfo:view',
+				},
+				{
+					name: '删除',
+					command: '删除',
+					type: 'danger',
+					link: true,
+					icon: 'Delete',
+					click: () => handleDelete(row),
+					permission: 'equipment:maintInfo:delete',
+					vif: row.status === 0 || row.status === 7
+				}
+			]
+			return [
+				h(DropDown, {
+					dropDownList,
+				}),
+			]
 		},
 	},
 ])

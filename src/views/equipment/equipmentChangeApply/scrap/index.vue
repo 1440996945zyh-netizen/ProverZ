@@ -96,13 +96,13 @@ const tableColumns = ref([
 	},
 	{
 		prop: 'useCompanyName',
-		label: '所属单位',
+		label: '使用单位',
 		align: 'left',
 		minWidth: 150
 	},
 	{
 		prop: 'useOrgName',
-		label: '所属部门',
+		label: '使用部门',
 		align: 'left',
 		minWidth: 150
 	},
