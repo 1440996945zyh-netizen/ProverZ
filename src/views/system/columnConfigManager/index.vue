@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-25 14:07:02
- * @LastEditTime: 2025-11-24 14:11:52
+ * @LastEditTime: 2026-03-16 17:08:16
  * @LastEditors: zhangsd
  * @Description: 高级查询表格列配置管理
  * @FilePath: \view\src\views\system\columnConfigManager\index.vue
@@ -12,7 +12,7 @@
 		<!-- 表格 -->
 		<div class="container-context">
 			<BaseTable
-				ref="columnConfigTableRef"
+				ref="columnConfigManagerTableRef"
 				:showSearchHeader="true"
 				:selectData="selectData"
 				:searchClick="getList"
@@ -63,7 +63,7 @@ const tableHeight = computed(() => storeHight.value - 15) // 表格高度
 
 
 // 表格实例
-const columnConfigTableRef = ref(null)
+const columnConfigManagerTableRef = ref(null)
 // 表格列配置
 const rowConfig = { keyField: 'id' } // 表格行配置，keyField为唯一标识字段
 const tableLoading = ref(false) // 表格加载状态
@@ -276,9 +276,11 @@ const saveTableColumns = () => {
 
 const getList = e => {
 	// tableLoading.value = true
+	let pagination = columnConfigManagerTableRef.value?.buildQueryParams()
 	let params = {
 		advancedQuery: JSON.stringify(advancedQuery.value),
 		...e,
+		...pagination,
 	}
 	api.getList(params)
 		.then(response => {

@@ -1,8 +1,8 @@
 <template>
-	<div  class="app-container">
+	<div  class="container">
 		<div>
 			<BaseTable
-				ref="baseTable"
+				ref="drawerTableRef"
 				:showSearchHeader="true"
 				:selectData="selectData"
 				:searchClick="getList"
@@ -11,7 +11,7 @@
 				:tableData="tableData"
 				:cellClickEvent="cellClickEvent"
 				:total="total"
-				:tableHeight="'drawerPageTableHeight'"
+				:tableHeight="storeHeight"
 			/>
 		</div>
 		<Drawer v-model="drawerVisible" :title="title" size="30%">
@@ -32,7 +32,9 @@ import detail from './detail/index.vue'
 import api from '@/api/master/dict/index'
 import { ref, reactive, nextTick } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
+import tableParamsStore from '@/store/modules/tableParams'
 import Drawer from '@/components/Drawer/index.vue'
+const storeHeight = computed(() => tableParamsStore().drawerPageTableHeight)
 const { proxy } = getCurrentInstance() // 相当于vue2里的this
 const baseTable = ref() // table的ref
 const drawerRef = ref(null) // 明细组件ref
@@ -44,8 +46,9 @@ const drawerVisible = ref(false)
 const clickRow = ref({})
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+ pageSize: 20, 
 })
+const drawerTableRef = ref(null)
 // 表格数据
 const tableData = ref([])
 const tableColumns = ref([
@@ -140,9 +143,13 @@ const buttonList = reactive([
 
 // 点击查询的事件
 const getList = e => {
-	queryParams.value = e
-	queryParams.value.dictType = dictType.value
-	api.getDictList(queryParams.value).then(res => {
+	let pagination = drawerTableRef.value?.buildQueryParams()
+	let params = {
+		...e,
+		...pagination,
+	}
+	params.dictType = dictType.value
+	api.getDictList(params).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
@@ -153,7 +160,7 @@ const getData = row => {
 	dictName.value = row.dictName
 	queryParams.value.dictType = row.dictType
 	nextTick(() => {
-		getList(queryParams.value)
+		getList()
 	})
 }
 // 新增事件
@@ -188,7 +195,7 @@ const handleDelete = row => {
 		.then(res => {
 			api.deleteDictById(deleteRow.id).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
-				getList(queryParams.value)
+				getList()
 				drawerVisible.value = false
 			})
 		})
@@ -202,13 +209,13 @@ const save = async () => {
 			if (params.id) {
 				api.updateDict(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
-					getList(queryParams.value)
+					getList()
 					drawerVisible.value = false
 				})
 			} else {
 				api.insertDict(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
-					getList(queryParams.value)
+					getList()
 					drawerVisible.value = false
 				})
 			}

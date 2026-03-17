@@ -252,6 +252,9 @@ const resetTaskForm = () => {
 		} else if (userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
 			userTaskForm.value.candidateParam = candidateParamStr.split('|')[0]
 			deptLevel.value = +candidateParamStr.split('|')[1]
+		} else if (userTaskForm.value.candidateStrategy == CandidateStrategy.POST) {
+			//岗位的是字符串类型
+			userTaskForm.value.candidateParam = candidateParamStr.split(',')
 		} else {
 			userTaskForm.value.candidateParam = candidateParamStr.split(',').map(item => {
 				// 如果数字超出了最大安全整数范围，则将其作为字符串处理
@@ -287,7 +290,6 @@ const updateElementTask = () => {
 	let candidateParam = Array.isArray(userTaskForm.value.candidateParam)
 		? userTaskForm.value.candidateParam.join(',')
 		: userTaskForm.value.candidateParam
-
 	// 特殊处理多级部门情况
 	if (
 		userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
@@ -381,6 +383,12 @@ onMounted(async () => {
 	const deptResData = await publicApi.getDeptList()
 	deptTreeOptions.value = flattenToTree(deptResData.data, 'id')
 	// 加载岗位列表
+	const postData = await publicApi.getLocalSelect({ type: 'DICT', dictType: 'POST' })
+	postOptions.value =
+		postData.data.map(item => ({
+			name: item.label,
+			id: item.value,
+		})) || []
 	// postOptions.value = await PostApi.getSimplePostList()
 	// 加载用户列表
 	const userResData = await publicApi.getLocalSelect({ type: 'USER' })

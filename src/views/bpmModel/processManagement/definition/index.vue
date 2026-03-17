@@ -237,11 +237,13 @@ const getFieldPreviewValue = item => {
 /**
  * 获取流程定义列表
  */
-const getList = async () => {
+const getList = async (e) => {
 	tableLoading.value = true
 	try {
-		queryParams.value.key = route.query.key || undefined
-		const res = await BpmProcessDefinitionApi.getProcessDefinitionPage(queryParams.value)
+		let params = {
+			...e,
+		}
+		const res = await BpmProcessDefinitionApi.getProcessDefinitionPage(params)
 		tableData.value = res.data.pages || []
 		total.value = res.data.totalNum || 0
 
@@ -342,14 +344,14 @@ const handleBackToModel = () => {
 // 页面初始化
 onMounted(() => {
 	queryParams.value.key = route.query.key || undefined
-	getList()
+	getList(definitionTableRef.value?.buildQueryParams())
 	// 监听路由参数变化
 	watch(
 		() => route.query.key,
 		newKey => {
 			queryParams.value.key = newKey || undefined
 			queryParams.value.pageNum = 1
-			getList()
+			getList(definitionTableRef.value?.buildQueryParams())
 		},
 	)
 })

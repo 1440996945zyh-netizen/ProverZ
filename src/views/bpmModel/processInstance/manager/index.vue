@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2026-02-10 16:35:54
+ * @LastEditTime: 2026-03-16 17:15:06
  * @LastEditors: zhangsd
  * @Description: 流程实例管理
  * @FilePath: \view\src\views\bpmModel\processInstance\manager\index.vue
@@ -11,7 +11,7 @@
 	<!-- 流程实例管理 -->
 	<div class="app-container">
 		<BaseTable
-			ref="baseTableRef"
+			ref="processInstanceTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -57,7 +57,7 @@ import tableParamsStore from '@/store/modules/tableParams'
 const route = useRoute()
 const router = useRouter()
 const message = useMessage() // 消息提示实例
-const baseTableRef = ref(null) // BaseTable 引用
+const processInstanceTableRef = ref(null) // BaseTable 引用
 
 // 响应式数据
 const loading = ref(false) // 列表加载状态
@@ -79,7 +79,7 @@ const tableHeight = computed(() => storeHight.value - 18)
 // 查询参数
 const queryParams = ref({
 	pageNo: 1,
-	pageSize: 10,
+ pageSize: 20, 
 	startUserId: undefined,
 	name: '',
 	processDefinitionId: undefined,
@@ -107,21 +107,21 @@ const selectData = reactive([
 		span: 5, // 栅格占位
 		placeholder: '请输入流程名称',
 	},
-	{
-		name: '所属流程', // 搜索框名称
-		type: 'input', // 搜索框类型
-		modelValue: 'processDefinitionId', // 绑定字段
-		span: 5, // 栅格占位
-		placeholder: '请输入流程定义的编号',
-	},
-	{
-		name: '流程分类', // 搜索框名称
-		type: 'select', // 搜索框类型
-		modelValue: 'category', // 绑定字段
-		span: 5, // 栅格占位
-		selectData: categoryList,
-		placeholder: '请选择流程分类',
-	},
+	// {
+	// 	name: '所属流程', // 搜索框名称
+	// 	type: 'input', // 搜索框类型
+	// 	modelValue: 'processDefinitionId', // 绑定字段
+	// 	span: 5, // 栅格占位
+	// 	placeholder: '请输入流程定义的编号',
+	// },
+	// {
+	// 	name: '流程分类', // 搜索框名称
+	// 	type: 'select', // 搜索框类型
+	// 	modelValue: 'category', // 绑定字段
+	// 	span: 5, // 栅格占位
+	// 	selectData: categoryList,
+	// 	placeholder: '请选择流程分类',
+	// },
 	{
 		name: '流程状态', // 搜索框名称
 		type: 'select', // 搜索框类型
@@ -312,11 +312,12 @@ const tableColumns = ref([
  * 查询列表数据
  * @param {Object} params 搜索参数
  */
-const getList = async (params = queryParams.value) => {
+const getList = async (params = {}) => {
 	loading.value = true
 	try {
 		// 合并查询参数
-		const query = { ...queryParams.value, ...params }
+		let pagination = processInstanceTableRef.value?.buildQueryParams()
+		const query = { ...params, ...pagination }
 		if (query.createTime && query.createTime.length === 2) {
 			const [startDate, endDate] = query.createTime
 

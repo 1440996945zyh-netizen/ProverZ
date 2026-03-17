@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-28 11:37:48
- * @LastEditTime: 2026-03-02 09:22:57
+ * @LastEditTime: 2026-03-13 16:07:05
  * @Description: 常用审批语 悬浮气泡组件（后端字符串版）
  * @FilePath: \view\src\views\bpmModel\processInstance\detail\CommonApprovalPhrases.vue
 -->
@@ -10,7 +10,9 @@
 	<div class="common-phrases-container" v-show="visible" ref="containerRef" :style="containerStyle">
 		<div class="phrases-header">
 			<span class="header-title">常用审批语</span>
-			<el-tag size="small" type="info" effect="plain">{{ filteredPhrases.length }}条</el-tag>
+			<!-- <el-tag size="small" type="info" effect="plain">{{ filteredPhrases.length }}条</el-tag> -->
+				<el-button type="primary" size="small" @click="handleGoToSettings">添加</el-button>
+
 		</div>
 
 		<div class="phrases-content" ref="contentRef">
@@ -48,14 +50,13 @@
 
 			<!-- 空状态 -->
 			<el-empty v-if="filteredPhrases.length === 0" description="暂无常用审批语" :image-size="80">
-				<el-button type="primary" size="small" @click="handleGoToSettings">去设置常用语</el-button>
 			</el-empty>
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch,getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { Select } from '@element-plus/icons-vue'
 import { ProcessLanguageApi } from '@/api/system/bpm/processLanguage'
@@ -94,10 +95,14 @@ const props = defineProps({
 		type: String,
 		default: 'COMMON',
 		validator: value => {
-			return value === null || ['APPROVE', 'COMMON', 'REJECT', 'TRANSFER', 'DELEGATE', 'ADD_SIGN', 'RETURN', 'COPY','CANCEL'].includes(value)
+			return (
+				value === null ||
+				['APPROVE', 'COMMON', 'REJECT', 'TRANSFER', 'DELEGATE', 'ADD_SIGN', 'RETURN', 'COPY', 'CANCEL'].includes(value)
+			)
 		},
 	},
 })
+const { proxy } = getCurrentInstance()
 
 // Emits
 const emit = defineEmits(['select', 'close', 'update:visible'])
@@ -226,12 +231,10 @@ const toggleShowMore = () => {
 
 const handleGoToSettings = () => {
 	const routeName = 'BpmProcessLanguage'
-	const routePath = '/bpm/process-language'
 
-	router.push({ name: routeName }).catch(() => {
-		router.push(routePath).catch(() => {
-			ElMessage.warning('请先在菜单中打开"常用审批语设置"')
-		})
+// 跳转到该路径
+	router.push({
+		path: '/bpmModel/processLanguage',
 	})
 
 	emit('update:visible', false)

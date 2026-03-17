@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-23 15:54:18
- * @LastEditTime: 2025-12-23 15:54:38
+ * @LastEditTime: 2026-03-16 15:30:03
  * @LastEditors: zhangsd
  * @Description: 抄送我的任务
  * @FilePath: \view\src\views\bpmModel\task\copy\index.vue
@@ -60,7 +60,7 @@ const tableData = ref([])
 // 查询参数
 const queryParams = reactive({
 	pageNum: 1,
-	pageSize: 10,
+ pageSize: 20, 
 	processInstanceId: '',
 	processInstanceName: '',
 	createTime: [],
@@ -227,7 +227,7 @@ const cellClickEvent = ({ row }) => {
  */
 const handleQuery = () => {
 	queryParams.pageNum = 1
-	getList()
+	getList(copyTaskTableRef.value?.buildQueryParams())
 }
 
 /**
@@ -237,7 +237,7 @@ const resetQuery = () => {
 	queryParams.processInstanceName = ''
 	queryParams.createTime = []
 	queryParams.pageNum = 1
-	getList()
+	getList(copyTaskTableRef.value?.buildQueryParams())
 }
 
 /**
@@ -259,7 +259,7 @@ const handleAudit = row => {
 
 /** 初始化 **/
 onMounted(() => {
-	getList()
+	getList(copyTaskTableRef.value?.buildQueryParams())
 })
 </script>
 

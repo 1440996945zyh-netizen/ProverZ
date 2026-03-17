@@ -1,14 +1,14 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-24 10:29:58
- * @LastEditTime: 2026-02-28 15:45:13
+ * @LastEditTime: 2026-03-16 14:27:30
  * @LastEditors: zhangsd
  * @Description:    审批语详情 新增 
  * @FilePath: \view\src\views\bpmModel\processLanguage\detail\index.vue
 -->
 
 <template>
-	<div class="app-container">
+	<div class="container">
 		<Dialog
 			:title="form.id ? '编辑审批语' : '新增审批语'"
 			v-model:visible="languageDialogVisible"

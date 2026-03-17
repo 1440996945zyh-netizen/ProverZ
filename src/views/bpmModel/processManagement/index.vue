@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-16 16:59:03
- * @LastEditTime: 2026-02-09 14:10:20
+ * @LastEditTime: 2026-03-16 17:09:15
  * @LastEditors: zhangsd
  * @Description: 流程管理
  * @FilePath: \view\src\views\bpmModel\processManagement\index.vue
@@ -28,6 +28,7 @@
 				:showNum="5"
 				:defaultWidth="30"
 				:total="total"
+				
 			/>
 		</div>
 
@@ -147,7 +148,7 @@ const formConfig = reactive({
 const { tableData, total, tableLoading } = toRefs(data)
 const queryParams = ref({
 	pageNum: 1,
-	pageSize: 20,
+	pageSize: 30,
 })
 
 // 8. 页面状态变量
@@ -533,9 +534,12 @@ const canSubmit = row => {
  */
 const getList = e => {
 	console.log('e =>', e)
-	console.log('(queryParams.value,', queryParams.value)
 	tableLoading.value = true
-	const params = Object.assign(queryParams.value, e)
+	let pagination = processtTableRef.value?.buildQueryParams()
+	const params = {
+		...pagination,
+		...e,
+	}
 
 	BpmModelApi.getModelList(params)
 		.then(res => {
