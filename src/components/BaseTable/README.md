@@ -10,36 +10,38 @@
 
         ### 2.1 基础配置
 
-        | 参数名                   | 类型           | 必传 | 默认值                               | 说明                                                         |
-        | ------------------------ | -------------- | ---- | ------------------------------------ | ------------------------------------------------------------ |
-        | `name`                   | String         | 否   | -                                    | **表格唯一标识**，用于缓存列宽、列显隐等配置到 localStorage，若需记忆功能必须传入 |
-        | `tableColumns`           | Array          | 是   | `[]`                                 | 表格列配置数组，每项对象详见[列配置](#列配置)                |
-        | `tableData`              | Array          | 是   | `[]`                                 | 表格数据源                                                   |
-        | `total`                  | Number         | 否   | `0`                                  | 数据总条数，用于分页显示                                     |
-        | `loading`                | Boolean        | 否   | `false`                              | 表格加载状态，`true` 时显示加载中动画                        |
-        | `size`                   | String         | 否   | `null`                               | 表格尺寸，可选 `medium` / `small` / `mini`，默认使用 vxe-table 默认值 |
-        | `stripe`                 | Boolean        | 否   | `false`                              | 是否显示斑马纹                                               |
+
+        | 参数名                   | 类型           | 必传 | 默认值                               | 说明                                                                                           |
+        | ------------------------ | -------------- | ---- | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+        | `name`                   | String         | 否   | -                                    | **表格唯一标识**，用于缓存列宽、列显隐等配置到 localStorage，若需记忆功能必须传入              |
+        | `tableColumns`           | Array          | 是   | `[]`                                 | 表格列配置数组，每项对象详见[列配置](#列配置)                                                  |
+        | `tableData`              | Array          | 是   | `[]`                                 | 表格数据源                                                                                     |
+        | `total`                  | Number         | 否   | `0`                                  | 数据总条数，用于分页显示                                                                       |
+        | `loading`                | Boolean        | 否   | `false`                              | 表格加载状态，`true` 时显示加载中动画                                                          |
+        | `size`                   | String         | 否   | `null`                               | 表格尺寸，可选`medium` / `small` / `mini`，默认使用 vxe-table 默认值                           |
+        | `stripe`                 | Boolean        | 否   | `false`                              | 是否显示斑马纹                                                                                 |
         | `border`                 | String/Boolean | 否   | `true`                               | 边框模式：`true`（完整边框）、`'outer'`（仅外边框）、`'inner'`（仅内边框）、`'none'`（无边框） |
-        | `round`                  | Boolean        | 否   | `null`                               | 是否使用圆角边框                                             |
-        | `autoResize`             | Boolean        | 否   | `false`                              | 是否自动监听父元素大小变化并重新计算表格布局                 |
-        | `syncResize`             | Boolean/String | 否   | `false`                              | 是否在数据变化时自动刷新表格，可传入事件名（如 `'sync'`）    |
-        | `showHeader`             | Boolean        | 否   | `true`                               | 是否显示表头                                                 |
-        | `showFooter`             | Boolean        | 否   | `false`                              | 是否显示表尾                                                 |
-        | `footerMethod`           | Function       | 否   | `null`                               | 自定义表尾内容的方法，接收 `{ columns, data }`，返回二维数组 |
-        | `footerConfig`           | Object         | 否   | `null`                               | 快捷表尾配置，用于自动计算平均值/合计，详见[表尾配置](#表尾配置) |
-        | `spanMethod`             | Function       | 否   | `null`                               | 合并单元格的方法，接收 `{ row, column, rowIndex, columnIndex }`，返回合并信息 |
-        | `rowConfig`              | Object         | 否   | `{ isCurrent: true, isHover: true }` | 行配置，参考 vxe-table [row-config](https://vxetable.cn/#/table/row/row-config) |
-        | `columnConfig`           | Object         | 否   | `{ resizable: true }`                | 列配置，常用 `resizable`（是否可调整列宽）                   |
-        | `treeConfig`             | Object         | 否   | `null`                               | 树形表格配置，参考 vxe-table [tree-config](https://vxetable.cn/#/table/tree/tree-config) |
-        | `editRules`              | Object         | 否   | `null`                               | 可编辑表格校验规则                                           |
-        | `editConfig`             | Object         | 否   | `null`                               | 可编辑表格配置                                               |
-        | `exportConfig`           | Object         | 否   | `null`                               | 导出配置，参考 vxe-table [export-config](https://vxetable.cn/#/table/export/export-config) |
-        | `scrollY`                | Object         | 否   | `{ enabled: true, gt: 10 }`          | 纵向虚拟滚动配置                                             |
-        | `height` / `tableHeight` | Number/String  | 否   | 动态计算                             | 表格高度，可传入数字或预定义字符串（见下方说明）             |
-        | `maxHeight`              | Number/String  | 否   | `null`                               | 表格最大高度                                                 |
-        | `minHeight`              | Number         | 否   | `150`                                | 表格最小高度（当高度计算值小于此值时使用）                   |
+        | `round`                  | Boolean        | 否   | `null`                               | 是否使用圆角边框                                                                               |
+        | `autoResize`             | Boolean        | 否   | `false`                              | 是否自动监听父元素大小变化并重新计算表格布局                                                   |
+        | `syncResize`             | Boolean/String | 否   | `false`                              | 是否在数据变化时自动刷新表格，可传入事件名（如`'sync'`）                                       |
+        | `showHeader`             | Boolean        | 否   | `true`                               | 是否显示表头                                                                                   |
+        | `showFooter`             | Boolean        | 否   | `false`                              | 是否显示表尾                                                                                   |
+        | `footerMethod`           | Function       | 否   | `null`                               | 自定义表尾内容的方法，接收`{ columns, data }`，返回二维数组                                    |
+        | `footerConfig`           | Object         | 否   | `null`                               | 快捷表尾配置，用于自动计算平均值/合计，详见[表尾配置](#表尾配置)                               |
+        | `spanMethod`             | Function       | 否   | `null`                               | 合并单元格的方法，接收`{ row, column, rowIndex, columnIndex }`，返回合并信息                   |
+        | `rowConfig`              | Object         | 否   | `{ isCurrent: true, isHover: true }` | 行配置，参考 vxe-table[row-config](https://vxetable.cn/#/table/row/row-config)                 |
+        | `columnConfig`           | Object         | 否   | `{ resizable: true }`                | 列配置，常用`resizable`（是否可调整列宽）                                                      |
+        | `treeConfig`             | Object         | 否   | `null`                               | 树形表格配置，参考 vxe-table[tree-config](https://vxetable.cn/#/table/tree/tree-config)        |
+        | `editRules`              | Object         | 否   | `null`                               | 可编辑表格校验规则                                                                             |
+        | `editConfig`             | Object         | 否   | `null`                               | 可编辑表格配置                                                                                 |
+        | `exportConfig`           | Object         | 否   | `null`                               | 导出配置，参考 vxe-table[export-config](https://vxetable.cn/#/table/export/export-config)      |
+        | `scrollY`                | Object         | 否   | `{ enabled: true, gt: 10 }`          | 纵向虚拟滚动配置                                                                               |
+        | `height` / `tableHeight` | Number/String  | 否   | 动态计算                             | 表格高度，可传入数字或预定义字符串（见下方说明）                                               |
+        | `maxHeight`              | Number/String  | 否   | `null`                               | 表格最大高度                                                                                   |
+        | `minHeight`              | Number         | 否   | `150`                                | 表格最小高度（当高度计算值小于此值时使用）                                                     |
 
         **高度预定义字符串**（由 store 提供）：
+
 
         - `'normalTableHeight'`：普通表格高度
         - `'pageTableHeight'`：带分页表格高度
@@ -51,42 +53,46 @@
 
         ### 2.2 搜索头部相关
 
-        | 参数名                | 类型          | 必传 | 默认值  | 说明                                                         |
-        | --------------------- | ------------- | ---- | ------- | ------------------------------------------------------------ |
-        | `showSearchHeader`    | Boolean       | 否   | `false` | 是否显示搜索头部（SearchHeader 组件）                        |
-        | `selectData`          | Array         | 否   | `[]`    | 搜索表单项配置，传递给 SearchHeader 组件，格式见下方示例     |
-        | `buttonList`          | Array         | 否   | -       | 搜索头部右侧操作按钮，如 `[{ label: '新建', type: 'primary', icon: 'Plus', click: () => {} }]` |
-        | `defaultWidth`        | Number/String | 否   | `25`    | 搜索框宽度比例（配合布局使用）                               |
-        | `showNum`             | Number/String | 否   | `3`     | 搜索框默认显示个数，超出折叠                                 |
-        | `isShowAdvancedQuery` | Boolean       | 否   | `false` | 是否显示高级查询按钮                                         |
-        | `queryAdvancedParams` | Object        | 否   | `{}`    | 高级查询参数                                                 |
-        | `searchClick`         | Function      | 否   | -       | **查询按钮点击回调**，接收搜索参数对象，通常在此触发数据请求 |
+
+        | 参数名                | 类型          | 必传 | 默认值  | 说明                                                                                          |
+        | --------------------- | ------------- | ---- | ------- | --------------------------------------------------------------------------------------------- |
+        | `showSearchHeader`    | Boolean       | 否   | `false` | 是否显示搜索头部（SearchHeader 组件）                                                         |
+        | `selectData`          | Array         | 否   | `[]`    | 搜索表单项配置，传递给 SearchHeader 组件，格式见下方示例                                      |
+        | `buttonList`          | Array         | 否   | -       | 搜索头部右侧操作按钮，如`[{ label: '新建', type: 'primary', icon: 'Plus', click: () => {} }]` |
+        | `defaultWidth`        | Number/String | 否   | `25`    | 搜索框宽度比例（配合布局使用）                                                                |
+        | `showNum`             | Number/String | 否   | `3`     | 搜索框默认显示个数，超出折叠                                                                  |
+        | `isShowAdvancedQuery` | Boolean       | 否   | `false` | 是否显示高级查询按钮                                                                          |
+        | `queryAdvancedParams` | Object        | 否   | `{}`    | 高级查询参数                                                                                  |
+        | `searchClick`         | Function      | 否   | -       | **查询按钮点击回调**，接收搜索参数对象，通常在此触发数据请求                                  |
 
         ### 2.3 工具栏与分页
 
-        | 参数名             | 类型    | 必传 | 默认值                                             | 说明                                                         |
-        | ------------------ | ------- | ---- | -------------------------------------------------- | ------------------------------------------------------------ |
-        | `showToolBar`      | Boolean | 否   | `false`                                            | 是否显示右侧工具栏（列显隐、自定义等）                       |
-        | `showPagination`   | Boolean | 否   | `true`                                             | 是否显示分页组件                                             |
+
+        | 参数名             | 类型    | 必传 | 默认值                                             | 说明                                                                                                                                                      |
+        | ------------------ | ------- | ---- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+        | `showToolBar`      | Boolean | 否   | `false`                                            | 是否显示右侧工具栏（列显隐、自定义等）                                                                                                                    |
+        | `showPagination`   | Boolean | 否   | `true`                                             | 是否显示分页组件                                                                                                                                          |
         | `pagination`       | Object  | 否   | `undefined`                                        | **受控分页参数**，支持 `v-model` 双向绑定，格式 `{ startPage: 1, pageSize: 20 }`。若传入，组件内部将完全受控，分页变化时会触发 `update:pagination` 事件。 |
-        | `useStorePageSize` | Boolean | 否   | `true`                                             | 是否使用 Vuex 中 userStore 的 `pageNum` 作为默认每页条数（仅在未传入 `pagination` 时生效） |
-        | `pageFieldMap`     | Object  | 否   | `{ startPage: 'startPage', pageSize: 'pageSize' }` | 分页参数与后端字段映射，用于请求时转换                       |
+        | `useStorePageSize` | Boolean | 否   | `true`                                             | 是否使用 Vuex 中 userStore 的`pageNum` 作为默认每页条数（仅在未传入 `pagination` 时生效）                                                                 |
+        | `pageFieldMap`     | Object  | 否   | `{ startPage: 'startPage', pageSize: 'pageSize' }` | 分页参数与后端字段映射，用于请求时转换                                                                                                                    |
 
         ### 2.4 选择功能（单选/多选）
 
-        | 参数名                 | 类型     | 必传 | 默认值     | 说明                                                         |
-        | ---------------------- | -------- | ---- | ---------- | ------------------------------------------------------------ |
-        | `radioConfig`          | Object   | 否   | `null`     | 单选配置，参考 vxe-table [radio-config](https://vxetable.cn/#/table/radio/radio-config) |
-        | `radioChangeEvent`     | Function | 否   | `() => {}` | 单选行变化回调，接收 `{ row }`                               |
-        | `checkboxConfig`       | Object   | 否   | `null`     | 多选配置                                                     |
-        | `selectAllChangeEvent` | Function | 否   | `() => {}` | 全选/取消全选回调，接收 `{ checked }`                        |
-        | `isSelectTable`        | Boolean  | 否   | `false`    | 是否为下拉选择模式（此时表格列会渲染为 `<el-option>`，用于自定义下拉框） |
-        | `selectLabel`          | String   | 否   | `'label'`  | 下拉选项显示字段名（配合 `isSelectTable`）                   |
-        | `selectValue`          | String   | 否   | `'value'`  | 下拉选项值字段名（配合 `isSelectTable`）                     |
+
+        | 参数名                 | 类型     | 必传 | 默认值     | 说明                                                                                   |
+        | ---------------------- | -------- | ---- | ---------- | -------------------------------------------------------------------------------------- |
+        | `radioConfig`          | Object   | 否   | `null`     | 单选配置，参考 vxe-table[radio-config](https://vxetable.cn/#/table/radio/radio-config) |
+        | `radioChangeEvent`     | Function | 否   | `() => {}` | 单选行变化回调，接收`{ row }`                                                          |
+        | `checkboxConfig`       | Object   | 否   | `null`     | 多选配置                                                                               |
+        | `selectAllChangeEvent` | Function | 否   | `() => {}` | 全选/取消全选回调，接收`{ checked }`                                                   |
+        | `isSelectTable`        | Boolean  | 否   | `false`    | 是否为下拉选择模式（此时表格列会渲染为`<el-option>`，用于自定义下拉框）                |
+        | `selectLabel`          | String   | 否   | `'label'`  | 下拉选项显示字段名（配合`isSelectTable`）                                              |
+        | `selectValue`          | String   | 否   | `'value'`  | 下拉选项值字段名（配合`isSelectTable`）                                                |
 
         ### 2.5 单元格事件回调
 
         以下 props 对应 vxe-table 的同名事件，用于监听表格交互：
+
 
         | 参数名                       | 类型     | 说明               |
         | ---------------------------- | -------- | ------------------ |
@@ -105,51 +111,54 @@
 
         ### 2.6 样式定制
 
-        | 参数名                | 类型     | 说明                                                   |
-        | --------------------- | -------- | ------------------------------------------------------ |
-        | `headerCellClassName` | Function | 动态设置表头单元格类名，接收 `{ column, columnIndex }` |
-        | `rowClassName`        | Function | 动态设置行类名，接收 `{ row, rowIndex }`               |
-        | `cellClassName`       | Function | 动态设置单元格类名                                     |
-        | `headerCellStyle`     | Function | 动态设置表头单元格样式                                 |
-        | `rowStyle`            | Function | 动态设置行样式                                         |
-        | `cellStyle`           | Function | 动态设置单元格样式                                     |
-        | `allAlign`            | String   | 统一设置列对齐方式，可选 `left` / `center` / `right`   |
+
+        | 参数名                | 类型     | 说明                                                  |
+        | --------------------- | -------- | ----------------------------------------------------- |
+        | `headerCellClassName` | Function | 动态设置表头单元格类名，接收`{ column, columnIndex }` |
+        | `rowClassName`        | Function | 动态设置行类名，接收`{ row, rowIndex }`               |
+        | `cellClassName`       | Function | 动态设置单元格类名                                    |
+        | `headerCellStyle`     | Function | 动态设置表头单元格样式                                |
+        | `rowStyle`            | Function | 动态设置行样式                                        |
+        | `cellStyle`           | Function | 动态设置单元格样式                                    |
+        | `allAlign`            | String   | 统一设置列对齐方式，可选`left` / `center` / `right`   |
 
         ### 2.7 其他
 
-        | 参数名        | 类型    | 必传 | 默认值  | 说明                                                   |
-        | ------------- | ------- | ---- | ------- | ------------------------------------------------------ |
-        | `id`          | String  | 否   | `null`  | 表格 DOM id                                            |
-        | `htmlContent` | String  | 否   | `null`  | 分页左侧自定义 HTML 内容                               |
+
+        | 参数名        | 类型    | 必传 | 默认值  | 说明                                                     |
+        | ------------- | ------- | ---- | ------- | -------------------------------------------------------- |
+        | `id`          | String  | 否   | `null`  | 表格 DOM id                                              |
+        | `htmlContent` | String  | 否   | `null`  | 分页左侧自定义 HTML 内容                                 |
         | `hasAdd`      | Boolean | 否   | `false` | 是否启用“快速添加行”功能（最后一列表头点击时添加空行） |
 
         ---
 
         ### 列配置（tableColumns 每项）
 
-        | 属性名               | 类型          | 说明                                                         |
-        | -------------------- | ------------- | ------------------------------------------------------------ |
-        | `prop`               | String        | **必填**，字段名，对应数据中的 key                           |
-        | `label`              | String        | **必填**，表头显示文本                                       |
-        | `type`               | String        | 列类型，如 `'selection'`（多选）、`'radio'`（单选）、`'seq'`（序号），参考 vxe-table 列类型 |
-        | `width`              | Number/String | 列宽度，可传入数字或预定义字符串（如 `'time'`、`'operate'`，组件内部映射为具体数值） |
-        | `minWidth`           | Number        | 最小宽度                                                     |
-        | `fixed`              | String        | 固定列，可选 `left` / `right`                                |
-        | `align`              | String        | 列对齐方式，覆盖 `allAlign`                                  |
-        | `sortable`           | Boolean       | 是否可排序（默认 `true`，设为 `false` 可禁用）               |
-        | `formatter`          | Function      | 格式化函数，接收 `{ row, column, cellValue }`，返回显示内容  |
-        | `filters`            | Array         | 筛选选项，参考 vxe-table 筛选                                |
-        | `filterMethod`       | Function      | 自定义筛选方法                                               |
-        | `editRender`         | Object        | 可编辑渲染配置，参考 vxe-table 编辑                          |
-        | `treeNode`           | Boolean       | 是否为树形节点列                                             |
-        | `isHidden`           | Boolean       | 是否初始隐藏该列                                             |
-        | `showOverFlow`       | Boolean       | 是否显示溢出省略（默认 `true`）                              |
-        | `showHeaderOverflow` | Boolean       | 表头溢出省略（默认 `true`）                                  |
-        | `showFooterOverflow` | Boolean       | 表尾溢出省略（默认 `true`）                                  |
-        | `isThousandth`       | Boolean       | 是否使用千分位格式化（内部使用 `<el-statistic>`）            |
-        | `vHtml`              | Boolean       | 是否将单元格内容作为 HTML 渲染（需确保数据安全）             |
-        | `render`             | Function      | 自定义渲染函数，返回 VNode，接收 `{ row }` 参数              |
-        | `headerSlot`         | String        | 自定义表头 HTML 内容                                         |
+
+        | 属性名               | 类型          | 说明                                                                                       |
+        | -------------------- | ------------- | ------------------------------------------------------------------------------------------ |
+        | `prop`               | String        | **必填**，字段名，对应数据中的 key                                                         |
+        | `label`              | String        | **必填**，表头显示文本                                                                     |
+        | `type`               | String        | 列类型，如`'selection'`（多选）、`'radio'`（单选）、`'seq'`（序号），参考 vxe-table 列类型 |
+        | `width`              | Number/String | 列宽度，可传入数字或预定义字符串（如`'time'`、`'operate'`，组件内部映射为具体数值）        |
+        | `minWidth`           | Number        | 最小宽度                                                                                   |
+        | `fixed`              | String        | 固定列，可选`left` / `right`                                                               |
+        | `align`              | String        | 列对齐方式，覆盖`allAlign`                                                                 |
+        | `sortable`           | Boolean       | 是否可排序（默认`true`，设为 `false` 可禁用）                                              |
+        | `formatter`          | Function      | 格式化函数，接收`{ row, column, cellValue }`，返回显示内容                                 |
+        | `filters`            | Array         | 筛选选项，参考 vxe-table 筛选                                                              |
+        | `filterMethod`       | Function      | 自定义筛选方法                                                                             |
+        | `editRender`         | Object        | 可编辑渲染配置，参考 vxe-table 编辑                                                        |
+        | `treeNode`           | Boolean       | 是否为树形节点列                                                                           |
+        | `isHidden`           | Boolean       | 是否初始隐藏该列                                                                           |
+        | `showOverFlow`       | Boolean       | 是否显示溢出省略（默认`true`）                                                             |
+        | `showHeaderOverflow` | Boolean       | 表头溢出省略（默认`true`）                                                                 |
+        | `showFooterOverflow` | Boolean       | 表尾溢出省略（默认`true`）                                                                 |
+        | `isThousandth`       | Boolean       | 是否使用千分位格式化（内部使用`<el-statistic>`）                                           |
+        | `vHtml`              | Boolean       | 是否将单元格内容作为 HTML 渲染（需确保数据安全）                                           |
+        | `render`             | Function      | 自定义渲染函数，返回 VNode，接收`{ row }` 参数                                             |
+        | `headerSlot`         | String        | 自定义表头 HTML 内容                                                                       |
 
         ---
 
@@ -166,7 +175,6 @@
           ]
         }
         ```
-
         组件内部预定义了 `平均值`、`合计` 两个函数，可扩展。
 
         ---
@@ -175,11 +183,12 @@
 
         组件通过 `defineEmits` 声明了以下事件：
 
-        | 事件名              | 触发时机                        | 参数                      | 说明                                                     |
-        | ------------------- | ------------------------------- | ------------------------- | -------------------------------------------------------- |
-        | `checkbox-change`   | 复选框选中状态变化时            | `records` (Array)         | 当前选中的行数据数组                                     |
-        | `rowSelect-change`  | （未实际使用，保留）            | -                         | -                                                        |
-        | `update:pagination` | 分页变化时（页码/每页条数改变） | `{ startPage, pageSize }` | 用于同步父组件的分页状态，配合 `v-model:pagination` 使用 |
+
+        | 事件名              | 触发时机                        | 参数                      | 说明                                                    |
+        | ------------------- | ------------------------------- | ------------------------- | ------------------------------------------------------- |
+        | `checkbox-change`   | 复选框选中状态变化时            | `records` (Array)         | 当前选中的行数据数组                                    |
+        | `rowSelect-change`  | （未实际使用，保留）            | -                         | -                                                       |
+        | `update:pagination` | 分页变化时（页码/每页条数改变） | `{ startPage, pageSize }` | 用于同步父组件的分页状态，配合`v-model:pagination` 使用 |
 
         此外，所有单元格交互事件均可通过对应的 props 回调接收（如 `cellClickEvent`），这些回调不会触发 emit，而是直接调用父组件传入的函数。
 
@@ -195,6 +204,7 @@
         - **表头自定义 HTML**：设置 `headerSlot` 字符串，会插入到表头。
 
         示例：
+
         ```javascript
         {
           prop: 'custom',
@@ -202,27 +212,30 @@
           render: ({ row }) => h('el-button', { onClick: () => handle(row) }, '编辑')
         }
         ```
-
         ---
 
         ## 5. 样式定制方式
 
         ### 5.1 通过 className/style 函数
+
         - `headerCellClassName`、`rowClassName`、`cellClassName`：返回字符串类名。
         - `headerCellStyle`、`rowStyle`、`cellStyle`：返回样式对象。
 
         ### 5.2 全局覆盖 CSS
+
         组件内部样式使用 scoped，可通过 `:deep()` 穿透覆盖：
+
         ```css
         :deep(.vxe-table--body .custom-row) {
           background-color: #f5f7fa;
         }
         ```
-
         ### 5.3 列宽记忆
+
         组件会自动保存用户调整后的列宽到 localStorage，键名为 `{name}_columnWidths`，需传入 `name` 属性。
 
         ### 5.4 工具栏自定义
+
         工具栏按钮文本、图标可通过 CSS 调整，例如修改“保存”按钮文本已在组件内处理。
 
         ---
@@ -263,11 +276,11 @@
             v-model:pagination="queryParams"
           />
         </template>
-        
+
         <script setup>
         import { ref, reactive, onMounted } from 'vue'
         import BaseTable from '@/components/BaseTable'
-        
+
         const columns = [
           { prop: 'name', label: '姓名', width: 120 },
           { prop: 'age', label: '年龄', width: 100 },
@@ -276,24 +289,24 @@
         const tableData = ref([])
         const total = ref(0)
         const loading = ref(false)
-        
+
         // 分页参数（双向绑定）
         const queryParams = reactive({
           startPage: 1,
           pageSize: 20
         })
-        
+
         const searchFields = [
           { name: '姓名', type: 'input', modelValue: 'name', span: 6 },
           { name: '年龄', type: 'input', modelValue: 'age', span: 6 }
         ]
-        
+
         const handleSearch = (params) => {
           // params 是搜索表单数据 + 分页参数
           console.log('搜索参数:', params)
           fetchData(params)
         }
-        
+
         const fetchData = async (params) => {
           loading.value = true
           try {
@@ -304,16 +317,16 @@
             loading.value = false
           }
         }
-        
+
         onMounted(() => {
           fetchData(queryParams) // 初始化加载
         })
         </script>
         ```
-
         ### 7.2 完整示例（结合实际项目：常用审批语配置）
 
         该示例展示了：
+
         - `v-model:pagination` 双向绑定分页
         - `selectData` 配置搜索项（支持字典、静态选项）
         - `buttonList` 配置顶部按钮（带权限）
@@ -327,30 +340,30 @@
             <!-- ✅ 表格组件 -->
             <BaseTable
               ref="languageTableRef"
-              
+
               <!-- 基础配置 -->
               :tableColumns="tableColumns"
               :tableData="tableData"
               :loading="tableLoading"
               name="processLanguageTable"  <!-- ✅ 唯一标识，用于缓存列配置 -->
-              
+
               <!-- 搜索区域 -->
               :showSearchHeader="true"
               :selectData="selectData"
               :searchClick="getList"       <!-- ✅ 搜索/分页时自动调用 -->
-              
+
               <!-- 分页控制（高级模式）-->
               v-model:pagination="queryParams"  <!-- ✅ 双向绑定分页参数 -->
               :total="total"
               :showPagination="true"
-              
+
               <!-- 工具栏按钮 -->
               :buttonList="buttonList"
-              
+
               <!-- 高度适配 -->
               :tableHeight="tableHeight"
             />
-            
+
             <!-- 详情弹窗 -->
             <ProcessLanguageDetail 
               ref="detailDialogRef" 
@@ -359,10 +372,10 @@
             />
           </div>
         </template>
-        
+
         <script setup>
         defineOptions({ name: 'BpmProcessLanguage' })
-        
+
         // ========== 1. 导入依赖 ==========
         import BaseTable from '@/components/BaseTable/index.vue'
         import { ProcessLanguageApi } from '@/api/system/bpm/processLanguage'
@@ -375,11 +388,11 @@
         import { CommonStatusEnumLabel } from '@/utils/bpm/constantEnumeration'
         import { h } from 'vue'
         import { ElTag, ElButton } from 'element-plus'
-        
+
         // ========== 2. 基础配置 ==========
         const { proxy } = getCurrentInstance()
         const storeHeight = computed(() => tableParamsStore().normalTableHeight)
-        
+
         // ========== 3. 响应式数据 ==========
         const data = reactive({
           // ✅ 分页参数（v-model 模式必须包含 startPage/pageSize）
@@ -397,14 +410,14 @@
         })
         // 解构为 ref，方便模板使用
         const { queryParams, tableData, total, tableLoading } = toRefs(data)
-        
+
         // 表格高度（适配不同场景）
         const tableHeight = computed(() => storeHeight.value - 15)
-        
+
         // 组件 ref
         const detailDialogRef = ref(null)
         const languageTableRef = ref(null)
-        
+
         // ========== 4. 搜索配置 ==========
         const selectData = reactive([
           {
@@ -441,7 +454,7 @@
             selectValue: 'value',
           },
         ])
-        
+
         // ========== 5. 按钮配置 ==========
         const buttonList = reactive([
           {
@@ -452,16 +465,16 @@
             permission: 'bpm:processLanguage:create',  // ✅ 权限控制
           },
         ])
-        
+
         // ========== 6. 列配置 ==========
         const tableColumns = ref([
           // 序号列
           { prop: '', label: '编号', align: 'center', width: 80, type: 'seq' },
-          
+
           // 普通文本列
           { prop: 'content', label: '快捷语内容', align: 'left', minWidth: 150 },
           { prop: 'expressionTypeName', label: '类型', align: 'center', width: 120 },
-          
+
           // ✅ 自定义渲染：状态标签
           {
             prop: 'status',
@@ -475,7 +488,7 @@
               })
             },
           },
-          
+
           // ✅ 自定义渲染：日期格式化
           {
             prop: 'createTime',
@@ -484,9 +497,9 @@
             width: 180,
             render: row => [h('span', {}, formatDate(row.createTime))],
           },
-          
+
           { prop: 'createByName', label: '创建人', align: 'center', width: 120 },
-          
+
           // ✅ 操作列：多个按钮 + 权限控制
           {
             label: '操作',
@@ -503,7 +516,7 @@
                   style: 'margin-right: 8px',
                   permission: 'bpm:processLanguage:update',
                 }, { default: () => '编辑' }),
-                
+
                 h(ElButton, {
                   onClick: () => handleDelete(row.id),
                   type: 'danger',
@@ -515,9 +528,9 @@
             },
           },
         ])
-        
+
         // ========== 7. 核心方法 ==========
-        
+
         /**
          * 查询列表（搜索/分页时自动调用）
          * @param {Object} e - 搜索条件（不含分页参数）
@@ -526,14 +539,14 @@
           // ✅ 方式1：直接使用 e + 组件内部的分页参数（推荐）
           // ✅ 方式2：使用 buildQueryParams 构建完整参数（需要额外参数时用）
           const extraParams = languageTableRef.value?.buildQueryParams()
-          
+
           console.log('查询参数:', { search: e, pagination: extraParams })
-          
+
           const params = {
             ...e,              // 搜索条件
             ...extraParams,    // 分页参数 + 高级查询
           }
-          
+
           tableLoading.value = true
           try {
             const res = await ProcessLanguageApi.getList(params)
@@ -545,7 +558,7 @@
             tableLoading.value = false
           }
         }
-        
+
         /**
          * 打开表单弹窗
          */
@@ -561,7 +574,7 @@
             })
           })
         }
-        
+
         /**
          * 删除操作
          */
@@ -577,18 +590,18 @@
             }
           }
         }
-        
+
         /**
          * 表单提交成功回调
          */
         const handleDialogSuccess = (payload) => {
           proxy?.$modal?.msgSuccess?.(payload.action === 'add' ? '新增成功' : '修改成功')
-          
+
           // ✅ 重置到第 1 页（避免新增后停留在末页）
           queryParams.value.startPage = 1
           getList()
         }
-        
+
         /**
          * 初始化字典等基础数据
          */
@@ -600,14 +613,14 @@
             // 如需在搜索中使用，可赋值给 selectData 的 selectData 字段
           })
         }
-        
+
         // ========== 8. 生命周期 ==========
         onMounted(() => {
           initBaseInfo()  // 1. 先加载字典
           getList()       // 2. ✅ 再加载表格数据（关键！）
         })
         </script>
-        
+
         <style lang="scss" scoped>
         .app-container {
           margin: 0 auto;
@@ -617,32 +630,35 @@
         }
         </style>
         ```
-
         ### 7.3 常见场景示例
 
         #### 7.3.1 自定义每页条数记忆
+
         - 通过 `v-model:pagination` 绑定父组件的响应式对象，组件内部分页变化时会自动更新该对象。
         - 如果需要将用户选择的每页条数保存到后端或 Vuex，可监听 `update:pagination` 事件并调用相应接口。
 
         #### 7.3.2 使用 `buildQueryParams` 构建请求参数
+
         在 `searchClick` 回调中，可以通过 `ref` 调用 `buildQueryParams()` 获取当前分页参数，与搜索参数合并后发送请求。示例中已展示。
 
         #### 7.3.3 重置搜索并刷新
+
         调用组件暴露的 `resetSearch()` 方法可重置搜索条件并触发查询：
+
         ```javascript
         languageTableRef.value?.resetSearch()
         ```
-
         #### 7.3.4 手动触发查询
+
         ```javascript
         languageTableRef.value?.query() // 使用当前条件查询
         ```
-
         ---
 
         ## 8. 注意事项
 
         ### 8.1 常见坑点
+
         1. **name 属性必须唯一**：用于 localStorage 存储列宽和列显隐，若多个表格使用相同 name 会导致配置覆盖。
         2. **分页参数优先级**：
            - 若传入 `pagination`（含 `v-model`），组件完全受控，分页变化触发 `update:pagination`，父组件需更新传入的对象。
@@ -654,25 +670,28 @@
         7. **权限控制**：按钮和操作列的权限标识（如 `permission` 属性）需配合自定义指令或权限函数使用，组件本身不处理权限，但推荐在模板中添加 `v-permission` 或在渲染函数中判断。
 
         ### 8.2 兼容性说明
+
         - **Vue 版本**：需 Vue 3.2+（使用 `<script setup>`）
         - **vxe-table 版本**：推荐 4.x（与当前代码兼容）
         - **浏览器**：支持 ES6、localStorage，不支持 IE
         - **移动端**：未适配，建议在桌面端使用
 
         ### 8.3 依赖缺失提示
+
         若未安装 `element-plus` 或 `vxe-table`，组件会报错，请确保已安装并引入相应样式：
+
         ```javascript
         import 'element-plus/dist/index.css'
         import 'vxe-table/lib/style.css'
         import VXETable from 'vxe-table'
         app.use(VXETable)
         ```
-
         ---
 
         ## 附录：暴露的方法
 
         通过 ref 可调用以下方法：
+
 
         | 方法名                              | 参数             | 说明                                       |
         | ----------------------------------- | ---------------- | ------------------------------------------ |
@@ -704,9 +723,8 @@
         | **`buildQueryParams(override)`**    | `override`       | **构建请求参数对象（包含分页和搜索条件）** |
 
         **特别说明**：
+
         - `buildQueryParams()` 返回的对象包含当前分页和搜索条件，可直接用于接口请求。
         - `query()` 和 `refresh()` 本质相同，都会触发 `searchClick` 回调（使用当前搜索条件）。
 
         ---
-
-        
