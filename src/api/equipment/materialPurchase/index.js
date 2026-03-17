@@ -68,38 +68,17 @@ const api = {
 	},
 
 	/**
-	 * 标记采购失败
-	 * @param {Number} id 物资采购id
-	 * @param {String} failureReason 失败原因
+	 * 发起物资采购流程
+	 * @param {Object} data 流程数据
 	 * @returns
 	 */
-	markAsFailed(id, failureReason) {
+	materialPurchaseStart(data) {
 		return request({
-			url: `${url}/markAsFailed`,
-			method: 'put',
-			params: { id, failureReason },
-		})
-	},
-
-	/**
-	 * 审核物资采购
-	 * @param {Number} id 物资采购id
-	 * @param {String} status 审核状态（3-审核通过，4-驳回）
-	 * @param {String} approvalRemark 审核备注
-	 * @returns
-	 */
-	approve(id, status, approvalRemark) {
-		return request({
-			url: `${url}/approve`,
+			url: `${url}/materialPurchaseStart`,
 			method: 'post',
-			params: {
-				id,
-				status,
-				approvalRemark: approvalRemark || '',
-			},
+			data: data,
 		})
 	},
 }
 
 export default api
-
