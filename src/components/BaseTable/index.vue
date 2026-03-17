@@ -75,7 +75,14 @@
 					}
 				"
 				:name="name"
+				:expand-config="expandConfig"
+				@toggle-row-expand="toggleRowExpandEvent"
 			>
+				<vxe-column type="expand" width="60" v-if="expandConfig">
+					<template #content="{ row, rowIndex }">
+						<slot name="expand" :row="row" :rowIndex="rowIndex"></slot>
+					</template>
+				</vxe-column>
 				<vxe-column
 					v-for="item in changeColumns.list"
 					:key="item.prop"
@@ -616,8 +623,17 @@ const props = defineProps({
 			pageSize: 'pageSize', // 分页组件 limit → 后端 pageSize
 		}),
 	},
+
+	/**
+	 * 展开行配置
+	 * { labelField: 'name', expandAll: false, accordion: true, trigger: 'default' }
+	 */
+	expandConfig: {
+		type: Object,
+		default: null,
+	},
 })
-const emit = defineEmits(['checkbox-change', 'rowSelect-change', 'update:pagination','checkbox-all'])
+const emit = defineEmits(['checkbox-change', 'rowSelect-change', 'update:pagination', 'checkbox-all', 'toggle-row-expand'])
 
 // 表格高度
 const tableParams = tableParamsStore()
@@ -947,16 +963,16 @@ const selectChangeEvent = () => {
 	emit('checkbox-change', records)
 }
 const handleCheckboxAll = ({ checked }) => {
-  const $table = xTable.value
-  const records = $table.getCheckboxRecords()  // 获取当前选中行
-  
-  // 同时触发 props 回调（兼容旧代码）和 emit 事件（新方式）
-  if (props.selectAllChangeEvent) {
-    props.selectAllChangeEvent({ checked })
-  }
-  
-  //  传给父组件：带上当前选中的所有记录
-  emit('checkbox-all', { checked, records })
+	const $table = xTable.value
+	const records = $table.getCheckboxRecords() // 获取当前选中行
+
+	// 同时触发 props 回调（兼容旧代码）和 emit 事件（新方式）
+	if (props.selectAllChangeEvent) {
+		props.selectAllChangeEvent({ checked })
+	}
+
+	//  传给父组件：带上当前选中的所有记录
+	emit('checkbox-all', { checked, records })
 }
 // 删除选中
 const removeCheckboxRow = () => {
@@ -1281,14 +1297,14 @@ const initColumnWidth = (force = false) => {
 const handleColumnResize = ({ column, width }) => {
 	// 跳过无name的场景（无法唯一标识存储）
 	if (!columnWidthStorageKey.value) {
-		console.warn('表格未配置"name"属性，无法保存列宽')
+		// console.warn('表格未配置"name"属性，无法保存列宽')
 		return
 	}
 
 	// 过滤无效宽度（非数字、负数、0）
 	const validWidth = Number(width)
 	if (isNaN(validWidth) || validWidth <= 0) {
-		console.warn(`无效列宽：${width}，跳过保存`)
+		// console.warn(`无效列宽：${width}，跳过保存`)
 		return
 	}
 
@@ -1305,9 +1321,9 @@ const handleColumnResize = ({ column, width }) => {
 
 			// 写入本地存储
 			localStorage.setItem(columnWidthStorageKey.value, JSON.stringify(widthMap))
-			console.log(`[${props.name}] 列宽保存成功：${column.field} = ${validWidth}px`)
+			// console.log(`[${props.name}] 列宽保存成功：${column.field} = ${validWidth}px`)
 		} catch (error) {
-			console.error(`[${props.name}] 列宽保存失败：`, error)
+			// console.error(`[${props.name}] 列宽保存失败：`, error)
 		}
 	}, 300) // 防抖间隔可根据需求调整（建议200-500ms）
 }
@@ -1363,7 +1379,42 @@ const resetColumnWidths = () => {
 		console.log(`[${props.name}] 列宽已重置为默认值`)
 	}
 }
+/**
+ * 切换展开行状态
+ */
+const toggleRowExpand = row => {
+	const $table = xTable.value
+	if ($table) {
+		$table.toggleRowExpand(row)
+	}
+}
 
+/**
+ * 设置所有行展开/收起
+ */
+const setAllRowExpand = checked => {
+	const $table = xTable.value
+	if ($table) {
+		$table.setAllRowExpand(checked)
+	}
+}
+
+/**
+ * 清除所有展开行
+ */
+const clearRowExpand = () => {
+	const $table = xTable.value
+	if ($table) {
+		$table.clearRowExpand()
+	}
+}
+
+/**
+ * 展开行切换事件回调
+ */
+const toggleRowExpandEvent = params => {
+	emit('toggle-row-expand', params)
+}
 watch(
 	props.tableColumns,
 	newV => {
@@ -1418,6 +1469,9 @@ defineExpose({
 	getPagination,
 	setPagination,
 	buildQueryParams,
+	toggleRowExpand,
+	setAllRowExpand,
+	clearRowExpand,
 })
 </script>
 <style scoped lang="scss">

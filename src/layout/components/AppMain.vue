@@ -28,6 +28,6 @@ const isIframeRoute = (route) => {
          tagsViewStore.iframeViews.some(v => v.path === route.path)
 }
 
-console.log('Current route:', route.path, 'meta:', route.meta, 'is iframe:', isIframeRoute(route));
-console.log('All iframe views:', tagsViewStore.iframeViews);
+// console.log('Current route:', route.path, 'meta:', route.meta, 'is iframe:', isIframeRoute(route));
+// console.log('All iframe views:', tagsViewStore.iframeViews);
 </script>

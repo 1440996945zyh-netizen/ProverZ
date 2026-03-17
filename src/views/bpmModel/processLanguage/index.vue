@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-24 10:29:17
- * @LastEditTime: 2026-03-16 18:38:52
+ * @LastEditTime: 2026-03-17 16:16:40
  * @LastEditors: zhangsd
  * @Description: 常用审批语配置
  * @FilePath: \view\src\views\bpmModel\processLanguage\index.vue
@@ -22,11 +22,8 @@
 			:showPagination="true"
 			:total="total"
 			v-model:pagination="queryParams"
-			:checkboxConfig="checkboxConfig"
-			:rowConfig="{ keyField: 'id' }"
-			@checkbox-change="handleCheckboxChange"
-			@checkbox-all="handleSelectAllChange"
-		/>
+		>
+		</BaseTable>
 		<!-- 常用审批语详情弹窗 -->
 		<ProcessLanguageDetail ref="detailDialogRef" @success="handleDialogSuccess" @close="handleDialogClose" />
 	</div>
@@ -76,19 +73,25 @@ const data = reactive({
 /**
  * 常用审批语表格复选框配置
  */
-const checkboxConfig = {}
-const selectedRows = ref([])
+const checkboxConfig = {
+	highlight: true, // 选中高亮行
+	strict: false, // 可以取消
+	reserve: false, // 是否保留选中状态
+	showHeader: true, // 是否显示全选
+}
+/**
+ * 常用审批语表格复选框变化事件处理
+ * @param selectedRows 选中的行数据
+ */
 const handleCheckboxChange = selectedRows => {
 	console.log('当前选中行：', selectedRows)
-	// 可将选中行保存到响应式变量中，用于后续操作
-	selectedRows.value = selectedRows
 }
 
-// 处理全选变化
+/**
+ * 常用审批语表格全选操作
+ */
 const handleSelectAllChange = ({ checked, records }) => {
-  console.log(' 全选操作:', checked, records)
-  
-  
+	console.log(' 全选操作:', checked, records)
 }
 /**
  * 常用审批语分页查询参数
@@ -159,6 +162,7 @@ const buttonList = reactive([
  */
 const tableColumns = ref([
 	{ type: 'checkbox', width: 50, fixed: 'left', align: 'center' },
+
 	{
 		prop: '',
 		label: '编号',
@@ -272,11 +276,7 @@ const getList = async e => {
 	}
 }
 
-const checkboxChange = selectedRows => {
-	console.log('当前选中行：', selectedRows)
-	// 可将选中行保存到响应式变量中，用于后续操作
-	selectedRows.value = selectedRows
-}
+
 /**
  * 打开常用审批语表单
  * @param type create/update
