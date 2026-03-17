@@ -27,11 +27,12 @@
 								<el-option label="定点服务" value="03" />
 							</el-select>
 						</el-form-item>
+						、
 					</el-col>
 					<el-col :span="8" v-if="form.applicationTypeCode === '03'">
 						<el-form-item label="定点服务类别" prop="fixedServiceCategoryCode">
 							<Select
-								:dataConfig="{ url: '/api/internal/public/getDictListByType/FIX_SERVICE' }"
+								:dataConfig="{ url: '/api/internal/public/getDictListByType/FIXEDPOINT_SERVICE' }"
 								v-model:value="form.fixedServiceCategoryCode"
 								v-model:label="form.fixedServiceCategoryName"
 								:disabled="formDisabled"

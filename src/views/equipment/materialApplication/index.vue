@@ -27,21 +27,21 @@
 					>
 						保存
 					</el-button>
-					<el-button
+					<!-- <el-button
 						type="success"
 						@click="save('2')"
 						v-hasPermi="['equipment:materialApplication:add', 'equipment:materialApplication:update']"
 						v-if="isAdd || isEdit || isRejected"
 					>
 						保存并上报
-					</el-button>
+					</el-button> -->
 				</template>
 			</div>
 		</template>
 	</el-drawer>
 
 	<!-- 审批弹窗 -->
-	<el-dialog v-model="approvalVisible" title="审批" width="500px">
+	<!-- <el-dialog v-model="approvalVisible" title="审批" width="500px">
 		<el-form :model="approvalForm" label-width="100px">
 			<el-form-item label="审批结果">
 				<el-radio-group v-model="approvalForm.status">
@@ -66,7 +66,7 @@
 				<el-button type="primary" @click="handleApprove">确定</el-button>
 			</div>
 		</template>
-	</el-dialog>
+	</el-dialog> -->
 </template>
 <script setup name="materialApplication">
 /**--------------引用------------ */
@@ -108,12 +108,12 @@ const detailRef = ref(null) // 明细组件ref
 const isAdd = ref(false) // 是否新增
 const isRejected = ref(false) // 是否为驳回状态修改
 const isEdit = ref(false) // 是否为编辑状态
-const approvalVisible = ref(false) // 是否显示审批弹窗
-const approvalForm = reactive({
-	id: null,
-	status: '3', // 默认通过
-	approvalRemark: '',
-})
+// const approvalVisible = ref(false) // 是否显示审批弹窗
+// const approvalForm = reactive({
+// 	id: null,
+// 	status: '3', // 默认通过
+// 	approvalRemark: '',
+// })
 const clickRow = ref(null) // 点击的行数据
 
 const baseTable = ref(null)
@@ -146,44 +146,44 @@ const selectData = reactive([
 // 获取点击行数据
 const cellClickEvent = ({ row }) => {
 	clickRow.value = row
-	// 更新审批按钮状态
-	updateApprovalButton()
+	// // 更新审批按钮状态
+	// updateApprovalButton()
 }
 
-// 更新审批按钮状态
-const updateApprovalButton = () => {
-	if (clickRow.value && clickRow.value.status === '2') {
-		// 状态为等待审批，启用按钮
-		buttonList[1].disabled = false
-	} else {
-		// 其他状态，禁用按钮
-		buttonList[1].disabled = true
-	}
-}
+// // 更新审批按钮状态
+// const updateApprovalButton = () => {
+// 	if (clickRow.value && clickRow.value.status === '2') {
+// 		// // 状态为等待审批，启用按钮
+// 		// buttonList[1].disabled = false
+// 	} else {
+// 		// // 其他状态，禁用按钮
+// 		// buttonList[1].disabled = true
+// 	}
+// }
 
-// 批量审批处理（从右上角按钮点击）
-const handleBatchApproval = () => {
-	// 检查是否有选中的行
-	if (!clickRow.value) {
-		proxy.$message.warning('请先选择要审批的记录')
-		return
-	}
-	// 检查选中的行状态是否为等待审批
-	if (clickRow.value.status !== '2') {
-		proxy.$message.warning('只能审批状态为"等待审批"的记录')
-		return
-	}
-	// 打开审批弹窗
-	openApprovalDialog(clickRow.value)
-}
+// // 批量审批处理（从右上角按钮点击）
+// const handleBatchApproval = () => {
+// 	// 检查是否有选中的行
+// 	if (!clickRow.value) {
+// 		proxy.$message.warning('请先选择要审批的记录')
+// 		return
+// 	}
+// 	// 检查选中的行状态是否为等待审批
+// 	if (clickRow.value.status !== '2') {
+// 		proxy.$message.warning('只能审批状态为"等待审批"的记录')
+// 		return
+// 	}
+// 	// 打开审批弹窗
+// 	openApprovalDialog(clickRow.value)
+// }
 
 // 打开审批弹窗
-const openApprovalDialog = row => {
-	approvalForm.id = row.id
-	approvalForm.status = '3' // 默认通过
-	approvalForm.approvalRemark = ''
-	approvalVisible.value = true
-}
+// const openApprovalDialog = row => {
+// 	approvalForm.id = row.id
+// 	approvalForm.status = '3' // 默认通过
+// 	approvalForm.approvalRemark = ''
+// 	approvalVisible.value = true
+// }
 // 展开明细表格组件
 const DetailTable = {
 	props: ['row', 'onRowCountChange'],
@@ -356,18 +356,20 @@ const tableColumns = ref([
 	},
 	{
 		label: '状态',
-		prop: 'status',
+		prop: 'processStatus',
 		align: 'center',
 		width: 100,
 		fixed: 'right',
 		render: row => {
 			const statusMap = {
-				1: { label: '暂存', type: 'info' },
-				2: { label: '等待审批', type: 'warning' },
-				3: { label: '审批通过', type: 'success' },
-				4: { label: '驳回', type: 'danger' },
+				0: { label: '未发起', type: 'info' },
+				1: { label: '审批中', type: 'warning' },
+				2: { label: '审批通过', type: 'success' },
+				3: { label: '审批不通过', type: 'danger' },
+				4: { label: '已办结', type: 'success' },
+				5: { label: '作废', type: 'danger' },
 			}
-			const status = statusMap[row.status] || { label: '未知', type: 'info' }
+			const status = statusMap[row.processStatus] || { label: '未知', type: 'info' }
 			return [
 				h(
 					ElTag,
@@ -402,14 +404,8 @@ const tableColumns = ref([
 				{
 					name: '编辑',
 					command: '编辑',
-					click: () => {
-						const canEdit = row.status === '1' || row.status === '4'
-						if (canEdit) {
-							edit(row)
-						}
-					},
+					click: () => edit(row),
 					icon: Edit,
-					disabled: row.status !== '1' && row.status !== '4',
 				},
 				{
 					name: '发起',
@@ -427,16 +423,10 @@ const tableColumns = ref([
 				{
 					name: '删除',
 					command: '删除',
-					click: () => {
-						const canDelete = row.status !== '3'
-						if (canDelete) {
-							handleDelete(row)
-						}
-					},
+					click: () => handleDelete(row),
 					type: 'danger',
 					icon: Delete,
 					permission: 'equipment:materialApplication:delete',
-					disabled: row.status === '3',
 				},
 			)
 
@@ -466,7 +456,7 @@ const queryParams = ref({
 // 点击查询按钮的事件
 const getList = e => {
 	queryParams.value = e || queryParams.value
-	buttonList[1].disabled = true // 查询时禁用审批按钮
+	// buttonList[1].disabled = true // 查询时禁用审批按钮
 	clickRow.value = null // 清空选中的行
 	materialApplicationApi.getList(queryParams.value).then(res => {
 		tableData.value = res.data.pages
@@ -516,21 +506,13 @@ const edit = row => {
 	title.value = '编辑'
 	isAdd.value = false
 	isEdit.value = true
-	// 判断是否为驳回状态
-	isRejected.value = editRow.status === '4'
 
 	nextTick(() => {
 		detailRef.value.resetForm()
 		detailRef.value.formDisabled = false
 		materialApplicationApi.getById(editRow.id).then(res => {
 			const data = res.data
-			// 如果是驳回状态，清空审核信息
-			if (editRow.status === '4') {
-				data.approvalRemark = ''
-				data.approvalBy = null
-				data.approvalByName = ''
-				data.approvalTime = null
-			}
+
 			proxy.setFormData(detailRef.value.formData.form, data)
 			detailRef.value.editDetailList(res.data.detailList || [])
 			detailRef.value.init(false)
@@ -538,53 +520,53 @@ const edit = row => {
 	})
 }
 
-// 参照申报事件
-const referenceApplication = row => {
-	const referenceRow = row
-	applicationVisible.value = true
-	title.value = '参照申报'
-	isAdd.value = true // 设置为新增模式，保存时新增数据
-	isEdit.value = false
-	isRejected.value = false
+// // 参照申报事件
+// const referenceApplication = row => {
+// 	const referenceRow = row
+// 	applicationVisible.value = true
+// 	title.value = '参照申报'
+// 	isAdd.value = true // 设置为新增模式，保存时新增数据
+// 	isEdit.value = false
+// 	isRejected.value = false
 
-	nextTick(() => {
-		detailRef.value.resetForm()
-		detailRef.value.formDisabled = false
-		materialApplicationApi.getById(referenceRow.id).then(res => {
-			// 清空ID和申请单号，这样保存时会新增数据
-			const data = JSON.parse(JSON.stringify(res.data))
-			data.id = null // 清空ID，走新增流程
-			data.applicationNo = '' // 清空申请单号，后端会自动生成
-			// 重新生成申报主题
-			const now = new Date()
-			const year = now.getFullYear()
-			const month = String(now.getMonth() + 1).padStart(2, '0')
-			const day = String(now.getDate()).padStart(2, '0')
-			data.applicationTitle = `物资申报${year}${month}${day}`
-			// 清空状态
-			data.status = ''
-			// 清空审核信息
-			data.approvalRemark = ''
-			data.approvalBy = null
-			data.approvalByName = ''
-			data.approvalTime = null
+// 	nextTick(() => {
+// 		detailRef.value.resetForm()
+// 		detailRef.value.formDisabled = false
+// 		materialApplicationApi.getById(referenceRow.id).then(res => {
+// 			// 清空ID和申请单号，这样保存时会新增数据
+// 			const data = JSON.parse(JSON.stringify(res.data))
+// 			data.id = null // 清空ID，走新增流程
+// 			data.applicationNo = '' // 清空申请单号，后端会自动生成
+// 			// 重新生成申报主题
+// 			const now = new Date()
+// 			const year = now.getFullYear()
+// 			const month = String(now.getMonth() + 1).padStart(2, '0')
+// 			const day = String(now.getDate()).padStart(2, '0')
+// 			data.applicationTitle = `物资申报${year}${month}${day}`
+// 			// 清空状态
+// 			data.status = ''
+// 			// 清空审核信息
+// 			data.approvalRemark = ''
+// 			data.approvalBy = null
+// 			data.approvalByName = ''
+// 			data.approvalTime = null
 
-			proxy.setFormData(detailRef.value.formData.form, data)
-			// 清空明细ID，让明细也走新增流程
-			const detailList = (res.data.detailList || []).map(item => {
-				const newItem = JSON.parse(JSON.stringify(item))
-				newItem.id = null // 清空明细ID
-				newItem.applicationId = null // 清空关联的主表ID
-				return newItem
-			})
-			detailRef.value.editDetailList(detailList)
-			detailRef.value.init(false)
-		})
-	})
-}
+// 			proxy.setFormData(detailRef.value.formData.form, data)
+// 			// 清空明细ID，让明细也走新增流程
+// 			const detailList = (res.data.detailList || []).map(item => {
+// 				const newItem = JSON.parse(JSON.stringify(item))
+// 				newItem.id = null // 清空明细ID
+// 				newItem.applicationId = null // 清空关联的主表ID
+// 				return newItem
+// 			})
+// 			detailRef.value.editDetailList(detailList)
+// 			detailRef.value.init(false)
+// 		})
+// 	})
+// }
 
 // 保存事件
-const save = async status => {
+const save = async () => {
 	if (await detailRef.value.validate()) {
 		let { form, detailList } = JSON.parse(JSON.stringify(toRaw(detailRef.value.formData)))
 
@@ -602,11 +584,9 @@ const save = async status => {
 			return item
 		})
 
-		const confirmText = status === '2' ? '确定保存并上报?' : '确定保存?'
-		proxy.$modal.confirm(confirmText).then(res => {
+		proxy.$modal.confirm('确定保存?').then(res => {
 			let params = {
 				...form,
-				status: status, // 设置状态：1-暂存，2-等待审批
 				detailList: detailList,
 			}
 			if (params.id == null) {
@@ -644,28 +624,28 @@ const handleDelete = row => {
 		.catch(err => {})
 }
 
-// 审批事件
-const handleApprove = () => {
-	if (!approvalForm.status) {
-		proxy.$message.warning('请选择审批结果')
-		return
-	}
-	const statusName = approvalForm.status === '3' ? '审批通过' : '驳回'
-	proxy.$modal.confirm(`确定${statusName}?`).then(() => {
-		materialApplicationApi
-			.approve(approvalForm.id, approvalForm.status, approvalForm.approvalRemark)
-			.then(res => {
-				proxy.$message.success(res.msg)
-				approvalVisible.value = false
-				clickRow.value = null // 清空选中行
-				buttonList[1].disabled = true // 禁用审批按钮
-				getList(queryParams.value)
-			})
-			.catch(err => {
-				proxy.$message.error(err.msg || '审批失败')
-			})
-	})
-}
+// // 审批事件
+// const handleApprove = () => {
+// 	if (!approvalForm.status) {
+// 		proxy.$message.warning('请选择审批结果')
+// 		return
+// 	}
+// 	const statusName = approvalForm.status === '3' ? '审批通过' : '驳回'
+// 	proxy.$modal.confirm(`确定${statusName}?`).then(() => {
+// 		materialApplicationApi
+// 			.approve(approvalForm.id, approvalForm.status, approvalForm.approvalRemark)
+// 			.then(res => {
+// 				proxy.$message.success(res.msg)
+// 				approvalVisible.value = false
+// 				clickRow.value = null // 清空选中行
+// 				buttonList[1].disabled = true // 禁用审批按钮
+// 				getList(queryParams.value)
+// 			})
+// 			.catch(err => {
+// 				proxy.$message.error(err.msg || '审批失败')
+// 			})
+// 	})
+// }
 
 // 初始化方法
 const init = async () => {
@@ -731,14 +711,14 @@ const buttonList = reactive([
 		click: () => add,
 		permission: 'equipment:materialApplication:add',
 	},
-	{
-		label: '审批',
-		type: 'primary',
-		icon: 'View',
-		click: handleBatchApproval,
-		permission: 'equipment:materialApplication:approve',
-		disabled: true, // 默认禁用，点击行后根据状态启用
-	},
+	// {
+	// 	label: '审批',
+	// 	type: 'primary',
+	// 	icon: 'View',
+	// 	click: handleBatchApproval,
+	// 	permission: 'equipment:materialApplication:approve',
+	// 	disabled: true, // 默认禁用，点击行后根据状态启用
+	// },
 ])
 
 init()
