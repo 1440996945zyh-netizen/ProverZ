@@ -11,7 +11,7 @@
 					</el-form-item>
 				</el-col>
 				<el-col :xs="24" :sm="12" :md="12" :lg="8">
-					<el-form-item label="维修单位" prop="maintenanceUnitName">
+					<el-form-item label="维修单位" prop="maintenanceUnitId">
 						<Select
 							:selectData="maintenanceUnitOptions"
 							v-model:value="formData.maintenanceUnitId"
@@ -139,7 +139,7 @@
 				:checkbox-config="quotaCheckboxConfig"
 				:total="quotaTotal"
 				:show-pagination="true"
-				@checkbox-all="selectAllChangeEvent"
+				@checkbox-all="handleCheckboxAll"
 				@checkboxChange="quotaCheckboxChange"
 				:tableHeight="tableHeight"
 			/>
@@ -317,6 +317,14 @@ const quotaCheckboxChange = data => {
 	console.log(data, 'data')
 	selectedQuotas.value = data || []
 }
+const handleCheckboxAll = checked => {
+	if (checked) {
+		console.log(checked, 'data')
+		selectedQuotas.value = checked.records || []
+	} else {
+		quotaTableData.value = []
+	}
+}
 
 // 确认选择定额
 const confirmQuotaSelection = () => {
@@ -429,6 +437,8 @@ const rules = reactive({
 	equipName: proxy.getRules({ required: true }),
 	appType: proxy.getRules({ required: true }),
 	appContent: proxy.getRules({ required: true }),
+	budgetAmount: proxy.getRules({ required: true }),
+	maintenanceUnitId: proxy.getRules({ required: true }),
 })
 
 const validate = async () => {
