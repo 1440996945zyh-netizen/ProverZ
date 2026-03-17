@@ -20,8 +20,21 @@
 			<div style="flex: auto">
 				<el-button @click="applicationVisible = false">{{ title === '查看详情' ? '关闭' : '取消' }}</el-button>
 				<template v-if="title !== '查看详情'">
-					<el-button type="primary" @click="save('1')" v-hasPermi="['equipment:materialApplication:add', 'equipment:materialApplication:update']">保存</el-button>
-					<el-button type="success" @click="save('2')" v-hasPermi="['equipment:materialApplication:add', 'equipment:materialApplication:update']" v-if="isAdd || isEdit || isRejected">保存并上报</el-button>
+					<el-button
+						type="primary"
+						@click="save('1')"
+						v-hasPermi="['equipment:materialApplication:add', 'equipment:materialApplication:update']"
+					>
+						保存
+					</el-button>
+					<el-button
+						type="success"
+						@click="save('2')"
+						v-hasPermi="['equipment:materialApplication:add', 'equipment:materialApplication:update']"
+						v-if="isAdd || isEdit || isRejected"
+					>
+						保存并上报
+					</el-button>
 				</template>
 			</div>
 		</template>
@@ -60,10 +73,31 @@
 import BaseTable from '@/components/BaseTable/index.vue'
 import detail from './detail/index.vue'
 import { ref, reactive, nextTick, onMounted, h, getCurrentInstance, toRaw, computed, watch } from 'vue'
-import { ElButton, ElTag, ElTable, ElTableColumn, ElDialog, ElForm, ElFormItem, ElRadioGroup, ElRadio, ElInput, ElTooltip } from 'element-plus'
+import {
+	ElButton,
+	ElTag,
+	ElTable,
+	ElTableColumn,
+	ElDialog,
+	ElForm,
+	ElFormItem,
+	ElRadioGroup,
+	ElRadio,
+	ElInput,
+	ElTooltip,
+} from 'element-plus'
+import { Edit, View, Delete, Promotion, Histogram } from '@element-plus/icons-vue'
+import DropDown from '@/components/DropDown/newIndex.vue'
 import materialApplicationApi from '@/api/equipment/materialApplication/index'
 import publicApi from '@/api/public/index'
+import { useRoute, useRouter } from 'vue-router'
+import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
 const { proxy } = getCurrentInstance() // 相当于vue2里的this
+
+const route = useRoute()
+const router = useRouter()
+
+const { startProcess, loading } = useProcessStarter()
 
 /**--------------变量定义------------ */
 const tableData = ref([]) // 表数据
@@ -188,13 +222,17 @@ const DetailTable = {
 		loadDetailList()
 
 		// 监听 detailList 变化，更新行数
-		watch(detailList, (newList) => {
-			if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
-				nextTick(() => {
-					props.onRowCountChange(newList.length)
-				})
-			}
-		}, { immediate: false })
+		watch(
+			detailList,
+			newList => {
+				if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
+					nextTick(() => {
+						props.onRowCountChange(newList.length)
+					})
+				}
+			},
+			{ immediate: false },
+		)
 
 		return () => {
 			//console.log('DetailTable render函数被调用，loading:', loading.value, 'detailList.length:', detailList.value.length)
@@ -205,64 +243,68 @@ const DetailTable = {
 				return h('div', { style: 'padding: 20px; text-align: center; color: #999;' }, '暂无明细数据')
 			}
 			return h('div', { class: 'detail-table-wrapper' }, [
-				h(ElTable, {
-					data: detailList.value,
-					border: true,
-					size: 'small',
-					style: 'width: 100%'
-				}, [
-					h(ElTableColumn, { prop: 'materialName', label: '物资名称',width: 150 }),
-					h(ElTableColumn, { prop: 'specificationModel', label: '规格型号',width: 150}),
-					h(ElTableColumn, { prop: 'suggestedBrand', label: '建议品牌',width: 150 }),
-					h(ElTableColumn, { prop: 'applicationQuantity', label: '申报数量', align: 'right',width: 100 }),
-					h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center',width: 80  }),
-					h(ElTableColumn, { prop: 'estimatedPrice', label: '估价(元)',  align: 'right',width: 100 }),
-					h(ElTableColumn, { prop: 'amount', label: '金额(元)',  align: 'right',width: 120 }),
-					h(ElTableColumn, {
-						prop: 'flowType',
-						label: '流向类型',
-						align: 'center',
-						width: 100,
-						formatter: (row) => {
-							if (row.flowType === '01') {
-								return '设备'
-							} else if (row.flowType === '02') {
-								return '其他'
-							}
-							return row.flowType || '-'
-						}
-					}),
-					h(ElTableColumn, { prop: 'flowDirection', label: '流向',width: 150 }),
-					h(ElTableColumn, {
-						prop: 'equipNames',
-						label: '设备',
-						width: 200,
-						showOverflowTooltip: true,
-						formatter: (row) => {
-							if (row.equipNames) {
-								if (typeof row.equipNames === 'string') {
-									return row.equipNames || '-'
-								} else if (Array.isArray(row.equipNames)) {
-									return row.equipNames.length > 0 ? row.equipNames.join('，') : '-'
+				h(
+					ElTable,
+					{
+						data: detailList.value,
+						border: true,
+						size: 'small',
+						style: 'width: 100%',
+					},
+					[
+						h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
+						h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
+						h(ElTableColumn, { prop: 'suggestedBrand', label: '建议品牌', width: 150 }),
+						h(ElTableColumn, { prop: 'applicationQuantity', label: '申报数量', align: 'right', width: 100 }),
+						h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
+						h(ElTableColumn, { prop: 'estimatedPrice', label: '估价(元)', align: 'right', width: 100 }),
+						h(ElTableColumn, { prop: 'amount', label: '金额(元)', align: 'right', width: 120 }),
+						h(ElTableColumn, {
+							prop: 'flowType',
+							label: '流向类型',
+							align: 'center',
+							width: 100,
+							formatter: row => {
+								if (row.flowType === '01') {
+									return '设备'
+								} else if (row.flowType === '02') {
+									return '其他'
 								}
-							}
-							return '-'
-						}
-					}),
-					h(ElTableColumn, {
-						prop: 'supplyTimeLimit',
-						label: '供货时限',
-            align: 'center',
-            width: 150,
-						formatter: (row) => {
-							return row.supplyTimeLimit || '-'
-						}
-					}),
-					h(ElTableColumn, { prop: 'specificationDesc', label: '规格描述',width: 150 }),
-				])
+								return row.flowType || '-'
+							},
+						}),
+						h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
+						h(ElTableColumn, {
+							prop: 'equipNames',
+							label: '设备',
+							width: 200,
+							showOverflowTooltip: true,
+							formatter: row => {
+								if (row.equipNames) {
+									if (typeof row.equipNames === 'string') {
+										return row.equipNames || '-'
+									} else if (Array.isArray(row.equipNames)) {
+										return row.equipNames.length > 0 ? row.equipNames.join('，') : '-'
+									}
+								}
+								return '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'supplyTimeLimit',
+							label: '供货时限',
+							align: 'center',
+							width: 150,
+							formatter: row => {
+								return row.supplyTimeLimit || '-'
+							},
+						}),
+						h(ElTableColumn, { prop: 'specificationDesc', label: '规格描述', width: 150 }),
+					],
+				),
 			])
 		}
-	}
+	},
 }
 
 const tableColumns = ref([
@@ -271,7 +313,7 @@ const tableColumns = ref([
 		type: 'expand',
 		width: 50,
 		fixed: 'left',
-		expandSlot: DetailTable
+		expandSlot: DetailTable,
 	},
 	{ label: '序号', type: 'seq', width: 50, align: 'center', fixed: 'left' },
 	{
@@ -292,38 +334,38 @@ const tableColumns = ref([
 							viewDetail(row)
 						},
 					},
-					row.applicationNo
+					row.applicationNo,
 				),
 			]
 		},
 	},
-	{ label: '申报主题', prop: 'applicationTitle', align: 'left', width: 150,},
-	{ label: '申报类型', prop: 'applicationTypeName', align: 'center',width: 120,  },
-	{ label: '定点服务类别', prop: 'fixedServiceCategoryName', align: 'center',width: 150,  },
-	{ label: '申报部门', prop: 'deptName', align: 'center', minWidth: 220,},
-	{ label: '申报人', prop: 'createByName', align: 'left', width: 100, },
-	{ label: '申报时间', prop: 'createTime',  align: 'center' ,width: 150,},
-	{ label: '审批人', prop: 'approvalByName', align: 'left',width: 100,  },
-	{ label: '审批时间', prop: 'approvalTime',  align: 'center', isTime: true,width: 150, },
+	{ label: '申报主题', prop: 'applicationTitle', align: 'left', width: 150 },
+	{ label: '申报类型', prop: 'applicationTypeName', align: 'center', width: 120 },
+	{ label: '定点服务类别', prop: 'fixedServiceCategoryName', align: 'center', width: 150 },
+	{ label: '申报部门', prop: 'deptName', align: 'center', minWidth: 220 },
+	{ label: '申报人', prop: 'createByName', align: 'left', width: 100 },
+	{ label: '申报时间', prop: 'createTime', align: 'center', width: 150 },
+	{ label: '审批人', prop: 'approvalByName', align: 'left', width: 100 },
+	{ label: '审批时间', prop: 'approvalTime', align: 'center', isTime: true, width: 150 },
 	{
 		label: '审批备注',
 		prop: 'approvalRemark',
 		align: 'left',
-    minWidth: 150,
+		minWidth: 150,
 		showOverflow: 'tooltip', // 内容过长时显示tooltip
 	},
 	{
 		label: '状态',
 		prop: 'status',
 		align: 'center',
-    width: 100,
+		width: 100,
 		fixed: 'right',
 		render: row => {
 			const statusMap = {
-				'1': { label: '暂存', type: 'info' },
-				'2': { label: '等待审批', type: 'warning' },
-				'3': { label: '审批通过', type: 'success' },
-				'4': { label: '驳回', type: 'danger' },
+				1: { label: '暂存', type: 'info' },
+				2: { label: '等待审批', type: 'warning' },
+				3: { label: '审批通过', type: 'success' },
+				4: { label: '驳回', type: 'danger' },
 			}
 			const status = statusMap[row.status] || { label: '未知', type: 'info' }
 			return [
@@ -336,7 +378,7 @@ const tableColumns = ref([
 						default: () => {
 							return status.label
 						},
-					}
+					},
 				),
 			]
 		},
@@ -344,70 +386,73 @@ const tableColumns = ref([
 	{
 		prop: '',
 		label: '操作',
-		width: 150,
+		width: 120,
 		fixed: 'right',
 		align: 'center',
 		render: row => {
-			const buttons = []
+			const dropDownList = []
 
-			// 编辑按钮：始终显示，状态为1（暂存）或4（驳回）时可点击，其他状态禁用
-			const canEdit = row.status === '1' || row.status === '4'
-			buttons.push(
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							if (canEdit) {
-								edit(row)
-							}
-						},
-						type: 'primary',
-						link: true,
-						icon: 'Edit',
-						disabled: !canEdit,
+			dropDownList.push(
+				{
+					name: '详情',
+					command: '详情',
+					click: () => viewDetail(row),
+					icon: View,
+				},
+				{
+					name: '编辑',
+					command: '编辑',
+					click: () => {
+						const canEdit = row.status === '1' || row.status === '4'
+						if (canEdit) {
+							edit(row)
+						}
 					},
-					{ default: () => '编辑' }
-				)
+					icon: Edit,
+					disabled: row.status !== '1' && row.status !== '4',
+				},
+				{
+					name: '发起',
+					command: '发起',
+					click: () => handleSubmit(row),
+					icon: Promotion,
+				},
+				{
+					name: '审批历史',
+					command: '审批历史',
+					click: () => handleHistory(row),
+					icon: Histogram,
+					type: 'primary',
+				},
+				{
+					name: '删除',
+					command: '删除',
+					click: () => {
+						const canDelete = row.status !== '3'
+						if (canDelete) {
+							handleDelete(row)
+						}
+					},
+					type: 'danger',
+					icon: Delete,
+					permission: 'equipment:materialApplication:delete',
+					disabled: row.status === '3',
+				},
 			)
 
-			// 所有状态下都显示参照申报按钮
-			// buttons.push(
-			// 	h(
-			// 		ElButton,
-			// 		{
-			// 			onClick: () => {
-			// 				referenceApplication(row)
-			// 			},
-			// 			type: 'success',
-			// 			link: true,
-			// 			icon: 'DocumentCopy',
-			// 		},
-			// 		{ default: () => '参照' }
-			// 	)
-			// )
-
-			// 删除按钮：始终显示，状态不是"审批通过"（状态不是'3'）时可点击，其他状态禁用
-			const canDelete = row.status !== '3'
-			buttons.push(
+			return [
 				h(
-					ElButton,
+					DropDown,
 					{
-						onClick: () => {
-							if (canDelete) {
-								handleDelete(row)
-							}
-						},
-						type: 'danger',
-						link: true,
-						icon: 'Delete',
-						disabled: !canDelete,
-						permission: 'equipment:materialApplication:delete',
+						dropDownList,
+						isInner: true,
+						props: { permission: undefined },
 					},
-					{ default: () => '删除' }
-				)
-			)
-
-			return buttons
+					{
+						default: () => h('span', { class: 'el-icon-more' }),
+					},
+				),
+			]
 		},
 	},
 ])
@@ -539,7 +584,7 @@ const referenceApplication = row => {
 }
 
 // 保存事件
-const save = async (status) => {
+const save = async status => {
 	if (await detailRef.value.validate()) {
 		let { form, detailList } = JSON.parse(JSON.stringify(toRaw(detailRef.value.formData)))
 
@@ -552,8 +597,8 @@ const save = async (status) => {
 		}
 		// 处理设备ID和设备名称：将数组转换为逗号分隔的字符串
 		detailList = validDetailList.map(item => {
-			item.equipIds = item.equipIds?item.equipIds.join(','):''
-			item.equipNames = item.equipNames?item.equipNames.join(','):''
+			item.equipIds = item.equipIds ? item.equipIds.join(',') : ''
+			item.equipNames = item.equipNames ? item.equipNames.join(',') : ''
 			return item
 		})
 
@@ -627,6 +672,55 @@ const init = async () => {
 	getList(null)
 }
 
+// 发起流程
+const submitMaterialApplicationProcess = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	console.log('submitMaterialApplicationProcess:', processDefinitionId, variables, startUserSelectAssignees)
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return materialApplicationApi.materialApplicationStart(params)
+}
+
+const handleSubmit = row => {
+	materialApplicationApi
+		.getById(row.id)
+		.then(res => {
+			if (res && res.data) {
+				startProcess({
+					rowData: res.data,
+					businessId: route.meta?.menuId,
+					businessTypeCode: 'bpm:equipment:controller:materialApplyStart',
+					businessSubmit: submitMaterialApplicationProcess,
+					onSuccess() {
+						proxy.$modal.msgSuccess('发起成功')
+						getList(queryParams.value)
+					},
+					onError(err) {
+						proxy.$modal.msgError(err.message)
+					},
+				})
+			}
+		})
+		.catch(error => {
+			console.error('获取详情失败:', error)
+			proxy.$modal.msgError('获取详情失败')
+		})
+}
+
+// 审批历史
+const handleHistory = row => {
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: row.procInstId,
+		},
+	})
+}
+
 // 按钮列表
 const buttonList = reactive([
 	// 搜索区域的按钮
@@ -656,4 +750,3 @@ init()
 	background: #f5f7fa;
 }
 </style>
-

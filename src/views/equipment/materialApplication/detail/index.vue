@@ -5,12 +5,23 @@
 				<el-row :gutter="24">
 					<el-col :span="8">
 						<el-form-item label="申报主题" prop="applicationTitle">
-							<el-input v-model="form.applicationTitle" placeholder="请输入申报主题" :disabled="formDisabled" maxlength="200" />
+							<el-input
+								v-model="form.applicationTitle"
+								placeholder="请输入申报主题"
+								:disabled="formDisabled"
+								maxlength="200"
+							/>
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
 						<el-form-item label="申报类型" prop="applicationTypeCode">
-							<el-select v-model="form.applicationTypeCode" placeholder="请选择申报类型" :disabled="formDisabled" style="width: 100%" @change="handleApplicationTypeChange">
+							<el-select
+								v-model="form.applicationTypeCode"
+								placeholder="请选择申报类型"
+								:disabled="formDisabled"
+								style="width: 100%"
+								@change="handleApplicationTypeChange"
+							>
 								<el-option label="月度" value="01" />
 								<el-option label="临时" value="02" />
 								<el-option label="定点服务" value="03" />
@@ -29,7 +40,14 @@
 					</el-col>
 					<el-col :span="24">
 						<el-form-item label="备注" prop="remark">
-							<el-input v-model="form.remark" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" placeholder="请输入备注" :disabled="formDisabled" maxlength="500" />
+							<el-input
+								v-model="form.remark"
+								:autosize="{ minRows: 2, maxRows: 4 }"
+								type="textarea"
+								placeholder="请输入备注"
+								:disabled="formDisabled"
+								maxlength="500"
+							/>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -40,11 +58,11 @@
 				<template #title>
 					<div style="width: 100%; display: flex; justify-content: space-between">
 						<span>物资申报明细</span>
-<!--						<div style="display: flex">-->
-<!--							<el-button plain size="medium" @click.stop="addDetail" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">-->
-<!--								新增明细-->
-<!--							</el-button>-->
-<!--						</div>-->
+						<!--						<div style="display: flex">-->
+						<!--							<el-button plain size="medium" @click.stop="addDetail" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">-->
+						<!--								新增明细-->
+						<!--							</el-button>-->
+						<!--						</div>-->
 					</div>
 				</template>
 				<EditTable
@@ -52,12 +70,12 @@
 					:name="'物资申报明细'"
 					:tableData="detailList"
 					:tableColumns="detailColumns"
-          			:tableHeight="tableHeight"
+					:tableHeight="tableHeight"
 					:cellClickEvent="detailCellClickEvent"
 					:headerCellClickEvent="detailHeaderCellClickEvent"
 					:editRules="detailEditRules"
 					:rowConfig="rowConfig"
-          			:hasAdd="true"
+					:hasAdd="true"
 					:disabledKey="'rowDisabled'"
 				/>
 			</el-collapse-item>
@@ -90,75 +108,83 @@ const equipmentOptions = ref([])
 
 // 加载物资代码列表
 const loadMaterialCodeList = () => {
-	materialCodeApi.getAllList().then(res => {
-		if (res.code === '0000' && res.data) {
-			// 转换为下拉框选项格式
-			const options = res.data.map(item => ({
-				value: item.id,
-				label: item.materialName,
-				materialCode: item.materialCode,
-				materialName: item.materialName,
-				specificationModel: item.specificationModel || '',
-				unitName: item.unitName || '',
-			}))
-			materialCodeOptions.value = options
-			// 更新列配置中的selectData（使用Vue的响应式更新）
-			if (detailColumns && detailColumns.length > 0) {
-				detailColumns[0].selectData = [...options] // 使用展开运算符确保响应式更新
+	materialCodeApi
+		.getAllList()
+		.then(res => {
+			if (res.code === '0000' && res.data) {
+				// 转换为下拉框选项格式
+				const options = res.data.map(item => ({
+					value: item.id,
+					label: item.materialName,
+					materialCode: item.materialCode,
+					materialName: item.materialName,
+					specificationModel: item.specificationModel || '',
+					unitName: item.unitName || '',
+				}))
+				materialCodeOptions.value = options
+				// 更新列配置中的selectData（使用Vue的响应式更新）
+				if (detailColumns && detailColumns.length > 0) {
+					detailColumns[0].selectData = [...options] // 使用展开运算符确保响应式更新
+				}
+				//console.log('物资代码选项已加载:', options.length, '条')
+			} else {
+				//console.error('物资代码数据格式错误:', res)
 			}
-			//console.log('物资代码选项已加载:', options.length, '条')
-		} else {
-			//console.error('物资代码数据格式错误:', res)
-		}
-	}).catch(error => {
-		console.error('加载物资代码列表失败:', error)
-		proxy.$message.error('加载物资代码列表失败')
-	})
+		})
+		.catch(error => {
+			console.error('加载物资代码列表失败:', error)
+			proxy.$message.error('加载物资代码列表失败')
+		})
 }
 
 // 加载设备列表
 const loadEquipmentList = () => {
-	publicApi.getLocalSelect({ type: 'EQUIPMENT' }).then(res => {
-		if (res.code === '0000' && res.data) {
-			// 转换为下拉框选项格式，保持value为字符串类型，避免精度丢失
-			const options = res.data.map(item => {
-				const value = item.value || item.id
-				return {
-					value: String(value), // 保持为字符串，避免大数字精度丢失
-					label: item.label || item.equipName,
-				}
-			})
-			equipmentOptions.value = options
-			// 找到设备列的索引并更新selectData
-			const equipmentColumnIndex = detailColumns.findIndex(col => col.prop === 'equipIds')
-			if (equipmentColumnIndex > -1) {
-				detailColumns[equipmentColumnIndex].selectData = [...options]
-				// 设备列表加载完成后，更新已存在行的设备名称和ID（确保类型一致）
-				nextTick(() => {
-					detailList.forEach(row => {
-						if (row.equipIds && Array.isArray(row.equipIds) && row.equipIds.length > 0) {
-							// 确保equipIds中的值都是字符串类型，避免精度丢失
-							row.equipIds = row.equipIds.map(id => String(id))
-							// 根据 equipIds 从 selectData 中查找对应的名称
-							row.equipNames = row.equipIds.map(id => {
-								const option = options.find(item => String(item.value) === String(id))
-								return option ? option.label : ''
-							}).filter(name => name)
-						}
-					})
-					// 刷新表格
-					if (detailTableRef.value && detailTableRef.value.xTable) {
-						detailTableRef.value.xTable.refreshColumn()
+	publicApi
+		.getLocalSelect({ type: 'EQUIPMENT' })
+		.then(res => {
+			if (res.code === '0000' && res.data) {
+				// 转换为下拉框选项格式，保持value为字符串类型，避免精度丢失
+				const options = res.data.map(item => {
+					const value = item.value || item.id
+					return {
+						value: String(value), // 保持为字符串，避免大数字精度丢失
+						label: item.label || item.equipName,
 					}
 				})
+				equipmentOptions.value = options
+				// 找到设备列的索引并更新selectData
+				const equipmentColumnIndex = detailColumns.findIndex(col => col.prop === 'equipIds')
+				if (equipmentColumnIndex > -1) {
+					detailColumns[equipmentColumnIndex].selectData = [...options]
+					// 设备列表加载完成后，更新已存在行的设备名称和ID（确保类型一致）
+					nextTick(() => {
+						detailList.forEach(row => {
+							if (row.equipIds && Array.isArray(row.equipIds) && row.equipIds.length > 0) {
+								// 确保equipIds中的值都是字符串类型，避免精度丢失
+								row.equipIds = row.equipIds.map(id => String(id))
+								// 根据 equipIds 从 selectData 中查找对应的名称
+								row.equipNames = row.equipIds
+									.map(id => {
+										const option = options.find(item => String(item.value) === String(id))
+										return option ? option.label : ''
+									})
+									.filter(name => name)
+							}
+						})
+						// 刷新表格
+						if (detailTableRef.value && detailTableRef.value.xTable) {
+							detailTableRef.value.xTable.refreshColumn()
+						}
+					})
+				}
+			} else {
+				console.error('加载设备列表失败:', res)
 			}
-		} else {
-			console.error('加载设备列表失败:', res)
-		}
-	}).catch(error => {
-		console.error('加载设备列表失败:', error)
-		proxy.$message.error('加载设备列表失败')
-	})
+		})
+		.catch(error => {
+			console.error('加载设备列表失败:', error)
+			proxy.$message.error('加载设备列表失败')
+		})
 }
 
 // 表单数据
@@ -200,23 +226,23 @@ const detailColumns = reactive([
 		change: (e, row) => {
 			handleMaterialNameChange(e, row)
 		},
-		width: 150
+		width: 150,
 	},
 	{
 		label: '物资代码',
 		prop: 'materialCode',
-		width: 120
+		width: 120,
 	},
 	{
 		label: '规格型号',
 		prop: 'specificationModel',
-		width: 100
+		width: 100,
 	},
 	{
 		label: '单位',
 		prop: 'unit',
-    align: 'center',
-		width: 70
+		align: 'center',
+		width: 70,
 	},
 	{
 		label: '估价',
@@ -280,7 +306,9 @@ const detailColumns = reactive([
 				value = e.value
 			} else if (typeof e === 'string') {
 				// 如果是字符串，可能是 label，需要查找对应的 value
-				const option = detailColumns[detailColumns.findIndex(col => col.prop === 'flowType')].selectData.find(item => item.label === e)
+				const option = detailColumns[detailColumns.findIndex(col => col.prop === 'flowType')].selectData.find(
+					item => item.label === e,
+				)
 				value = option ? option.value : e
 			} else {
 				value = e
@@ -297,7 +325,7 @@ const detailColumns = reactive([
 		editType: 'input',
 		editRender: {},
 		width: 150,
-		disabledFunc: (row) => row.flowType === '01', // 选择"设备"时禁用
+		disabledFunc: row => row.flowType === '01', // 选择"设备"时禁用
 	},
 	{
 		label: '设备',
@@ -310,7 +338,7 @@ const detailColumns = reactive([
 		selectLabel: 'label',
 		selectValue: 'value',
 		width: 200,
-		disabledFunc: (row) => row.flowType === '02', // 选择"其他"时禁用
+		disabledFunc: row => row.flowType === '02', // 选择"其他"时禁用
 		change: (e, row) => {
 			handleEquipmentChange(e, row)
 		},
@@ -322,7 +350,7 @@ const detailColumns = reactive([
 		prop: '',
 		label: '添加',
 		width: 90,
-    fixed: 'right',
+		fixed: 'right',
 		align: 'center',
 		render: row => {
 			return [
@@ -339,7 +367,7 @@ const detailColumns = reactive([
 					},
 					{
 						default: () => '删除',
-					}
+					},
 				),
 			]
 		},
@@ -499,7 +527,7 @@ watch(
 			calculateAmount(row)
 		})
 	},
-	{ deep: true }
+	{ deep: true },
 )
 
 // 明细表头点击事件（新增行）
@@ -585,18 +613,20 @@ const editDetailList = data => {
 			let equipIds = item.equipIds ? (typeof item.equipIds === 'string' ? item.equipIds.split(',') : item.equipIds) : []
 			// 确保是字符串数组，过滤空值并转换为字符串，避免精度丢失
 			equipIds = equipIds.filter(id => id && id !== '').map(id => String(id))
-			
+
 			// 处理设备名称：如果是字符串（逗号分隔），转换为数组
 			let equipNames = item.equipNames ? (typeof item.equipNames === 'string' ? item.equipNames.split(',') : item.equipNames) : []
 			// 如果设备列表已加载，根据equipIds从selectData中查找对应的名称
 			const equipmentColumn = detailColumns.find(col => col.prop === 'equipIds')
 			if (equipmentColumn && equipmentColumn.selectData && equipmentColumn.selectData.length > 0 && equipIds.length > 0) {
-				equipNames = equipIds.map(id => {
-					const option = equipmentColumn.selectData.find(item => String(item.value) === String(id))
-					return option ? option.label : ''
-				}).filter(name => name)
+				equipNames = equipIds
+					.map(id => {
+						const option = equipmentColumn.selectData.find(item => String(item.value) === String(id))
+						return option ? option.label : ''
+					})
+					.filter(name => name)
 			}
-			
+
 			const editRow = {
 				row_id: `row_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
 				id: item.id || null,
@@ -704,4 +734,3 @@ defineExpose({
 <style lang="scss" scoped>
 @import '@/assets/styles/formData.scss';
 </style>
-

@@ -124,7 +124,14 @@ const api = {
 			params: params,
 		})
 	},
+
+	materialApplicationStart(data) {
+		return request({
+			url: `${url}/materialApplicationStart`,
+			method: 'post',
+			data: data,
+		})
+	},
 }
 
 export default api
-
