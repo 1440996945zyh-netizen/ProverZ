@@ -713,12 +713,13 @@ const handleHistory = row => {
 const buttonList = reactive([
 	// 搜索区域的按钮
 	{
-		label: '新建',
+		label: '新增', // 按钮名称
 		type: 'primary',
 		icon: 'Plus',
 		click: () => add,
 		permission: 'equipment:materialApplication:add',
 	},
+
 	// {
 	// 	label: '审批',
 	// 	type: 'primary',
