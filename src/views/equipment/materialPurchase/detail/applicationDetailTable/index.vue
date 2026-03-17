@@ -13,6 +13,8 @@
 		:checkbox-config="checkboxConfig"
 		@checkbox-change="checkboxChange"
 		@selectAllChangeEvent="selectAllChangeEvent"
+		:showNum="5"
+		defaultWidth="70"
 	/>
 </template>
 
@@ -32,19 +34,6 @@ const getList = e => {
 		...queryParams.value,
 		...e,
 	}
-	// 处理日期区间，转换为 startDate 和 endDate
-	if (params.dateRange && Array.isArray(params.dateRange) && params.dateRange.length === 2) {
-		params.startDate = params.dateRange[0]
-		params.endDate = params.dateRange[1]
-	} else {
-		// 如果日期区间为空或无效，使用默认值（一个月前到今天）
-		const defaultRange = getDefaultDateRange()
-		params.dateRange = defaultRange
-		params.startDate = defaultRange[0]
-		params.endDate = defaultRange[1]
-	}
-	// 删除 dateRange，只保留 startDate 和 endDate
-	delete params.dateRange
 	materialApplicationApi.getDetailListForPurchase(params).then(res => {
 		if (res.code === '0000' && res.data) {
 			tableData.value = res.data.pages
@@ -53,48 +42,37 @@ const getList = e => {
 	})
 }
 
-// 格式化日期为 YYYY-MM-DD
-const formatDate = (date) => {
-	const year = date.getFullYear()
-	const month = String(date.getMonth() + 1).padStart(2, '0')
-	const day = String(date.getDate()).padStart(2, '0')
-	return `${year}-${month}-${day}`
-}
-
-// 计算默认日期区间（一个月前到今天）
-const getDefaultDateRange = () => {
-	const endDate = new Date()
-	const startDate = new Date()
-	startDate.setMonth(startDate.getMonth() - 1)
-	return [formatDate(startDate), formatDate(endDate)]
-}
-
 //顶部 搜索表单
 const selectData = reactive([
-
-  {
+	{
 		name: '申请单号',
 		type: 'input',
 		modelValue: 'applicationNo',
-		span: 7,
+		span: 4,
 	},
 	{
 		name: '物资名称',
 		type: 'input',
 		modelValue: 'materialName',
-		span: 6,
+		span: 4,
 	},
 	{
-		name: '申请时间',
-		type: 'daterange',
-		modelValue: 'dateRange',
-		span: 11,
+		name: '申请开始时间',
+		type: 'date',
+		modelValue: 'startDate',
+		span: 5,
+	},
+	{
+		name: '申请结束时间',
+		type: 'date',
+		modelValue: 'endDate',
+		span: 5,
 	},
 	{
 		name: '采购状态',
 		type: 'select',
 		modelValue: 'purchaseStatus',
-		span: 3,
+		span: 4,
 		selectData: [
 			{ value: '0', label: '待采购' },
 			{ value: '1', label: '已采购' },
@@ -105,7 +83,8 @@ const selectData = reactive([
 const queryParams = ref({
 	startPage: 1,
 	pageSize: 20,
-	dateRange: getDefaultDateRange(),
+	startDate: '',
+	endDate: '',
 	purchaseStatus: '0', // 默认待采购
 })
 
@@ -132,25 +111,25 @@ const tableColumns = reactive([
 		label: '规格型号',
 		width: 120,
 	},
-  {
-    prop: 'suggestedBrand',
-    label: '建议品牌',
-    width: 150,
-  },
-  {
-    prop: 'flowDirection',
-    label: '流向',
-    width: 120,
-  },
-  {
-    prop: 'supplyTimeLimit',
-    label: '供货时限',
-    align: 'center',
-    width: 120,
-  },
+	{
+		prop: 'suggestedBrand',
+		label: '建议品牌',
+		width: 150,
+	},
+	{
+		prop: 'flowDirection',
+		label: '流向',
+		width: 120,
+	},
+	{
+		prop: 'supplyTimeLimit',
+		label: '供货时限',
+		align: 'center',
+		width: 120,
+	},
 	{
 		prop: 'unit',
-    align: 'center',
+		align: 'center',
 		label: '单位',
 		width: 70,
 	},
@@ -172,18 +151,18 @@ const tableColumns = reactive([
 		width: 120,
 		align: 'right',
 	},
-  {
-    prop: 'createByName',
-    label: '申请人',
-    width: 100,
-    align: 'center',
-  },
-  {
-    prop: 'createTime',
-    label: '申请时间',
-    width: 150,
-    align: 'center',
-  },
+	{
+		prop: 'createByName',
+		label: '申请人',
+		width: 100,
+		align: 'center',
+	},
+	{
+		prop: 'createTime',
+		label: '申请时间',
+		width: 150,
+		align: 'center',
+	},
 ])
 
 // 复选框配置
@@ -215,11 +194,11 @@ const selectAllChangeEvent = res => {
 
 const init = (purchaseTypeCode, fixedServiceCategoryCode) => {
 	// 重置所有查询条件为默认值
-	const defaultRange = getDefaultDateRange()
 	queryParams.value = {
 		startPage: 1,
 		pageSize: 20,
-		dateRange: defaultRange,
+		startDate: '',
+		endDate: '',
 		purchaseStatus: '0', // 默认待采购
 		applicationNo: '', // 清空申请单号
 		materialName: '', // 清空物资名称
@@ -234,7 +213,8 @@ const init = (purchaseTypeCode, fixedServiceCategoryCode) => {
 	// 通过事件总线设置 SearchHeader 的默认值
 	nextTick(() => {
 		proxy.$bus.emit('setInitSearchData', {
-			dateRange: defaultRange,
+			startDate: '',
+			endDate: '',
 			purchaseStatus: '0',
 			applicationNo: '',
 			materialName: '',
@@ -246,12 +226,13 @@ const init = (purchaseTypeCode, fixedServiceCategoryCode) => {
 
 // 组件挂载时设置默认日期区间和采购状态
 onMounted(() => {
-	const defaultRange = getDefaultDateRange()
-	queryParams.value.dateRange = defaultRange
+	queryParams.value.startDate = ''
+	queryParams.value.endDate = ''
 	queryParams.value.purchaseStatus = '0' // 默认待采购
 	nextTick(() => {
 		proxy.$bus.emit('setInitSearchData', {
-			dateRange: defaultRange,
+			startDate: '',
+			endDate: '',
 			purchaseStatus: '0',
 		})
 	})
@@ -265,4 +246,3 @@ defineExpose({
 	init,
 })
 </script>
-
