@@ -9,7 +9,7 @@
 			:tableColumns="tableColumns"
 			:tableData="tableData"
 			:total="total"
-	:expand-config="{ trigger: 'default', accordion: true }"
+			:expand-config="{ trigger: 'default', accordion: true }"
 			:cellClickEvent="cellClickEvent"
 		>
 		<!-- 1. 展开行插槽：展示更多元数据 -->
