@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-02 16:11:56
- * @LastEditTime: 2026-02-11 10:54:03
+ * @LastEditTime: 2026-03-16 17:11:49
  * @LastEditors: zhangsd
  * @Description: 业务配置 流程关联业务
  * @FilePath: \view\src\views\bpmModel\businessConfig\index.vue
@@ -10,7 +10,7 @@
 	<div>
 		<div class="app-container">
 			<BaseTable
-				ref="baseTable"
+				ref="businessConfigTableRef"
 				:showSearchHeader="true"
 				:selectData="selectData"
 				:searchClick="getList"
@@ -54,7 +54,7 @@ import BpmPreviewDialog from './detail/bpmPreviewDialog.vue'
 const { proxy } = getCurrentInstance()
 const storeHeight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHeight.value - 25)
-const baseTable = ref() // table的ref
+const businessConfigTableRef = ref() // table的ref
 const detailRef = ref() // 明细组件ref
 const dialogVisible = ref(false)
 const total = ref('') // 数据总数
@@ -62,7 +62,7 @@ const title = ref(null) // 弹窗标题
 const clickRow = ref({})
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 // 预览流程模型
 const previewDialogVisible = ref(false)
@@ -221,9 +221,10 @@ const cellClickEvent = ({ row }) => {
 
 /** 查询列表 */
 const getList = e => {
-	queryParams.value = e || queryParams.value
+	let pagination = businessConfigTableRef.value?.buildQueryParams()
 	let params = {
-		...queryParams.value,
+		...e,
+		...pagination,
 	}
 
 	api.getList(params)
@@ -276,7 +277,7 @@ const save = async () => {
 				.then(res => {
 					proxy.$modal.msgSuccess(res.msg || (isEdit ? '修改成功' : '新增成功'))
 					dialogVisible.value = false
-					getList(queryParams.value) // 刷新列表
+					getList() // 刷新列表
 				})
 				.catch(error => {
 					console.error(`${isEdit ? '修改' : '新增'}失败:`, error)
@@ -294,7 +295,7 @@ const handleDelete = row => {
 		.then(() => {
 			api.deleteById(deleteRow.id)
 				.then(res => {
-					getList(queryParams.value)
+					getList()
 					proxy.$modal.msgSuccess(res.msg || '删除成功')
 				})
 				.catch(error => {
@@ -308,7 +309,7 @@ const previewProcModelId = ref(null)
 /**
  * 预览流程模型
  */
-const handlePreview = async (row) => {
+const handlePreview = async row => {
 	previewLoading.value = true
 	try {
 		previewDialogVisible.value = true
@@ -319,11 +320,12 @@ const handlePreview = async (row) => {
 		proxy.$modal.msgError('预览流程模型失败，请稍后重试')
 	} finally {
 		previewLoading.value = false
-
 	}
 }
 // 初始化加载列表
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 
 <style lang="less" scoped>

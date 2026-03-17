@@ -1,7 +1,7 @@
 <template>
 	<div class="app-container">
 		<BaseTable
-			ref="baseTable"
+			ref="loginLogTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -36,7 +36,9 @@ import { ref, reactive } from 'vue'
 import tableParamsStore from '@/store/modules/tableParams'
 import Drawer from '@/components/Drawer/index.vue'
 const loginVisible = ref(false)
+// 组件实例与路由
 const { proxy } = getCurrentInstance()
+const loginLogTableRef = ref(null)
 const drawer = ref(false)
 const total = ref(0)
 const drawerRef = ref(null)
@@ -51,7 +53,7 @@ let storeHight = computed(() => tableParamsStore().pageTableHeight)
 const tableHeight = computed(() => storeHight.value)
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+ pageSize: 20, 
 	beginTimes: '',
 	endTimes: '',
 })
@@ -157,11 +159,15 @@ const selectData = reactive([
 ])
 // 点击查询的事件
 const getList = e => {
-	queryParams.value = e
+	let pagination = loginLogTableRef.value?.buildQueryParams()
+	let params = {
+		...e,
+		...pagination
+	}
 	// queryParams.value.beginTimes = proxy.addDateRange(e).dateRange ? proxy.addDateRange(e).dateRange[0] : ''
 	// queryParams.value.endTimes = proxy.addDateRange(e).dateRange ? proxy.addDateRange(e).dateRange[1] : ''
 
-	listOperLog(queryParams.value)
+	listOperLog(params)
 		.then(response => {
 			console.log(6666, response)
 			tableData.value = response.data.pages
@@ -189,7 +195,7 @@ function closeDrawer() {
 function handleQuery() {
 	queryParams.value.startPage = 1
 
-	getList(queryParams.value)
+	getList()
 }
 /** 重置按钮操作 */
 function resetQuery() {
@@ -221,7 +227,9 @@ function reset() {
 	proxy.resetForm('roleRef')
 }
 
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped>
 // @import "../../../assets/styles/searchform.scss";

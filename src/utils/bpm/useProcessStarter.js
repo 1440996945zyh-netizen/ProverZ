@@ -99,9 +99,37 @@ export function useProcessStarter() {
                 processDefinitionId,
                 formFields
             } = procRes.data
-
+            
             /* ================== 2. 表单数据映射 ================== */
             const variables = mapFormValues(formFields, rowData)
+
+            /** 赋值其他字段用paramsJSON接收 */
+            if(rowData.paramsJSON){
+              let params;
+              try {
+                // 2. 解析JSON字符串为对象（处理JSON格式错误）
+                params = JSON.parse(rowData.paramsJSON);
+              } catch (parseError) {
+                throw new Error(`paramsJSON解析失败：${parseError.message}`);
+              }
+  
+              // 校验解析后的params是否为对象（避免JSON是数组/字符串等情况）
+              if (typeof params !== 'object' || params === null || Array.isArray(params)) {
+                throw new Error('paramsJSON解析结果必须是普通对象（不能是数组/基本类型）');
+              }
+  
+              // 3. 遍历params的所有属性，检查字段冲突
+              const paramsKeys = Object.keys(params);
+              for (const key of paramsKeys) {
+                // 检查variables中是否已存在该字段（包括原型链上的属性，若需仅检查自身属性则用hasOwnProperty）
+                if (key in variables) {
+                  throw new Error(`字段冲突：已存在名为"${key}"的字段，请删除paramsJSON中该字段`);
+                }
+                // 4. 无冲突则赋值
+                variables[key] = params[key];
+              }
+            }
+            
 
             /* ================== 3. 流程校验 ================== */
             const approvalRes = await commonApi.getApprovalDetail({

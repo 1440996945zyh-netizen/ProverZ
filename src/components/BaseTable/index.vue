@@ -5,7 +5,7 @@
 			ref="SearchHeaderRef"
 			v-if="showSearchHeader"
 			:selectData="selectData"
-			@searchClick="searchClickB"
+			@searchClick="handleSearchSubmit"
 			:buttonList="buttonList"
 			:defaultWidth="defaultWidth"
 			:showNum="showNum"
@@ -37,7 +37,7 @@
 				:radio-config="radioConfig"
 				@radio-change="radioChangeEvent"
 				:checkbox-config="checkboxConfig"
-				@checkbox-all="selectAllChangeEvent"
+				@checkbox-all="handleCheckboxAll"
 				@checkbox-change="selectChangeEvent"
 				:tree-config="treeConfig"
 				:edit-rules="editRules"
@@ -121,10 +121,10 @@
 				<div v-html="htmlContent"></div>
 				<pagination
 					:total="total"
-					v-model:page="queryParams.startPage"
-					v-model:limit="queryParams.pageSize"
-					@pagination="searchClickB"
-					@searchClick="getSearchData"
+					v-model:page="internalPagination.startPage"
+					v-model:limit="internalPagination.pageSize"
+					@pagination="handlePaginationChange"
+					@searchClick="handlePaginationSearch"
 				/>
 			</div>
 		</div>
@@ -138,9 +138,10 @@ import useAppStore from '../../store/modules/app'
 import tableParamsStore from '../../store/modules/tableParams'
 import pagination from '../../components/Pagination/index.vue'
 import Sortable from 'sortablejs'
+import useUserStore from '../../store/modules/user'
 const appStore = useAppStore()
 const { proxy } = getCurrentInstance()
-
+const userStore = useUserStore()
 const props = defineProps({
 	// 是否显示header
 	showSearchHeader: {
@@ -591,8 +592,32 @@ const props = defineProps({
 		type: Object,
 		default: () => {},
 	},
+	/**
+	 * 分页参数
+	 */
+	pagination: {
+		type: Object,
+		default: undefined,
+	},
+	/**
+	 * 是否使用vuex中自定义设置的表格条数
+	 */
+	useStorePageSize: {
+		type: Boolean,
+		default: true,
+	},
+	/**
+	 * 分页参数中页码的key值
+	 */
+	pageFieldMap: {
+		type: Object,
+		default: () => ({
+			startPage: 'startPage', // 分页组件 page → 后端 startPage
+			pageSize: 'pageSize', // 分页组件 limit → 后端 pageSize
+		}),
+	},
 })
-const emit = defineEmits(['checkbox-change', 'rowSelect-change'])
+const emit = defineEmits(['checkbox-change', 'rowSelect-change', 'update:pagination','checkbox-all'])
 
 // 表格高度
 const tableParams = tableParamsStore()
@@ -618,6 +643,7 @@ const heightObj = reactive({
 	null: null,
 })
 const height = ref(0)
+
 watch(
 	heightObj,
 	newV => {
@@ -655,70 +681,203 @@ const tableData = computed({
 	},
 })
 // header----------------------------------------------------------------
-const queryParams = ref({
+const internalPagination = ref({
 	startPage: 1,
 	pageSize: 20,
 })
+
+// 初始化分页
+const initPagination = () => {
+	// 1. 父组件传入 pagination，优先使用
+	if (props.pagination?.pageSize !== undefined) {
+		internalPagination.value.startPage = props.pagination.startPage ?? props.pagination.page ?? 1
+		internalPagination.value.pageSize = props.pagination.pageSize ?? props.pagination.limit ?? 20
+		return
+	}
+
+	// 2. 启用 Vuex 且 Vuex 有值，使用 Vuex
+	if (props.useStorePageSize && userStore.pageNum) {
+		internalPagination.value.pageSize = Number(userStore.pageNum)
+		return
+	}
+
+	// 3. 使用默认值
+	internalPagination.value.pageSize = 20
+}
+// 初始化执行
+initPagination()
+
+/**
+ * 监听父组件 pagination 变化（最高优先级）
+ */
+watch(
+	() => props.pagination,
+	newVal => {
+		if (newVal?.pageSize !== undefined) {
+			internalPagination.value.startPage = newVal.startPage ?? newVal.page ?? 1
+			internalPagination.value.pageSize = newVal.pageSize ?? newVal.limit ?? 20
+			console.log('[BaseTable] props.pagination 变化:', internalPagination.value)
+		}
+	},
+	{ immediate: true, deep: true }
+)
+
+/**
+ * 监听 Vuex userStore.pageNum 变化（第二优先级）
+ */
+watch(
+	() => userStore.pageNum,
+	newVal => {
+		// 只有当父组件没有传 pagination 且启用 Vuex 时才使用
+		if (!props.pagination?.pageSize && props.useStorePageSize) {
+			if (newVal && Number(newVal) > 0) {
+				internalPagination.value.pageSize = Number(newVal)
+				console.log('[BaseTable] Vuex pageNum 变化:', internalPagination.value.pageSize)
+			}
+		}
+	},
+	{ immediate: true, deep: true }
+)
+
+/**
+ * 监听 useStorePageSize 变化
+ */
+watch(
+	() => props.useStorePageSize,
+	newVal => {
+		if (newVal && !props.pagination?.pageSize && userStore.pageNum) {
+			internalPagination.value.pageSize = Number(userStore.pageNum)
+		}
+	},
+	{ immediate: true }
+)
+
+// 构建请求参数
+const buildParams = () => {
+	const params = {
+		...searchData.value,
+		[props.pageFieldMap.startPage]: internalPagination.value.startPage,
+		[props.pageFieldMap.pageSize]: internalPagination.value.pageSize,
+	}
+	if (advancedQuery.value?.length) {
+		params.advancedQuery = JSON.stringify(advancedQuery.value)
+	}
+	return params
+}
+const buildQueryParams = (overrideParams = {}) => {
+	const params = {
+		...searchData.value,
+		startPage: internalPagination.value.startPage,
+		pageSize: internalPagination.value.pageSize,
+		...overrideParams,
+	}
+
+	if (advancedQuery.value && advancedQuery.value.length > 0) {
+		params.advancedQuery = JSON.stringify(advancedQuery.value)
+	}
+
+	return params
+}
+
 /**
  * 高级查询
  * @description: 高级查询
  */
 const advancedQuery = ref([])
 provide('onQuery', data => {
-    console.log('父组件收到数据：', data)
-    advancedQuery.value = data ? JSON.parse(JSON.stringify(data)) : []
-    
-    // 构建基础参数
-    const baseParams = {
-        ...queryParams.value,
-        ...seachData.value
-    }
-    
-    // 只有当 advancedQuery 有数据时才添加该字段
-    const paramsForImmediateQuery = advancedQuery.value && advancedQuery.value.length > 0 
-        ? { ...baseParams, advancedQuery: JSON.stringify(advancedQuery.value) }
-        : baseParams
-        
-    console.log('高级查询触发，立即查询参数：', paramsForImmediateQuery)
-    props.searchClick(paramsForImmediateQuery) // 直接调用父组件传递的查询回调
+	advancedQuery.value = data ? JSON.parse(JSON.stringify(data)) : []
+	internalPagination.value.startPage = 1
+	handleQuery()
 })
 
-const seachData = ref({})
+const searchData = ref({})
+/**
+ * 执行查询，合并所有参数后调用父组件的 searchClick
+ * @param overrideParams 可覆盖 startPage/pageSize 的临时参数
+ */
+const handleQuery = (overrideParams = {}) => {
+	const params = buildQueryParams(overrideParams)
+	console.log('[BaseTable] 执行查询:', params)
+	emit('update:pagination', {
+		startPage: internalPagination.value.startPage,
+		pageSize: internalPagination.value.pageSize,
+	})
+	if (props.searchClick) {
+		props.searchClick(params)
+	}
+}
+/**
+ * 分页组件变化时触发（页码或每页条数改变）
+ * @param {Object} paginationParams - 分页组件传入的参数，包含 page/limit 或 startPage/pageSize
+ */
+const handlePaginationChange = paginationParams => {
+	// console.log('[BaseTable] 分页组件变化:', paginationParams)
+	// console.log('[BaseTable] 分页组件变化:', internalPagination.value)
+	const newPage = paginationParams?.startPage ?? paginationParams?.page
+	const newPageSize = paginationParams?.pageSize ?? paginationParams?.limit
 
-const searchClickB = e => {
-    // 构建基础参数
-    const buildBaseParams = () => {
-        const base = { ...queryParams.value, ...seachData.value }
-        // 只有当 advancedQuery 有数据时才添加该字段
-        if (advancedQuery.value && advancedQuery.value.length > 0) {
-            base.advancedQuery = JSON.stringify(advancedQuery.value)
-        }
-        return base
-    }
-    
-    if (e.pagination) {
-        if (queryParams.value.startPage !== 1 || queryParams.value.pageSize !== 10) {
-            const params = { ...e, ...buildBaseParams() }
-            props.searchClick(params)
-            return
-        } else {
-            seachData.value.startPage = queryParams.value.startPage
-            seachData.value.pageSize = queryParams.value.pageSize
-            
-            const params = { ...e, ...buildBaseParams() }
-            seachData.value = JSON.parse(JSON.stringify(queryParams.value))
-            props.searchClick(params)
-            return
-        }
-    } else {
-        seachData.value = JSON.parse(JSON.stringify(e))
-        e.startPage = queryParams.value.startPage
-        e.pageSize = queryParams.value.pageSize
-        
-        const params = { ...e, ...buildBaseParams() }
-        console.log('组件params', params)
-        props.searchClick(params)
-    }
+	if (newPage !== undefined) {
+		internalPagination.value.startPage = Math.max(1, Number(newPage) || 1)
+	}
+	if (newPageSize !== undefined) {
+		internalPagination.value.pageSize = Math.max(1, Number(newPageSize) || 20)
+	}
+
+	handleQuery()
+}
+
+/**
+ * 搜索头部点击“查询”时触发
+ * @param {Object} searchParams - 搜索表单数据
+ */
+const handleSearchSubmit = searchParams => {
+	searchData.value = searchParams ? JSON.parse(JSON.stringify(searchParams)) : {}
+	internalPagination.value.startPage = 1 // 重置到第一页
+	handleQuery()
+}
+/**
+ * 分页搜索按钮点击，使用现有条件
+ */
+const handlePaginationSearch = () => {
+	// console.log('[BaseTable] 分页搜索按钮点击，使用现有条件')
+	nextTick(() => {
+		handleQuery()
+	})
+}
+/**
+ * 查询表格数据
+ */
+const query = () => {
+	nextTick(() => {
+		handleQuery()
+	})
+}
+/**
+ * 刷新表格数据
+ */
+const refresh = () => {
+	nextTick(() => {
+		handleQuery()
+	})
+}
+/**
+ * 获取当前分页参数
+ */
+const getPagination = () => {
+	return {
+		startPage: internalPagination.value.startPage,
+		pageSize: internalPagination.value.pageSize,
+	}
+}
+/**
+ * 设置分页参数
+ * @param page 页码
+ * @param pageSize 每页条数
+ */
+const setPagination = (page, pageSize) => {
+	internalPagination.value.startPage = page
+	internalPagination.value.pageSize = pageSize
+	handleQuery()
 }
 const SearchHeaderRef = ref()
 const xTable = ref()
@@ -784,7 +943,20 @@ const getRadioRecord = () => {
 const selectChangeEvent = () => {
 	const $table = xTable.value
 	const records = $table.getCheckboxRecords()
+
 	emit('checkbox-change', records)
+}
+const handleCheckboxAll = ({ checked }) => {
+  const $table = xTable.value
+  const records = $table.getCheckboxRecords()  // 获取当前选中行
+  
+  // 同时触发 props 回调（兼容旧代码）和 emit 事件（新方式）
+  if (props.selectAllChangeEvent) {
+    props.selectAllChangeEvent({ checked })
+  }
+  
+  //  传给父组件：带上当前选中的所有记录
+  emit('checkbox-all', { checked, records })
 }
 // 删除选中
 const removeCheckboxRow = () => {
@@ -889,7 +1061,20 @@ const custom = params => {
 }
 // header清空
 const resetSearch = () => {
-	SearchHeaderRef.value.resetSearch()
+	SearchHeaderRef.value?.resetSearch()
+	searchData.value = {}
+	advancedQuery.value = []
+	internalPagination.value.page = 1
+
+	// 重置时重新初始化分页参数
+	initPagination()
+
+	emit('update:pagination', {
+		pageSize: internalPagination.value.pageSize,
+		startPage: internalPagination.value.startPage,
+	})
+
+	handleQuery()
 }
 // 表头单元格点击事件
 const headerCellClickEvent = props.hasAdd
@@ -1178,6 +1363,7 @@ const resetColumnWidths = () => {
 		console.log(`[${props.name}] 列宽已重置为默认值`)
 	}
 }
+
 watch(
 	props.tableColumns,
 	newV => {
@@ -1227,6 +1413,11 @@ defineExpose({
 	getSavedColumnWidths, // 新增：获取用户保存的列宽
 	resetColumnWidths, // 新增：重置列宽为默认值
 	initColumnWidth, // 新增：手动触发列宽恢复（可选）
+	query,
+	refresh,
+	getPagination,
+	setPagination,
+	buildQueryParams,
 })
 </script>
 <style scoped lang="scss">
