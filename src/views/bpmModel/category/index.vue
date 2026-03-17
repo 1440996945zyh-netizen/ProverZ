@@ -1,11 +1,4 @@
-<!--
- * @Author: zhangsd
- * @Date: 2025-12-17 10:24:11
- * @LastEditTime: 2025-12-25 14:46:28
- * @LastEditors: zhangsd
- * @Description: 流程分类
- * @FilePath: \view\src\views\bpmModel\category\index.vue
--->
+
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-17 10:00:00
@@ -292,7 +285,7 @@ const handleDelete = id => {
 		.then(() => {
 			CategoryApi.deleteCategory(id).then(() => {
 				message.success('删除成功')
-				getList()
+				getList(categoryTableRef.value?.buildQueryParams())
 			})
 		})
 		.catch(() => {
@@ -315,7 +308,7 @@ const submitForm = () => {
 			.then(() => {
 				message.success(formType.value === 'create' ? '新增成功' : '更新成功')
 				dialogVisible.value = false
-				getList() // 刷新列表
+				getList(categoryTableRef.value?.buildQueryParams()) // 刷新列表
 			})
 			.finally(() => {
 				formLoading.value = false
@@ -359,7 +352,7 @@ const getList = (params = {}) => {
 
 // 初始化加载列表
 onMounted(() => {
-	getList()
+	getList(categoryTableRef.value?.buildQueryParams())
 })
 </script>
 

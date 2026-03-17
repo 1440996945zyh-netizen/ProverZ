@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-12-22 11:10:21
- * @LastEditTime: 2026-02-10 16:03:49
+ * @LastEditTime: 2026-03-16 17:18:26
  * @LastEditors: zhangsd
  * @Description: 审批中心
  * @FilePath: \view\src\views\bpmModel\processInstance\index.vue
@@ -74,7 +74,7 @@
 			<el-tab-pane name="myProcess" label="我的流程">
 				<!-- 我的流程表格 -->
 				<BaseTable
-					ref="instanceTableRef"
+					ref="myProcessTableRef"
 					:showSearchHeader="true"
 					:selectData="selectDataMyProcess"
 					:searchClick="getListMyProcess"
@@ -377,7 +377,7 @@ const tableColumnsMyProcess = ref([
 	},
 ])
 
-const instanceTableRef = ref(null)
+const myProcessTableRef = ref(null)
 const loadingMyProcess = computed(() => myProcessData.loading)
 const tableDataMyProcess = computed(() => myProcessData.tableData)
 const totalMyProcess = computed(() => myProcessData.total)
@@ -385,7 +385,11 @@ const totalMyProcess = computed(() => myProcessData.total)
 const getListMyProcess = async e => {
 	myProcessData.loading = true
 	try {
-		const params = Object.assign(myProcessData.queryParams, e)
+		let pagination = myProcessTableRef.value?.buildQueryParams()
+		const params = {
+			...e,
+			...pagination
+		}
 		const res = await getProcessInstanceMyPage(params)
 		if (res.code === '0000') {
 			myProcessData.tableData = res.data.pages
@@ -405,7 +409,7 @@ const cellClickEventMyProcess = ({ row }) => {
 
 const handleQueryMyProcess = () => {
 	myProcessData.queryParams.pageNum = 1
-	getListMyProcess()
+	getListMyProcess(myProcessTableRef.value?.buildQueryParams())
 	commonData.showPopover = false
 }
 
@@ -457,7 +461,7 @@ const handleCancelMyProcess = async row => {
 		ElMessage.success('办结成功')
 
 		// 刷新列表
-		await getListMyProcess()
+		await getListMyProcess(myProcessTableRef.value?.buildQueryParams())
 	} catch (error) {
 		if (error !== 'cancel') {
 			console.error('办结流程失败:', error)
@@ -638,7 +642,11 @@ const totalTodo = computed(() => todoData.total)
 const getListTodo = async e => {
 	todoData.loading = true
 	try {
-		const params = Object.assign(todoData.queryParams, e)
+		let pagination = todoTaskTableRef.value?.buildQueryParams()
+		const params = {
+			...e,
+			...pagination
+		}
 		const res = await getTaskTodoPage(params)
 		todoData.tableData = res.data.pages
 		todoData.total = res.data.totalNum
@@ -909,7 +917,11 @@ const totalDone = computed(() => doneData.total)
 const getListDone = async e => {
 	doneData.loading = true
 	try {
-		const params = Object.assign(doneData.queryParams, e)
+		let pagination = doneTaskTableRef.value?.buildQueryParams()
+		const params ={
+			...e,
+			...pagination
+		}
 		const res = await getTaskDonePage(params)
 		doneData.tableData = res.data.pages || []
 		doneData.total = res.data.totalNum || 0
@@ -929,7 +941,7 @@ const cellClickEventDone = ({ row }) => {
 
 const handleQueryDone = () => {
 	doneData.queryParams.pageNum = 1
-	getListDone()
+	getListDone(doneTaskTableRef.value?.buildQueryParams())
 	commonData.showPopover = false
 }
 
@@ -951,7 +963,7 @@ const handleWithdrawDone = async row => {
 	try {
 		await TaskApi.withdrawTask(row.id)
 		ElMessage.success('撤回成功')
-		getListDone()
+		getListDone(doneTaskTableRef.value?.buildQueryParams())
 	} catch (error) {
 		console.error('撤回任务失败:', error)
 		ElMessage.error('撤回失败')
@@ -1104,7 +1116,11 @@ const totalCopy = computed(() => copyData.total)
 const getListCopy = async e => {
 	copyData.loading = true
 	try {
-		const params = Object.assign(copyData.queryParams, e)
+		let pagination = copyTaskTableRef.value?.buildQueryParams()
+		const params = {
+			...e,
+			...pagination
+		}
 		if (params.createTime && params.createTime.length === 2) {
 			const [startDate, endDate] = params.createTime
 
@@ -1133,7 +1149,7 @@ const cellClickEventCopy = ({ row }) => {
 
 const handleQueryCopy = () => {
 	copyData.queryParams.pageNum = 1
-	getListCopy()
+	getListCopy(copyTaskTableRef.value?.buildQueryParams())
 }
 
 const toggleAdvancedFilterCopy = () => {

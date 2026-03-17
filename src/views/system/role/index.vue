@@ -2,7 +2,7 @@
 	<!-- 角色管理 -->
 	<div class="app-container">
 		<BaseTable
-			ref="baseTable"
+			ref="roleTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -40,7 +40,7 @@
 <script setup name="role">
 import BaseTable from '@/components/BaseTable/index.vue'
 import { addRole, changeRoleStatus, delRole, getRole, listRole, updateRole } from '@/api/system/role'
-import { ref, reactive,provide } from 'vue'
+import { ref, reactive, provide, onMounted } from 'vue'
 import DrawerDetail from './drawer/index.vue'
 import DialogDetail from './dialog/index.vue'
 import { ElButton, ElSwitch } from 'element-plus'
@@ -48,6 +48,8 @@ import Drawer from '@/components/Drawer/index.vue'
 import Dialog from '@/components/Dialog/index.vue'
 const { proxy } = getCurrentInstance()
 const ids = ref([])
+const roleTableRef = ref(null) // 表格ref
+
 const clickRow = ref({}) //点击当前行
 const total = ref(0)
 const drawerTitle = ref('新增')
@@ -57,11 +59,11 @@ const roleVisible = ref(false) //抽屉组件显示隐藏
 const dialogVisible = ref(false) //弹出框组件显示隐藏
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 const queryAdvancedParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 })
 // 表格数据
 const tableData = ref([])
@@ -202,11 +204,12 @@ const tableId = ref('role_1762244958298')
 // })
 // 点击查询的事件
 const getList = e => {
-	console.log('e =>', e);
+	console.log('e =>', e)
 	buttonList[1].disabled = true
-	queryParams.value = e
+	let pagination = roleTableRef.value?.buildQueryParams()
 	let params = {
-		...queryParams.value,
+		...e,
+		...pagination,
 	}
 	listRole(params).then(res => {
 		tableData.value = res.data.pages
@@ -226,13 +229,13 @@ const save = async () => {
 				updateRole(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					roleVisible.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			} else {
 				addRole(params).then(res => {
 					proxy.$modal.msgSuccess(res.msg)
 					roleVisible.value = false
-					getList(queryParams.value)
+					getList()
 				})
 			}
 		})
@@ -248,7 +251,7 @@ function handleDelete(row) {
 			return delRole(idList)
 		})
 		.then(() => {
-			getList(queryParams.value)
+			getList()
 			proxy.$modal.msgSuccess('删除成功')
 		})
 		.catch(() => {})
@@ -269,7 +272,7 @@ function handleStatusChange(row) {
 		})
 		.then(() => {
 			proxy.$modal.msgSuccess(text + '成功')
-			getList(queryParams.value)
+			getList()
 		})
 		.catch(function () {})
 }
@@ -316,7 +319,9 @@ const edit = row => {
 	})
 }
 
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped>
 // @import "../../../assets/styles/searchform.scss";

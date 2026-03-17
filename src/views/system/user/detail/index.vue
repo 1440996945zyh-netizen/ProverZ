@@ -94,8 +94,19 @@
 					</el-form-item>
 				</el-col>
 			</el-row>
+			<el-row>
+				<el-col :span="24">
+					<el-form-item label="电子签" prop="">
+						<upload
+							@changeFile="changeFile"
+							fileTypeName=".jpeg,.jpg"
+							:businessId="formData.id"
+							businessType="PERSONAL_SIGN"
+						></upload>
+					</el-form-item>
+				</el-col>
+			</el-row>
 		</el-form>
-		<upload @changeFile="changeFile" fileTypeName=".jpeg,.jpg" :businessId="formData.id" businessType="PERSONAL_SIGN"></upload>
 	</div>
 </template>
 

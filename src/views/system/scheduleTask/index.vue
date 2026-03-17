@@ -2,7 +2,7 @@
 	<!-- 角色管理 -->
 	<div class="app-container">
 		<BaseTable
-			ref="baseTable"
+			ref="scheduleTaskTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -66,6 +66,7 @@ import api from '@/api/system/scheduleTask.js'
 import historyTask from './historyTask/index.vue'
 const { proxy } = getCurrentInstance()
 const clickRow = ref({}) //点击当前行
+const scheduleTaskTableRef = ref(null)
 const total = ref(0)
 const title = ref('新增')
 const detailRef = ref(null)
@@ -245,8 +246,12 @@ const buttonList = reactive([
 
 // 点击查询的事件
 const getList = e => {
-	queryParams.value = Object.assign(queryParams.value, e)
-	api.getJobs(queryParams.value).then(res => {
+	let pagination = scheduleTaskTableRef.value?.buildQueryParams()
+	let params = {
+		...e,
+		...pagination,
+	}
+	api.getJobs(params).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
@@ -343,6 +348,8 @@ const editCron = row => {
 		proxy.setFormData(updateCronRef.value.formData, editRow)
 	})
 }
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped></style>

@@ -1,7 +1,7 @@
 <template>
 	<div class="app-container">
 		<BaseTable
-			ref="baseTable"
+			ref="operLogTableRef"
 			:showSearchHeader="true"
 			:selectData="selectData"
 			:searchClick="getList"
@@ -11,6 +11,8 @@
 			:cellClickEvent="cellClickEvent"
 			:total="total"
 			@Status_Change="Status_Change"
+			
+			:showNum="4"
 		/>
 
 		<Drawer v-model="operVisible" :title="title" size="70%">
@@ -33,7 +35,9 @@ import { ref, reactive, toRefs } from 'vue'
 import Drawer from '@/components/Drawer/index.vue'
 import tableParamsStore from '@/store/modules/tableParams'
 const router = useRouter()
+// 组件实例与路由
 const { proxy } = getCurrentInstance()
+const operLogTableRef = ref(null)
 const operVisible = ref(false)
 const drawerRef = ref(null)
 const drawer = ref(false)
@@ -52,7 +56,7 @@ let storeHight = computed(() => tableParamsStore().pageTableHeight)
 const tableHeight = computed(() => storeHight.value)
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+	pageSize: 20,
 	beginTimes: '',
 	endTimes: '',
 })
@@ -61,7 +65,7 @@ const tableData = ref([])
 const tableColumns = ref([
 	{ label: 'PC/APP', prop: 'operType', align: 'left' },
 	{ label: '业务模块', prop: 'title', align: 'left' },
-  { label: '方法名', prop: 'method', align: 'left' },
+	{ label: '方法名', prop: 'method', align: 'left' },
 	{ label: '操作类型', prop: 'businessType', align: 'left' },
 	{ label: '主机地址', prop: 'operIp', align: 'center' },
 	{ label: '请求url', prop: 'operUrl', align: 'left' },
@@ -101,13 +105,13 @@ const selectData = reactive([
 	{
 		type: 'date', // 搜索框类型
 		modelValue: 'beginTimes', // 绑定字段
-		span: 4, // 占位，共24
+		span: 6, // 占位，共24
 		name: '开始时间',
 	},
 	{
 		type: 'date', // 搜索框类型
 		modelValue: 'endTimes', // 绑定字段
-		span: 4, // 占位，共24
+		span: 6, // 占位，共24
 		name: '结束时间',
 	},
 
@@ -115,7 +119,7 @@ const selectData = reactive([
 		name: '操作类型', // 搜索框name
 		type: 'select', // 搜索框类型
 		modelValue: 'businessType', // 绑定字段
-		span: 4, // 占位，共24
+		span: 6, // 占位，共24
 		selectData: [
 			{ label: '查询', value: '查询' },
 			{ label: '新增', value: '新增' },
@@ -128,7 +132,7 @@ const selectData = reactive([
 		name: '操作状态',
 		type: 'select',
 		modelValue: 'status',
-		span: 4,
+		span: 6,
 		selectData: [
 			{ label: '正常', value: '正常' },
 			{ label: '异常', value: '异常' },
@@ -138,21 +142,24 @@ const selectData = reactive([
 		name: '模块标题', // 搜索框name
 		type: 'input', // 搜索框类型
 		modelValue: 'title', // 绑定字段
-		span: 4, // 占位，共24
+		span: 6, // 占位，共24
 	},
-  {
-    name: '方法名', // 搜索框name
-    type: 'input', // 搜索框类型
-    modelValue: 'method', // 绑定字段
-    span: 4, // 占位，共24
-  }
+	{
+		name: '方法名', // 搜索框name
+		type: 'input', // 搜索框类型
+		modelValue: 'method', // 绑定字段
+		span: 6, // 占位，共24
+	},
 ])
 // 点击查询的事件
 const getList = e => {
-	console.log('查询数据', e)
-	queryParams.value = e
+	let pagination = operLogTableRef.value?.buildQueryParams()
+	let params = {
+		...e,
+		...pagination,
+	}
 
-	listOperLog(proxy.addDateRange(queryParams.value))
+	listOperLog(params)
 		.then(response => {
 			console.log(6666)
 			tableData.value = response.data.pages
@@ -184,7 +191,7 @@ function closeDrawer() {
 function handleQuery() {
 	queryParams.value.startPage = 1
 
-	getList(queryParams.value)
+	getList()
 }
 /** 重置按钮操作 */
 function resetQuery() {
@@ -216,7 +223,9 @@ function reset() {
 	proxy.resetForm('roleRef')
 }
 
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="less" scoped>
 .my-label {

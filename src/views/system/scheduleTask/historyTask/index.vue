@@ -1,6 +1,6 @@
 <template>
 	<BaseTable
-		ref="baseTable"
+		ref="historyTaskTableRef"
 		:showSearchHeader="true"
 		:selectData="selectData"
 		:tableHeight="tableHeight"
@@ -34,6 +34,8 @@ const clickRow = ref({}) //点击当前行
 const title = ref('')
 const total = ref(0)
 const reportRef = ref(null)
+const historyTaskTableRef = ref(null) // table的ref
+
 const reportVisible = ref(false)
 const tableHeight = ref(window.innerHeight - 320)
 const queryParams = ref({
@@ -123,7 +125,7 @@ const report = row => {
 		})
 	})
 }
-getList(queryParams.value)
+getList(historyTaskTableRef.value?.buildQueryParams())
 defineExpose({
 	tableData,
 	getList,

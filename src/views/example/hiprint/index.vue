@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-09-04 10:05:32
- * @LastEditTime: 2025-09-11 14:57:55
+ * @LastEditTime: 2026-03-16 17:20:25
  * @LastEditors: zhangsd
  * @Description: 自定义打印
  * @FilePath: \view\src\views\example\hiprint\index.vue
@@ -10,7 +10,7 @@
 	<div class="app-container">
 		<div>
 			<BaseTable
-				ref="menuTableRef"
+				ref="hiprintTableRef"
 				:showSearchHeader="true"
 				:selectData="selectData"
 				:searchClick="getList"
@@ -18,11 +18,12 @@
 				:tableData="tableData"
 				:tableColumns="tableColumns"
 				:tableHeight="tableHeight"
-				name="menuLazyTable"
+				name="hiprintTable"
 				:cellClickEvent="cellClickEvent"
 				:loading="tableLoading"
-				:showPagination="false"
+				:showPagination="true"
 				:showToolBar="false"
+				:total="total"
 			></BaseTable>
 		</div>
 		<!-- 表格组件 -->
@@ -46,6 +47,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { proxy } = getCurrentInstance()
+const hiprintTableRef = ref(null) // table的ref
 
 const storeHight = computed(() => tableParamsStore().normalTableHeight)
 const tableHeight = computed(() => storeHight.value) //表格高度
@@ -59,7 +61,7 @@ const tableLoading = ref(false)
 const tableData = ref([])
 const queryParams = ref({
 	startPage: 1,
-	pageSize: 10,
+ pageSize: 20, 
 })
 const total = ref(0)
 const baseTable = ref()
@@ -168,8 +170,12 @@ const buttonList = reactive([
  */
 
 const getList = e => {
-	queryParams.value = e
-	api.getList(queryParams.value).then(res => {
+	let pagination = hiprintTableRef.value?.buildQueryParams() || { startPage: 1, pageSize: 20 }
+	let params = {
+		...e,
+		...pagination,
+	}
+	api.getList(params).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
@@ -215,7 +221,7 @@ const handleDelete = row => {
 		.then(res => {
 			api.delete(deleteRow.id).then(res => {
 				proxy.$message.success(res.msg)
-				getList(queryParams.value)
+				getList()
 			})
 		})
 		.catch(err => {})
@@ -234,6 +240,8 @@ const editTemplate = template => {
 		model: template.model, // 模板JSON字符串
 	})
 }
-getList(queryParams.value)
+onMounted(() => {
+	getList()
+})
 </script>
 <style lang="scss" scoped></style>
