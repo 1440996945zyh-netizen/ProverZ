@@ -9,6 +9,14 @@
 				<el-input v-model="formData.contractCode" placeholder="请输入合同编号" maxlength="255" :disabled="isViewMode" />
 			</el-form-item>
 
+			<el-form-item label="合同类型" prop="contractType">
+				<Select
+					:dataConfig="{ params: { type: 'DICT', dictType: 'CONTRACT_TYPE' } }"
+					v-model:value="formData.contractType"
+					v-model:label="formData.contractTypeLabel"
+				/>
+			</el-form-item>
+
 			<el-form-item label="合同金额" prop="contractAmount">
 				<el-input v-model="formData.contractAmount" placeholder="请输入合同金额" type="number" :disabled="isViewMode" />
 			</el-form-item>
@@ -57,7 +65,8 @@
 </template>
 
 <script setup name="projectContractInfoDetail">
-import { ref, reactive, getCurrentInstance, toRefs } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, onMounted } from 'vue'
+import Select from '@/components/Select'
 
 const props = defineProps({
 	isViewMode: {
@@ -69,6 +78,8 @@ const props = defineProps({
 const { proxy } = getCurrentInstance()
 
 const ruleForm = ref()
+const contractTypeOptions = ref([])
+
 const data = reactive({
 	formData: {
 		id: null,
@@ -79,6 +90,8 @@ const data = reactive({
 		endDate: null,
 		applyScope: '',
 		status: '1',
+		contractType: '',
+		contractTypeLabel: '',
 	},
 })
 const { formData } = toRefs(data)
@@ -86,6 +99,7 @@ const { formData } = toRefs(data)
 const rules = reactive({
 	contractName: proxy.getRules({ required: true }),
 	contractCode: proxy.getRules({ required: true }),
+	contractType: proxy.getRules({ required: true }),
 	contractAmount: proxy.getRules({ required: true }),
 	startDate: proxy.getRules({ required: true }),
 	endDate: proxy.getRules({ required: true }),
@@ -110,6 +124,8 @@ const resetForm = () => {
 	formData.value.id = null
 	formData.value.contractName = ''
 	formData.value.contractCode = ''
+	formData.value.contractType = ''
+	formData.value.contractTypeLabel = ''
 	formData.value.contractAmount = null
 	formData.value.startDate = null
 	formData.value.endDate = null
@@ -117,6 +133,8 @@ const resetForm = () => {
 	formData.value.status = '1'
 	ruleForm.value?.clearValidate()
 }
+
+onMounted(() => {})
 
 defineExpose({
 	validate,

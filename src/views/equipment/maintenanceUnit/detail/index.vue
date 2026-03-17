@@ -1,12 +1,12 @@
 <template>
 	<div class="formData">
 		<el-form :model="formData" ref="ruleForm" label-width="150px" :rules="rules">
-			<el-form-item label="企业/个人类型" prop="entityType">
+			<!-- <el-form-item label="企业/个人类型" prop="entityType">
 				<el-radio-group v-model="formData.entityType">
 					<el-radio label="1">企业</el-radio>
 					<el-radio label="2">个人</el-radio>
 				</el-radio-group>
-			</el-form-item>
+			</el-form-item> -->
 
 			<el-form-item :label="formData.entityType === '1' ? '企业名称' : '个人姓名'" prop="unitName">
 				<el-select
@@ -45,7 +45,7 @@
 				/>
 			</el-form-item>
 
-			<el-form-item label="负责人" prop="principal">
+			<el-form-item label="法人" prop="principal">
 				<el-input v-model="formData.principal" placeholder="请输入法人姓名" maxlength="50" />
 			</el-form-item>
 
@@ -142,13 +142,20 @@ watch(
 const serviceUnitOptions = ref([])
 const companyOptions = ref([])
 const getServiceUnit = () => {
-	const params = { deptLevel: '1' }
-	api.getDeptListByLevel(params.deptLevel).then(res => {
+	const params = { deptLevel: '1', inOutType: 'I' }
+	api.getDeptListByLevel(params).then(res => {
 		if (res.code == '0000') {
 			serviceUnitOptions.value = res.data.map(item => ({
 				label: item.deptName,
 				value: item.id,
 			}))
+		}
+	})
+}
+const getCompanyList = () => {
+	const params = { deptLevel: '1' }
+	api.getDeptListByLevel(params).then(res => {
+		if (res.code == '0000') {
 			companyOptions.value = res.data.map(item => ({
 				label: item.deptName,
 				value: item.id,
@@ -207,6 +214,7 @@ const resetForm = () => {
 }
 onMounted(() => {
 	getServiceUnit()
+	getCompanyList()
 })
 
 defineExpose({

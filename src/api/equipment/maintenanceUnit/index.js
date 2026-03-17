@@ -44,11 +44,11 @@ const api = {
 	 * @param {Number} deptLevel 部门级别
 	 * @returns {Promise}
 	 */
-	getDeptListByLevel(deptLevel) {
+	getDeptListByLevel(params) {
 		return request({
 			url: '/api/internal/sysDept/getListByLevel',
 			method: 'get',
-			params: { deptLevel },
+			params: params,
 		})
 	},
 	getOutTypeNum(params) {

@@ -30,12 +30,13 @@
 </template>
 
 <script setup name="projectContractInfo">
-import { ref, reactive, getCurrentInstance, toRefs, h, computed } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, h, computed, onMounted } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
 import Drawer from '@/components/Drawer/index.vue'
 import detail from './detail/index.vue'
 import api from '@/api/equipment/projectContractInfo/index'
+import publicApi from '@/api/public/index'
 import tableParamsStore from '@/store/modules/tableParams'
 
 const { proxy } = getCurrentInstance()
@@ -48,6 +49,7 @@ const dialogVisible = ref(false)
 const title = ref('')
 const detailRef = ref(null)
 const isViewMode = ref(false)
+const contractTypeOptions = ref([])
 
 const storeHight = computed(() => tableParamsStore().pageTableHeight)
 
@@ -57,6 +59,7 @@ const data = reactive({
 		pageSize: 20,
 		contractName: undefined,
 		contractCode: undefined,
+		contractType: undefined,
 		contractAmount: undefined,
 		startDate: undefined,
 		endDate: undefined,
@@ -79,7 +82,6 @@ const selectData = reactive([
 		modelValue: 'contractCode',
 		span: 6,
 	},
-
 	{
 		name: '合同开始日期',
 		type: 'date',
@@ -98,6 +100,7 @@ const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '合同名称', prop: 'contractName', align: 'left', width: 200, showOverFlow: true },
 	{ label: '合同编号', prop: 'contractCode', align: 'center', width: 150 },
+	{ label: '合同类型', prop: 'contractTypeLabel', align: 'center', width: 120 },
 	{ label: '合同金额', prop: 'contractAmount', align: 'center', width: 120 },
 	{ label: '合同开始日期', prop: 'startDate', align: 'center', width: 150 },
 	{ label: '合同截止日期', prop: 'endDate', align: 'center', width: 150 },
@@ -217,6 +220,7 @@ const handleEditOrView = (row, isView = false) => {
 			detailRef.value.formData.id = resData.id
 			detailRef.value.formData.contractName = resData.contractName
 			detailRef.value.formData.contractCode = resData.contractCode
+			detailRef.value.formData.contractType = resData.contractType
 			detailRef.value.formData.contractAmount = resData.contractAmount
 			detailRef.value.formData.startDate = resData.startDate
 			detailRef.value.formData.endDate = resData.endDate
@@ -280,6 +284,8 @@ const cancel = () => {
 const reset = () => {
 	detailRef.value?.resetForm()
 }
+
+onMounted(() => {})
 
 getList(queryParams.value)
 </script>

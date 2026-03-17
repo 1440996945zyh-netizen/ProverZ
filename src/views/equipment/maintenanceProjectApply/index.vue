@@ -86,6 +86,24 @@ const tableColumns = ref([
 
 	{ label: '申请事项', prop: 'appContent', align: 'left', minWidth: 300, showOverFlow: true },
 	{
+		label: '是否作废',
+		prop: 'status',
+		align: 'center',
+		width: 100,
+		render: row => {
+			return h(ElTag, { type: row.status === '1' ? 'danger' : 'success' }, row.status === '1' ? '是' : '否')
+		},
+	},
+	{
+		label: '是否结算',
+		prop: 'isSettlement',
+		align: 'center',
+		width: 100,
+		render: row => {
+			return h(ElTag, { type: row.isSettlement === '1' ? 'success' : 'info' }, row.isSettlement === '1' ? '是' : '否')
+		},
+	},
+	{
 		label: '预算金额',
 		prop: 'budgetAmount',
 		align: 'right',
@@ -98,6 +116,7 @@ const tableColumns = ref([
 			return h('span', { style: { color: '#f56c6c', fontWeight: 'bold' } }, `¥${formattedValue}`)
 		},
 	},
+
 	{
 		label: '状态',
 		prop: 'processStatusLable',
@@ -159,6 +178,13 @@ const tableColumns = ref([
 					click: () => handleSubmit(row),
 					permission: 'equipment:emaintprojapply:submit',
 					icon: Promotion,
+				},
+				{
+					name: '审批历史',
+					command: '审批历史',
+					click: () => handleHistory(row),
+					icon: 'Histogram',
+					type: 'primary',
 				},
 				{
 					name: '删除',
@@ -274,6 +300,8 @@ const handleView = row => {
 			detailRef.value.formData.budgetAmount = resData.budgetAmount
 			detailRef.value.formData.remark = resData.remark
 			detailRef.value.formData.appType = resData.appType
+			detailRef.value.formData.status = resData.status
+			detailRef.value.formData.isSettlement = resData.isSettlement
 			detailRef.value.formData.list = resData.list || []
 			if (resData.list && resData.list.length > 0) {
 				detailRef.value.initQuotaTableData(resData.list)
@@ -303,6 +331,8 @@ const handleEdit = row => {
 			detailRef.value.formData.budgetAmount = resData.budgetAmount
 			detailRef.value.formData.remark = resData.remark
 			detailRef.value.formData.appType = resData.appType
+			detailRef.value.formData.status = resData.status
+			detailRef.value.formData.isSettlement = resData.isSettlement
 			detailRef.value.formData.list = resData.list || []
 			if (resData.list && resData.list.length > 0) {
 				detailRef.value.initQuotaTableData(resData.list)
@@ -366,7 +396,15 @@ const handleSubmit = row => {
 			proxy.$modal.msgError('获取详情失败')
 		})
 }
-
+//审批历史
+const handleHistory = row => {
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: row.procInstId,
+		},
+	})
+}
 const handleDelete = row => {
 	proxy.$modal
 		.confirm('确定删除？')
