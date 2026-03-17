@@ -72,7 +72,7 @@
 					<el-table-column prop="projectName" label="维修项目名称" width="200" />
 					<el-table-column prop="projectContent" label="维修项目内容" min-width="200" show-overflow-tooltip />
 
-					<el-table-column prop="projectNum" label="计件数量" width="120">
+					<el-table-column prop="projectNum" label="数量" width="120">
 						<template #default="scope">
 							<el-input-number
 								v-model="scope.row.projectNum"
@@ -402,7 +402,7 @@ const calculateBudgetAmount = () => {
 	formData.value.list = quotaTableData.value
 }
 
-// 计件数量变化处理
+// 数量变化处理
 const handleProjectNumChange = row => {
 	calculateTaxAmount(row)
 	calculateBudgetAmount()
