@@ -171,6 +171,7 @@ const tableColumns = ref([
 					click: () => handleEdit(row),
 					permission: 'equipment:emequiprepaircontract:update',
 					icon: Edit,
+					disabled: row.processStatus !== '0',
 				},
 				{
 					name: '发起',
@@ -178,6 +179,7 @@ const tableColumns = ref([
 					click: () => handleSubmit(row),
 					permission: 'equipment:emaintprojapply:submit',
 					icon: Promotion,
+					disabled: row.processStatus !== '0',
 				},
 				{
 					name: '审批历史',
@@ -193,6 +195,7 @@ const tableColumns = ref([
 					type: 'danger',
 					permission: 'equipment:emaintprojapply:deleteProJect',
 					icon: 'Delete',
+					disabled: row.processStatus !== '0',
 				},
 				{
 					name: '作废',
@@ -201,6 +204,7 @@ const tableColumns = ref([
 					type: 'danger',
 					permission: 'equipment:emaintprojapply:void',
 					icon: CircleClose,
+					disabled: row.processStatus !== '2',
 				},
 			)
 
@@ -373,28 +377,33 @@ const submitMaintenanceProjectApply = ({ rowData, processDefinitionId, variables
 }
 
 const handleSubmit = row => {
-	api.getById(row.id)
-		.then(res => {
-			if (res && res.data) {
-				startProcess({
-					rowData: res.data,
-					businessId: route.meta?.menuId,
-					businessTypeCode: 'bpm:equipment:controller:projectApplyStart',
-					businessSubmit: submitMaintenanceProjectApply,
-					onSuccess() {
-						proxy.$modal.msgSuccess('发起成功')
-						getList(queryParams.value)
-					},
-					onError(err) {
-						proxy.$modal.msgError(err.message)
-					},
+	proxy.$modal
+		.confirm('确定发起审批流程？')
+		.then(() => {
+			api.getById(row.id)
+				.then(res => {
+					if (res && res.data) {
+						startProcess({
+							rowData: res.data,
+							businessId: route.meta?.menuId,
+							businessTypeCode: 'bpm:equipment:controller:projectApplyStart',
+							businessSubmit: submitMaintenanceProjectApply,
+							onSuccess() {
+								proxy.$modal.msgSuccess('发起成功')
+								getList(queryParams.value)
+							},
+							onError(err) {
+								proxy.$modal.msgError(err.message)
+							},
+						})
+					}
 				})
-			}
+				.catch(error => {
+					console.error('获取详情失败:', error)
+					proxy.$modal.msgError('获取详情失败')
+				})
 		})
-		.catch(error => {
-			console.error('获取详情失败:', error)
-			proxy.$modal.msgError('获取详情失败')
-		})
+		.catch(() => {})
 }
 //审批历史
 const handleHistory = row => {

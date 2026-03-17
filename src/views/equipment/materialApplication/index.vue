@@ -345,15 +345,15 @@ const tableColumns = ref([
 	{ label: '申报部门', prop: 'deptName', align: 'center', minWidth: 220 },
 	{ label: '申报人', prop: 'createByName', align: 'left', width: 100 },
 	{ label: '申报时间', prop: 'createTime', align: 'center', width: 150 },
-	{ label: '审批人', prop: 'approvalByName', align: 'left', width: 100 },
-	{ label: '审批时间', prop: 'approvalTime', align: 'center', isTime: true, width: 150 },
-	{
-		label: '审批备注',
-		prop: 'approvalRemark',
-		align: 'left',
-		minWidth: 150,
-		showOverflow: 'tooltip', // 内容过长时显示tooltip
-	},
+	// { label: '审批人', prop: 'approvalByName', align: 'left', width: 100 },
+	// { label: '审批时间', prop: 'approvalTime', align: 'center', isTime: true, width: 150 },
+	// {
+	// 	label: '审批备注',
+	// 	prop: 'approvalRemark',
+	// 	align: 'left',
+	// 	minWidth: 150,
+	// 	showOverflow: 'tooltip', // 内容过长时显示tooltip
+	// },
 	{
 		label: '状态',
 		prop: 'processStatus',
@@ -406,12 +406,14 @@ const tableColumns = ref([
 					command: '编辑',
 					click: () => edit(row),
 					icon: Edit,
+					disabled: row.processStatus !== '0',
 				},
 				{
 					name: '发起',
 					command: '发起',
 					click: () => handleSubmit(row),
 					icon: Promotion,
+					disabled: row.processStatus !== '0',
 				},
 				{
 					name: '审批历史',
@@ -427,6 +429,7 @@ const tableColumns = ref([
 					type: 'danger',
 					icon: Delete,
 					permission: 'equipment:materialApplication:delete',
+					disabled: row.processStatus !== '0',
 				},
 			)
 
@@ -666,29 +669,34 @@ const submitMaterialApplicationProcess = ({ rowData, processDefinitionId, variab
 }
 
 const handleSubmit = row => {
-	materialApplicationApi
-		.getById(row.id)
-		.then(res => {
-			if (res && res.data) {
-				startProcess({
-					rowData: res.data,
-					businessId: route.meta?.menuId,
-					businessTypeCode: 'bpm:equipment:controller:materialApplyStart',
-					businessSubmit: submitMaterialApplicationProcess,
-					onSuccess() {
-						proxy.$modal.msgSuccess('发起成功')
-						getList(queryParams.value)
-					},
-					onError(err) {
-						proxy.$modal.msgError(err.message)
-					},
+	proxy.$modal
+		.confirm('确定发起审批流程？')
+		.then(() => {
+			materialApplicationApi
+				.getById(row.id)
+				.then(res => {
+					if (res && res.data) {
+						startProcess({
+							rowData: res.data,
+							businessId: route.meta?.menuId,
+							businessTypeCode: 'bpm:equipment:controller:materialApplyStart',
+							businessSubmit: submitMaterialApplicationProcess,
+							onSuccess() {
+								proxy.$modal.msgSuccess('发起成功')
+								getList(queryParams.value)
+							},
+							onError(err) {
+								proxy.$modal.msgError(err.message)
+							},
+						})
+					}
 				})
-			}
+				.catch(error => {
+					console.error('获取详情失败:', error)
+					proxy.$modal.msgError('获取详情失败')
+				})
 		})
-		.catch(error => {
-			console.error('获取详情失败:', error)
-			proxy.$modal.msgError('获取详情失败')
-		})
+		.catch(() => {})
 }
 
 // 审批历史
