@@ -9,9 +9,14 @@
 			:tableColumns="tableColumns"
 			:tableData="tableData"
 			:total="total"
-			:expandConfig="{ trigger: 'default' }"
+			:expand-config="{ trigger: 'default', accordion: true }"
 			:cellClickEvent="cellClickEvent"
-		/>
+		>
+			<!-- 1. 展开行插槽：展示明细子表格 -->
+			<template #expand="{ row }">
+				<DetailTable :row="row" />
+			</template>
+		</BaseTable>
 	</div>
 
 	<el-drawer v-model="purchaseVisible" :title="title" size="80%">
@@ -76,6 +81,11 @@ const selectData = reactive([
 		],
 	},
 ])
+
+// 获取点击行数据
+const cellClickEvent = ({ row }) => {
+	clickRow.value = row
+}
 
 // 查看详情事件（只读）
 const viewDetail = row => {
@@ -244,13 +254,7 @@ const DetailTable = {
 
 const tableColumns = ref([
 	// 表头列
-	{
-		type: 'expand',
-		width: 50,
-		fixed: 'left',
-		expandSlot: DetailTable,
-	},
-	{ label: '序号', type: 'seq', width: 50, align: 'center', fixed: 'left' },
+	{ label: '序号', type: 'seq', width: 50, align: 'center' },
 	{
 		label: '采购单号',
 		prop: 'purchaseNo',
