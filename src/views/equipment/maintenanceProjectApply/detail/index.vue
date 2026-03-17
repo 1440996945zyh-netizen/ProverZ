@@ -163,7 +163,7 @@ import quotaApi from '@/api/equipment/maintenanceProjectQuota/index'
 import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
 import publicApi from '@/api/public/index.js'
 import tableParamsStore from '@/store/modules/tableParams'
-const tableHeight = computed(() => tableParamsStore().drawerPageTableHeight)
+const tableHeight = computed(() => tableParamsStore().dialogPageTableHeight)
 
 const props = defineProps({
 	isViewMode: {

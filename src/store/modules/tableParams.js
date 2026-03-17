@@ -11,6 +11,7 @@ const tableParamsStore = defineStore('tableParams', {
 		drawerSearchTableHeight: window.innerHeight - 300, // 抽屉里带查询+table
 		drawerHeaderPageTableHeight: window.innerHeight - 370, // 抽屉里带header + 分页
 		drawerTableHeight: window.innerHeight - 600, // 抽屉里带header +table
+		dialogPageTableHeight: window.innerHeight - 400, // 弹窗里带分页
 	}),
 	actions: {
 		setTableHeight(tempHeight) {
@@ -24,6 +25,7 @@ const tableParamsStore = defineStore('tableParams', {
 			this.drawerPageTableHeight = window.innerHeight - 350 + tempHeight
 			this.drawerHeaderPageTableHeight = window.innerHeight - 370 + tempHeight
 			this.drawerTableHeight = window.innerHeight - 600 + tempHeight
+			this.dialogPageTableHeight = window.innerHeight - 400 + tempHeight
 		
 		},
 	},
