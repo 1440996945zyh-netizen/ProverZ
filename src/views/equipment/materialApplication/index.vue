@@ -12,25 +12,11 @@
 			:expand-config="{ trigger: 'default', accordion: true }"
 			:cellClickEvent="cellClickEvent"
 		>
-		<!-- 1. 展开行插槽：展示更多元数据 -->
+			<!-- 1. 展开行插槽：展示明细子表格 -->
 			<template #expand="{ row }">
-				<div class="expand-content">
-					<el-descriptions title="审批语详细元数据" :column="3" border size="small">
-						<el-descriptions-item label="快捷键码">{{ row.keyCode || '未设置' }}</el-descriptions-item>
-						<el-descriptions-item label="使用次数">{{ row.useCount || 0 }} 次</el-descriptions-item>
-						<el-descriptions-item label="最后修改人">{{ row.updateByName || '-' }}</el-descriptions-item>
-						<el-descriptions-item label="适用流程范围" :span="3">
-							<el-tag v-for="tag in row.scope" :key="tag" size="small" style="margin-right: 5px">
-								{{ tag }}
-							</el-tag>
-						</el-descriptions-item>
-						<el-descriptions-item label="备注说明" :span="3">
-							<span class="text-gray">{{ row.remark || '暂无备注信息' }}</span>
-						</el-descriptions-item>
-					</el-descriptions>
-				</div>
+				<DetailTable :row="row" />
 			</template>
-	</BaseTable>
+		</BaseTable>
 	</div>
 
 	<el-drawer v-model="applicationVisible" :title="title" size="80%">
@@ -329,7 +315,7 @@ const DetailTable = {
 const tableColumns = ref([
 	// 表头列
 
-	{ label: '序号', type: 'seq', width: 50, align: 'center', fixed: 'left' },
+	{ label: '序号', type: 'seq', width: 50, align: 'center' },
 	{
 		label: '申请单号',
 		prop: 'applicationNo',
