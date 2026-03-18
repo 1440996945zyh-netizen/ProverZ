@@ -22,6 +22,7 @@
 					:dataConfig="{ params: { type: 'DICT', dictType: 'CONTRACT_TYPE' } }"
 					v-model:value="formData.contractType"
 					v-model:label="formData.contractTypeLabel"
+					:disabled="isViewMode"
 				/>
 			</el-form-item>
 

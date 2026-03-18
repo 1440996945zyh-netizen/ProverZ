@@ -38,6 +38,8 @@ import detail from './detail/index.vue'
 import api from '@/api/equipment/projectContractInfo/index'
 import publicApi from '@/api/public/index'
 import tableParamsStore from '@/store/modules/tableParams'
+import DropDown from '@/components/DropDown/newIndex.vue'
+import { Edit, View, Delete } from '@element-plus/icons-vue'
 
 const { proxy } = getCurrentInstance()
 
@@ -129,55 +131,49 @@ const tableColumns = ref([
 		},
 	},
 	{
-		prop: 'operate',
+		prop: '',
 		label: '操作',
-		align: 'center',
-		width: 200,
+		width: 120,
 		fixed: 'right',
+		align: 'center',
 		render: row => {
+			const dropDownList = []
+
+			dropDownList.push(
+				{
+					name: '详情',
+					command: '详情',
+					click: () => handleView(row),
+					icon: View,
+				},
+				{
+					name: '编辑',
+					command: '编辑',
+					click: () => handleUpdate(row),
+					permission: 'equipment:econtractinfocontract:update',
+					icon: Edit,
+				},
+
+				{
+					name: '删除',
+					command: '删除',
+					click: () => handleDelete(row),
+					type: 'danger',
+					icon: Delete,
+					permission: 'equipment:econtractinfocontract:delete',
+				},
+			)
+
 			return [
 				h(
-					ElButton,
+					DropDown,
 					{
-						onClick: () => {
-							handleView(row)
-						},
-						type: 'primary',
-						link: true,
-						icon: 'View',
+						dropDownList,
+						isInner: true,
+						props: { permission: undefined },
 					},
 					{
-						default: () => '详情',
-					},
-				),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleUpdate(row)
-						},
-						type: 'primary',
-						link: true,
-						icon: 'Edit',
-						permission: 'equipment:econtractinfocontract:update',
-					},
-					{
-						default: () => '编辑',
-					},
-				),
-				h(
-					ElButton,
-					{
-						onClick: () => {
-							handleDelete(row)
-						},
-						type: 'danger',
-						link: true,
-						icon: 'Delete',
-						permission: 'equipment:econtractinfocontract:delete',
-					},
-					{
-						default: () => '删除',
+						default: () => h('span', { class: 'el-icon-more' }),
 					},
 				),
 			]
