@@ -8,7 +8,15 @@
 			<el-form-item label="合同编号" prop="contractCode">
 				<el-input v-model="formData.contractCode" placeholder="请输入合同编号" maxlength="255" :disabled="isViewMode" />
 			</el-form-item>
-
+			<el-form-item label="维修单位" prop="externalCompanyId">
+				<Select
+					:selectData="maintenanceUnitOptions"
+					v-model:value="formData.externalCompanyId"
+					v-model:label="formData.unitName"
+					placeholder="请选择维修单位"
+					:disabled="isViewMode"
+				/>
+			</el-form-item>
 			<el-form-item label="合同类型" prop="contractType">
 				<Select
 					:dataConfig="{ params: { type: 'DICT', dictType: 'CONTRACT_TYPE' } }"
@@ -67,6 +75,7 @@
 <script setup name="projectContractInfoDetail">
 import { ref, reactive, getCurrentInstance, toRefs, onMounted } from 'vue'
 import Select from '@/components/Select'
+import api from '@/api/equipment/projectContractInfo/index'
 
 const props = defineProps({
 	isViewMode: {
@@ -92,6 +101,8 @@ const data = reactive({
 		status: '1',
 		contractType: '',
 		contractTypeLabel: '',
+		externalCompanyId: null,
+		unitName: '',
 	},
 })
 const { formData } = toRefs(data)
@@ -104,6 +115,7 @@ const rules = reactive({
 	startDate: proxy.getRules({ required: true }),
 	endDate: proxy.getRules({ required: true }),
 	applyScope: proxy.getRules({ required: true }),
+	externalCompanyId: proxy.getRules({ required: true }),
 	status: proxy.getRules({ required: true }),
 })
 
@@ -133,8 +145,20 @@ const resetForm = () => {
 	formData.value.status = '1'
 	ruleForm.value?.clearValidate()
 }
-
-onMounted(() => {})
+const maintenanceUnitOptions = ref([])
+const getMaintenanceUnitList = () => {
+	api.queryUnitName({}).then(res => {
+		if (res.code === '0000') {
+			maintenanceUnitOptions.value = res.data.map(item => ({
+				label: item.unitName,
+				value: item.externalCompanyId,
+			}))
+		}
+	})
+}
+onMounted(() => {
+	getMaintenanceUnitList()
+})
 
 defineExpose({
 	validate,

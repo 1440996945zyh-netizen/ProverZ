@@ -47,5 +47,12 @@ const api = {
 			data: ids,
 		})
 	},
+	queryUnitName(params) {
+		return request({
+			url: '/api/internal/EMEquipRepairContract/queryUnitName',
+			method: 'get',
+			params: params,
+		})
+	},
 }
 export default api

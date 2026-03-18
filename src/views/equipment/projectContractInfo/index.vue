@@ -100,6 +100,7 @@ const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '合同名称', prop: 'contractName', align: 'left', width: 200, showOverFlow: true },
 	{ label: '合同编号', prop: 'contractCode', align: 'center', width: 150 },
+	{ label: '维修单位', prop: 'unitName', align: 'center', width: 120 },
 	{ label: '合同类型', prop: 'contractTypeLabel', align: 'center', width: 120 },
 	{ label: '合同金额', prop: 'contractAmount', align: 'center', width: 120 },
 	{ label: '合同开始日期', prop: 'startDate', align: 'center', width: 150 },
