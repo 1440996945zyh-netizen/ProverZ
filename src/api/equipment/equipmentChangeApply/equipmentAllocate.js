@@ -64,5 +64,40 @@ export default {
 			params: params,
 			responseType: 'blob'
 		})
+	},
+
+	/**
+	 * 设备调拨提交审批
+	 * @param {Object} data
+	 */
+	submitEquipAllocate(data) {
+		return request({
+			url: '/api/v1/internal/equipAllocate/submitEquipAllocate',
+			method: 'post',
+			data: data
+		})
+	},
+
+	/**
+	 * 删除设备调拨申请
+	 * @param {Number|String} id
+	 */
+	delete(id) {
+		return request({
+			url: '/api/v1/internal/equipAllocate/delete/' + id,
+			method: 'delete'
+		})
+	},
+
+	/**
+	 * 批量删除设备调拨申请
+	 * @param {Array} ids
+	 */
+	deleteBatch(ids) {
+		return request({
+			url: '/api/v1/internal/equipAllocate/deleteBatch',
+			method: 'delete',
+			data: ids
+		})
 	}
 }

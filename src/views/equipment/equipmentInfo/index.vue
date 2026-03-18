@@ -11,7 +11,8 @@
 			:loading="loading"
 			:cellClickEvent="cellClickEvent"
 			:total="total"
-      :showNum = '4'
+      		:showNum = '3'
+			:defaultWidth="50"
 		/>
 	</div>
 	<el-drawer v-model="open" :title="title" size="70%">
@@ -60,7 +61,7 @@ const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 170 },
 	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 170 },
-	{ label: '设备名称', prop: 'equipName', align: 'left', },
+	{ label: '设备名称', prop: 'equipName', align: 'left', width: 250 },
 	{ label: '设备编号', prop: 'equipCode', align: 'left', width: 180 },
 	{ label: '规格', prop: 'specificCode', align: 'left', width: 120 },
 	{ label: '型号', prop: 'modelNumber', align: 'left', width: 120 },
@@ -238,7 +239,7 @@ const executeChange = (value) => {
 		queryParams.value.equipSmallCategoryId = null
 		return
 	}
-	
+
 	// 查找节点
 	const selectedNode = findTreeNode(equipmentTypeTreeData.value, value)
 	if (!selectedNode) {
@@ -249,7 +250,7 @@ const executeChange = (value) => {
 		queryParams.value.equipSmallCategoryId = null
 		return
 	}
-	
+
 	// 获取节点的级别
 	const categoryLevel = selectedNode.categoryLevel
 	if (categoryLevel === 1) {
@@ -275,32 +276,32 @@ const selectData = reactive([
 		name: '设备编号',
 		type: 'input',
 		modelValue: 'equipCode',
-		span: 6,
+		span: 8,
 	},
 	{
 		name: '设备名称',
 		type: 'input',
 		modelValue: 'equipName',
-		span: 6,
+		span: 8,
 	},
-	{
-		name: '设备类型',
-		type: 'tree-select',
-		modelValue: 'equipmentTypeId',
-		span: 6,
-		treeData: equipmentTypeTreeData,
-		treeDataLoaded: equipmentTypeTreeLoaded,
-		dataConfig: {
-			props: { value: 'id', label: 'typeName', children: 'children' },
-			valueKey: 'id',
-		},
-		onChange: handleEquipmentTypeChange,
-	},
+	// {
+	// 	name: '设备类型',
+	// 	type: 'tree-select',
+	// 	modelValue: 'equipmentTypeId',
+	// 	span: 6,
+	// 	treeData: equipmentTypeTreeData,
+	// 	treeDataLoaded: equipmentTypeTreeLoaded,
+	// 	dataConfig: {
+	// 		props: { value: 'id', label: 'typeName', children: 'children' },
+	// 		valueKey: 'id',
+	// 	},
+	// 	onChange: handleEquipmentTypeChange,
+	// },
 	{
 		name: '设备状态',
 		type: 'select',
 		modelValue: 'equipState',
-		span: 6,
+		span: 8,
 		dataConfig: {
 			params: { type: 'DICT', dictType: 'E_STATUS' }
 		},
