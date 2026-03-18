@@ -92,7 +92,19 @@ const api = {
 			params: params,
 		})
 	},
+
+	/**
+	 * 发起物资出库申请流程
+	 * @param {Object} data 流程数据
+	 * @returns
+	 */
+	outApplicationStart(data) {
+		return request({
+			url: `${url}/outApplicationStart`,
+			method: 'post',
+			data: data,
+		})
+	},
 }
 
 export default api
-

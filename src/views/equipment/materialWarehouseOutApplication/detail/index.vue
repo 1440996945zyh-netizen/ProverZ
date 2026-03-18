@@ -5,7 +5,12 @@
 				<el-row :gutter="24">
 					<el-col :span="8">
 						<el-form-item label="出库主题" prop="warehouseOutTitle">
-							<el-input v-model="form.warehouseOutTitle" placeholder="请输入出库主题" :disabled="formDisabled" maxlength="200" />
+							<el-input
+								v-model="form.warehouseOutTitle"
+								placeholder="请输入出库主题"
+								:disabled="formDisabled"
+								maxlength="200"
+							/>
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
@@ -21,7 +26,14 @@
 					</el-col>
 					<el-col :span="24">
 						<el-form-item label="备注" prop="remarks">
-							<el-input v-model="form.remarks" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" placeholder="请输入备注" :disabled="formDisabled" maxlength="500" />
+							<el-input
+								v-model="form.remarks"
+								:autosize="{ minRows: 2, maxRows: 4 }"
+								type="textarea"
+								placeholder="请输入备注"
+								:disabled="formDisabled"
+								maxlength="500"
+							/>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -33,10 +45,16 @@
 					<div style="width: 100%; display: flex; justify-content: space-between">
 						<span>物资申领明细</span>
 						<div style="display: flex">
-<!--							<el-button type="primary" @click.stop="addDetail" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">-->
-<!--								新增明细-->
-<!--							</el-button>-->
-							<el-button plain size="medium" @click.stop="openApplicationDrawer" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">
+							<!--							<el-button type="primary" @click.stop="addDetail" :disabled="formDisabled" style="margin: 8px 10px 0px 0px">-->
+							<!--								新增明细-->
+							<!--							</el-button>-->
+							<el-button
+								plain
+								size="medium"
+								@click.stop="openApplicationDrawer"
+								:disabled="formDisabled"
+								style="margin: 8px 10px 0px 0px"
+							>
 								导入申报
 							</el-button>
 						</div>
@@ -48,13 +66,12 @@
 					:name="'物资出库申请明细'"
 					:tableData="detailList"
 					:tableColumns="detailColumns"
-          			:tableHeight="tableHeight"
+					:tableHeight="tableHeight"
 					:cellClickEvent="detailCellClickEvent"
 					:headerCellClickEvent="detailHeaderCellClickEvent"
 					:editRules="detailEditRules"
 					:rowConfig="rowConfig"
 					:disabledKey="'rowDisabled'"
-
 				/>
 			</el-collapse-item>
 		</el-collapse>
@@ -107,72 +124,78 @@ const userList = ref([])
 
 // 加载物资代码列表
 const loadMaterialCodeList = () => {
-	materialCodeApi.getAllList().then(res => {
-		if (res.code === '0000' && res.data) {
-			// 转换为下拉框选项格式
-			const options = res.data.map(item => ({
-				value: item.id,
-				label: item.materialName,
-				materialCode: item.materialCode,
-				materialName: item.materialName,
-				specificationModel: item.specificationModel || '',
-				unitCode: item.unitCode || '',
-				unitName: item.unitName || '',
-				brand: item.brand || '',
-			}))
-			materialCodeOptions.value = options
-			// 更新列配置中的selectData（使用Vue的响应式更新）
-			if (detailColumns && detailColumns.length > 0) {
-				detailColumns[0].selectData = [...options] // 使用展开运算符确保响应式更新
+	materialCodeApi
+		.getAllList()
+		.then(res => {
+			if (res.code === '0000' && res.data) {
+				// 转换为下拉框选项格式
+				const options = res.data.map(item => ({
+					value: item.id,
+					label: item.materialName,
+					materialCode: item.materialCode,
+					materialName: item.materialName,
+					specificationModel: item.specificationModel || '',
+					unitCode: item.unitCode || '',
+					unitName: item.unitName || '',
+					brand: item.brand || '',
+				}))
+				materialCodeOptions.value = options
+				// 更新列配置中的selectData（使用Vue的响应式更新）
+				if (detailColumns && detailColumns.length > 0) {
+					detailColumns[0].selectData = [...options] // 使用展开运算符确保响应式更新
+				}
 			}
-		}
-	}).catch(error => {
-		console.error('加载物资代码列表失败:', error)
-		proxy.$message.error('加载物资代码列表失败')
-	})
+		})
+		.catch(error => {
+			console.error('加载物资代码列表失败:', error)
+			proxy.$message.error('加载物资代码列表失败')
+		})
 }
 
 // 加载设备列表
 const loadEquipmentList = () => {
-	publicApi.getLocalSelect({ type: 'EQUIPMENT' }).then(res => {
-		if (res.code === '0000' && res.data) {
-			// 转换为下拉框选项格式，保持value为字符串类型，避免精度丢失
-			const options = res.data.map(item => {
-				const value = item.value || item.id
-				return {
-					value: String(value), // 保持为字符串，避免大数字精度丢失
-					label: item.label || item.equipName,
-				}
-			})
-			equipmentOptions.value = options
-			// 找到设备列的索引并更新selectData
-			const equipmentColumnIndex = detailColumns.findIndex(col => col.prop === 'equipIds')
-			if (equipmentColumnIndex > -1) {
-				detailColumns[equipmentColumnIndex].selectData = [...options]
-				// 设备列表加载完成后，更新已存在行的设备名称和ID（确保类型一致）
-				nextTick(() => {
-					detailList.forEach(row => {
-						if (row.equipIds != null && row.equipIds !== '') {
-							// 确保equipIds是字符串类型，避免精度丢失
-							row.equipIds = String(row.equipIds)
-							// 根据 equipIds 从 selectData 中查找对应的名称
-							const option = options.find(item => String(item.value) === String(row.equipIds))
-							row.equipNames = option ? option.label : ''
-						}
-					})
-					// 刷新表格
-					if (detailTableRef.value && detailTableRef.value.xTable) {
-						detailTableRef.value.xTable.refreshColumn()
+	publicApi
+		.getLocalSelect({ type: 'EQUIPMENT' })
+		.then(res => {
+			if (res.code === '0000' && res.data) {
+				// 转换为下拉框选项格式，保持value为字符串类型，避免精度丢失
+				const options = res.data.map(item => {
+					const value = item.value || item.id
+					return {
+						value: String(value), // 保持为字符串，避免大数字精度丢失
+						label: item.label || item.equipName,
 					}
 				})
+				equipmentOptions.value = options
+				// 找到设备列的索引并更新selectData
+				const equipmentColumnIndex = detailColumns.findIndex(col => col.prop === 'equipIds')
+				if (equipmentColumnIndex > -1) {
+					detailColumns[equipmentColumnIndex].selectData = [...options]
+					// 设备列表加载完成后，更新已存在行的设备名称和ID（确保类型一致）
+					nextTick(() => {
+						detailList.forEach(row => {
+							if (row.equipIds != null && row.equipIds !== '') {
+								// 确保equipIds是字符串类型，避免精度丢失
+								row.equipIds = String(row.equipIds)
+								// 根据 equipIds 从 selectData 中查找对应的名称
+								const option = options.find(item => String(item.value) === String(row.equipIds))
+								row.equipNames = option ? option.label : ''
+							}
+						})
+						// 刷新表格
+						if (detailTableRef.value && detailTableRef.value.xTable) {
+							detailTableRef.value.xTable.refreshColumn()
+						}
+					})
+				}
+			} else {
+				console.error('加载设备列表失败:', res)
 			}
-		} else {
-			console.error('加载设备列表失败:', res)
-		}
-	}).catch(error => {
-		console.error('加载设备列表失败:', error)
-		proxy.$message.error('加载设备列表失败')
-	})
+		})
+		.catch(error => {
+			console.error('加载设备列表失败:', error)
+			proxy.$message.error('加载设备列表失败')
+		})
 }
 
 // 加载仓库列表
@@ -189,16 +212,18 @@ const loadWarehouseList = () => {
 
 // 加载用户列表（验收人列表，不按部门查询，获取所有用户）
 const loadUserList = () => {
-	publicApi.getLocalSelect({
-		type: 'USER',
-	}).then(res => {
-		if (res.code == '0000') {
-			userList.value = res.data.map(item => ({
-				label: item.label || item.userName,
-				value: item.value || item.id,
-			}))
-		}
-	})
+	publicApi
+		.getLocalSelect({
+			type: 'USER',
+		})
+		.then(res => {
+			if (res.code == '0000') {
+				userList.value = res.data.map(item => ({
+					label: item.label || item.userName,
+					value: item.value || item.id,
+				}))
+			}
+		})
 }
 
 // 表单数据
@@ -235,23 +260,26 @@ const loadStockQuantity = row => {
 		return
 	}
 	console.log('loadStockQuantity - 开始查询库存数量 - materialId:', row.materialId, 'warehouseId:', form.warehouseId)
-	materialWarehouseInApi.getStockQuantity(row.materialId, form.warehouseId).then(res => {
-		console.log('库存数量查询结果:', res)
-		if (res.code === '0000' && res.data !== null && res.data !== undefined) {
-			row.stockQuantity = res.data
-		} else {
+	materialWarehouseInApi
+		.getStockQuantity(row.materialId, form.warehouseId)
+		.then(res => {
+			console.log('库存数量查询结果:', res)
+			if (res.code === '0000' && res.data !== null && res.data !== undefined) {
+				row.stockQuantity = res.data
+			} else {
+				row.stockQuantity = 0
+			}
+		})
+		.catch(error => {
+			console.error('加载库存数量失败:', error)
 			row.stockQuantity = 0
-		}
-	}).catch(error => {
-		console.error('加载库存数量失败:', error)
-		row.stockQuantity = 0
-	})
+		})
 }
 
 // 监听仓库变化，重新加载所有明细的库存数量
 watch(
 	() => form.warehouseId,
-	(newWarehouseId) => {
+	newWarehouseId => {
 		if (newWarehouseId) {
 			detailList.forEach(row => {
 				if (row.materialId) {
@@ -263,7 +291,7 @@ watch(
 				row.stockQuantity = null
 			})
 		}
-	}
+	},
 )
 
 // 表单验证规则
@@ -277,7 +305,7 @@ const detailColumns = reactive([
 	{
 		label: '物资名称',
 		prop: 'materialId',
-    minWidth: 200,
+		minWidth: 200,
 		modelLabel: 'materialName',
 		editType: 'select',
 		editRender: {},
@@ -296,17 +324,17 @@ const detailColumns = reactive([
 	{
 		label: '规格型号',
 		prop: 'specificationModel',
-		width: 150
+		width: 150,
 	},
 	{
 		label: '计量单位',
 		prop: 'unitName',
-		width: 100
+		width: 100,
 	},
 	{
 		label: '品牌',
 		prop: 'brand',
-		width: 120
+		width: 120,
 	},
 	{
 		label: '流向类型',
@@ -326,7 +354,9 @@ const detailColumns = reactive([
 				value = e.value
 			} else if (typeof e === 'string') {
 				// 如果是字符串，可能是 label，需要查找对应的 value
-				const option = detailColumns[detailColumns.findIndex(col => col.prop === 'flowType')].selectData.find(item => item.label === e)
+				const option = detailColumns[detailColumns.findIndex(col => col.prop === 'flowType')].selectData.find(
+					item => item.label === e,
+				)
 				value = option ? option.value : e
 			} else {
 				value = e
@@ -343,7 +373,7 @@ const detailColumns = reactive([
 		editType: 'input',
 		editRender: {},
 		width: 150,
-		disabledFunc: (row) => row.flowType === '01', // 选择"设备"时禁用
+		disabledFunc: row => row.flowType === '01', // 选择"设备"时禁用
 	},
 	{
 		label: '设备',
@@ -355,7 +385,7 @@ const detailColumns = reactive([
 		selectLabel: 'label',
 		selectValue: 'value',
 		width: 200,
-		disabledFunc: (row) => row.flowType === '02', // 选择"其他"时禁用
+		disabledFunc: row => row.flowType === '02', // 选择"其他"时禁用
 		change: (e, row) => {
 			handleEquipmentChange(e, row)
 		},
@@ -413,7 +443,7 @@ const detailColumns = reactive([
 					},
 					{
 						default: () => '删除',
-					}
+					},
 				),
 			]
 		},
@@ -742,16 +772,19 @@ const validate = async () => {
 						index: index + 1,
 						materialName: item.materialName || '未知物资',
 						appQty: appQty,
-						stockQty: stockQty
+						stockQty: stockQty,
 					})
 				}
 			}
 		})
 
 		if (invalidDetails.length > 0) {
-			const errorMsg = invalidDetails.map(detail =>
-				`第${detail.index}行【${detail.materialName}】：申请数量（${detail.appQty}）不能大于库存数量（${detail.stockQty}）`
-			).join('\n')
+			const errorMsg = invalidDetails
+				.map(
+					detail =>
+						`第${detail.index}行【${detail.materialName}】：申请数量（${detail.appQty}）不能大于库存数量（${detail.stockQty}）`,
+				)
+				.join('\n')
 			proxy.$message.warning(errorMsg)
 			flag2 = false
 		}
@@ -815,68 +848,68 @@ const saveApplicationDetails = () => {
 				// 从物资代码选项中查找对应的物资信息
 				const materialOption = materialCodeOptions.value.find(opt => opt.value === detail.materialCodeId)
 
-					// 处理设备ID：单选，如果是字符串（逗号分隔），取第一个值；如果是数组，取第一个元素
-					let equipId = null
-					if (detail.equipIds) {
-						if (typeof detail.equipIds === 'string') {
-							// 如果是逗号分隔的字符串，取第一个值
-							const ids = detail.equipIds.split(',').filter(id => id && id.trim() !== '')
-							equipId = ids.length > 0 ? String(ids[0].trim()) : null
-						} else if (Array.isArray(detail.equipIds)) {
-							// 如果是数组，取第一个元素
-							equipId = detail.equipIds.length > 0 ? String(detail.equipIds[0]) : null
-						} else {
-							equipId = String(detail.equipIds)
-						}
+				// 处理设备ID：单选，如果是字符串（逗号分隔），取第一个值；如果是数组，取第一个元素
+				let equipId = null
+				if (detail.equipIds) {
+					if (typeof detail.equipIds === 'string') {
+						// 如果是逗号分隔的字符串，取第一个值
+						const ids = detail.equipIds.split(',').filter(id => id && id.trim() !== '')
+						equipId = ids.length > 0 ? String(ids[0].trim()) : null
+					} else if (Array.isArray(detail.equipIds)) {
+						// 如果是数组，取第一个元素
+						equipId = detail.equipIds.length > 0 ? String(detail.equipIds[0]) : null
+					} else {
+						equipId = String(detail.equipIds)
 					}
+				}
 
-					// 处理设备名称：单选，如果是字符串（逗号分隔），取第一个值
-					let equipName = ''
-					if (detail.equipNames) {
-						if (typeof detail.equipNames === 'string') {
-							// 如果是逗号分隔的字符串，取第一个值
-							const names = detail.equipNames.split(',').filter(name => name && name.trim() !== '')
-							equipName = names.length > 0 ? names[0].trim() : ''
-						} else if (Array.isArray(detail.equipNames)) {
-							// 如果是数组，取第一个元素
-							equipName = detail.equipNames.length > 0 ? detail.equipNames[0] : ''
-						} else {
-							equipName = String(detail.equipNames)
-						}
+				// 处理设备名称：单选，如果是字符串（逗号分隔），取第一个值
+				let equipName = ''
+				if (detail.equipNames) {
+					if (typeof detail.equipNames === 'string') {
+						// 如果是逗号分隔的字符串，取第一个值
+						const names = detail.equipNames.split(',').filter(name => name && name.trim() !== '')
+						equipName = names.length > 0 ? names[0].trim() : ''
+					} else if (Array.isArray(detail.equipNames)) {
+						// 如果是数组，取第一个元素
+						equipName = detail.equipNames.length > 0 ? detail.equipNames[0] : ''
+					} else {
+						equipName = String(detail.equipNames)
 					}
+				}
 
-					// 将物资申报明细转换为出库申请明细
-					const newDetail = {
-						row_id: `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-						id: null,
-						outApplicationId: null,
-						materialId: detail.materialCodeId, // 物资ID
-						materialName: detail.materialName || '',
-						specificationModel: detail.specificationModel || '',
-						unitCode: materialOption ? (materialOption.unitCode || '') : '', // 从物资代码选项获取
-						unitName: materialOption ? (materialOption.unitName || detail.unit || '') : (detail.unit || ''), // 优先使用物资代码的单位，否则使用申报明细的单位
-						brand: detail.suggestedBrand || '', // 使用建议品牌
-						stockQuantity: detail.stockQuantity != null ? detail.stockQuantity : null, // 使用接口返回的库存数量
-						applicationQuantity: detail.applicationQuantity || null, // 使用申报数量
-						flowType: detail.flowType || '02', // 使用流向类型，默认"其他"
-						flowDirection: detail.flowDirection || '', // 使用流向
-						equipIds: equipId, // 设备ID（单选）
-						equipNames: equipName, // 设备名称
-						rowDisabled: false,
+				// 将物资申报明细转换为出库申请明细
+				const newDetail = {
+					row_id: `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+					id: null,
+					outApplicationId: null,
+					materialId: detail.materialCodeId, // 物资ID
+					materialName: detail.materialName || '',
+					specificationModel: detail.specificationModel || '',
+					unitCode: materialOption ? materialOption.unitCode || '' : '', // 从物资代码选项获取
+					unitName: materialOption ? materialOption.unitName || detail.unit || '' : detail.unit || '', // 优先使用物资代码的单位，否则使用申报明细的单位
+					brand: detail.suggestedBrand || '', // 使用建议品牌
+					stockQuantity: detail.stockQuantity != null ? detail.stockQuantity : null, // 使用接口返回的库存数量
+					applicationQuantity: detail.applicationQuantity || null, // 使用申报数量
+					flowType: detail.flowType || '02', // 使用流向类型，默认"其他"
+					flowDirection: detail.flowDirection || '', // 使用流向
+					equipIds: equipId, // 设备ID（单选）
+					equipNames: equipName, // 设备名称
+					rowDisabled: false,
+				}
+
+				// 如果从物资代码选项中找到，补充其他字段
+				if (materialOption) {
+					newDetail.materialCode = materialOption.materialCode || ''
+					if (!newDetail.specificationModel && materialOption.specificationModel) {
+						newDetail.specificationModel = materialOption.specificationModel
 					}
-
-					// 如果从物资代码选项中找到，补充其他字段
-					if (materialOption) {
-						newDetail.materialCode = materialOption.materialCode || ''
-						if (!newDetail.specificationModel && materialOption.specificationModel) {
-							newDetail.specificationModel = materialOption.specificationModel
-						}
-						if (!newDetail.brand && materialOption.brand) {
-							newDetail.brand = materialOption.brand
-						}
+					if (!newDetail.brand && materialOption.brand) {
+						newDetail.brand = materialOption.brand
 					}
+				}
 
-					newDetails.push(newDetail)
+				newDetails.push(newDetail)
 			})
 		}
 	})
@@ -921,4 +954,3 @@ defineExpose({
 <style lang="scss" scoped>
 @import '@/assets/styles/formData.scss';
 </style>
-
