@@ -140,18 +140,18 @@ const tableColumns = ref([
 	{ label: '社会信用代码/身份证号', prop: 'externalCompanyCode', align: 'left', width: 200, showOverFlow: true },
 	{ label: '负责人', prop: 'principal', align: 'center', width: 100 },
 	{ label: '联系方式', prop: 'phone', align: 'center', width: 120 },
-	{
-		prop: 'contractDateRange',
-		label: '委外合同期限',
-		align: 'center',
-		width: 200,
-		render: row => {
-			if (row.outType === '2' && row.contractDateStart && row.contractDateEnd) {
-				return h('span', `${row.contractDateStart} 至 ${row.contractDateEnd}`)
-			}
-			return h('span', '')
-		},
-	},
+	// {
+	// 	prop: 'contractDateRange',
+	// 	label: '委外合同期限',
+	// 	align: 'center',
+	// 	width: 200,
+	// 	render: row => {
+	// 		if (row.outType === '2' && row.contractDateStart && row.contractDateEnd) {
+	// 			return h('span', `${row.contractDateStart} 至 ${row.contractDateEnd}`)
+	// 		}
+	// 		return h('span', '')
+	// 	},
+	// },
 	{ label: '维修范围', prop: 'repairType', align: 'left', minWidth: 200, showOverFlow: true },
 	{ label: '备注', prop: 'remark', align: 'left', width: 200, showOverFlow: true },
 	{

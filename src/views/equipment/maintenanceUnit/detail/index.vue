@@ -53,7 +53,7 @@
 				<el-input v-model="formData.phone" placeholder="请输入联系方式" maxlength="50" />
 			</el-form-item>
 
-			<el-form-item label="委外合同开始期限" prop="contractDateStart" v-if="formData.outType === '2'">
+			<!-- <el-form-item label="委外合同开始期限" prop="contractDateStart" v-if="formData.outType === '2'">
 				<el-date-picker
 					v-model="formData.contractDateStart"
 					type="date"
@@ -71,7 +71,7 @@
 					value-format="YYYY-MM-DD"
 					style="width: 100%"
 				/>
-			</el-form-item>
+			</el-form-item> -->
 
 			<el-form-item label="服务单位" prop="serviceCompanies" v-if="formData.outType === '2'">
 				<el-select v-model="serviceCompaniesArray" multiple placeholder="请选择服务单位" style="width: 100%">
