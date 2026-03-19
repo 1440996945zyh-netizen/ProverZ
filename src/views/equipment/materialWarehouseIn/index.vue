@@ -9,9 +9,13 @@
 			:tableColumns="tableColumns"
 			:tableData="tableData"
 			:total="total"
-			:expandConfig="{ trigger: 'default' }"
+			:expand-config="{ trigger: 'default', accordion: true }"
 			:cellClickEvent="cellClickEvent"
-		/>
+		>
+			<template #expand="{ row }">
+				<DetailTable :row="row" />
+			</template>
+		</BaseTable>
 	</div>
 
 	<el-drawer v-model="warehouseInVisible" :title="title" size="80%">
@@ -20,7 +24,13 @@
 			<div style="flex: auto">
 				<el-button @click="warehouseInVisible = false">{{ title === '查看详情' ? '关闭' : '取消' }}</el-button>
 				<template v-if="title !== '查看详情'">
-					<el-button type="primary" @click="save" v-hasPermi="['equipment:materialWarehouseIn:add', 'equipment:materialWarehouseIn:update']">保存</el-button>
+					<el-button
+						type="primary"
+						@click="save"
+						v-hasPermi="['equipment:materialWarehouseIn:add', 'equipment:materialWarehouseIn:update']"
+					>
+						保存
+					</el-button>
 				</template>
 			</div>
 		</template>
@@ -103,12 +113,11 @@ const selectData = reactive([
 		type: 'select',
 		modelValue: 'acceptanceStatus',
 		span: 2,
-	  selectData: [
-		{ label: '待验收', value: '0' },
-		{ label: '验收通过', value: 1 },
-		{ label: '验收不通过', value: 2 },
-	  ],
-
+		selectData: [
+			{ label: '待验收', value: '0' },
+			{ label: '验收通过', value: 1 },
+			{ label: '验收不通过', value: 2 },
+		],
 	},
 ])
 
@@ -118,7 +127,7 @@ const cellClickEvent = ({ row }) => {
 }
 
 // 获取验收状态标签
-const getAcceptanceStatusLabel = (status) => {
+const getAcceptanceStatusLabel = status => {
 	const statusMap = {
 		0: '待验收',
 		1: '通过',
@@ -128,7 +137,7 @@ const getAcceptanceStatusLabel = (status) => {
 }
 
 // 获取验收状态类型（用于ElTag的颜色）
-const getAcceptanceStatusType = (status) => {
+const getAcceptanceStatusType = status => {
 	const typeMap = {
 		0: 'info', // 待验收 - 灰色
 		1: 'success', // 通过 - 绿色
@@ -195,16 +204,20 @@ const DetailTable = {
 		loadDetailList()
 
 		// 监听 detailList 变化，更新行数
-		watch(detailList, (newList) => {
-			if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
-				nextTick(() => {
-					props.onRowCountChange(newList.length)
-				})
-			}
-		}, { immediate: false })
+		watch(
+			detailList,
+			newList => {
+				if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
+					nextTick(() => {
+						props.onRowCountChange(newList.length)
+					})
+				}
+			},
+			{ immediate: false },
+		)
 
 		// 格式化金额（千分位）
-		const formatAmount = (value) => {
+		const formatAmount = value => {
 			if (value == null || value === '') {
 				return '-'
 			}
@@ -223,86 +236,83 @@ const DetailTable = {
 				return h('div', { style: 'padding: 20px; text-align: center; color: #999;' }, '暂无明细数据')
 			}
 			return h('div', { class: 'detail-table-wrapper' }, [
-				h(ElTable, {
-					data: detailList.value,
-					border: true,
-					size: 'small',
-					style: 'width: 100%'
-				}, [
-					h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
-					h(ElTableColumn, { prop: 'specification', label: '规格型号', width: 100 }),
-					h(ElTableColumn, { prop: 'brand', label: '品牌', width: 100 }),
-					h(ElTableColumn, {
-						prop: 'purchaseQuantity',
-						label: '采购数量',
-						align: 'right',
-						width: 100,
-						formatter: (row) => {
-							return row.purchaseQuantity != null ? row.purchaseQuantity : '-'
-						}
-					}),
+				h(
+					ElTable,
+					{
+						data: detailList.value,
+						border: true,
+						size: 'small',
+						style: 'width: 100%',
+					},
+					[
+						h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
+						h(ElTableColumn, { prop: 'specification', label: '规格型号', width: 100 }),
+						h(ElTableColumn, { prop: 'brand', label: '品牌', width: 100 }),
+						h(ElTableColumn, {
+							prop: 'purchaseQuantity',
+							label: '采购数量',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.purchaseQuantity != null ? row.purchaseQuantity : '-'
+							},
+						}),
 
-					h(ElTableColumn, {
-						prop: 'warehouseInQuantity',
-						label: '本次入库',
-						align: 'right',
-						width: 120,
-						formatter: (row) => {
-							return row.warehouseInQuantity != null ? row.warehouseInQuantity : '-'
-						}
-					}),
+						h(ElTableColumn, {
+							prop: 'warehouseInQuantity',
+							label: '本次入库',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.warehouseInQuantity != null ? row.warehouseInQuantity : '-'
+							},
+						}),
 
-					h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
-					h(ElTableColumn, {
-						prop: 'taxIncludedUnitPrice',
-						label: '单价(元)',
-						align: 'right',
-						width: 100,
-						formatter: (row) => {
-							return row.taxIncludedUnitPrice != null ? formatAmount(row.taxIncludedUnitPrice) : '-'
-						}
-					}),
-					h(ElTableColumn, {
-						prop: 'taxIncludedAmount',
-						label: '金额(元)',
-						align: 'right',
-						width: 100,
-						formatter: (row) => {
-							return row.taxIncludedAmount != null ? formatAmount(row.taxIncludedAmount) : '-'
-						}
-					}),
-					h(ElTableColumn, {
-						prop: 'warrantyExpiryDate',
-						label: '质保到期时间',
-						align: 'center',
-						width: 150,
-						formatter: (row) => {
-							return row.warrantyExpiryDate || '-'
-						}
-					}),
-					h(ElTableColumn, {
-						prop: 'purchaserName',
-						label: '采购员',
-						width: 100,
-						formatter: (row) => {
-							return row.purchaserName || '-'
-						}
-					}),
-				])
+						h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
+						h(ElTableColumn, {
+							prop: 'taxIncludedUnitPrice',
+							label: '单价(元)',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.taxIncludedUnitPrice != null ? formatAmount(row.taxIncludedUnitPrice) : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'taxIncludedAmount',
+							label: '金额(元)',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.taxIncludedAmount != null ? formatAmount(row.taxIncludedAmount) : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'warrantyExpiryDate',
+							label: '质保到期时间',
+							align: 'center',
+							width: 150,
+							formatter: row => {
+								return row.warrantyExpiryDate || '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'purchaserName',
+							label: '采购员',
+							width: 100,
+							formatter: row => {
+								return row.purchaserName || '-'
+							},
+						}),
+					],
+				),
 			])
 		}
-	}
+	},
 }
 
 const tableColumns = ref([
-	// 表头列
-	{
-		type: 'expand',
-		width: 50,
-		fixed: 'left',
-		expandSlot: DetailTable
-	},
-	{ label: '序号', type: 'seq', width: 50, align: 'center', fixed: 'left' },
+	{ label: '序号', type: 'seq', width: 50, align: 'center' },
 	{
 		label: '入库单号',
 		prop: 'warehouseInNo',
@@ -321,7 +331,7 @@ const tableColumns = ref([
 							viewDetail(row)
 						},
 					},
-					row.warehouseInNo
+					row.warehouseInNo,
 				),
 			]
 		},
@@ -338,25 +348,25 @@ const tableColumns = ref([
 	{ label: '创建时间', prop: 'createTime', align: 'center', width: 150 },
 	{ label: '实际验收人', prop: 'approvalByName', align: 'left', width: 120 },
 	{ label: '实际验收时间', prop: 'approvalTime', align: 'center', width: 150 },
-  {
-    label: '验收状态',
-    prop: 'acceptanceStatus',
-    align: 'center',
-    width: 100,
-    fixed: 'right',
-    render: row => {
-      if (row.acceptanceStatus === null || row.acceptanceStatus === undefined) {
-        return [h(ElTag, { type: 'info' }, { default: () => '待验收' })]
-      }
-      return [
-        h(
-          ElTag,
-          { type: getAcceptanceStatusType(row.acceptanceStatus) },
-          { default: () => getAcceptanceStatusLabel(row.acceptanceStatus) }
-        ),
-      ]
-    },
-  },
+	{
+		label: '验收状态',
+		prop: 'acceptanceStatus',
+		align: 'center',
+		width: 100,
+		fixed: 'right',
+		render: row => {
+			if (row.acceptanceStatus === null || row.acceptanceStatus === undefined) {
+				return [h(ElTag, { type: 'info' }, { default: () => '待验收' })]
+			}
+			return [
+				h(
+					ElTag,
+					{ type: getAcceptanceStatusType(row.acceptanceStatus) },
+					{ default: () => getAcceptanceStatusLabel(row.acceptanceStatus) },
+				),
+			]
+		},
+	},
 	{
 		prop: '',
 		label: '操作',
@@ -403,8 +413,8 @@ const tableColumns = ref([
 						permission: 'equipment:materialWarehouseIn:delete',
 						disabled: !canDelete,
 					},
-					{ default: () => '删除' }
-				)
+					{ default: () => '删除' },
+				),
 			)
 
 			// 只有待验收状态（0或null/undefined）才能验收
@@ -609,21 +619,24 @@ const saveAcceptance = async () => {
 	try {
 		await acceptanceFormRef.value.validate()
 		proxy.$modal.confirm('确定保存验收信息?').then(() => {
-			materialWarehouseInApi.acceptance({
-				id: acceptanceForm.id,
-				acceptanceStatus: acceptanceForm.acceptanceStatus,
-				acceptanceRemarks: acceptanceForm.acceptanceRemarks,
-			}).then(res => {
-				if (res.code === '0000') {
-					proxy.$message.success(res.msg || '验收成功')
-					acceptanceVisible.value = false
-					getList(queryParams.value)
-				} else {
-					proxy.$message.error(res.msg || '验收失败')
-				}
-			}).catch(err => {
-				proxy.$message.error(err.msg || '验收失败')
-			})
+			materialWarehouseInApi
+				.acceptance({
+					id: acceptanceForm.id,
+					acceptanceStatus: acceptanceForm.acceptanceStatus,
+					acceptanceRemarks: acceptanceForm.acceptanceRemarks,
+				})
+				.then(res => {
+					if (res.code === '0000') {
+						proxy.$message.success(res.msg || '验收成功')
+						acceptanceVisible.value = false
+						getList(queryParams.value)
+					} else {
+						proxy.$message.error(res.msg || '验收失败')
+					}
+				})
+				.catch(err => {
+					proxy.$message.error(err.msg || '验收失败')
+				})
 		})
 	} catch (error) {
 		// 表单验证失败
@@ -677,4 +690,3 @@ init()
 	background: #f5f7fa;
 }
 </style>
-

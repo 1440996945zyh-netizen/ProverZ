@@ -9,9 +9,13 @@
 			:tableColumns="tableColumns"
 			:tableData="tableData"
 			:total="total"
-			:expandConfig="{ trigger: 'default' }"
+			:expand-config="{ trigger: 'default', accordion: true }"
 			:cellClickEvent="cellClickEvent"
-		/>
+		>
+			<template #expand="{ row }">
+				<DetailTable :row="row" />
+			</template>
+		</BaseTable>
 	</div>
 
 	<el-drawer v-model="warehouseOutVisible" :title="title" size="80%">
@@ -20,7 +24,13 @@
 			<div style="flex: auto">
 				<el-button @click="warehouseOutVisible = false">{{ title === '查看详情' ? '关闭' : '取消' }}</el-button>
 				<template v-if="title !== '查看详情'">
-					<el-button type="primary" @click="save" v-hasPermi="['equipment:materialWarehouseOut:add', 'equipment:materialWarehouseOut:update']">保存</el-button>
+					<el-button
+						type="primary"
+						@click="save"
+						v-hasPermi="['equipment:materialWarehouseOut:add', 'equipment:materialWarehouseOut:update']"
+					>
+						保存
+					</el-button>
 				</template>
 			</div>
 		</template>
@@ -117,13 +127,17 @@ const DetailTable = {
 		loadDetailList()
 
 		// 监听 detailList 变化，更新行数
-		watch(detailList, (newList) => {
-			if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
-				nextTick(() => {
-					props.onRowCountChange(newList.length)
-				})
-			}
-		}, { immediate: false })
+		watch(
+			detailList,
+			newList => {
+				if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
+					nextTick(() => {
+						props.onRowCountChange(newList.length)
+					})
+				}
+			},
+			{ immediate: false },
+		)
 
 		return () => {
 			if (loading.value) {
@@ -133,67 +147,64 @@ const DetailTable = {
 				return h('div', { style: 'padding: 20px; text-align: center; color: #999;' }, '暂无明细数据')
 			}
 			return h('div', { class: 'detail-table-wrapper' }, [
-				h(ElTable, {
-					data: detailList.value,
-					border: true,
-					size: 'small',
-					style: 'width: 100%'
-				}, [
-					h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
-					h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
-					h(ElTableColumn, { prop: 'unitName', label: '计量单位', align: 'center', width: 100 }),
-					h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
-					h(ElTableColumn, { 
-						prop: 'stockQuantity', 
-						label: '库存数据', 
-						align: 'right', 
-						width: 120,
-						formatter: (row) => {
-							return row.stockQuantity != null ? row.stockQuantity : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'applicationQuantity', 
-						label: '申领数量', 
-						align: 'right', 
-						width: 120,
-						formatter: (row) => {
-							return row.applicationQuantity != null ? row.applicationQuantity : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'outQuantitySum', 
-						label: '已申领数量', 
-						align: 'right', 
-						width: 120,
-						formatter: (row) => {
-							return row.outQuantitySum != null ? row.outQuantitySum : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'outQuantity', 
-						label: '本次出库数量', 
-						align: 'right', 
-						width: 140,
-						formatter: (row) => {
-							return row.outQuantity != null ? row.outQuantity : '-'
-						}
-					}),
-				])
+				h(
+					ElTable,
+					{
+						data: detailList.value,
+						border: true,
+						size: 'small',
+						style: 'width: 100%',
+					},
+					[
+						h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
+						h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
+						h(ElTableColumn, { prop: 'unitName', label: '计量单位', align: 'center', width: 100 }),
+						h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
+						h(ElTableColumn, {
+							prop: 'stockQuantity',
+							label: '库存数据',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.stockQuantity != null ? row.stockQuantity : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'applicationQuantity',
+							label: '申领数量',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.applicationQuantity != null ? row.applicationQuantity : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'outQuantitySum',
+							label: '已申领数量',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.outQuantitySum != null ? row.outQuantitySum : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'outQuantity',
+							label: '本次出库数量',
+							align: 'right',
+							width: 140,
+							formatter: row => {
+								return row.outQuantity != null ? row.outQuantity : '-'
+							},
+						}),
+					],
+				),
 			])
 		}
-	}
+	},
 }
 
 const tableColumns = ref([
-	// 表头列
-	{
-		type: 'expand',
-		width: 50,
-		fixed: 'left',
-		expandSlot: DetailTable
-	},
-	{ label: '序号', type: 'seq', width: 50, align: 'center', fixed: 'left' },
+	{ label: '序号', type: 'seq', width: 50, align: 'center' },
 	{
 		label: '出库单号',
 		prop: 'warehouseOutNo',
@@ -212,15 +223,15 @@ const tableColumns = ref([
 							viewDetail(row)
 						},
 					},
-					row.warehouseOutNo
+					row.warehouseOutNo,
 				),
 			]
 		},
 	},
-	{ label: '出库主题', prop: 'warehouseOutTitle', align: 'left', width: 140, },
-	{ label: '部门名称', prop: 'deptName', align: 'left', width: 200, },
-	{ label: '所属仓库', prop: 'warehouseName', align: 'left',  },
-	{ label: '领料人', prop: 'receiverName', align: 'left', },
+	{ label: '出库主题', prop: 'warehouseOutTitle', align: 'left', width: 140 },
+	{ label: '部门名称', prop: 'deptName', align: 'left', width: 200 },
+	{ label: '所属仓库', prop: 'warehouseName', align: 'left' },
+	{ label: '领料人', prop: 'receiverName', align: 'left' },
 	{
 		label: '状态',
 		prop: 'status',
@@ -231,16 +242,10 @@ const tableColumns = ref([
 			if (row.status === null || row.status === undefined) {
 				return [h(ElTag, { type: 'info' }, { default: () => '待验收' })]
 			}
-			return [
-				h(
-					ElTag,
-					{ type: getAcceptanceStatusType(row.status) },
-					{ default: () => getAcceptanceStatusLabel(row.status) }
-				),
-			]
+			return [h(ElTag, { type: getAcceptanceStatusType(row.status) }, { default: () => getAcceptanceStatusLabel(row.status) })]
 		},
 	},
-	{ label: '创建人', prop: 'createByName', align: 'left',  },
+	{ label: '创建人', prop: 'createByName', align: 'left' },
 	{ label: '创建时间', prop: 'createTime', align: 'center', width: 160 },
 	{ label: '确认人', prop: 'confirmByName', align: 'left', width: 120 },
 	{ label: '确认时间', prop: 'confirmTime', align: 'center', width: 160 },
@@ -284,8 +289,8 @@ const tableColumns = ref([
 						disabled: isDisabled,
 						permission: 'equipment:materialWarehouseOut:delete',
 					},
-					{ default: () => '删除' }
-				)
+					{ default: () => '删除' },
+				),
 			)
 
 			return buttons
@@ -325,7 +330,7 @@ const add = () => {
 		detailRef.value.init(true)
 	})
 }
-const getAcceptanceStatusLabel = (status) => {
+const getAcceptanceStatusLabel = status => {
 	const statusMap = {
 		0: '待确认',
 		1: '已确认',
@@ -333,7 +338,7 @@ const getAcceptanceStatusLabel = (status) => {
 	return statusMap[status] || '未知'
 }
 
-const getAcceptanceStatusType = (status) => {
+const getAcceptanceStatusType = status => {
 	const typeMap = {
 		0: 'info',
 		1: 'success',
@@ -496,4 +501,3 @@ init()
 	background: #f5f7fa;
 }
 </style>
-
