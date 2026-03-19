@@ -25,7 +25,7 @@ import materialApplicationApi from '@/api/equipment/materialApplication/index'
 //查询
 const baseTableRef = ref()
 const total = ref()
-const tableHeight = reactive(window.innerHeight - 250)
+const tableHeight = reactive(window.innerHeight - 280)
 
 const getList = e => {
 	const params = {
@@ -127,7 +127,7 @@ const tableColumns = reactive([
 	{
 		prop: 'unit',
 		label: '单位',
-    align: 'center',
+		align: 'center',
 		width: 70,
 	},
 	// {
@@ -201,7 +201,7 @@ const selectAllChangeEvent = res => {
 	checkData.value = res
 }
 
-const init = (supplierId) => {
+const init = supplierId => {
 	// 重置查询条件
 	queryParams.value = {
 		startPage: 1,
@@ -225,4 +225,3 @@ defineExpose({
 	init,
 })
 </script>
-

@@ -39,7 +39,7 @@ const props = defineProps({
 //查询
 const baseTableRef = ref()
 const total = ref()
-const tableHeight = reactive(window.innerHeight - 250)
+const tableHeight = reactive(window.innerHeight - 280)
 
 const getList = e => {
 	const params = {

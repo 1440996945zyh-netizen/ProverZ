@@ -504,7 +504,7 @@ const init = async () => {
 
 const buttonList = reactive([
 	{
-		label: '新建',
+		label: '新增', // 按钮名称
 		type: 'primary',
 		icon: 'Plus',
 		click: () => add,
