@@ -31,10 +31,13 @@
 
 <script setup name="equipmentScrapIndex">
 import { ref, reactive, getCurrentInstance, nextTick, watch, onMounted, h } from 'vue'
-import { ElButton, ElTag } from 'element-plus'
+import { ElButton, ElTag, ElMessageBox } from 'element-plus'
+import { useRoute, useRouter } from 'vue-router'
 import BaseTable from '@/components/BaseTable/index.vue'
 import operation from './operation.vue'
+import DropDown from '@/components/DropDown/newIndex'
 import api from '@/api/equipment/equipmentChangeApply/equipmentScrap'
+import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
 
 const props = defineProps({
 	searchParams: {
@@ -46,6 +49,9 @@ const props = defineProps({
 const emit = defineEmits(['showDrawer'])
 
 const { proxy } = getCurrentInstance()
+const route = useRoute()
+const router = useRouter()
+const { startProcess, loading: processLoading } = useProcessStarter()
 
 const baseTableRef = ref()
 const operationRef = ref()
@@ -69,7 +75,7 @@ const currentSearchParams = ref({
 	title: '',
 	useCompanyId: null,
 	useOrgId: null,
-	status: null
+	processStatus: null
 })
 
 // 表格列配置
@@ -113,18 +119,21 @@ const tableColumns = ref([
 		width: 100
 	},
 	{
-		prop: 'status',
+		prop: 'processStatus',
 		label: '审批状态',
 		align: 'center',
 		width: 120,
 		render: (row) => {
 			const statusMap = {
-				'1': { type: 'warning', text: '审批中' },
-				'2': { type: 'success', text: '审批成功' },
-				'3': { type: 'danger', text: '审批未通过' }
+				0: { label: '未发起', type: 'info' },
+				1: { label: '审批中', type: 'warning' },
+				2: { label: '审批通过', type: 'success' },
+				3: { label: '审批不通过', type: 'danger' },
+				4: { label: '已办结', type: 'success' },
+				5: { label: '作废', type: 'danger' },
 			}
-			const status = statusMap[row.status] || { type: 'info', text: '未知' }
-			return h(ElTag, { type: status.type, effect: 'dark' }, () => status.text)
+			const status = statusMap[row.processStatus] || { label: '未知', type: 'info' }
+			return h(ElTag, { type: status.type, effect: 'dark' }, () => status.label)
 		}
 	},
 	{
@@ -140,18 +149,48 @@ const tableColumns = ref([
 		width: 100,
 		fixed: 'right',
 		render: (row) => {
+			const dropDownList = [
+				{
+					name: '查看',
+					command: '查看',
+					type: 'primary',
+					icon: 'View',
+					click: () => openDrawer('view', row),
+					permission: 'equipment:equipScrap:query',
+					vif: true
+				},
+				{
+					name: '发起',
+					command: '发起',
+					type: 'primary',
+					icon: 'Promotion',
+					click: () => handleInitiate(row),
+					permission: 'bpm:equipment:controller:submitEquipScrap',
+					vif: row.processStatus == 0 || row.processStatus == null
+				},
+				{
+					name: '审批历史',
+					command: '审批历史',
+					type: 'primary',
+					icon: 'Histogram',
+					permission: 'equipment:equipScrap:history',
+					click: () => handleHistory(row),
+					vif: row.processStatus != 0 && row.processStatus != null
+				},
+				{
+					name: '删除',
+					command: '删除',
+					type: 'danger',
+					icon: 'Delete',
+					click: () => handleDelete(row),
+					permission: 'equipment:equipScrap:delete',
+					vif: row.processStatus == 0 || row.processStatus == null
+				},
+			]
 			return [
-				h(
-					ElButton,
-					{
-						onClick: () => openDrawer('view', row),
-						type: 'primary',
-						link: true,
-						icon: 'View',
-						permission: 'equipment:equipScrap:query'
-					},
-					{ default: () => '查看' }
-				)
+				h(DropDown, {
+					dropDownList,
+				}),
 			]
 		}
 	}
@@ -224,6 +263,72 @@ const loadDetail = id => {
 			proxy.$message.error(res.msg)
 		}
 	})
+}
+
+const handleUpdate = row => {
+	openDrawer('edit', row)
+}
+
+/** 发起审批回调 */
+const submitEquipScrapCallback = ({ rowData, processDefinitionId, variables, startUserSelectAssignees, businessId }) => {
+	let params = {
+		businessDataId: rowData.id,
+		variables: variables,
+		startUserSelectAssignees: startUserSelectAssignees,
+		processDefinitionId: processDefinitionId,
+		businessId: businessId,
+	}
+	return api.submitEquipScrap(params)
+}
+
+/** 发起审批 */
+const handleInitiate = row => {
+	api.getDetail(row.id).then(res => {
+		if (res.code === '0000' && res.data) {
+			startProcess({
+				rowData: res.data,
+				businessId: route.meta?.menuId,
+				businessTypeCode: 'bpm:equipment:controller:submitEquipScrap',
+				businessSubmit: submitEquipScrapCallback,
+				onSuccess() {
+					proxy.$modal.msgSuccess('发起成功')
+					getList()
+				},
+				onError(err) {
+					proxy.$modal.msgError(err.message || '发起失败')
+				}
+			})
+		}
+	})
+}
+
+/** 审批历史 */
+const handleHistory = row => {
+	if (!row.procInstId) {
+		proxy.$message.warning('暂无审批历史')
+		return
+	}
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: row.procInstId,
+		},
+	})
+}
+
+const handleDelete = row => {
+	ElMessageBox.confirm('是否确定删除该条报废申请数据？', '提示', {
+		type: 'warning',
+	}).then(() => {
+		api.delete(row.id).then(res => {
+			if (res.code === '0000') {
+				proxy.$message.success('删除成功')
+				getList()
+			} else {
+				proxy.$message.error(res.msg || '删除失败')
+			}
+		})
+	}).catch(() => {})
 }
 
 const handleAddSubmit = async () => {

@@ -146,6 +146,41 @@ const api = {
 			params: params,
 			responseType: 'blob'
 		})
+	},
+
+	/**
+	 * 设备报废提交审批
+	 * @param {Object} data
+	 */
+	submitEquipScrap(data) {
+		return request({
+			url: '/api/v1/internal/equipScrap/submitEquipScrap',
+			method: 'post',
+			data: data
+		})
+	},
+
+	/**
+	 * 删除设备报废申请
+	 * @param {Number|String} id
+	 */
+	delete(id) {
+		return request({
+			url: '/api/v1/internal/equipScrap/delete/' + id,
+			method: 'delete'
+		})
+	},
+
+	/**
+	 * 批量删除设备报废申请
+	 * @param {Array} ids
+	 */
+	deleteBatch(ids) {
+		return request({
+			url: '/api/v1/internal/equipScrap/deleteBatch',
+			method: 'delete',
+			data: ids
+		})
 	}
 }
 

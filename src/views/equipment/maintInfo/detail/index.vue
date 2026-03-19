@@ -114,7 +114,7 @@
 							<el-form-item label="派工类型" prop="dispatchTypeCode">
 								<el-select v-model="formData.dispatchTypeCode" placeholder="请选择派工类型" style="width: 100%" @change="handleDispatchTypeChange">
 									<el-option label="委内" :value="'1'" />
-									<el-option label="委外" :value="'2'" />
+									<el-option label="大包" :value="'2'" />
 									<el-option label="定额" :value="'3'" />
 									<el-option label="非定额" :value="'4'" />
 									<el-option label="其他" :value="'5'" />
@@ -321,7 +321,7 @@ const formData = reactive({
 	faultDesc: '',
 	reportTypeCode: '', // 报修类型由外部设置
 	reportTypeName: '', // 报修类型由外部设置
-	dispatchTypeCode: '', // 派工类型：1-委内，2-委外
+	dispatchTypeCode: '', // 派工类型：
 	dispatchTypeName: '',
 	mantAppNumber: '',
 	maintOrgId: null,
@@ -687,7 +687,7 @@ const loadDeptList = () => {
 		return
 	}
 
-	// 委内(1)查询内部单位(outType=1)，委外/定额/非定额/其他(2/3/4/5)查询外部单位(outType=2)
+	// 委内(1)查询内部单位(outType=1)大包/定额/非定额/其他(2/3/4/5)查询外部单位(outType=2)
 	const outType = formData.dispatchTypeCode === '1' ? '1' : '2'
 
 	// 使用新的接口查询维修单位
@@ -729,7 +729,7 @@ const loadUserList = (deptId) => {
 const handleDispatchTypeChange = (value) => {
 	const typeMap = {
 		'1': '委内',
-		'2': '委外',
+		'2': '大包',
 		'3': '定额',
 		'4': '非定额',
 		'5': '其他'
@@ -921,7 +921,7 @@ watch(() => formData.dispatchTypeCode, (newVal) => {
 	if (newVal) {
 		const typeMap = {
 			'1': '委内',
-			'2': '委外',
+			'2': '大包',
 			'3': '定额',
 			'4': '非定额',
 			'5': '其他'

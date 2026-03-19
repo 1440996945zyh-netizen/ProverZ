@@ -281,9 +281,9 @@ const loading = ref(false)
 const tableColumns = ref([
 	{ label: '', type: 'checkbox', width: 50, fixed: 'left' },
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
-	{ label: '工单号', prop: 'workOrderNo', align: 'left', width: 200 },
+	{ label: '工单号', prop: 'workOrderNo', align: 'left', width: 200, fixed: 'left' },
+	{ label: '设备名称', prop: 'equipName', align: 'left', width: 150, fixed: 'left' },
 	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 200 },
-	{ label: '设备名称', prop: 'equipName', align: 'left', width: 150 },
 	{ label: '设备编码', prop: 'equipCode', align: 'left', width: 170 },
 	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 170 },
 
@@ -470,7 +470,7 @@ const tableColumns = ref([
 					icon: 'Delete',
 					click: () => handleDelete(row),
 					permission: 'equipment:maintInfo:delete',
-					vif: row.status === 0 || row.status === 7
+					vif: row.status === 0
 				}
 			]
 			return [
@@ -917,26 +917,32 @@ const getStatistics = () => {
 				{
 					total: statistics.value.reportCount,
 					name: '提报',
+					startColor: '#909399', endColor: '#606266'
 				},
 				{
 					total: statistics.value.dispatchCount,
 					name: '已派工',
+					startColor: '#E6A23C', endColor: '#CF9236'
 				},
 				{
 					total: statistics.value.maintCount,
 					name: '维修中',
+					startColor: '#409EFF', endColor: '#3a8ee6'
 				},
 				{
 					total: statistics.value.finishCount,
 					name: '维修完成',
+					startColor: '#409EFF', endColor: '#3a8ee6'
 				},
 				{
 					total: statistics.value.acceptCount,
 					name: '已验收',
+					startColor: '#67C23A', endColor: '#5daf34'
 				},
 				{
 					total: statistics.value.cancelCount,
 					name: '作废',
+					startColor: '#F56C6C', endColor: '#f78989'
 				}
 			]
 		}
@@ -1638,8 +1644,49 @@ const hourFeedbackColumns = reactive([
 
 const hourFeedbackEditRules = ref({
 	maintUserId: proxy.getRules({ required: true }),
-	startTime: proxy.getRules({ required: true }),
-	endTime: proxy.getRules({ required: true }),
+	startTime: [
+		{ required: true, message: '请选择开始时间', trigger: 'change' },
+		{
+			validator: ({ cellValue }) => {
+				if (!cellValue) return Promise.resolve()
+				const startMaintTime = parseDateTimeValue(endMaintForm.value.maintStartTime)
+				const endMaintTime = parseDateTimeValue(endMaintForm.value.maintEndTime)
+				const currentTime = parseDateTimeValue(cellValue)
+				if (startMaintTime && currentTime < startMaintTime) {
+					return Promise.reject(new Error('不能早于维修开始时间'))
+				}
+				if (endMaintTime && currentTime > endMaintTime) {
+					return Promise.reject(new Error('不能晚于维修结束时间'))
+				}
+				return Promise.resolve()
+			},
+			trigger: 'change'
+		}
+	],
+	endTime: [
+		{ required: true, message: '请选择结束时间', trigger: 'change' },
+		{
+			validator: ({ row, cellValue }) => {
+				if (!cellValue) return Promise.resolve()
+				const startMaintTime = parseDateTimeValue(endMaintForm.value.maintStartTime)
+				const endMaintTime = parseDateTimeValue(endMaintForm.value.maintEndTime)
+				const currentTime = parseDateTimeValue(cellValue)
+				const startTime = parseDateTimeValue(row.startTime)
+
+				if (startMaintTime && currentTime < startMaintTime) {
+					return Promise.reject(new Error('不能早于维修开始时间'))
+				}
+				if (endMaintTime && currentTime > endMaintTime) {
+					return Promise.reject(new Error('不能晚于维修结束时间'))
+				}
+				if (startTime && currentTime < startTime) {
+					return Promise.reject(new Error('不能早于开始时间'))
+				}
+				return Promise.resolve()
+			},
+			trigger: 'change'
+		}
+	],
 })
 
 const handleHourFeedbackDateChange = (row) => {

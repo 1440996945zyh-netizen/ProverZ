@@ -1,8 +1,32 @@
 <template>
 	<div class="formData">
 		<el-form ref="ruleForm" :model="formData" :rules="rules" label-position="top">
-			<el-row :gutter="20">
+			<el-row :gutter="20" v-if="formData.id">
 				<el-col :span="8">
+					<el-form-item label="结算单号" prop="settlementNo">
+						<el-input v-model="formData.settlementNo" disabled />
+					</el-form-item>
+				</el-col>
+				<el-col :span="8">
+					<el-form-item label="申请时间" prop="applyTime">
+						<el-date-picker
+							v-model="formData.applyTime"
+							type="datetime"
+							value-format="YYYY-MM-DD HH:mm:ss"
+							disabled
+							style="width: 100%"
+						/>
+					</el-form-item>
+				</el-col>
+				<el-col :span="8">
+					<el-form-item label="申请人" prop="applyUserName">
+						<el-input v-model="formData.applyUserName" disabled />
+					</el-form-item>
+				</el-col>
+			</el-row>
+
+			<el-row :gutter="20">
+				<el-col :span="6">
 					<el-form-item label="维修单位" prop="maintOrgId">
 						<Select
 							:selectData="maintOrgOptions"
@@ -14,7 +38,7 @@
 						/>
 					</el-form-item>
 				</el-col>
-				<el-col :span="8">
+				<el-col :span="6">
 					<el-form-item label="项目类型" prop="projectType">
 						<el-select
 							v-model="formData.projectType"
@@ -28,43 +52,22 @@
 						</el-select>
 					</el-form-item>
 				</el-col>
-				<el-col :span="8">
+				<el-col :span="6">
 					<el-form-item label="预算金额合计(元)" prop="totalBudgetAmount">
 						<el-input-number v-model="formData.totalBudgetAmount" :precision="4" :controls="false" disabled style="width: 100%" />
+					</el-form-item>
+				</el-col>
+				<el-col :span="6">
+					<el-form-item label="实际金额合计(元)" prop="totalActualAmount">
+						<el-input-number v-model="formData.totalActualAmount" :precision="4" :controls="false" disabled style="width: 100%" />
 					</el-form-item>
 				</el-col>
 			</el-row>
 
 			<el-row :gutter="20">
-				<el-col :span="8">
-					<el-form-item label="实际金额合计(元)" prop="totalActualAmount">
-						<el-input-number v-model="formData.totalActualAmount" :precision="4" :controls="false" disabled style="width: 100%" />
-					</el-form-item>
-				</el-col>
-				<el-col :span="8" v-if="formData.id">
-					<el-form-item label="结算单号" prop="settlementNo">
-						<el-input v-model="formData.settlementNo" disabled />
-					</el-form-item>
-				</el-col>
-				<el-col :span="8" v-if="formData.id">
-					<el-form-item label="申请人" prop="applyUserName">
-						<el-input v-model="formData.applyUserName" disabled />
-					</el-form-item>
-				</el-col>
-				<el-col :span="8" v-if="formData.id">
-					<el-form-item label="申请时间" prop="applyTime">
-						<el-date-picker
-							v-model="formData.applyTime"
-							type="datetime"
-							value-format="YYYY-MM-DD HH:mm:ss"
-							disabled
-							style="width: 100%"
-						/>
-					</el-form-item>
-				</el-col>
-				<el-col :span="16">
+				<el-col :span="24">
 					<el-form-item label="备注" prop="remark">
-						<el-input v-model="formData.remark" type="textarea" :rows="1" :disabled="isViewMode" placeholder="请输入备注" />
+						<el-input v-model="formData.remark" type="textarea" :rows="3" :disabled="isViewMode" placeholder="请输入备注" />
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -75,7 +78,7 @@
 					<div v-if="!isViewMode" class="sub-table-btns">
 						<el-button type="primary" size="small" @click="openWorkOrderDialog" :disabled="!formData.maintOrgId || !formData.projectType">选择工单</el-button>
 						<el-button v-if="formData.subList && formData.subList.length > 0" type="warning" size="small" @click="clearSubList">清空明细</el-button>
-						<el-tooltip content="更换单位或项目类型需先清空明细" placement="top">
+						<el-tooltip content="更换单位或项目定额需先清空明细" placement="top">
 							<el-icon style="margin-left: 8px; vertical-align: middle; color: #909399; cursor: help"><QuestionFilled /></el-icon>
 						</el-tooltip>
 					</div>
@@ -128,7 +131,8 @@
 				@checkbox-change="handleWorkOrderSelection"
 				@checkbox-all="handleWorkOrderSelection"
 				:row-config="{ keyField: 'id' }"
-				:tableHeight="400"
+				:tableHeight="tableHeight"
+
 			/>
 			<template #footer>
 				<div style="display: flex; justify-content: flex-end; gap: 10px">
@@ -149,6 +153,9 @@ import Select from '@/components/Select/index.vue'
 import api from '@/api/equipment/costSettlement/index'
 import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
 import publicApi from '@/api/public/index'
+import tableParamsStore from '@/store/modules/tableParams'
+const tableHeight = computed(() => tableParamsStore().dialogPageTableHeight)
+
 
 const props = defineProps({
 	isViewMode: {

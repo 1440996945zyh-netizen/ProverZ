@@ -9,10 +9,10 @@
 		>
 			<el-row>
 				<el-col :span="12">
-					<el-form-item label="使用单位" prop="useCompanyId">
+					<el-form-item label="所属单位" prop="useCompanyId">
 					<el-select
 						v-model="baseForm.useCompanyId"
-						placeholder="请选择使用单位"
+						placeholder="请选择所属单位"
 						clearable
 						filterable
 						:disabled="readonly"
@@ -76,7 +76,7 @@
 
 			<el-table :data="selectedEquipList" border style="width: 100%">
 				<el-table-column type="index" label="序号" width="60" align="center" />
-				<el-table-column label="使用单位" prop="useCompanyName" min-width="120" />
+				<el-table-column label="所属单位" prop="useCompanyName" min-width="120" />
 				<el-table-column label="使用部门" prop="useOrgName" min-width="120" />
 				<el-table-column label="设备名称" prop="equipName" min-width="120" />
 				<el-table-column label="设备编号" prop="equipCode" min-width="120" />
@@ -126,7 +126,7 @@
 				<div class="left-table">
 					<el-table :data="equipList" border height="50vh" v-loading="equipLoading">
 						<el-table-column type="index" label="序号" width="50" align="center" />
-						<el-table-column label="使用单位" prop="useCompanyName" min-width="120" />
+						<el-table-column label="所属单位" prop="useCompanyName" min-width="120" />
 						<el-table-column label="使用部门" prop="useOrgName" min-width="120" />
 						<el-table-column label="设备名称" prop="equipName" min-width="120" />
 						<el-table-column label="设备编号" prop="equipCode" min-width="120" />
@@ -222,7 +222,7 @@ const baseForm = reactive({
 
 const baseFormRules = {
 	useCompanyId: [
-		{ required: true, message: '请选择使用单位', trigger: 'change' }
+		{ required: true, message: '请选择所属单位', trigger: 'change' }
 	],
 	useOrgId: [
 		{ required: true, message: '请选择使用部门', trigger: 'change' }
