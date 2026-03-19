@@ -636,7 +636,7 @@ const comparisonHeaderCellClickEvent = even => {
 const handlePurchaseTypeChange = value => {
 	const typeMap = {
 		'01': '比价',
-		'02': '招商',
+		'02': '招标',
 		'03': '定点服务',
 	}
 	form.purchaseTypeName = typeMap[value] || ''
