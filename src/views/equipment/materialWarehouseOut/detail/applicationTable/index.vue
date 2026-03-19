@@ -11,10 +11,14 @@
 		:total="total"
 		:tableHeight="tableHeight"
 		:checkbox-config="checkboxConfig"
-		:expandConfig="{ trigger: 'default' }"
+		:expand-config="{ trigger: 'default', accordion: true }"
 		@checkbox-change="checkboxChange"
 		@selectAllChangeEvent="selectAllChangeEvent"
-	/>
+	>
+		<template #expand="{ row }">
+			<DetailTable :row="row" />
+		</template>
+	</BaseTable>
 </template>
 
 <script setup name="applicationTableForWarehouseOut">
@@ -102,13 +106,17 @@ const DetailTable = {
 		loadDetailList()
 
 		// 监听 detailList 变化，更新行数
-		watch(detailList, (newList) => {
-			if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
-				nextTick(() => {
-					props.onRowCountChange(newList.length)
-				})
-			}
-		}, { immediate: false })
+		watch(
+			detailList,
+			newList => {
+				if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
+					nextTick(() => {
+						props.onRowCountChange(newList.length)
+					})
+				}
+			},
+			{ immediate: false },
+		)
 
 		return () => {
 			if (loading.value) {
@@ -118,79 +126,77 @@ const DetailTable = {
 				return h('div', { style: 'padding: 20px; text-align: center; color: #999;' }, '暂无明细数据')
 			}
 			return h('div', { class: 'detail-table-wrapper' }, [
-				h(ElTable, {
-					data: detailList.value,
-					border: true,
-					size: 'small',
-					style: 'width: 100%'
-				}, [
-					h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
-					h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
-					h(ElTableColumn, { prop: 'unitName', label: '计量单位', align: 'center', width: 100 }),
-					h(ElTableColumn, { prop: 'brand', label: '品牌', width: 120 }),
-					h(ElTableColumn, {
-						prop: 'flowType',
-						label: '流向类型',
-						align: 'center',
-						width: 100,
-						formatter: (row) => {
-							if (row.flowType === '01') {
-								return '设备'
-							} else if (row.flowType === '02') {
-								return '其他'
-							}
-							return row.flowType || '-'
-						}
-					}),
-					h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
-					h(ElTableColumn, {
-						prop: 'equipNames',
-						label: '设备',
-						width: 200,
-						showOverflowTooltip: true,
-						formatter: (row) => {
-							if (row.equipNames) {
-								if (typeof row.equipNames === 'string') {
-									return row.equipNames || '-'
-								} else if (Array.isArray(row.equipNames)) {
-									return row.equipNames.length > 0 ? row.equipNames.join('，') : '-'
+				h(
+					ElTable,
+					{
+						data: detailList.value,
+						border: true,
+						size: 'small',
+						style: 'width: 100%',
+					},
+					[
+						h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
+						h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
+						h(ElTableColumn, { prop: 'unitName', label: '计量单位', align: 'center', width: 100 }),
+						h(ElTableColumn, { prop: 'brand', label: '品牌', width: 120 }),
+						h(ElTableColumn, {
+							prop: 'flowType',
+							label: '流向类型',
+							align: 'center',
+							width: 100,
+							formatter: row => {
+								if (row.flowType === '01') {
+									return '设备'
+								} else if (row.flowType === '02') {
+									return '其他'
 								}
-							}
-							return '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'stockQuantity', 
-						label: '库存数量', 
-						align: 'right', 
-						width: 120,
-						formatter: (row) => {
-							return row.stockQuantity != null ? row.stockQuantity : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'applicationQuantity', 
-						label: '申请数量', 
-						align: 'right', 
-						width: 120,
-						formatter: (row) => {
-							return row.applicationQuantity != null ? row.applicationQuantity : '-'
-						}
-					}),
-				])
+								return row.flowType || '-'
+							},
+						}),
+						h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
+						h(ElTableColumn, {
+							prop: 'equipNames',
+							label: '设备',
+							width: 200,
+							showOverflowTooltip: true,
+							formatter: row => {
+								if (row.equipNames) {
+									if (typeof row.equipNames === 'string') {
+										return row.equipNames || '-'
+									} else if (Array.isArray(row.equipNames)) {
+										return row.equipNames.length > 0 ? row.equipNames.join('，') : '-'
+									}
+								}
+								return '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'stockQuantity',
+							label: '库存数量',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.stockQuantity != null ? row.stockQuantity : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'applicationQuantity',
+							label: '申请数量',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.applicationQuantity != null ? row.applicationQuantity : '-'
+							},
+						}),
+					],
+				),
 			])
 		}
-	}
+	},
 }
 
 const tableData = ref([])
 const tableColumns = reactive([
-	{
-		type: 'expand',
-		width: 50,
-		fixed: 'left',
-		expandSlot: DetailTable
-	},
 	{ label: '', type: 'checkbox', width: 50 },
 	{
 		prop: 'warehouseOutNo',
@@ -207,25 +213,23 @@ const tableColumns = reactive([
 		label: '申请人',
 		minWidth: 120,
 	},
-	{
-		prop: 'createTime',
-		label: '申请时间',
-		minWidth: 150,
-	},
 ])
-
-// 复选框配置
 const checkboxConfig = reactive({
 	reserve: true,
-	highlight: true,
-	range: true,
+	prop: 'createTime',
+	range: true, // 开启复选框范围选择功能
+	visibleMethod: ({}) => {
+		// 返回显示的单选框
+		return true
+	},
+	checkMethod: ({}) => {
+		// 返回可选的单选框
+		return true
+	},
 })
 
-// 选中的数据
-const checkData = ref([])
-
 // 复选框变化事件
-const checkboxChange = (data) => {
+const checkboxChange = data => {
 	if (data && data.records) {
 		checkData.value = data.records
 	} else if (data && Array.isArray(data)) {
@@ -234,7 +238,7 @@ const checkboxChange = (data) => {
 }
 
 // 全选变化事件
-const selectAllChangeEvent = (data) => {
+const selectAllChangeEvent = data => {
 	if (data && data.records) {
 		checkData.value = data.records
 	} else if (data && Array.isArray(data)) {
@@ -249,13 +253,21 @@ const getSelectedData = () => {
 	}
 	return checkData.value || []
 }
+// 复选框选中
+const checkData = ref([])
+// const checkboxChange = res => {
+// 	checkData.value = res
+// }
+// const selectAllChangeEvent = res => {
+// 	getSelectedData,
+// 	checkData.value = res
+// }
 
 // 暴露方法给父组件
 defineExpose({
 	getList,
 	queryParams,
 	checkData,
-	getSelectedData,
 })
 </script>
 

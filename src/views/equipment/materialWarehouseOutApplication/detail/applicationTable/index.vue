@@ -11,10 +11,14 @@
 		:total="total"
 		:tableHeight="tableHeight"
 		:checkbox-config="checkboxConfig"
-		:expandConfig="{ trigger: 'default' }"
+		:expand-config="{ trigger: 'default', accordion: true }"
 		@checkbox-change="checkboxChange"
 		@selectAllChangeEvent="selectAllChangeEvent"
-	/>
+	>
+		<template #expand="{ row }">
+			<DetailTable :row="row" />
+		</template>
+	</BaseTable>
 </template>
 
 <script setup name="applicationTableForWarehouseOut">
@@ -122,14 +126,28 @@ const DetailTable = {
 		loadDetailList()
 
 		// 监听 detailList 变化，更新行数
-		watch(detailList, (newList) => {
-			if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
-				nextTick(() => {
-					props.onRowCountChange(newList.length)
-				})
+		watch(
+			detailList,
+			newList => {
+				if (props.onRowCountChange && typeof props.onRowCountChange === 'function') {
+					nextTick(() => {
+						props.onRowCountChange(newList.length)
+					})
+				}
+			},
+			{ immediate: false },
+		)
+		// 格式化金额（千分位）
+		const formatAmount = value => {
+			if (value == null || value === '') {
+				return '-'
 			}
-		}, { immediate: false })
-
+			const num = Number(value)
+			if (isNaN(num)) {
+				return value
+			}
+			return num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+		}
 		return () => {
 			if (loading.value) {
 				return h('div', { style: 'padding: 20px; text-align: center;' }, '加载中...')
@@ -138,98 +156,96 @@ const DetailTable = {
 				return h('div', { style: 'padding: 20px; text-align: center; color: #999;' }, '暂无明细数据')
 			}
 			return h('div', { class: 'detail-table-wrapper' }, [
-				h(ElTable, {
-					data: detailList.value,
-					border: true,
-					size: 'small',
-					style: 'width: 100%'
-				}, [
-					h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
-					h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
-					h(ElTableColumn, { prop: 'suggestedBrand', label: '建议品牌', width: 150 }),
-					h(ElTableColumn, { 
-						prop: 'applicationQuantity', 
-						label: '申报数量', 
-						align: 'right', 
-						width: 100,
-						formatter: (row) => {
-							return row.applicationQuantity != null ? row.applicationQuantity : '-'
-						}
-					}),
-					h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
-					h(ElTableColumn, { 
-						prop: 'estimatedPrice', 
-						label: '估价(元)', 
-						align: 'right', 
-						width: 100,
-						formatter: (row) => {
-							return row.estimatedPrice != null ? row.estimatedPrice : '-'
-						}
-					}),
-					h(ElTableColumn, { 
-						prop: 'amount', 
-						label: '金额(元)', 
-						align: 'right', 
-						width: 120,
-						formatter: (row) => {
-							return row.amount != null ? row.amount : '-'
-						}
-					}),
-					h(ElTableColumn, {
-						prop: 'flowType',
-						label: '流向类型',
-						align: 'center',
-						width: 100,
-						formatter: (row) => {
-							if (row.flowType === '01') {
-								return '设备'
-							} else if (row.flowType === '02') {
-								return '其他'
-							}
-							return row.flowType || '-'
-						}
-					}),
-					h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
-					h(ElTableColumn, {
-						prop: 'equipNames',
-						label: '设备',
-						width: 200,
-						showOverflowTooltip: true,
-						formatter: (row) => {
-							if (row.equipNames) {
-								if (typeof row.equipNames === 'string') {
-									return row.equipNames || '-'
-								} else if (Array.isArray(row.equipNames)) {
-									return row.equipNames.length > 0 ? row.equipNames.join('，') : '-'
+				h(
+					ElTable,
+					{
+						data: detailList.value,
+						border: true,
+						size: 'small',
+						style: 'width: 100%',
+					},
+					[
+						h(ElTableColumn, { prop: 'materialName', label: '物资名称', width: 150 }),
+						h(ElTableColumn, { prop: 'specificationModel', label: '规格型号', width: 150 }),
+						h(ElTableColumn, { prop: 'suggestedBrand', label: '建议品牌', width: 150 }),
+						h(ElTableColumn, {
+							prop: 'applicationQuantity',
+							label: '申报数量',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.applicationQuantity != null ? row.applicationQuantity : '-'
+							},
+						}),
+						h(ElTableColumn, { prop: 'unit', label: '单位', align: 'center', width: 80 }),
+						h(ElTableColumn, {
+							prop: 'estimatedPrice',
+							label: '估价(元)',
+							align: 'right',
+							width: 100,
+							formatter: row => {
+								return row.estimatedPrice != null ? row.estimatedPrice : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'amount',
+							label: '金额(元)',
+							align: 'right',
+							width: 120,
+							formatter: row => {
+								return row.amount != null ? row.amount : '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'flowType',
+							label: '流向类型',
+							align: 'center',
+							width: 100,
+							formatter: row => {
+								if (row.flowType === '01') {
+									return '设备'
+								} else if (row.flowType === '02') {
+									return '其他'
 								}
-							}
-							return '-'
-						}
-					}),
-					h(ElTableColumn, {
-						prop: 'supplyTimeLimit',
-						label: '供货时限',
-						align: 'center',
-						width: 150,
-						formatter: (row) => {
-							return row.supplyTimeLimit || '-'
-						}
-					}),
-					h(ElTableColumn, { prop: 'specificationDesc', label: '规格描述', width: 150 }),
-				])
+								return row.flowType || '-'
+							},
+						}),
+						h(ElTableColumn, { prop: 'flowDirection', label: '流向', width: 150 }),
+						h(ElTableColumn, {
+							prop: 'equipNames',
+							label: '设备',
+							width: 200,
+							showOverflowTooltip: true,
+							formatter: row => {
+								if (row.equipNames) {
+									if (typeof row.equipNames === 'string') {
+										return row.equipNames || '-'
+									} else if (Array.isArray(row.equipNames)) {
+										return row.equipNames.length > 0 ? row.equipNames.join('，') : '-'
+									}
+								}
+								return '-'
+							},
+						}),
+						h(ElTableColumn, {
+							prop: 'supplyTimeLimit',
+							label: '供货时限',
+							align: 'center',
+							width: 150,
+							formatter: row => {
+								return row.supplyTimeLimit || '-'
+							},
+						}),
+						h(ElTableColumn, { prop: 'specificationDesc', label: '规格描述', width: 150 }),
+					],
+				),
 			])
 		}
-	}
+	},
 }
 
 const tableData = ref([])
 const tableColumns = reactive([
-	{
-		type: 'expand',
-		width: 50,
-		fixed: 'left',
-		expandSlot: DetailTable
-	},
 	{ label: '', type: 'checkbox', width: 50 },
 	{
 		prop: 'applicationNo',
@@ -291,7 +307,7 @@ const selectAllChangeEvent = res => {
 	checkData.value = res
 }
 
-const init = (initDate) => {
+const init = initDate => {
 	if (initDate) {
 		// 可以在这里初始化搜索条件
 	}
