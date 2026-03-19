@@ -48,36 +48,36 @@ const selectData = reactive([
 		name: '申请单号',
 		type: 'input',
 		modelValue: 'applicationNo',
-		span: 4,
+		span: 6,
 	},
 	{
 		name: '物资名称',
 		type: 'input',
 		modelValue: 'materialName',
-		span: 4,
+		span: 6,
 	},
 	{
 		name: '申请开始时间',
 		type: 'date',
 		modelValue: 'startDate',
-		span: 5,
+		span: 6,
 	},
 	{
 		name: '申请结束时间',
 		type: 'date',
 		modelValue: 'endDate',
-		span: 5,
+		span: 6,
 	},
-	{
-		name: '采购状态',
-		type: 'select',
-		modelValue: 'purchaseStatus',
-		span: 4,
-		selectData: [
-			{ value: '0', label: '待采购' },
-			{ value: '1', label: '已采购' },
-		],
-	},
+	// {
+	// 	name: '采购状态',
+	// 	type: 'select',
+	// 	modelValue: 'purchaseStatus',
+	// 	span: 4,
+	// 	selectData: [
+	// 		{ value: '0', label: '待采购' },
+	// 		{ value: '1', label: '已采购' },
+	// 	],
+	// },
 ])
 
 const queryParams = ref({
