@@ -926,6 +926,7 @@ const saveApplicationDetails = () => {
 					unitName: materialOption ? materialOption.unitName || detail.unit || '' : detail.unit || '', // 优先使用物资代码的单位，否则使用申报明细的单位
 					brand: detail.suggestedBrand || '', // 使用建议品牌
 					stockQuantity: detail.stockQuantity != null ? detail.stockQuantity : null, // 使用接口返回的库存数量
+					availableInventory: detail.availableInventory != null ? detail.availableInventory : null, // 使用接口返回的库存数量
 					applicationQuantity: detail.applicationQuantity || null, // 使用申报数量
 					flowType: detail.flowType || '02', // 使用流向类型，默认"其他"
 					flowDirection: detail.flowDirection || '', // 使用流向
