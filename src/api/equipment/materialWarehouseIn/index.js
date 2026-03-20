@@ -97,6 +97,24 @@ const api = {
 			params,
 		})
 	},
+
+	/**
+	 * 查询物资可用库存数量（按物资ID和仓库ID）
+	 * @param {Number} materialId 物资ID
+	 * @param {Number} warehouseId 仓库ID（可选，不传时查询所有仓库的库存总和）
+	 * @returns
+	 */
+	getAvailableInventory(materialId, warehouseId) {
+		const params = { materialId }
+		if (warehouseId !== undefined && warehouseId !== null) {
+			params.warehouseId = warehouseId
+		}
+		return request({
+			url: `${url}/getAvailableInventory`,
+			method: 'get',
+			params,
+		})
+	},
 }
 
 export default api

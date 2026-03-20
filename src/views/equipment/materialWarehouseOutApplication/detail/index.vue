@@ -276,6 +276,35 @@ const loadStockQuantity = row => {
 		})
 }
 
+// 加载库存数量
+const loadAvailableInventory = row => {
+	console.log('loadStockQuantityloadAvailableInventory 函数被调用 - row:', row, 'form.warehouseId:', form.warehouseId)
+	if (!row.materialId) {
+		console.log('loadAvailableInventory - materialId为空，返回')
+		row.availableInventory = null
+		return
+	}
+	if (!form.warehouseId) {
+		console.warn('loadAvailableInventory - 仓库未选择，无法查询可用库存数量')
+		row.availableInventory = null
+		return
+	}
+	console.log('loadAvailableInventory - 开始查询可用库存数量 - materialId:', row.materialId, 'warehouseId:', form.warehouseId)
+	materialWarehouseInApi
+		.getAvailableInventory(row.materialId, form.warehouseId)
+		.then(res => {
+			console.log('可用库存数量查询结果:', res)
+			if (res.code === '0000' && res.data !== null && res.data !== undefined) {
+				row.availableInventory = res.data
+			} else {
+				row.availableInventory = 0
+			}
+		})
+		.catch(error => {
+			console.error('加载库存数量失败:', error)
+			row.availableInventory = 0
+		})
+}
 // 监听仓库变化，重新加载所有明细的库存数量
 watch(
 	() => form.warehouseId,
@@ -284,6 +313,7 @@ watch(
 			detailList.forEach(row => {
 				if (row.materialId) {
 					loadStockQuantity(row)
+					loadAvailableInventory(row)
 				}
 			})
 		} else {
@@ -393,6 +423,12 @@ const detailColumns = reactive([
 	{
 		label: '库存数量',
 		prop: 'stockQuantity',
+		width: 120,
+		align: 'right',
+	},
+	{
+		label: '可用库存',
+		prop: 'availableInventory',
 		width: 120,
 		align: 'right',
 	},
