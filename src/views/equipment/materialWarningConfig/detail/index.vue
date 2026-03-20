@@ -9,9 +9,7 @@
 				</el-input>
 			</el-form-item>
 
-			<el-form-item label="物资编码">
-				<el-input v-model="formData.materialCode" disabled placeholder="自动带出" />
-			</el-form-item>
+			
 
 			<el-form-item label="规格型号">
 				<el-input v-model="formData.specificationModel" disabled placeholder="自动带出" />
@@ -19,6 +17,9 @@
 
 			<el-form-item label="计量单位">
 				<el-input v-model="formData.unitName" disabled placeholder="自动带出" />
+			</el-form-item>
+			<el-form-item label="品牌">
+				<el-input v-model="formData.brand" disabled placeholder="自动带出" />
 			</el-form-item>
 
 			<el-form-item label="预警阈值" prop="warningThreshold">
@@ -79,9 +80,9 @@
 				max-height="400"
 			>
 				<el-table-column type="index" width="50" label="序号" align="center" />
-				<el-table-column prop="materialCode" label="物资编码" min-width="150" show-overflow-tooltip />
 				<el-table-column prop="materialName" label="物资名称" min-width="180" show-overflow-tooltip />
 				<el-table-column prop="specificationModel" label="规格型号" min-width="150" show-overflow-tooltip />
+				<el-table-column prop="brand" label="品牌" min-width="150" show-overflow-tooltip />
 				<el-table-column prop="unitName" label="计量单位" width="100" align="center" />
 			</el-table>
 			<el-pagination
@@ -133,7 +134,7 @@ const data = reactive({
 		id: null,
 		materialId: null,
 		materialName: '',
-		materialCode: '',
+		brand: '',
 		specificationModel: '',
 		unitName: '',
 		warningThreshold: null,
@@ -146,7 +147,7 @@ const { formData } = toRefs(data)
 
 const rules = reactive({
 	materialId: proxy.getRules({ required: true, message: '请选择物资' }),
-	warningThreshold: proxy.getRules({ required: true, message: '请输入预警阈值' }),
+	// warningThreshold: proxy.getRules({ required: true, message: '请输入预警阈值' }),
 	status: proxy.getRules({ required: true }),
 })
 
@@ -183,7 +184,7 @@ const confirmMaterialSelect = () => {
 	}
 	formData.value.materialId = currentMaterialRow.value.id
 	formData.value.materialName = currentMaterialRow.value.materialName
-	formData.value.materialCode = currentMaterialRow.value.materialCode
+	formData.value.brand = currentMaterialRow.value.brand
 	formData.value.specificationModel = currentMaterialRow.value.specificationModel || ''
 	formData.value.unitName = currentMaterialRow.value.unitName || ''
 	materialDialogVisible.value = false
@@ -225,7 +226,7 @@ const resetForm = () => {
 	formData.value.id = null
 	formData.value.materialId = null
 	formData.value.materialName = ''
-	formData.value.materialCode = ''
+	formData.value.brand = ''
 	formData.value.specificationModel = ''
 	formData.value.unitName = ''
 	formData.value.warningThreshold = null

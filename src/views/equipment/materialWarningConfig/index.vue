@@ -60,11 +60,11 @@ const { queryParams } = toRefs(data)
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '物资名称', prop: 'materialName', align: 'left', minWidth: 180, showOverFlow: true },
-	{ label: '物资编码', prop: 'materialCode', align: 'left', minWidth: 150, showOverFlow: true },
 	{ label: '规格型号', prop: 'specificationModel', align: 'left', minWidth: 150, showOverFlow: true },
+	{ label: '品牌', prop: 'brand', align: 'left', minWidth: 150, showOverFlow: true },
 	{ label: '计量单位', prop: 'unitName', align: 'center', width: 100 },
 	{ label: '预警阈值', prop: 'warningThreshold', align: 'center', width: 100 },
-	{ label: '预警接收人', prop: 'receiverNames', align: 'left', minWidth: 200, showOverFlow: true },
+	// { label: '预警接收人', prop: 'receiverNames', align: 'left', minWidth: 200, showOverFlow: true },
 	{
 		prop: 'status',
 		label: '状态',
@@ -88,7 +88,7 @@ const tableColumns = ref([
 		},
 	},
 	{ label: '创建时间', prop: 'createTime', align: 'center', width: 180 },
-	{ label: '修改时间', prop: 'updateTime', align: 'center', width: 180 },
+	{ label: '创建人', prop: 'createByName', align: 'center', width: 180 },
 	{
 		prop: 'operate',
 		label: '操作',
@@ -106,7 +106,7 @@ const tableColumns = ref([
 						type: 'primary',
 						link: true,
 						icon: 'Edit',
-						permission: 'equipment:materialWarningConfig:update',
+						permission: 'equipment:eMaterialWarningConfig:save',
 					},
 					{
 						default: () => '编辑',
@@ -121,7 +121,7 @@ const tableColumns = ref([
 						type: 'danger',
 						link: true,
 						icon: 'Delete',
-						permission: 'equipment:materialWarningConfig:delete',
+						permission: 'equipment:eMaterialWarningConfig:delete',
 					},
 					{
 						default: () => '删除',
@@ -157,7 +157,7 @@ const buttonList = reactive([
 		type: 'primary',
 		icon: 'Plus',
 		click: () => handleAdd,
-		permission: 'equipment:materialWarningConfig:add',
+		permission: 'equipment:eMaterialWarningConfig:save',
 	},
 ])
 
@@ -203,7 +203,7 @@ const handleUpdate = row => {
 			detailRef.value.formData.id = resData.id
 			detailRef.value.formData.materialId = resData.materialId
 			detailRef.value.formData.materialName = resData.materialName
-			detailRef.value.formData.materialCode = resData.materialCode
+			detailRef.value.formData.brand = resData.brand
 			detailRef.value.formData.specificationModel = resData.specificationModel
 			detailRef.value.formData.unitName = resData.unitName
 			detailRef.value.formData.warningThreshold = resData.warningThreshold
@@ -228,19 +228,11 @@ const handleUpdate = row => {
 const submitForm = async () => {
 	if (await detailRef.value.validate()) {
 		const params = detailRef.value.formData
-		if (params.id) {
-			api.update(params).then(res => {
+		api.save(params).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
 				dialogVisible.value = false
 				getList()
 			})
-		} else {
-			api.add(params).then(res => {
-				proxy.$modal.msgSuccess(res.msg)
-				dialogVisible.value = false
-				getList()
-			})
-		}
 	}
 }
 
