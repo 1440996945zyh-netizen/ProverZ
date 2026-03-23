@@ -91,6 +91,25 @@
 						{{ row.netValue ? Number(row.netValue).toFixed(2) : '-' }}
 					</template>
 				</el-table-column>
+				<el-table-column label="负责人" width="180" align="center" fixed="right">
+					<template #default="{ row }">
+						<el-select
+							v-model="row.responsiCode"
+							placeholder="请选择负责人"
+							clearable
+							filterable
+							:disabled="readonly"
+							@change="(val) => handleEquipUserChange(val, row)"
+						>
+							<el-option
+								v-for="item in selectedDeptUserList"
+								:key="item.value"
+								:label="item.label"
+								:value="item.value"
+							/>
+						</el-select>
+					</template>
+				</el-table-column>
 				<!-- 非只读模式下显示操作列 -->
 				<el-table-column v-if="!readonly" label="操作" width="80" align="center" fixed="right">
 					<template #default="{ $index }">
@@ -111,7 +130,7 @@
 			@close="handleDialogClose"
 		>
 			<!-- 搜索条件 -->
-			<el-form :model="equipSearchForm" :inline="true" label-width="85px">
+			<el-form :model="equipSearchForm" :inline="true" label-width="85px" style="margin-top: 15px">
 				<el-form-item label="所属单位" prop="useCompanyId">
 					<el-select
 						v-model="equipSearchForm.useCompanyId"
@@ -200,10 +219,11 @@
 </template>
 
 <script setup name="equipmentAllocateOperation">
-import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, watch } from 'vue'
 import { formatDate } from '@/utils'
 import api from '@/api/equipment/equipmentChangeApply/equipmentAllocate'
 import { getListByLevel, getListByParentId } from '@/api/system/dept'
+import publicApi from '@/api/public/index'
 
 const props = defineProps({
 	readonly: {
@@ -269,6 +289,7 @@ const equipPagination = reactive({
 
 const companyList = ref([])
 const deptList = ref([])
+const selectedDeptUserList = ref([]) // 调入部门下的用户列表
 
 // 加载公司列表（DEPT_LEVEL=1）
 const loadCompanyList = () => {
@@ -296,6 +317,43 @@ const loadDeptList = (companyId) => {
 			}))
 		}
 	})
+}
+
+// 加载调入部门负责人列表
+const loadSelectedDeptUserList = (deptId) => {
+	if (!deptId) {
+		selectedDeptUserList.value = []
+		return
+	}
+	publicApi.getLocalSelect({
+		type: 'USER',
+		deptId: deptId
+	}).then(res => {
+		if (res.code == '0000') {
+			selectedDeptUserList.value = res.data || []
+		}
+	})
+}
+
+// 监听调入部门变化，刷新负责人列表
+watch(() => baseForm.toOrgId, (newVal) => {
+	if (newVal) {
+		loadSelectedDeptUserList(newVal)
+	} else {
+		selectedDeptUserList.value = []
+	}
+})
+
+// 处理设备负责人变化，同步负责人姓名
+const handleEquipUserChange = (val, row) => {
+	if (val) {
+		const user = selectedDeptUserList.value.find(item => item.value === val)
+		if (user) {
+			row.responsiName = user.label
+		}
+	} else {
+		row.responsiName = ''
+	}
 }
 
 // 处理公司选择变化
@@ -399,6 +457,7 @@ const handleEquipSizeChange = (size) => {
 
 // 添加到预选中列表
 const handleAddToPreSelect = (row) => {
+	console.log('添加的设备原始数据:', row); // 查看这里是否有 useOrgId
 	const equipId = row.equipId || row.id
 	const isExist = preSelectedEquipList.value.some(item => (item.equipId || item.id) === equipId)
 	if (isExist) {
@@ -444,6 +503,13 @@ const validate = async () => {
 		return false
 	}
 
+	// 验证设备是否都选择了负责人
+	const hasEmptyResponsi = selectedEquipList.value.some(item => !item.responsiCode)
+	if (hasEmptyResponsi) {
+		proxy.$message.warning('请为所有设备选择负责人')
+		return false
+	}
+
 	try {
 		await baseFormRef.value.validate()
 		return true
@@ -485,6 +551,11 @@ const loadDetailData = (data) => {
 	// 如果有公司ID，先加载部门列表
 	if (data.toCompanyId) {
 		loadDeptList(data.toCompanyId)
+	}
+
+	// 如果有部门ID，同步加载负责人列表
+	if (data.toOrgId) {
+		loadSelectedDeptUserList(data.toOrgId)
 	}
 
 	// 设置表单数据
@@ -534,7 +605,7 @@ defineExpose({
 .dialog-content {
 	display: flex;
 	gap: 15px;
-	margin-top: 15px;
+	margin-top: 0;
 
 	.left-table {
 		flex: 1;

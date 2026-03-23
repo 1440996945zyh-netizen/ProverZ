@@ -7,6 +7,7 @@
 					ref="basicInfoRef"
 					:formData="formData"
 					:readonly="readonly"
+					:mode="mode"
 					@update:formData="handleFormDataUpdate"
 				/>
 			</el-tab-pane>
@@ -109,6 +110,10 @@ const props = defineProps({
 	readonly: {
 		type: Boolean,
 		default: false
+	},
+	mode: {
+		type: String,
+		default: 'add'
 	}
 })
 
@@ -151,7 +156,7 @@ const handleSaved = () => {
 	loadChangeLogs()
 }
 
-// 加载所有变更记录
+// 加载所有变更记录和下拉数据
 const loadChangeLogs = () => {
 	if (basicInfoRef.value && typeof basicInfoRef.value.loadChangeLog === 'function') {
 		basicInfoRef.value.loadChangeLog()
@@ -161,6 +166,21 @@ const loadChangeLogs = () => {
 	}
 	if (specialInfoRef.value && typeof specialInfoRef.value.loadChangeLog === 'function') {
 		specialInfoRef.value.loadChangeLog()
+	}
+	// 同时触发下拉数据的重新加载
+	loadEditCategoryData()
+}
+
+// 加载下拉列表数据
+const loadEditCategoryData = () => {
+	if (basicInfoRef.value && typeof basicInfoRef.value.loadEditCategoryData === 'function') {
+		basicInfoRef.value.loadEditCategoryData()
+	}
+	if (financeSupplyRef.value && typeof financeSupplyRef.value.loadEditCategoryData === 'function') {
+		financeSupplyRef.value.loadEditCategoryData()
+	}
+	if (specialInfoRef.value && typeof specialInfoRef.value.loadEditCategoryData === 'function') {
+		specialInfoRef.value.loadEditCategoryData()
 	}
 }
 
@@ -409,7 +429,8 @@ defineExpose({
 	resetForm,
 	getSaveMethod,
 	activeTab,
-	loadChangeLogs
+	loadChangeLogs,
+	loadEditCategoryData
 })
 </script>
 
