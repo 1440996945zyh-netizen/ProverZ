@@ -64,7 +64,7 @@ const tableColumns = ref([
 	{ label: '品牌', prop: 'brand', align: 'left', minWidth: 150, showOverFlow: true },
 	{ label: '计量单位', prop: 'unitName', align: 'center', width: 100 },
 	{ label: '预警阈值', prop: 'warningThreshold', align: 'center', width: 100 },
-	// { label: '预警接收人', prop: 'receiverNames', align: 'left', minWidth: 200, showOverFlow: true },
+	{ label: '预警接收人', prop: 'receiverNames', align: 'left', minWidth: 200, showOverFlow: true },
 	{
 		prop: 'status',
 		label: '状态',

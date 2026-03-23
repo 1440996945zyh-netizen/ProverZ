@@ -38,12 +38,12 @@
 					<div class="selected-users">
 						<el-tag
 							v-for="user in selectedUsers"
-							:key="user.id"
+							:key="user.value"
 							closable
 							@close="removeUser(user)"
 							style="margin-right: 8px; margin-bottom: 8px"
 						>
-							{{ user.name }}
+							{{ user.label }}
 						</el-tag>
 					</div>
 					<el-button type="primary" link @click="openUserSelect">
@@ -195,18 +195,21 @@ const openUserSelect = () => {
 }
 
 const handleUserSelectConfirm = (activityId, userList) => {
+
 	selectedUsers.value = userList || []
+	selectedUsers.value = userList
 	updateReceivers()
 }
 
 const removeUser = user => {
-	selectedUsers.value = selectedUsers.value.filter(item => item.id !== user.id)
+	
+	selectedUsers.value = selectedUsers.value.filter(item => item.value !== user.id)
 	updateReceivers()
 }
 
 const updateReceivers = () => {
-	formData.value.receivers = selectedUsers.value.map(item => item.id).join(',')
-	formData.value.receiverNames = selectedUsers.value.map(item => item.name).join(',')
+	formData.value.receivers = selectedUsers.value.map(item => item.value).join(',')
+	formData.value.receiverNames = selectedUsers.value.map(item => item.label).join(',')
 }
 
 const validate = async () => {
