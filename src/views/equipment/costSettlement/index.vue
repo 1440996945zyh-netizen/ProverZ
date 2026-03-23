@@ -104,7 +104,7 @@ const formatNumber = value => {
 const tableColumns = ref([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '结算单号', prop: 'settlementNo', align: 'center', width: 180, fixed: 'left' },
-	{ label: '工单号', prop: 'workOrderNos', align: 'center', width: 250, showOverFlow: true },
+	{ label: '工单号', prop: 'workOrderNos', align: 'center', width: 300, showOverFlow: true },
 	{ label: '维修单位', prop: 'maintOrgName', align: 'center', width: 220, showOverFlow: true },
 	{
 		label: '项目类型',

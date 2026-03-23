@@ -9,7 +9,8 @@
 	  	:tableColumns="tableColumns"
 	  	:tableData="tableData"
 	  	:total="total"
-			:showNum="2"
+			:showNum="3"
+      :defaultWidth="47"
 	  />
 		<!-- 任务明细 -->
 		<el-drawer v-model="isShow" title="任务明细" size="80%">
@@ -32,10 +33,28 @@ import publicApi from '@/api/public/index'
 const { proxy } = getCurrentInstance()
 
 const selectData = reactive([
+  {
+		name: '设备小类',
+		type: 'select',
+		modelValue: 'equipSmallCategoryId',
+		dataConfig: {
+			params: {
+				type: 'EQUIP_TYPE',
+				categoryLevel: '3'
+			},
+		},
+		span: 6,
+	},
+  {
+		name: '设备名称',
+		type: 'input',
+		modelValue: 'equipName',
+		span: 6,
+	},
 	{
     type: 'daterange',
     modelValue: 'date', //对应字段
-    span: 16,
+    span: 12, // 移至末尾，防止左侧菜单遮挡弹窗
     shortcuts: [
       {
         text: '上周',
@@ -190,24 +209,6 @@ const selectData = reactive([
       },
     ],
   },
-  {
-		name: '设备小类',
-		type: 'select',
-		modelValue: 'equipSmallCategoryId',
-		dataConfig: {
-			params: {
-				type: 'EQUIP_TYPE',
-				categoryLevel: '3'
-			},
-		},
-		span: 8,
-	},
-  {
-		name: '设备名称',
-		type: 'input',
-		modelValue: 'equipName',
-		span: 2,
-	},
 	{
 		name: '点检类型',
 		type: 'select',
@@ -220,7 +221,7 @@ const selectData = reactive([
 			{ label: '运行台时', value: '5' },
 			{ label: '里程', value: '6' },
 		],
-		span: 2,
+		span: 4,
 	},
 	{
 		name: '点检状态',
@@ -231,11 +232,11 @@ const selectData = reactive([
 			{ label: '进行中', value: '1' },
 			{ label: '已点检', value: '2' },
 		],
-		span: 2,
+		span: 4,
 	},
 ])
 const buttonList = ref([
-  
+	{ label: 'hidden', vif: false },
 ])
 const total = ref(0)
 const queryParams = ref({
@@ -247,9 +248,9 @@ const tableColumns = reactive([
   { label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
   { label: '设备小类', prop: 'equipSmallCategoryName', },
 	{ label: '设备名称', prop: 'equipName', },
-	{ 
-    label: '点检类型', 
-    prop: 'equipType', 
+	{
+    label: '点检类型',
+    prop: 'equipType',
     render: row => {
 			return [
 				h(
@@ -268,8 +269,8 @@ const tableColumns = reactive([
 	{ label: '初始数据', prop: 'initialNumber',align: 'right', },
 	{ label: '结束数据', prop: 'deadlineNumber',align: 'right', },
 	{ label: '点检员', prop: 'inspectorName' },
-	{ 
-    label: '点检状态', 
+	{
+    label: '点检状态',
     prop: 'status',
 		align: 'center',
 		width: 100,
@@ -285,7 +286,7 @@ const tableColumns = reactive([
 					}
 				),
 			]
-		}, 
+		},
   },
 	{ label: '创建时间', prop: 'createTime', width: 160},
 	{
@@ -348,7 +349,7 @@ const getList = e => {
 	queryParams.value.startTime = queryParams.value.date ? queryParams.value.date[0] : ''
   queryParams.value.endTime = queryParams.value.date ? queryParams.value.date[1] : ''
   api.getList(queryParams.value).then(res => {
-    tableData.value = res.data.pages 
+    tableData.value = res.data.pages
     total.value = res.data.totalNum
   })
 }

@@ -132,6 +132,7 @@
 									:dataConfig="{ params: { type: 'DICT', dictType: 'E_STATUS' } }"
 									v-model:value="localFormData.equipState"
 									v-model:label="localFormData.equipStateName"
+									:disabled="mode === 'edit'"
 								/>
 							</el-form-item>
 						</el-col>
@@ -178,6 +179,10 @@ const props = defineProps({
 	readonly: {
 		type: Boolean,
 		default: false
+	},
+	mode: {
+		type: String,
+		default: 'add'
 	}
 })
 
@@ -370,7 +375,7 @@ const loadEditCategoryData = () => {
 watch(
 	() => localFormData.useOrgId,
 	newVal => {
-		if (newVal && !userList.value.length) {
+		if (newVal) {
 			loadUserList(newVal)
 		}
 	}
@@ -397,7 +402,8 @@ const loadChangeLog = () => {
 defineExpose({
 	validate,
 	resetForm,
-	loadChangeLog
+	loadChangeLog,
+	loadEditCategoryData
 })
 </script>
 

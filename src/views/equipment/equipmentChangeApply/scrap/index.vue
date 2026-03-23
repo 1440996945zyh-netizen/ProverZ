@@ -133,7 +133,7 @@ const tableColumns = ref([
 				5: { label: '作废', type: 'danger' },
 			}
 			const status = statusMap[row.processStatus] || { label: '未知', type: 'info' }
-			return h(ElTag, { type: status.type, effect: 'dark' }, () => status.label)
+			return h(ElTag, { type: status.type}, () => status.label)
 		}
 	},
 	{

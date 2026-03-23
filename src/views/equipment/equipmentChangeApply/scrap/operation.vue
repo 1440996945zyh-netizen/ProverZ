@@ -111,7 +111,7 @@
 			@close="handleDialogClose"
 		>
 			<!-- 搜索条件 -->
-			<el-form :model="equipSearchForm" :inline="true" label-width="70px">
+			<el-form :model="equipSearchForm" :inline="true" label-width="70px" style="margin-top: 15px">
 				<el-form-item label="设备名称" prop="equipName">
 					<el-input v-model="equipSearchForm.equipName" placeholder="请输入设备名称" clearable @keyup.enter="loadEquipList" />
 				</el-form-item>
@@ -516,7 +516,7 @@ defineExpose({
 .dialog-content {
 	display: flex;
 	gap: 15px;
-	margin-top: 15px;
+	margin-top: 0px;
 
 	.left-table {
 		flex: 1;

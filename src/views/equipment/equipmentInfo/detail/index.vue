@@ -3,7 +3,7 @@
 		<!-- 新增时使用折叠面板 -->
 		<Add v-if="isAddMode" ref="addRef" :readonly="readonly" />
 		<!-- 修改/查看时使用标签页 -->
-		<Main v-else ref="mainRef" :formData="formData" :readonly="readonly" @update:formData="handleFormDataUpdate" @saved="handleSaved" />
+		<Main v-else ref="mainRef" :formData="formData" :readonly="readonly" :mode="mode" @update:formData="handleFormDataUpdate" @saved="handleSaved" />
 	</div>
 </template>
 
