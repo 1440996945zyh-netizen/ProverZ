@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-24 10:29:17
- * @LastEditTime: 2026-02-24 10:41:33
+ * @LastEditTime: 2026-03-25 14:41:26
  * @LastEditors: zhangsd
  * @Description: 常用审批语配置
  * @FilePath: \view\src\views\bpmModel\Language\index.vue
@@ -31,7 +31,6 @@
 <script setup>
  import BaseTable from '@/components/BaseTable/index.vue'
 import { ref, onMounted } from 'vue'
-import { getList } from '@/api/bpmModel/processLanguage'
 
 const loading = ref(false)
 </script>

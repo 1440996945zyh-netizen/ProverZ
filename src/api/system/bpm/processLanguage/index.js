@@ -2,7 +2,7 @@ import request from '@/utils/auth/request'
 
 const baseApi = '/api/internal/bpmProcessLanguage'
 
-
+ 
 export  const ProcessLanguageApi = {
  /**
   * 查询常用审批语分页
