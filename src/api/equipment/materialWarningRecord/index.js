@@ -1,27 +1,27 @@
 import request from '@/utils/auth/request'
 
 const api = {
-	getList(params) {
-		return request({
-			url: '/api/v1/internal/materialWarningRecord/list',
-			method: 'get',
-			params: params,
-		})
-	},
+  getList(params) {
+    return request({
+      url: '/api/v1/internal/EMaterialWarningRecord/list',
+      method: 'post',
+      params: params,
+    })
+  },
 
-	getById(id) {
-		return request({
-			url: '/api/v1/internal/materialWarningRecord/getById?id=' + id,
-			method: 'get',
-		})
-	},
+  getById(id) {
+    return request({
+      url: '/api/v1/internal/EMaterialWarningRecord/getById?id=' + id,
+      method: 'get',
+    })
+  },
 
-	handle(params) {
-		return request({
-			url: '/api/v1/internal/materialWarningRecord/handle',
-			method: 'put',
-			params: params,
-		})
-	},
+  handleBatch(data) {
+    return request({
+      url: '/api/v1/internal/EMaterialWarningRecord/handleBatch',
+      method: 'post',
+      data,
+    })
+  },
 }
 export default api

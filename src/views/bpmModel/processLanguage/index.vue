@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2026-02-24 10:29:17
- * @LastEditTime: 2026-03-17 16:16:40
+ * @LastEditTime: 2026-03-25 14:39:35
  * @LastEditors: zhangsd
  * @Description: 常用审批语配置
  * @FilePath: \view\src\views\bpmModel\processLanguage\index.vue
@@ -34,7 +34,7 @@ defineOptions({ name: 'BpmProcessLanguage' })
 // 2. 组件导入
 import BaseTable from '@/components/BaseTable/index.vue'
 // 3. 接口与状态管理导入
-import { ProcessLanguageApi } from '@/api/system/bpm/processLanguage'
+import { ProcessLanguageApi } from '@/api/system/bpm/processLanguage/index.js'
 import tableParamsStore from '@/store/modules/tableParams'
 import { formatDate } from '@/utils/common/date'
 import ProcessLanguageDetail from './detail/index.vue'
