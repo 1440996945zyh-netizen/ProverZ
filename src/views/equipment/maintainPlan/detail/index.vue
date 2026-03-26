@@ -157,7 +157,7 @@
       </el-collapse-item>
     </el-collapse>
 		<!-- 标准明细 -->
-		<el-drawer v-model="isShow" title="点检标准" size="70%">
+		<el-drawer v-model="isShow" title="润滑保养标准" size="70%">
 			<standard ref="detailRef" />
   	  <template #footer>
 				<div style="flex: auto">
