@@ -53,7 +53,7 @@
 							<el-icon><Tickets /></el-icon>
 						</div>
 						<div class="card-info">
-							<div class="card-title">工单处理中心</div>
+							<div class="card-title">设备管理中心</div>
 							<div class="card-desc">维修工单管理</div>
 						</div>
 					</div>
@@ -78,16 +78,35 @@
 							<span class="stat-label">待验收</span>
 						</div>
 					</div>
-					<div class="progress-section">
-						<div class="progress-header">
-							<span>本月工单进度</span>
-							<span class="progress-rate">{{ workOrderProgress }}%</span>
+					<div class="section-divider"></div>
+					<div class="maintenance-section">
+						<div class="status-grid inspection-grid">
+							<div
+								class="status-item"
+								v-for="(item, index) in inspectionStatusList.filter(
+									i => i.type.includes('inspection') || i.type.includes('check'),
+								)"
+								:key="index"
+								:class="{ 'is-pending': item.isPending }"
+								@click.stop="navigateToStatus(item.type)"
+							>
+								<span class="status-num">{{ item.value }}</span>
+								<span class="status-label">{{ item.label }}</span>
+							</div>
 						</div>
-						<div class="progress-bar">
-							<div class="progress-fill" :style="{ width: workOrderProgress + '%' }"></div>
-						</div>
-						<div class="progress-detail">
-							<span>已完成 {{ workOrderCenter.completed || 156 }} / 总计 {{ workOrderCenter.monthTotal || 200 }}</span>
+						<div class="status-grid maintenance-grid">
+							<div
+								class="status-item"
+								v-for="(item, index) in inspectionStatusList.filter(
+									i => i.type.includes('lubrication') || i.type.includes('maintenance'),
+								)"
+								:key="index"
+								:class="{ 'is-pending': item.isPending }"
+								@click.stop="navigateToStatus(item.type)"
+							>
+								<span class="status-num">{{ item.value }}</span>
+								<span class="status-label">{{ item.label }}</span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -351,6 +370,7 @@ import {
 	Finished,
 	Warning,
 	InfoFilled,
+	CaretRight,
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import usePermissionStore from '@/store/modules/permission'
@@ -376,6 +396,7 @@ const iconMap = {
 	Finished,
 	Warning,
 	InfoFilled,
+	CaretRight,
 }
 
 const iconList = Object.keys(iconMap)
@@ -442,6 +463,17 @@ const workOrderProgress = computed(() => {
 	const completed = workOrderCenter.value.completed || 0
 	return Math.round((completed / total) * 100)
 })
+
+const inspectionStatusList = ref([
+	{ label: '待巡检', value: 12, type: 'inspection-pending', isPending: true },
+	{ label: '已巡检', value: 45, type: 'inspection-done', isPending: false },
+	{ label: '待点检', value: 8, type: 'check-pending', isPending: true },
+	{ label: '已点检', value: 38, type: 'check-done', isPending: false },
+	{ label: '待润滑', value: 6, type: 'lubrication-pending', isPending: true },
+	{ label: '已润滑', value: 24, type: 'lubrication-done', isPending: false },
+	{ label: '待保养', value: 10, type: 'maintenance-pending', isPending: true },
+	{ label: '已保养', value: 32, type: 'maintenance-done', isPending: false },
+])
 
 const messageList = ref([
 	{ title: '设备维修工单已审批通过', desc: '您提交的设备维修申请已通过审批', time: '10分钟前', type: 'success', read: false },
@@ -830,6 +862,13 @@ const navigateTo = path => {
 	router.push(path)
 }
 
+const navigateToStatus = type => {
+	router.push({
+		path: '/equipment/maintInfo',
+		query: { status: type },
+	})
+}
+
 const navigateToApproval = tab => {
 	router.push({
 		path: '/bpmModel/processInstance/index',
@@ -1047,6 +1086,103 @@ onUnmounted(() => {
 	.card-body {
 		padding: 16px 20px;
 
+		.section-title {
+			font-size: 13px;
+			font-weight: 600;
+			color: #374151;
+			margin-bottom: 12px;
+			padding-left: 4px;
+			position: relative;
+
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 3px;
+				height: 14px;
+				background: linear-gradient(180deg, #3b82f6, #2563eb);
+				border-radius: 2px;
+			}
+		}
+
+		.maintenance-section {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+
+			.inspection-grid {
+				background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+				border-left: 3px solid #3b82f6;
+
+				.status-item {
+					background: #fff;
+					border: 1px solid rgba(59, 130, 246, 0.15);
+					box-shadow: 0 1px 3px rgba(59, 130, 246, 0.08);
+
+					&:hover {
+						background: #fff;
+						border-color: rgba(59, 130, 246, 0.25);
+						box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+					}
+
+					&.is-pending {
+						background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+						border-color: rgba(245, 158, 11, 0.2);
+						box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
+
+						&:hover {
+							background: #fffbeb;
+							border-color: rgba(245, 158, 11, 0.3);
+						}
+					}
+				}
+			}
+
+			.maintenance-grid {
+				background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+				border-left: 3px solid #10b981;
+
+				.status-item {
+					background: #fff;
+					border: 1px solid rgba(16, 185, 129, 0.15);
+					box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
+
+					&:hover {
+						background: #fff;
+						border-color: rgba(16, 185, 129, 0.25);
+						box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+					}
+
+					&.is-pending {
+						background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+						border-color: rgba(245, 158, 11, 0.2);
+						box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
+
+						&:hover {
+							background: #fffbeb;
+							border-color: rgba(245, 158, 11, 0.3);
+						}
+					}
+				}
+			}
+
+			.status-grid {
+				padding: 12px;
+				border-radius: 8px;
+				border-top: 1px solid #e5e7eb;
+				border-right: 1px solid #e5e7eb;
+				border-bottom: 1px solid #e5e7eb;
+			}
+		}
+
+		.section-divider {
+			height: 1px;
+			background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
+			margin: 16px 0;
+		}
+
 		.stat-row {
 			display: flex;
 			gap: 16px;
@@ -1187,6 +1323,51 @@ onUnmounted(() => {
 			.progress-detail {
 				font-size: 11px;
 				color: #9ca3af;
+			}
+		}
+
+		.status-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 16px;
+
+			.status-item {
+				text-align: center;
+				padding: 12px 8px;
+				border-radius: 8px;
+				cursor: pointer;
+				transition: all 0.2s;
+
+				&:hover {
+					transform: translateY(-1px);
+				}
+
+				&.is-pending {
+					.status-num {
+						color: #f59e0b;
+						font-weight: 700;
+					}
+				}
+
+				&:not(.is-pending) {
+					.status-num {
+						color: #10b981;
+						font-weight: 600;
+					}
+				}
+
+				.status-num {
+					display: block;
+					font-size: 24px;
+					margin-bottom: 4px;
+					font-weight: 600;
+				}
+
+				.status-label {
+					display: block;
+					font-size: 12px;
+					color: #6b7280;
+				}
 			}
 		}
 
