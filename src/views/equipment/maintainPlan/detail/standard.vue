@@ -12,7 +12,7 @@
       :checkbox-config="checkboxConfig"
       @checkbox-change="checkboxChange"
 			@selectAllChangeEvent="checkboxChange"
-      :tableHeight="'tabTableHeight'"
+      :tableHeight="tableHeight"
 	  />
   </div>
 </template>
@@ -23,8 +23,11 @@ import api from '@/api/equipment/maintainStandard/index'
 import publicApi from '@/api/public/index'
 import Select from '@/components/Select'
 import BaseTable from '@/components/BaseTable/index.vue'
+import tableParamsStore from '@/store/modules/tableParams'
 
 const total = ref(0)
+const storeHeight =computed(() => tableParamsStore().normalTableHeight)
+const tableHeight =computed(() => storeHeight.value - 110)
 const selectData = reactive([
   {
 		name: '设备机构',
@@ -55,9 +58,9 @@ const tableData = ref([])
 const tableColumns = reactive([
 	{ label: '', type: 'checkbox', width: 50, fixed: 'left' },
   { label: '序号', type: 'seq', width: 60, align: 'center' },
-  { 
-    label: '类型', 
-    prop: 'equipType', 
+  {
+    label: '类型',
+    prop: 'equipType',
     width: 80,
     render: row => {
 			return [
@@ -74,8 +77,8 @@ const tableColumns = reactive([
   { label: '设备小类', prop: 'equipSmallCategoryName',width: 110 },
   { label: '设备机构', prop: 'equipInstitutionName',width: 110 },
   { label: '设备部件', prop: 'equipUnitName',width: 140 },
-	{ label: '点检内容', prop: 'content', },
-	{ label: '点检标准', prop: 'standard', },
+	{ label: '保养内容', prop: 'content', },
+	{ label: '技术要求及标准', prop: 'standard', },
 ])
 const equipPlanId = ref(null)
 // 复选框配置
@@ -96,7 +99,7 @@ const formData = ref({
 	planType: '',
 	equipType: '',
 	setDate: [],
-	initialDate: '', 
+	initialDate: '',
   isSingle: '2',
   cycle: '',
   inspectorId: '',
@@ -158,7 +161,7 @@ const getList = e => {
 	queryParams.value.equipType = formData.value.equipType
 	queryParams.value = Object.assign({},queryParams.value,e)
   api.queryAll(queryParams.value).then(res => {
-    tableData.value = res.data.pages 
+    tableData.value = res.data.pages
     tableData.value.forEach((v,index) => {
       v.seq = index+1
     })
