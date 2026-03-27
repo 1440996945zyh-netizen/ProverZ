@@ -439,8 +439,10 @@ const formatDateTime = (dateTime) => {
 		const day = String(dateTime.getDate()).padStart(2, '0')
 		const hours = String(dateTime.getHours()).padStart(2, '0')
 		const minutes = String(dateTime.getMinutes()).padStart(2, '0')
-		const seconds = String(dateTime.getSeconds()).padStart(2, '0')
-		return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+		return `${year}-${month}-${day} ${hours}:${minutes}`
+	}
+	if (typeof dateTime === 'string' && dateTime.length >= 16) {
+		return dateTime.slice(0, 16)
 	}
 	return dateTime
 }

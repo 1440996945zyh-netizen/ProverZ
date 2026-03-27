@@ -27,8 +27,8 @@
 									v-model="formData.faultFindTime"
 									type="datetime"
 									placeholder="请选择故障发现时间"
-									format="YYYY-MM-DD HH:mm:ss"
-									value-format="YYYY-MM-DD HH:mm:ss"
+									format="YYYY-MM-DD HH:mm"
+									value-format="YYYY-MM-DD HH:mm"
 									style="width: 100%"
 								/>
 							</el-form-item>
@@ -669,8 +669,7 @@ const getCurrentDateTime = () => {
 	const day = String(now.getDate()).padStart(2, '0')
 	const hours = String(now.getHours()).padStart(2, '0')
 	const minutes = String(now.getMinutes()).padStart(2, '0')
-	const seconds = String(now.getSeconds()).padStart(2, '0')
-	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+	return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
 // 加载维修单位列表（根据派工类型）

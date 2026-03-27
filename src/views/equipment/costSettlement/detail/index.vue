@@ -33,7 +33,7 @@
 							v-model:value="formData.maintOrgId"
 							v-model:label="formData.maintOrgName"
 							placeholder="请选择维修单位"
-							:disabled="isViewMode || (formData.subList && formData.subList.length > 0)"
+							:disabled="isViewMode"
 							@change="handleMaintOrgChange"
 						/>
 					</el-form-item>
@@ -43,7 +43,7 @@
 						<el-select
 							v-model="formData.projectType"
 							placeholder="请选择项目类型"
-							:disabled="isViewMode || (formData.subList && formData.subList.length > 0)"
+							:disabled="isViewMode"
 							@change="handleProjectTypeChange"
 							style="width: 100%"
 						>
@@ -77,10 +77,6 @@
 					<span class="sub-table-title">结算明细</span>
 					<div v-if="!isViewMode" class="sub-table-btns">
 						<el-button type="primary" size="small" @click="openWorkOrderDialog" :disabled="!formData.maintOrgId || !formData.projectType">选择工单</el-button>
-						<el-button v-if="formData.subList && formData.subList.length > 0" type="warning" size="small" @click="clearSubList">清空明细</el-button>
-						<el-tooltip content="更换单位或项目定额需先清空明细" placement="top">
-							<el-icon style="margin-left: 8px; vertical-align: middle; color: #909399; cursor: help"><QuestionFilled /></el-icon>
-						</el-tooltip>
 					</div>
 				</div>
 				<el-table :data="formData.subList" border stripe style="width: 100%; margin-top: 10px">
@@ -197,6 +193,11 @@ const workOrderTotal = ref(0)
 const workOrderTableRef = ref()
 const tempSelectedWorkOrders = ref([])
 
+// 记录变更前的值
+const oldMaintOrgId = ref(null)
+const oldMaintOrgName = ref('')
+const oldProjectType = ref('')
+
 const workOrderSearchData = reactive([
 	{ name: '工单号', type: 'input', modelValue: 'workOrderNo', span: 12 },
 	{ name: '设备名称', type: 'input', modelValue: 'equipName', span: 12 },
@@ -221,20 +222,43 @@ const workOrderCheckboxConfig = {
 	},
 }
 
-const handleMaintOrgChange = () => {
-	// 类型或单位改变逻辑已在模板中通过 disabled 控制
+const handleMaintOrgChange = (val, item) => {
+	if (formData.subList && formData.subList.length > 0) {
+		ElMessageBox.confirm('变更维修单位会清空已选择工单，是否继续？', '提示', {
+			type: 'warning',
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+		}).then(() => {
+			formData.subList = []
+			calculateTotals()
+			oldMaintOrgId.value = formData.maintOrgId
+			oldMaintOrgName.value = formData.maintOrgName
+		}).catch(() => {
+			formData.maintOrgId = oldMaintOrgId.value
+			formData.maintOrgName = oldMaintOrgName.value
+		})
+	} else {
+		oldMaintOrgId.value = formData.maintOrgId
+		oldMaintOrgName.value = formData.maintOrgName
+	}
 }
 
-const handleProjectTypeChange = () => {
-}
-
-const clearSubList = () => {
-	ElMessageBox.confirm('清空明细后可重新选择单位和项目类型，是否继续？', '提示', {
-		type: 'warning',
-	}).then(() => {
-		formData.subList = []
-		calculateTotals()
-	}).catch(() => {})
+const handleProjectTypeChange = (val) => {
+	if (formData.subList && formData.subList.length > 0) {
+		ElMessageBox.confirm('变更项目类型会清空已选择工单，是否继续？', '提示', {
+			type: 'warning',
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+		}).then(() => {
+			formData.subList = []
+			calculateTotals()
+			oldProjectType.value = formData.projectType
+		}).catch(() => {
+			formData.projectType = oldProjectType.value
+		})
+	} else {
+		oldProjectType.value = formData.projectType
+	}
 }
 
 const openWorkOrderDialog = () => {
@@ -327,11 +351,17 @@ const resetForm = () => {
 		subList: [],
 	})
 	ruleForm.value?.clearValidate()
+	oldMaintOrgId.value = null
+	oldMaintOrgName.value = ''
+	oldProjectType.value = ''
 }
 
 const setFormData = data => {
 	Object.assign(formData, data)
 	calculateTotals()
+	oldMaintOrgId.value = formData.maintOrgId
+	oldMaintOrgName.value = formData.maintOrgName
+	oldProjectType.value = formData.projectType
 }
 
 const validate = async () => {

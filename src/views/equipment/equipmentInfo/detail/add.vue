@@ -95,27 +95,41 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="6">
+							<el-form-item label="所属单位" prop="useCompanyId">
+								<Select
+									:selectData="companyList"
+									v-model:value="formData.useCompanyId"
+									v-model:label="formData.useCompanyName"
+									placeholder="请选择所属单位"
+									@change="handleCompanyChange"
+								/>
+							</el-form-item>
+						</el-col>
+						<el-col :span="6">
 							<el-form-item label="使用部门" prop="useOrgId">
 								<Select
 									:selectData="deptList"
 									v-model:value="formData.useOrgId"
-									placeholder="请选择使用部门"
+									v-model:label="formData.useOrgName"
+									:disabled="!formData.useCompanyId"
+									placeholder="请先选择所属单位"
 									@change="handleDeptChange"
 								/>
 							</el-form-item>
 						</el-col>
-            <el-col :span="6">
-              <el-form-item label="负责人" prop="responsiCode">
-                <Select
-                  :selectData="userList"
-                  v-model:value="formData.responsiCode"
-                  :disabled="!formData.useOrgId"
-                  placeholder="请先选择使用部门"
-                />
-              </el-form-item>
-            </el-col>
 					</el-row>
 					<el-row :gutter="20">
+						<el-col :span="6">
+							<el-form-item label="负责人" prop="responsiCode">
+								<Select
+									:selectData="userList"
+									v-model:value="formData.responsiCode"
+									v-model:label="formData.responsiName"
+									:disabled="!formData.useOrgId"
+									placeholder="请先选择使用部门"
+								/>
+							</el-form-item>
+						</el-col>
 
 						<el-col :span="6">
 							<el-form-item label="是否特种设备" prop="isParticular">
@@ -365,7 +379,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import Select from '@/components/Select'
 import equipmentTypeApi from '@/api/equipment/equipmentType/index'
-import { getListByLevel } from '@/api/system/dept'
+import { getListByLevel, getListByParentId, listDept } from '@/api/system/dept'
 import publicApi from '@/api/public/index'
 
 const props = defineProps({
@@ -381,6 +395,9 @@ const activeNames = ref(['basic', 'supply', 'finance', 'attachment'])
 
 // 设备类型树形数据
 const equipmentTypeTreeData = ref([])
+
+// 单位列表
+const companyList = ref([])
 
 // 部门列表
 const deptList = ref([])
@@ -415,8 +432,12 @@ const formData = reactive({
 	unit: null,
 	unitName: '',
 	insuranceDate: '',
+	useCompanyId: null,
+	useCompanyName: '',
 	useOrgId: null,
+	useOrgName: '',
 	responsiCode: null,
+	responsiName: '',
 	isParticular: '0',
 	remark: '',
 	sourceType: null,
@@ -463,6 +484,7 @@ const rules = reactive({
 	equipTechState: proxy.getRules({ required: true }),
 	equipState: proxy.getRules({ required: true }),
 	unit: proxy.getRules({ required: true }),
+	useCompanyId: proxy.getRules({ required: true }),
 	useOrgId: proxy.getRules({ required: true }),
 	responsiCode: proxy.getRules({ required: true }),
 	purchaseTime: proxy.getRules({ required: true }),
@@ -629,9 +651,25 @@ const handleEquipmentTypeChange = (value) => {
 	})
 }
 
-// 加载部门列表（DEPT_LEVEL=2）
-const loadDeptList = () => {
-	getListByLevel(2).then(res => {
+// 加载所属单位列表（内部公司层级）
+const loadCompanyList = () => {
+	listDept({ deptLevel: 1, inOutType: 'I' }).then(res => {
+		if (res.code == '0000') {
+			companyList.value = res.data.map(item => ({
+				label: item.deptName,
+				value: item.id,
+			}))
+		}
+	})
+}
+
+// 加载部门列表（根据公司ID）
+const loadDeptList = (parentId) => {
+	if (!parentId) {
+		deptList.value = []
+		return
+	}
+	getListByParentId(parentId).then(res => {
 		if (res.code == '0000') {
 			deptList.value = res.data.map(item => ({
 				label: item.deptName,
@@ -658,6 +696,18 @@ const loadUserList = (deptId) => {
 			}))
 		}
 	})
+}
+
+// 单位变化时，清空部门和负责人并重新加载部门列表
+const handleCompanyChange = () => {
+	formData.useOrgId = null
+	formData.responsiCode = null
+	userList.value = []
+	if (formData.useCompanyId) {
+		loadDeptList(formData.useCompanyId)
+	} else {
+		deptList.value = []
+	}
 }
 
 // 部门变化时，清空负责人并重新加载负责人列表
@@ -1022,6 +1072,9 @@ const loadEditCategoryData = () => {
 			}
 		})
 	}
+	if (formData.useCompanyId) {
+		loadDeptList(formData.useCompanyId)
+	}
 	if (formData.useOrgId) {
 		loadUserList(formData.useOrgId)
 	}
@@ -1029,7 +1082,7 @@ const loadEditCategoryData = () => {
 
 onMounted(() => {
 	loadEquipmentTypeTree()
-	loadDeptList()
+	loadCompanyList()
 	loadEditCategoryData()
 	if (formData.purchaseTime) {
 		calculateDepreciatedPeriod()
