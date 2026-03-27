@@ -97,8 +97,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, getCurrentInstance, onMounted, onActivated, h } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, getCurrentInstance, onMounted, onActivated, h, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { formatDate } from '@/utils/common/date'
 import BaseTable from '@/components/BaseTable/index.vue'
 import DropDown from '@/components/DropDown/newIndex.vue'
@@ -114,9 +114,21 @@ defineOptions({ name: 'BpmProcessInstanceAll' })
 // 组件实例与路由
 const { proxy } = getCurrentInstance()
 const router = useRouter()
+const route = useRoute()
 
 // 当前激活的 Tab
 const activeTab = ref('todo')
+
+// 监听路由参数变化，切换tab
+watch(
+	() => route.query.tab,
+	newTab => {
+		if (newTab && ['todo', 'done', 'copy', 'myProcess'].includes(newTab)) {
+			activeTab.value = newTab
+		}
+	},
+	{ immediate: true },
+)
 
 // 通用配置
 const tableHeight = computed(() => {
@@ -224,12 +236,12 @@ const tableColumnsMyProcess = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
-						)
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
+						),
 					),
 				]
 			}
@@ -255,7 +267,7 @@ const tableColumnsMyProcess = ref([
 									class: 'el-link el-link--primary',
 									onClick: () => handleDetailMyProcess(row),
 								},
-								row.tasks[0].assigneeUser?.userName
+								row.tasks[0].assigneeUser?.userName,
 							),
 							` (${row.tasks[0].name}) 审批中`,
 						]),
@@ -270,7 +282,7 @@ const tableColumnsMyProcess = ref([
 									class: 'el-link el-link--primary',
 									onClick: () => handleDetailMyProcess(row),
 								},
-								row.tasks[0].assigneeUser?.userName
+								row.tasks[0].assigneeUser?.userName,
 							),
 							` 等 ${row.tasks.length} 人 (${row.tasks[0].name})审批中`,
 						]),
@@ -292,7 +304,7 @@ const tableColumnsMyProcess = ref([
 						{
 							class: `el-tag el-tag--${status.type}`,
 						},
-						status.label
+						status.label,
 					),
 				]
 			}
@@ -332,8 +344,8 @@ const tableColumnsMyProcess = ref([
 					},
 					{
 						default: () => '详情',
-					}
-				)
+					},
+				),
 			)
 
 			// 2. 根据状态判断显示 办结 还是 重新发起
@@ -350,8 +362,8 @@ const tableColumnsMyProcess = ref([
 						},
 						{
 							default: () => '办结',
-						}
-					)
+						},
+					),
 				)
 			}
 			// else {
@@ -388,7 +400,7 @@ const getListMyProcess = async e => {
 		let pagination = myProcessTableRef.value?.buildQueryParams()
 		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		const res = await getProcessInstanceMyPage(params)
 		if (res.code === '0000') {
@@ -535,12 +547,12 @@ const tableColumnsTodo = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.processInstance.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
-						)
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
+						),
 					),
 				]
 			}
@@ -581,7 +593,7 @@ const tableColumnsTodo = ref([
 				},
 				{
 					default: () => row.processInstance?.name || '',
-				}
+				},
 			),
 		],
 	},
@@ -627,7 +639,7 @@ const tableColumnsTodo = ref([
 					},
 					{
 						default: () => '办理',
-					}
+					},
 				),
 			]
 		},
@@ -645,7 +657,7 @@ const getListTodo = async e => {
 		let pagination = todoTaskTableRef.value?.buildQueryParams()
 		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		const res = await getTaskTodoPage(params)
 		todoData.tableData = res.data.pages
@@ -787,12 +799,12 @@ const tableColumnsDone = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.processInstance.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
-						)
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
+						),
 					),
 				]
 			}
@@ -862,7 +874,7 @@ const tableColumnsDone = ref([
 					{
 						class: `el-tag el-tag--${status.type}`,
 					},
-					status.label
+					status.label,
 				),
 			]
 		},
@@ -887,7 +899,7 @@ const tableColumnsDone = ref([
 					},
 					{
 						default: () => '撤回',
-					}
+					},
 				),
 				h(
 					ElButton,
@@ -902,7 +914,7 @@ const tableColumnsDone = ref([
 					},
 					{
 						default: () => '历史',
-					}
+					},
 				),
 			]
 		},
@@ -918,9 +930,9 @@ const getListDone = async e => {
 	doneData.loading = true
 	try {
 		let pagination = doneTaskTableRef.value?.buildQueryParams()
-		const params ={
+		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		const res = await getTaskDonePage(params)
 		doneData.tableData = res.data.pages || []
@@ -1029,12 +1041,12 @@ const tableColumnsCopy = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.summary.map((item, index) =>
-							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
-						)
+							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`)),
+						),
 					),
 				]
 			}
@@ -1101,7 +1113,7 @@ const tableColumnsCopy = ref([
 					},
 					{
 						default: () => '详情',
-					}
+					},
 				),
 			]
 		},
@@ -1119,7 +1131,7 @@ const getListCopy = async e => {
 		let pagination = copyTaskTableRef.value?.buildQueryParams()
 		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		if (params.createTime && params.createTime.length === 2) {
 			const [startDate, endDate] = params.createTime

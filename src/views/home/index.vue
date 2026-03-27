@@ -1,7 +1,7 @@
 <template>
 	<div class="dashboard-container">
 		<div class="core-section">
-			<div class="core-card approval-card" @click="navigateTo('/bpmModel/task/todo')">
+			<div class="core-card approval-card" @click="navigateToApproval('todo')">
 				<div class="card-header">
 					<div class="card-title-row">
 						<div class="card-icon">
@@ -16,17 +16,21 @@
 				</div>
 				<div class="card-body">
 					<div class="stat-row">
-						<div class="stat-item" @click.stop="navigateTo('/bpmModel/task/todo')">
+						<div class="stat-item" @click.stop="navigateToApproval('todo')">
 							<span class="stat-num">{{ approvalData.todo }}</span>
 							<span class="stat-label">待办任务</span>
 						</div>
-						<div class="stat-item" @click.stop="navigateTo('/bpmModel/task/done')">
+						<div class="stat-item" @click.stop="navigateToApproval('done')">
 							<span class="stat-num">{{ approvalData.handled }}</span>
 							<span class="stat-label">已办任务</span>
 						</div>
-						<div class="stat-item" @click.stop="navigateTo('/bpmModel/task/manager')">
+						<div class="stat-item" @click.stop="navigateToApproval('copy')">
+							<span class="stat-num">{{ approvalData.copy }}</span>
+							<span class="stat-label">抄送我的</span>
+						</div>
+						<div class="stat-item" @click.stop="navigateToApproval('myProcess')">
 							<span class="stat-num">{{ approvalData.created }}</span>
-							<span class="stat-label">我发起的</span>
+							<span class="stat-label">我的流程</span>
 						</div>
 					</div>
 					<div class="todo-preview">
@@ -163,10 +167,10 @@
 					</el-button>
 				</div>
 				<div class="panel-body">
-					<div class="quick-grid-enhanced">
+					<div class="quick-grid-enhanced" :class="quickGridClass">
 						<div
 							class="quick-item-enhanced"
-							v-for="(module, index) in customModules.slice(0, 9)"
+							v-for="(module, index) in customModules.slice(0, displayModuleCount)"
 							:key="index"
 							@click="handleModuleClick(module)"
 						>
@@ -283,12 +287,12 @@
 				<div class="customize-header">
 					<div class="customize-tip">
 						<el-icon class="tip-icon"><InfoFilled /></el-icon>
-						<span>点击模块可添加或移除，最多可选择9个快捷入口</span>
+						<span>点击模块可添加或移除，最多可选择12个快捷入口</span>
 					</div>
 					<div class="selected-count">
 						已选择
 						<span class="count-num">{{ selectedModuleIds.length }}</span>
-						/ 9 个
+						/ 12 个
 					</div>
 				</div>
 				<div class="module-pool">
@@ -299,7 +303,7 @@
 							:key="module.id"
 							:class="{
 								selected: isModuleSelected(module.id),
-								disabled: !isModuleSelected(module.id) && selectedModuleIds.length >= 9,
+								disabled: !isModuleSelected(module.id) && selectedModuleIds.length >= 12,
 							}"
 							@click="toggleModuleSelection(module)"
 						>
@@ -349,13 +353,73 @@ import {
 	InfoFilled,
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-
+import usePermissionStore from '@/store/modules/permission'
+const permissionStore = usePermissionStore()
 const router = useRouter()
+
+const iconMap = {
+	FolderOpened,
+	Operation,
+	FirstAidKit,
+	Search,
+	Files,
+	Calendar,
+	Wallet,
+	TrendCharts,
+	DataAnalysis,
+	Setting,
+	Grid,
+	Document,
+	Check,
+	Bell,
+	Tickets,
+	Finished,
+	Warning,
+	InfoFilled,
+}
+
+const iconList = Object.keys(iconMap)
+const colorList = ['blue', 'green', 'orange', 'purple']
+
+const sidebarRouters = computed(() => permissionStore.sidebarRouters.filter(i => i.hidden == false))
+
+const flattenMenus = menus => {
+	const result = []
+	const flatten = (items, parentPath = '') => {
+		items.forEach(item => {
+			const path = parentPath ? `${parentPath}/${item.path}`.replace(/\/+/g, '/') : item.path
+			if (item.children && item.children.length > 0) {
+				flatten(item.children, path)
+			} else if (item.path) {
+				result.push({
+					id: item.id || item.path,
+					name: item.meta?.title || item.name || item.path,
+					path: path,
+					icon: item.meta?.icon || iconList[result.length % iconList.length],
+				})
+			}
+		})
+	}
+	flatten(menus)
+	return result
+}
+
+const allModules = computed(() => {
+	const menus = flattenMenus(sidebarRouters.value)
+	return menus.map((item, index) => ({
+		id: item.id,
+		name: item.name,
+		icon: iconMap[item.icon] || iconMap[iconList[index % iconList.length]],
+		colorType: colorList[index % colorList.length],
+		route: item.path,
+	}))
+})
 
 const approvalData = ref({
 	todo: 12,
 	created: 8,
 	handled: 45,
+	copy: 6,
 })
 
 const approvalTodoList = ref([
@@ -456,21 +520,17 @@ const costPeriod = ref('month')
 
 const customizeDialogVisible = ref(false)
 
-const allModules = ref([
-	{ id: 1, name: '设备台账', icon: 'FolderOpened', colorType: 'blue', route: '/equipment/equipmentInfo' },
-	{ id: 2, name: '维修委托', icon: 'Operation', colorType: 'orange', route: '/equipment/maintInfo' },
-	{ id: 3, name: '维保委托', icon: 'FirstAidKit', colorType: 'green', route: '/equipment/maintainTask' },
-	{ id: 4, name: '点巡检记录', icon: 'Search', colorType: 'blue', route: '/equipment/inspectionTask' },
-	{ id: 5, name: '委外维修项目申请', icon: 'Files', colorType: 'purple', route: '/equipment/maintenanceProjectApply' },
-	{ id: 6, name: '年度维保计划', icon: 'Calendar', colorType: 'blue', route: '/equipment/maintainPlan' },
-	{ id: 7, name: '预算指标', icon: 'Wallet', colorType: 'green', route: '/equipment/budget' },
-	{ id: 8, name: '设备模型', icon: 'Setting', colorType: 'blue', route: '/equipment/equipmentModel' },
-	{ id: 9, name: '三率填报管理', icon: 'TrendCharts', colorType: 'orange', route: '/equipment/threeRate' },
-	{ id: 10, name: '设备三率分析', icon: 'DataAnalysis', colorType: 'blue', route: '/equipment/threeRateAnalysis' },
-])
-
 const customModules = ref([])
 const selectedModuleIds = ref([])
+
+const displayModuleCount = computed(() => Math.min(customModules.value.length, 12))
+
+const quickGridClass = computed(() => {
+	const count = displayModuleCount.value
+	if (count <= 6) return 'grid-small'
+	if (count <= 9) return 'grid-medium'
+	return 'grid-large'
+})
 
 const workOrderTypeChartRef = ref(null)
 const trendChartRef = ref(null)
@@ -770,6 +830,13 @@ const navigateTo = path => {
 	router.push(path)
 }
 
+const navigateToApproval = tab => {
+	router.push({
+		path: '/bpmModel/processInstance/index',
+		query: { tab },
+	})
+}
+
 const handleModuleClick = module => {
 	if (module.route) {
 		router.push(module.route)
@@ -794,27 +861,46 @@ const toggleModuleSelection = module => {
 }
 
 const saveCustomModules = () => {
-	customModules.value = allModules.value.filter(m => selectedModuleIds.value.includes(m.id))
-	localStorage.setItem('customModules', JSON.stringify(selectedModuleIds.value))
+	const validIds = selectedModuleIds.value.filter(id => allModules.value.some(m => m.id === id))
+	const limitedIds = validIds.slice(0, 12)
+	selectedModuleIds.value = limitedIds
+	customModules.value = allModules.value.filter(m => limitedIds.includes(m.id))
+	localStorage.setItem('customModules', JSON.stringify(limitedIds))
 	customizeDialogVisible.value = false
 	ElMessage.success('自定义模块保存成功')
 }
 
 const loadCustomModules = () => {
+	if (!allModules.value || allModules.value.length === 0) return
 	const saved = localStorage.getItem('customModules')
 	if (saved) {
 		try {
-			selectedModuleIds.value = JSON.parse(saved)
-			customModules.value = allModules.value.filter(m => selectedModuleIds.value.includes(m.id))
+			const savedIds = JSON.parse(saved)
+			const validIds = savedIds.filter(id => allModules.value.some(m => m.id === id))
+			const limitedIds = validIds.slice(0, 12)
+			selectedModuleIds.value = limitedIds
+			customModules.value = allModules.value.filter(m => limitedIds.includes(m.id))
 		} catch (e) {
-			customModules.value = [...allModules.value]
-			selectedModuleIds.value = allModules.value.map(m => m.id)
+			const defaultModules = allModules.value.slice(0, 8)
+			customModules.value = [...defaultModules]
+			selectedModuleIds.value = defaultModules.map(m => m.id)
 		}
 	} else {
-		customModules.value = [...allModules.value]
-		selectedModuleIds.value = allModules.value.map(m => m.id)
+		const defaultModules = allModules.value.slice(0, 8)
+		customModules.value = [...defaultModules]
+		selectedModuleIds.value = defaultModules.map(m => m.id)
 	}
 }
+
+watch(
+	() => allModules.value,
+	newVal => {
+		if (newVal && newVal.length > 0 && customModules.value.length === 0) {
+			loadCustomModules()
+		}
+	},
+	{ immediate: true },
+)
 
 watch(workOrderTab, async newTab => {
 	await nextTick()
@@ -828,7 +914,6 @@ watch(equipmentView, () => {
 })
 
 onMounted(() => {
-	loadCustomModules()
 	setTimeout(() => {
 		initWorkOrderTypeChart()
 		initTrendChart()
@@ -1332,15 +1417,71 @@ onUnmounted(() => {
 
 			.quick-grid-enhanced {
 				display: grid;
-				grid-template-columns: repeat(3, 1fr);
 				gap: 10px;
+
+				&.grid-small {
+					grid-template-columns: repeat(2, 1fr);
+
+					.quick-item-enhanced {
+						padding: 18px 12px;
+
+						.quick-icon-enhanced {
+							width: 52px;
+							height: 52px;
+							font-size: 26px;
+							border-radius: 14px;
+						}
+
+						.quick-name-enhanced {
+							font-size: 13px;
+						}
+					}
+				}
+
+				&.grid-medium {
+					grid-template-columns: repeat(3, 1fr);
+
+					.quick-item-enhanced {
+						padding: 14px 10px;
+
+						.quick-icon-enhanced {
+							width: 44px;
+							height: 44px;
+							font-size: 22px;
+							border-radius: 12px;
+						}
+
+						.quick-name-enhanced {
+							font-size: 12px;
+						}
+					}
+				}
+
+				&.grid-large {
+					grid-template-columns: repeat(4, 1fr);
+
+					.quick-item-enhanced {
+						padding: 10px 6px;
+
+						.quick-icon-enhanced {
+							width: 36px;
+							height: 36px;
+							font-size: 18px;
+							border-radius: 10px;
+						}
+
+						.quick-name-enhanced {
+							font-size: 10px;
+						}
+					}
+				}
 
 				.quick-item-enhanced {
 					display: flex;
 					flex-direction: column;
 					align-items: center;
 					gap: 6px;
-					padding: 12px 8px;
+					padding: 14px 10px;
 					border-radius: 8px;
 					background: #f9fafb;
 					cursor: pointer;
@@ -1355,15 +1496,16 @@ onUnmounted(() => {
 					}
 
 					.quick-icon-enhanced {
-						width: 40px;
-						height: 40px;
-						border-radius: 10px;
+						width: 44px;
+						height: 44px;
+						border-radius: 12px;
 						display: flex;
 						align-items: center;
 						justify-content: center;
-						font-size: 20px;
+						font-size: 22px;
 						color: #fff;
 						box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+						transition: all 0.25s ease;
 
 						&.blue {
 							background: linear-gradient(135deg, #3b82f6, #60a5fa);
@@ -1380,11 +1522,12 @@ onUnmounted(() => {
 					}
 
 					.quick-name-enhanced {
-						font-size: 11px;
+						font-size: 12px;
 						color: #4b5563;
 						text-align: center;
 						font-weight: 500;
 						line-height: 1.2;
+						transition: font-size 0.25s ease;
 					}
 				}
 			}
@@ -2364,7 +2507,17 @@ onUnmounted(() => {
 		.quick-panel-enhanced {
 			.panel-body {
 				.quick-grid-enhanced {
-					grid-template-columns: repeat(4, 1fr);
+					&.grid-small {
+						grid-template-columns: repeat(2, 1fr);
+					}
+
+					&.grid-medium {
+						grid-template-columns: repeat(2, 1fr);
+					}
+
+					&.grid-large {
+						grid-template-columns: repeat(3, 1fr);
+					}
 				}
 			}
 		}
