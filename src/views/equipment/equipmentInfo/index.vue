@@ -58,7 +58,9 @@ const queryParams = ref({
 const tableData = ref([])
 const loading = ref(false)
 const tableColumns = ref([
+	{ type: 'checkbox', width: 50, align: 'center', fixed: 'left' },
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
+	{ label: '所属单位', prop: 'useCompanyName', align: 'left', width: 170 },
 	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 170 },
 	{ label: '设备小类', prop: 'equipSmallCategoryName', align: 'left', width: 170 },
 	{ label: '设备名称', prop: 'equipName', align: 'left', minWidth: 200 },
@@ -316,6 +318,13 @@ const buttonList = reactive([
 		click: () => add(),
 		permission: 'equipment:equipmentInfo:add',
 	},
+	{
+		label: '导出二维码',
+		type: 'warning',
+		icon: 'Download',
+		click: () => handleExportQRCode(),
+		permission: 'equipment:equipmentInfo:exportQRCode',
+	},
 ])
 
 const clickRow = ref({})
@@ -436,6 +445,30 @@ const handleDelete = row => {
 			})
 		})
 		.catch(() => {})
+}
+
+// 导出二维码
+const handleExportQRCode = () => {
+	const selectRecords = baseTable.value.getSelectEvent()
+	if (selectRecords.length === 0) {
+		proxy.$message.warning('请选择需要导出二维码的设备')
+		return
+	}
+
+	const equipIdList = selectRecords.map(item => item.id)
+	proxy.download(
+		'/api/v1/internal/equipmentInfo/export/qrCode',
+		{ equipIdList },
+		`设备二维码_${new Date().getTime()}.pdf`,
+		{
+			headers: { 'Content-Type': 'application/json;charset=utf-8' },
+			transformRequest: [
+				data => {
+					return JSON.stringify(data)
+				},
+			],
+		}
+	)
 }
 
 // 保存事件

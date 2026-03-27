@@ -184,6 +184,16 @@ const api = {
 			params: params,
 		})
 	},
+
+	// 导出设备二维码
+	exportQRCode(data) {
+		return request({
+			url: '/api/v1/internal/equipmentInfo/export/qrCode',
+			method: 'post',
+			data: data,
+			responseType: 'blob',
+		})
+	},
 }
 export default api
 

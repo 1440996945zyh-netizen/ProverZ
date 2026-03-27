@@ -12,7 +12,7 @@
 					:selectData="unitOptions"
 					v-model:value="formData.disposalType"
 					v-model:label="formData.disposalTypeLabel"
-					placeholder="请选择单位"
+					placeholder="请选择类型"
 					:disabled="formDisabled"
 				/>
 			</el-form-item>

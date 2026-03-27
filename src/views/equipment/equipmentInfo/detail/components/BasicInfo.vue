@@ -64,14 +64,39 @@
 							</el-form-item>
 						</el-col>
 					</el-row>
-					<!-- 第三行：设备技术状况、计量单位、保险期限、所属部门 -->
+					<!-- 第三行：所属单位、所属部门、负责人、计量单位 -->
 					<el-row :gutter="0" class="form-table-row">
 						<el-col :span="6" class="form-table-col">
-							<el-form-item label="设备技术状况" prop="equipTechState" class="form-table-item">
+							<el-form-item label="所属单位" prop="useCompanyId" class="form-table-item">
 								<Select
-									:dataConfig="{ params: { type: 'DICT', dictType: 'E_TECH' } }"
-									v-model:value="localFormData.equipTechState"
-									v-model:label="localFormData.equipTechStateName"
+									:selectData="companyList"
+									v-model:value="localFormData.useCompanyId"
+									v-model:label="localFormData.useCompanyName"
+									placeholder="请选择所属单位"
+									@change="handleCompanyChange"
+								/>
+							</el-form-item>
+						</el-col>
+						<el-col :span="6" class="form-table-col">
+							<el-form-item label="所属部门" prop="useOrgId" class="form-table-item">
+								<Select
+									:selectData="deptList"
+									v-model:value="localFormData.useOrgId"
+									v-model:label="localFormData.useOrgName"
+									:disabled="!localFormData.useCompanyId"
+									placeholder="请选择使用部门"
+									@change="handleDeptChange"
+								/>
+							</el-form-item>
+						</el-col>
+						<el-col :span="6" class="form-table-col">
+							<el-form-item label="负责人" prop="responsiCode" class="form-table-item">
+								<Select
+									:selectData="userList"
+									v-model:value="localFormData.responsiCode"
+									v-model:label="localFormData.responsiName"
+									:disabled="!localFormData.useOrgId"
+									placeholder="请先选择使用部门"
 								/>
 							</el-form-item>
 						</el-col>
@@ -84,6 +109,9 @@
 								/>
 							</el-form-item>
 						</el-col>
+					</el-row>
+					<!-- 第四行：保险期限、设备技术状况、是否特种设备、设备使用状态 -->
+					<el-row :gutter="0" class="form-table-row">
 						<el-col :span="6" class="form-table-col">
 							<el-form-item label="保险期限" prop="insuranceDate" class="form-table-item">
 								<el-date-picker
@@ -96,25 +124,11 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="6" class="form-table-col">
-							<el-form-item label="所属部门" prop="useOrgId" class="form-table-item">
+							<el-form-item label="设备技术状况" prop="equipTechState" class="form-table-item">
 								<Select
-									:selectData="deptList"
-									v-model:value="localFormData.useOrgId"
-									placeholder="请选择使用部门"
-									@change="handleDeptChange"
-								/>
-							</el-form-item>
-						</el-col>
-					</el-row>
-					<!-- 第四行：负责人、是否特种设备、设备状态、备注 -->
-					<el-row :gutter="0" class="form-table-row">
-						<el-col :span="6" class="form-table-col">
-							<el-form-item label="负责人" prop="responsiCode" class="form-table-item">
-								<Select
-									:selectData="userList"
-									v-model:value="localFormData.responsiCode"
-									:disabled="!localFormData.useOrgId"
-									placeholder="请先选择使用部门"
+									:dataConfig="{ params: { type: 'DICT', dictType: 'E_TECH' } }"
+									v-model:value="localFormData.equipTechState"
+									v-model:label="localFormData.equipTechStateName"
 								/>
 							</el-form-item>
 						</el-col>
@@ -136,11 +150,17 @@
 								/>
 							</el-form-item>
 						</el-col>
+					</el-row>
+					<!-- 第五行：备注 -->
+					<el-row :gutter="0" class="form-table-row">
 						<el-col :span="6" class="form-table-col">
 							<el-form-item label="备注" prop="remark" class="form-table-item">
 								<el-input v-model="localFormData.remark" placeholder="备注" />
 							</el-form-item>
 						</el-col>
+						<el-col :span="6" class="form-table-col"></el-col>
+						<el-col :span="6" class="form-table-col"></el-col>
+						<el-col :span="6" class="form-table-col"></el-col>
 					</el-row>
 				</el-collapse-item>
 			</el-collapse>
@@ -166,7 +186,7 @@
 import { ref, reactive, watch, onMounted, getCurrentInstance, nextTick } from 'vue'
 import Select from '@/components/Select'
 import equipmentTypeApi from '@/api/equipment/equipmentType/index'
-import { getListByLevel } from '@/api/system/dept'
+import { getListByLevel, getListByParentId, listDept } from '@/api/system/dept'
 import publicApi from '@/api/public/index'
 import ChangeLog from './ChangeLog.vue'
 const tableHeight = reactive(window.innerHeight - 700)
@@ -203,6 +223,9 @@ watch(() => props.formData, (newVal) => {
 // 设备类型树
 const equipmentTypeTreeData = ref([])
 
+// 单位列表
+const companyList = ref([])
+
 // 部门列表
 const deptList = ref([])
 
@@ -220,6 +243,7 @@ const rules = reactive({
 	equipTechState: proxy.getRules({ required: true }),
 	equipState: proxy.getRules({ required: true }),
 	unit: proxy.getRules({ required: true }),
+	useCompanyId: proxy.getRules({ required: true }),
 	useOrgId: proxy.getRules({ required: true }),
 	responsiCode: proxy.getRules({ required: true }),
 })
@@ -303,9 +327,25 @@ const handleEquipmentTypeChange = value => {
 	loadEquipmentTypePath(value)
 }
 
-// 加载部门列表（DEPT_LEVEL=2）
-const loadDeptList = () => {
-	getListByLevel(2).then(res => {
+// 加载所属单位列表（内部公司层级）
+const loadCompanyList = () => {
+	listDept({ deptLevel: 1, inOutType: 'I' }).then(res => {
+		if (res.code == '0000') {
+			companyList.value = res.data.map(item => ({
+				label: item.deptName,
+				value: item.id,
+			}))
+		}
+	})
+}
+
+// 加载部门列表（根据公司ID）
+const loadDeptList = (parentId) => {
+	if (!parentId) {
+		deptList.value = []
+		return
+	}
+	getListByParentId(parentId).then(res => {
 		if (res.code == '0000') {
 			deptList.value = res.data.map(item => ({
 				label: item.deptName,
@@ -313,6 +353,18 @@ const loadDeptList = () => {
 			}))
 		}
 	})
+}
+
+// 单位变化时，清空部门和负责人并重新加载部门列表
+const handleCompanyChange = () => {
+	localFormData.useOrgId = null
+	localFormData.responsiCode = null
+	userList.value = []
+	if (localFormData.useCompanyId) {
+		loadDeptList(localFormData.useCompanyId)
+	} else {
+		deptList.value = []
+	}
 }
 
 // 加载负责人列表（根据部门ID）
@@ -366,6 +418,9 @@ const loadEditCategoryData = () => {
 	if (localFormData.equipSmallCategoryId) {
 		loadEquipmentTypePath(localFormData.equipSmallCategoryId)
 	}
+	if (localFormData.useCompanyId) {
+		loadDeptList(localFormData.useCompanyId)
+	}
 	if (localFormData.useOrgId) {
 		loadUserList(localFormData.useOrgId)
 	}
@@ -384,7 +439,7 @@ watch(
 // 初始化
 onMounted(() => {
 	loadEquipmentTypeTree()
-	loadDeptList()
+	loadCompanyList()
 	loadEditCategoryData()
 })
 

@@ -57,7 +57,8 @@
 					type="datetime"
 					placeholder="请选择开始维修时间"
 					style="width: 100%"
-					value-format="YYYY-MM-DD HH:mm:ss"
+					format="YYYY-MM-DD HH:mm"
+					value-format="YYYY-MM-DD HH:mm"
 				/>
 			</el-form-item>
 		</el-form>
@@ -82,7 +83,8 @@
 									type="datetime"
 									placeholder="请选择结束维修时间"
 									style="width: 100%"
-									value-format="YYYY-MM-DD HH:mm:ss"
+									format="YYYY-MM-DD HH:mm"
+									value-format="YYYY-MM-DD HH:mm"
 								/>
 							</el-form-item>
 						</el-col>
@@ -287,7 +289,7 @@ const tableColumns = ref([
 	{ label: '设备编码', prop: 'equipCode', align: 'left', width: 170 },
 	{ label: '使用部门', prop: 'useOrgName', align: 'left', width: 170 },
 
-	{ label: '故障发现时间', prop: 'faultFindTime', align: 'center', width: 180 },
+	{ label: '故障发现时间', prop: 'faultFindTime', align: 'center', width: 160 },
 	{
 		label: '紧急程度',
 		prop: 'emergencyLevel',
@@ -358,8 +360,8 @@ const tableColumns = ref([
 	{ label: '派工时间', prop: 'dispatchTime', align: 'center', width: 180 },
 	{ label: '承修单位', prop: 'maintOrgName', align: 'left', width: 150 },
 	{ label: '维修负责人', prop: 'maintLeaderName', align: 'left', width: 120 },
-	{ label: '维修开始时间', prop: 'maintStartTime', align: 'center', width: 180 },
-	{ label: '维修结束时间', prop: 'maintEndTime', align: 'center', width: 180 },
+	{ label: '维修开始时间', prop: 'maintStartTime', align: 'center', width: 160 },
+	{ label: '维修结束时间', prop: 'maintEndTime', align: 'center', width: 160 },
 	{
 		label: '维修时长(小时)',
 		prop: 'maintDuration',
@@ -594,8 +596,7 @@ const endMaintenance = async row => {
 	const day = String(now.getDate()).padStart(2, '0')
 	const hours = String(now.getHours()).padStart(2, '0')
 	const minutes = String(now.getMinutes()).padStart(2, '0')
-	const seconds = String(now.getSeconds()).padStart(2, '0')
-	const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+	const currentTime = `${year}-${month}-${day} ${hours}:${minutes}`
 	let detailData = { ...row }
 
 	try {
