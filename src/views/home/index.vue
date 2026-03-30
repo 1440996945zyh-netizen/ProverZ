@@ -35,12 +35,31 @@
 					</div>
 					<div class="todo-preview">
 						<div class="preview-title">待办预览</div>
-						<div class="preview-list">
-							<div class="preview-item" v-for="(item, index) in approvalTodoList" :key="index">
-								<span class="preview-tag" :class="item.type">{{ item.typeText }}</span>
-								<span class="preview-text">{{ item.title }}</span>
+						<div class="preview-list" v-loading="todoLoading">
+							<div
+								class="preview-item"
+								v-for="(item, index) in paginatedTodoList"
+								:key="index"
+								@click.stop="handleTodoClick(item)"
+							>
+								<span class="preview-tag" :class="item.type">{{ item.title }}</span>
+								<span class="preview-text">{{ item.summary }}</span>
 								<span class="preview-time">{{ item.time }}</span>
 							</div>
+							<div class="preview-empty" v-if="!todoLoading && paginatedTodoList.length === 0">暂无待办任务</div>
+						</div>
+						<div class="preview-pagination" v-if="todoTotal > todoPageSize">
+							<span class="pagination-btn" :class="{ disabled: todoCurrentPage === 1 }" @click.stop="todoPrevPage">
+								<el-icon><CaretLeft /></el-icon>
+							</span>
+							<span class="pagination-info">{{ todoCurrentPage }} / {{ todoTotalPages }}</span>
+							<span
+								class="pagination-btn"
+								:class="{ disabled: todoCurrentPage === todoTotalPages }"
+								@click.stop="todoNextPage"
+							>
+								<el-icon><CaretRight /></el-icon>
+							</span>
 						</div>
 					</div>
 				</div>
@@ -264,16 +283,20 @@
 					</el-radio-group>
 				</div>
 				<div class="panel-body">
-					<div ref="equipmentChartRef" class="chart-pie"></div>
-					<div class="eq-legend">
+					<div class="equipment-grid">
 						<div
-							class="eq-item"
+							class="equipment-item"
 							v-for="(item, index) in equipmentView === 'type' ? equipmentByType : equipmentByStatus"
 							:key="index"
+							:style="{ borderColor: item.color }"
 						>
-							<span class="eq-dot" :style="{ background: item.color }"></span>
-							<span class="eq-name">{{ item.name }}</span>
-							<span class="eq-value">{{ item.value }}</span>
+							<div class="equipment-icon" :style="{ background: item.color + '20' }">
+								<el-icon><component :is="getEquipmentIcon(index)" /></el-icon>
+							</div>
+							<div class="equipment-info">
+								<div class="equipment-num" :style="{ color: item.color }">{{ item.value }}</div>
+								<div class="equipment-label">{{ item.name }}</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -371,9 +394,11 @@ import {
 	Warning,
 	InfoFilled,
 	CaretRight,
+	CaretLeft,
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import usePermissionStore from '@/store/modules/permission'
+import { getTaskTodoPage } from '@/api/system/bpm/task'
 const permissionStore = usePermissionStore()
 const router = useRouter()
 
@@ -397,6 +422,7 @@ const iconMap = {
 	Warning,
 	InfoFilled,
 	CaretRight,
+	CaretLeft,
 }
 
 const iconList = Object.keys(iconMap)
@@ -443,11 +469,111 @@ const approvalData = ref({
 	copy: 6,
 })
 
-const approvalTodoList = ref([
-	{ title: '设备采购申请审批', type: 'purchase', typeText: '采购', time: '5分钟前' },
-	{ title: '年度维保计划审批', type: 'plan', typeText: '计划', time: '30分钟前' },
-	{ title: '委外维修申请审批', type: 'repair', typeText: '维修', time: '1小时前' },
-])
+const approvalTodoList = ref([])
+const todoLoading = ref(false)
+const todoCurrentPage = ref(1)
+const todoPageSize = 3
+const todoTotal = ref(0)
+
+const todoTotalPages = computed(() => Math.ceil(todoTotal.value / todoPageSize))
+
+const paginatedTodoList = computed(() => {
+	return approvalTodoList.value
+})
+
+const getTodoList = async () => {
+	todoLoading.value = true
+	try {
+		const res = await getTaskTodoPage({
+			startPage: todoCurrentPage.value,
+			pageSize: todoPageSize,
+		})
+		approvalTodoList.value = (res.data.pages || []).map(item => ({
+			id: item.id,
+			title: item.processInstance?.name || '未知流程',
+			summary: formatSummary(item.processInstance?.summary),
+			type: getProcessType(item.processInstance?.name),
+			time: formatTimeAgo(item.processInstance?.createTime),
+			processInstance: item.processInstance,
+		}))
+		todoTotal.value = res.data.totalNum || 0
+	} catch (error) {
+		console.error('获取待办任务失败:', error)
+		approvalTodoList.value = []
+		todoTotal.value = 0
+	} finally {
+		todoLoading.value = false
+	}
+}
+
+const getProcessType = name => {
+	if (!name) return 'other'
+	if (name.includes('采购')) return 'purchase'
+	if (name.includes('计划')) return 'plan'
+	if (name.includes('维修') || name.includes('维修')) return 'repair'
+	if (name.includes('报废')) return 'scrap'
+	if (name.includes('备件') || name.includes('领用')) return 'parts'
+	if (name.includes('调拨')) return 'transfer'
+	return 'other'
+}
+
+const getProcessTypeText = name => {
+	if (!name) return '其他'
+	if (name.includes('采购')) return '采购'
+	if (name.includes('计划')) return '计划'
+	if (name.includes('维修') || name.includes('维修')) return '维修'
+	if (name.includes('报废')) return '报废'
+	if (name.includes('备件') || name.includes('领用')) return '备件'
+	if (name.includes('调拨')) return '调拨'
+	return '其他'
+}
+
+const formatTimeAgo = time => {
+	if (!time) return ''
+	const now = new Date()
+	const createTime = new Date(time)
+	const diff = now - createTime
+	const minutes = Math.floor(diff / 60000)
+	const hours = Math.floor(diff / 3600000)
+	const days = Math.floor(diff / 86400000)
+	if (minutes < 60) return `${minutes}分钟前`
+	if (hours < 24) return `${hours}小时前`
+	return `${days}天前`
+}
+
+const formatSummary = summary => {
+	if (!summary || !Array.isArray(summary) || summary.length === 0) return '无摘要'
+	return summary
+		.slice(0, 2)
+		.map(item => `${item.key}: ${item.value}`)
+		.join(', ')
+}
+
+const todoPrevPage = () => {
+	if (todoCurrentPage.value > 1) {
+		todoCurrentPage.value--
+		getTodoList()
+	}
+}
+
+const todoNextPage = () => {
+	if (todoCurrentPage.value < todoTotalPages.value) {
+		todoCurrentPage.value++
+		getTodoList()
+	}
+}
+
+const handleTodoClick = item => {
+	console.log('handleTodoClick', item)
+
+	router.push({
+		name: 'BpmProcessInstanceDetail',
+		params: {
+			id: item.processInstance.id,
+			taskId: item.id,
+		},
+	})
+}
 
 const workOrderCenter = ref({
 	total: 28,
@@ -528,6 +654,12 @@ const equipmentByStatus = ref([
 	{ name: '停用', value: 15, color: '#6b7280' },
 	{ name: '报废', value: 18, color: '#ef4444' },
 ])
+
+const equipmentIcons = ['Operation', 'Connection', 'Monitor', 'Setting']
+
+const getEquipmentIcon = index => {
+	return equipmentIcons[index % equipmentIcons.length]
+}
 
 const materialWarning = ref([
 	{ name: '润滑油', stock: 15, threshold: 50, level: 'danger', levelText: '紧急' },
@@ -968,6 +1100,7 @@ watch(equipmentView, () => {
 })
 
 onMounted(() => {
+	getTodoList()
 	setTimeout(() => {
 		initWorkOrderTypeChart()
 		initTrendChart()
@@ -1260,12 +1393,15 @@ onUnmounted(() => {
 					background: #f9fafb;
 					border-radius: 8px;
 					transition: all 0.2s;
+					cursor: pointer;
 
 					&:hover {
 						background: #f3f4f6;
 					}
 
 					.preview-tag {
+						min-width: 75px;
+						text-align: center;
 						padding: 2px 8px;
 						border-radius: 4px;
 						font-size: 10px;
@@ -1284,6 +1420,18 @@ onUnmounted(() => {
 							background: #fef3c7;
 							color: #f59e0b;
 						}
+						&.scrap {
+							background: #fee2e2;
+							color: #ef4444;
+						}
+						&.parts {
+							background: #e0e7ff;
+							color: #6366f1;
+						}
+						&.transfer {
+							background: #f3e8ff;
+							color: #8b5cf6;
+						}
 					}
 
 					.preview-text {
@@ -1300,6 +1448,56 @@ onUnmounted(() => {
 						color: #9ca3af;
 						flex-shrink: 0;
 					}
+				}
+
+				.preview-empty {
+					text-align: center;
+					padding: 20px;
+					color: #9ca3af;
+					font-size: 13px;
+				}
+			}
+
+			.preview-pagination {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 12px;
+				margin-top: 12px;
+				padding-top: 12px;
+				border-top: 1px solid #f3f4f6;
+
+				.pagination-btn {
+					width: 28px;
+					height: 28px;
+					border-radius: 6px;
+					background: #f9fafb;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					cursor: pointer;
+					transition: all 0.2s;
+
+					&:hover:not(.disabled) {
+						background: #f3f4f6;
+					}
+
+					&.disabled {
+						opacity: 0.4;
+						cursor: not-allowed;
+					}
+
+					.el-icon {
+						font-size: 14px;
+						color: #6b7280;
+					}
+				}
+
+				.pagination-info {
+					font-size: 12px;
+					color: #6b7280;
+					min-width: 40px;
+					text-align: center;
 				}
 			}
 		}
@@ -2203,54 +2401,61 @@ onUnmounted(() => {
 
 .equipment-panel {
 	.panel-body {
-		display: flex;
-		align-items: center;
-		gap: 20px;
-		padding: 20px;
+		padding: 16px;
 
-		.chart-pie {
-			width: 120px;
-			height: 120px;
-			flex-shrink: 0;
-		}
-
-		.eq-legend {
-			flex: 1;
+		.equipment-grid {
 			display: grid;
 			grid-template-columns: repeat(2, 1fr);
-			gap: 10px;
+			gap: 12px;
 
-			.eq-item {
+			.equipment-item {
 				display: flex;
 				align-items: center;
-				gap: 8px;
-				padding: 10px 12px;
-				background: #f9fafb;
-				border-radius: 8px;
+				gap: 12px;
+				padding: 16px;
+				background: #fff;
+				border-radius: 10px;
+				border: 2px solid #e5e7eb;
 				cursor: pointer;
-				transition: all 0.2s;
+				transition: all 0.3s;
 
 				&:hover {
-					background: #f3f4f6;
-					transform: translateY(-1px);
+					transform: translateY(-2px);
+					box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 				}
 
-				.eq-dot {
-					width: 8px;
-					height: 8px;
-					border-radius: 50%;
+				.equipment-icon {
+					width: 48px;
+					height: 48px;
+					border-radius: 10px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					flex-shrink: 0;
+
+					.el-icon {
+						font-size: 24px;
+						color: #fff;
+					}
 				}
 
-				.eq-name {
+				.equipment-info {
 					flex: 1;
-					font-size: 13px;
-					color: #6b7280;
-				}
+					display: flex;
+					flex-direction: column;
+					gap: 4px;
 
-				.eq-value {
-					font-size: 16px;
-					font-weight: 700;
-					color: #1f2937;
+					.equipment-num {
+						font-size: 28px;
+						font-weight: 700;
+						line-height: 1;
+						font-family: 'DIN Alternate', 'Arial', sans-serif;
+					}
+
+					.equipment-label {
+						font-size: 13px;
+						color: #6b7280;
+					}
 				}
 			}
 		}
