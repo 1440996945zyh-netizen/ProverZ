@@ -472,7 +472,7 @@ const approvalData = ref({
 const approvalTodoList = ref([])
 const todoLoading = ref(false)
 const todoCurrentPage = ref(1)
-const todoPageSize = 4
+const todoPageSize = 3
 const todoTotal = ref(0)
 
 const todoTotalPages = computed(() => Math.ceil(todoTotal.value / todoPageSize))
@@ -485,7 +485,7 @@ const getTodoList = async () => {
 	todoLoading.value = true
 	try {
 		const res = await getTaskTodoPage({
-			pageNum: todoCurrentPage.value,
+			startPage: todoCurrentPage.value,
 			pageSize: todoPageSize,
 		})
 		approvalTodoList.value = (res.data.pages || []).map(item => ({
@@ -1400,6 +1400,8 @@ onUnmounted(() => {
 					}
 
 					.preview-tag {
+						min-width: 75px;
+						text-align: center;
 						padding: 2px 8px;
 						border-radius: 4px;
 						font-size: 10px;
