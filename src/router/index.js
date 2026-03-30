@@ -186,6 +186,47 @@ export const constantRoutes = [
 		],
 	},
 	{
+		path: '/equipment',
+		component: Layout,
+		hidden: true,
+		redirect: 'noredirect',
+		name: 'equipment',
+		children: [
+			{
+				path: 'maintInfo',
+				component: () => import('@/views/equipment/maintInfo/index.vue'),
+				name: 'EquipmentMaintInfo',
+				meta: {
+					title: '设备工单管理',
+				},
+			},
+			{
+				path: 'patrolTask',
+				component: () => import('@/views/equipment/patrolTask/index.vue'),
+				name: 'EquipmentPatrolTask',
+				meta: {
+					title: '巡检记录',
+				},
+			},
+			{
+				path: 'inspectionTask',
+				component: () => import('@/views/equipment/inspectionTask/index.vue'),
+				name: 'EquipmentInspectionTask',
+				meta: {
+					title: '点检记录',
+				},
+			},
+			{
+				path: 'maintainTask',
+				component: () => import('@/views/equipment/maintainTask/index.vue'),
+				name: 'EquipmentMaintainTask',
+				meta: {
+					title: '润滑保养记录',
+				},
+			},
+		],
+	},
+	{
 		path: '/iframe/:id',
 		component: () => import('@/layout/index.vue'), // 或者空组件
 		meta: {

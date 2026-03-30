@@ -61,19 +61,19 @@
 				</div>
 				<div class="card-body">
 					<div class="stat-row">
-						<div class="stat-item" @click.stop="navigateTo('/equipment/maintInfo')">
+						<div class="stat-item" @click.stop="navigateToWorkOrder('total')">
 							<span class="stat-num">{{ workOrderCenter.total }}</span>
 							<span class="stat-label">工单总数</span>
 						</div>
-						<div class="stat-item highlight" @click.stop="navigateTo('/equipment/maintInfo')">
+						<div class="stat-item highlight" @click.stop="navigateToWorkOrder('dispatch')">
 							<span class="stat-num">{{ workOrderCenter.dispatch }}</span>
 							<span class="stat-label">待派工</span>
 						</div>
-						<div class="stat-item" @click.stop="navigateTo('/equipment/maintInfo')">
+						<div class="stat-item" @click.stop="navigateToWorkOrder('repairing')">
 							<span class="stat-num">{{ workOrderCenter.repairing }}</span>
 							<span class="stat-label">维修中</span>
 						</div>
-						<div class="stat-item" @click.stop="navigateTo('/equipment/maintInfo')">
+						<div class="stat-item" @click.stop="navigateToWorkOrder('acceptance')">
 							<span class="stat-num">{{ workOrderCenter.acceptance }}</span>
 							<span class="stat-label">待验收</span>
 						</div>
@@ -862,9 +862,24 @@ const navigateTo = path => {
 	router.push(path)
 }
 
-const navigateToStatus = type => {
+const navigateToWorkOrder = tab => {
 	router.push({
 		path: '/equipment/maintInfo',
+		query: { tab },
+	})
+}
+
+const navigateToStatus = type => {
+	let path = '/equipment/maintInfo'
+	if (type.includes('inspection')) {
+		path = '/equipment/patrolTask'
+	} else if (type.includes('check')) {
+		path = '/equipment/inspectionTask'
+	} else if (type.includes('lubrication') || type.includes('maintenance')) {
+		path = '/equipment/maintainTask'
+	}
+	router.push({
+		path,
 		query: { status: type },
 	})
 }
