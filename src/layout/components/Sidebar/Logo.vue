@@ -10,36 +10,26 @@
 				: variables.topNavColor,
 		}"
 	>
-		<transition name="sidebarLogoFade">
-			<router-link key="collapse" class="sidebar-logo-link" to="/">
-				<img :src="logo" class="sidebar-logo" />
-				<h1
-					class="sidebar-title"
-					:style="{
-						color: !topNav
-							? sideTheme === 'theme-dark'
-								? variables.logoTitleColor
-								: variables.logoLightTitleColor
-							: variables.logoTitleColor,
-					}"
-				>
-					{{ title }}
-				</h1>
-			</router-link>
-			<!-- <router-link v-else key="expand" class="sidebar-logo-link" to="/">
-				<img v-if="logo" :src="logo" class="sidebar-logo" />
-				<h1
-					class="sidebar-title"
-					:style="{ color: !topNav?sideTheme === 'theme-dark' ? variables.logoTitleColor : variables.logoLightTitleColor: variables.logoTitleColor }"
-				>
-					{{ title }}
-				</h1>
-			</router-link> -->
-		</transition>
+		<router-link key="collapse" class="sidebar-logo-link" to="/">
+			<img :src="logo" class="sidebar-logo" />
+			<span
+				class="sidebar-title"
+				:style="{
+					color: !topNav
+						? sideTheme === 'theme-dark'
+							? variables.logoTitleColor
+							: variables.logoLightTitleColor
+						: variables.logoTitleColor,
+				}"
+			>
+				{{ title }}
+			</span>
+		</router-link>
 	</div>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import variables from '@/assets/styles/variables.module.scss'
 import logo from '@/assets/logo/logo1.png'
 import useSettingsStore from '@/store/modules/settings'
@@ -51,7 +41,7 @@ defineProps({
 	},
 })
 
-const title = ref('设备管理系统')
+const title = ref('数智设备物资管理平台')
 const settingsStore = useSettingsStore()
 const sideTheme = computed(() => settingsStore.sideTheme)
 const topNav = computed(() => settingsStore.topNav)
@@ -72,30 +62,28 @@ const topNav = computed(() => settingsStore.topNav)
 	height: 50px;
 	line-height: 50px;
 	background: #2b2f3a;
-	padding-left: 10px;
-	overflow: hidden;
+	padding-left: 5px;
+	overflow: visible;
 	transition: width 0.28s;
 	& .sidebar-logo-link {
 		height: 100%;
-		width: 100%;
+		display: flex;
+		align-items: center;
+		padding-left: 5px;
 
 		& .sidebar-logo {
-			width: 40px;
-			height: 40px;
-			vertical-align: middle;
-			margin-top: -6%;
-			margin-left: -12px;
+			width: 32px;
+			height: 32px;
 		}
 
 		& .sidebar-title {
-			display: inline-block;
 			margin: 0;
-			color: #fff;
 			font-weight: 600;
-			line-height: 50px;
-			font-size: 16px;
+			font-size: 14px;
 			font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
-			vertical-align: middle;
+			white-space: nowrap;
+			letter-spacing: -0.5px;
+			margin-left: 8px;
 		}
 	}
 

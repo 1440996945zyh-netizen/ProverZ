@@ -123,7 +123,7 @@ const queryParams = ref({
 
 // 获取子表数据列表
 const getList = (e) => {
-	queryParams.value = { ...queryParams.value, ...e, parentId: taskId.value }
+	queryParams.value = { ...queryParams.value, ...e, id: taskId.value }
 	api.getById(queryParams.value).then((res) => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
