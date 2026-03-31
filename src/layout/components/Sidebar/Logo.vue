@@ -72,17 +72,17 @@ const topNav = computed(() => settingsStore.topNav)
 		padding-left: 5px;
 
 		& .sidebar-logo {
-			width: 32px;
-			height: 32px;
+			width: 36px;
+			height: 36px;
 		}
 
 		& .sidebar-title {
 			margin: 0;
 			font-weight: 600;
-			font-size: 14px;
+			font-size: 16px;
 			font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
 			white-space: nowrap;
-			letter-spacing: -0.5px;
+			letter-spacing: 0px;
 			margin-left: 8px;
 		}
 	}

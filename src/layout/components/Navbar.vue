@@ -297,6 +297,9 @@ const aPortClick = () => {
 				// margin-top: 17px;
 				position: relative;
 				font-size: 14px;
+				display: flex;
+				align-items: center;
+				white-space: nowrap;
 
 				.user-avatar {
 					cursor: pointer;
@@ -305,11 +308,9 @@ const aPortClick = () => {
 					border-radius: 10px;
 				}
 
-				i {
+				.el-icon {
+					margin-left: 5px;
 					cursor: pointer;
-					position: absolute;
-					right: -10px;
-					// top: 10px;
 					font-size: 12px;
 				}
 			}
