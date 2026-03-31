@@ -109,6 +109,21 @@ const tableColumns = reactive([
 			]
 		}, 
   },
+  { 
+    label: '是否生效', 
+    prop: 'status',
+    render: row => {
+			return [
+				h(
+					'span',
+          {},
+					{
+						default: () => row.isSingle == '1' ? '是' : '否',
+					}
+				),
+			]
+		}, 
+  },
 	{ label: '点检员', prop: 'patrolName' },
   {
 		prop: '',
