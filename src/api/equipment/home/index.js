@@ -7,7 +7,7 @@ import request from '@/utils/auth/request'
 export function getHomeMap() {
 	return request({
 		url: '/api/internal/home/getHomeMap',
-		method: 'get'
+		method: 'get',
 	})
 }
 
@@ -23,7 +23,7 @@ export function getMaintInfo(startTime, endTime) {
 		method: 'get',
 		params: {
 			startTime,
-			endTime
-		}
+			endTime,
+		},
 	})
 }

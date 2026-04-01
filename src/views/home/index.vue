@@ -190,11 +190,11 @@
 					<div class="trend-summary">
 						<div class="summary-item">
 							<span class="summary-num">{{ weekSummary.total }}</span>
-							<span class="summary-label">提报</span>
+							<span class="summary-label">工单数</span>
 						</div>
 						<div class="summary-item">
 							<span class="summary-num">{{ weekSummary.completed }}</span>
-							<span class="summary-label">完成</span>
+							<span class="summary-label">完成数</span>
 						</div>
 						<div class="summary-item">
 							<span class="summary-num">{{ weekSummary.rate }}%</span>
@@ -649,15 +649,18 @@ const workOrderByType = ref([
 ])
 
 const todayWorkOrder = ref([
-	{ label: '已提报', value: 0, type: 'blue', icon: 'Files' },
-	{ label: '已派工', value: 0, type: 'orange', icon: 'Operation' },
-	{ label: '已完成', value: 0, type: 'green', icon: 'Finished' },
+	{ label: '提报', value: 0, type: 'blue', icon: 'Files' },
+	{ label: '派工', value: 0, type: 'orange', icon: 'Operation' },
+	{ label: '点检', value: 0, type: 'green', icon: 'Finished' },
+	{ label: '巡检', value: 0, type: 'purple', icon: 'Monitor' },
+	{ label: '润滑', value: 0, type: 'cyan', icon: 'Tools' },
+	{ label: '保养', value: 0, type: 'pink', icon: 'FirstAidKit' },
 ])
 
 const weekSummary = ref({
-	total: 173,
-	completed: 148,
-	rate: 85,
+	total: 0,
+	completed: 0,
+	rate: 0,
 })
 
 const getDefaultDateRange = () => {
@@ -778,12 +781,13 @@ const initTrendChart = async () => {
 		const inProgressData = data.map(item => item.jxz || 0)
 		const completedData = data.map(item => item.ywc || 0)
 
-		const lastItem = data[data.length - 1]
-		if (lastItem) {
+		// 从第一条数据获取汇总统计
+		const firstItem = data[0]
+		if (firstItem) {
 			weekSummary.value = {
-				total: lastItem.sumTb || 0,
-				completed: lastItem.sumWc || 0,
-				rate: lastItem.wcl ? parseFloat(lastItem.wcl) : 0,
+				total: firstItem.sumTb || 0,
+				completed: firstItem.sumWc || 0,
+				rate: firstItem.wcl ? parseFloat(firstItem.wcl) : 0,
 			}
 		}
 
@@ -1216,9 +1220,12 @@ const getHomeData = async () => {
 		// 工单今日统计
 		if (data.eMaintIfonToday) {
 			todayWorkOrder.value = [
-				{ label: '已提报', value: parseInt(data.eMaintIfonToday.ytb), type: 'blue', icon: 'Files' },
-				{ label: '已派工', value: parseInt(data.eMaintIfonToday.ypg), type: 'orange', icon: 'Operation' },
-				{ label: '已完成', value: parseInt(data.eMaintIfonToday.ywc), type: 'green', icon: 'Finished' },
+				{ label: '提报', value: parseInt(data.eMaintIfonToday.tb) || 0, type: 'blue', icon: 'Files' },
+				{ label: '派工', value: parseInt(data.eMaintIfonToday.pg) || 0, type: 'orange', icon: 'Operation' },
+				{ label: '点检', value: parseInt(data.eMaintIfonToday.dj) || 0, type: 'green', icon: 'Finished' },
+				{ label: '巡检', value: parseInt(data.eMaintIfonToday.xj) || 0, type: 'purple', icon: 'Monitor' },
+				{ label: '润滑', value: parseInt(data.eMaintIfonToday.rh) || 0, type: 'cyan', icon: 'Tools' },
+				{ label: '保养', value: parseInt(data.eMaintIfonToday.by) || 0, type: 'pink', icon: 'FirstAidKit' },
 			]
 		}
 
@@ -2176,7 +2183,7 @@ onUnmounted(() => {
 
 		.today-view-compact {
 			display: grid;
-			grid-template-columns: repeat(3, 1fr);
+			grid-template-columns: repeat(6, 1fr);
 			gap: 12px;
 
 			.today-item-compact {
@@ -2211,6 +2218,15 @@ onUnmounted(() => {
 					}
 					&.green {
 						background: linear-gradient(135deg, #10b981, #34d399);
+					}
+					&.purple {
+						background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+					}
+					&.cyan {
+						background: linear-gradient(135deg, #06b6d4, #22d3ee);
+					}
+					&.pink {
+						background: linear-gradient(135deg, #ec4899, #f472b6);
 					}
 				}
 
