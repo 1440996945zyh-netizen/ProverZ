@@ -97,6 +97,7 @@ const tableColumns = reactive([
   {
     label: '巡检路线等级',
     prop: 'routeLevel',
+	  minWidth: 80,
     render: row => {
       return [
         h(
