@@ -2183,63 +2183,69 @@ onUnmounted(() => {
 
 		.today-view-compact {
 			display: grid;
-			grid-template-columns: repeat(6, 1fr);
+			grid-template-columns: repeat(3, 1fr);
 			gap: 12px;
 
 			.today-item-compact {
 				display: flex;
 				align-items: center;
-				gap: 12px;
-				padding: 14px;
-				background: #f9fafb;
+				gap: 14px;
+				padding: 16px;
+				background: #fff;
 				border-radius: 10px;
 				cursor: pointer;
-				transition: all 0.2s;
+				transition: all 0.2s ease;
+				border: 1px solid #f0f0f0;
 
 				&:hover {
-					background: #f3f4f6;
+					border-color: #e0e0e0;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 				}
 
 				.today-icon {
-					width: 42px;
-					height: 42px;
-					border-radius: 10px;
+					width: 40px;
+					height: 40px;
+					border-radius: 8px;
 					display: flex;
 					align-items: center;
 					justify-content: center;
-					font-size: 20px;
+					font-size: 18px;
 					color: #fff;
+					flex-shrink: 0;
 
 					&.blue {
-						background: linear-gradient(135deg, #3b82f6, #60a5fa);
+						background: #3b82f6;
 					}
 					&.orange {
-						background: linear-gradient(135deg, #f59e0b, #fbbf24);
+						background: #f59e0b;
 					}
 					&.green {
-						background: linear-gradient(135deg, #10b981, #34d399);
+						background: #10b981;
 					}
 					&.purple {
-						background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+						background: #8b5cf6;
 					}
 					&.cyan {
-						background: linear-gradient(135deg, #06b6d4, #22d3ee);
+						background: #06b6d4;
 					}
 					&.pink {
-						background: linear-gradient(135deg, #ec4899, #f472b6);
+						background: #ec4899;
 					}
 				}
 
 				.today-info {
+					flex: 1;
+					min-width: 0;
+
 					.today-num {
-						font-size: 22px;
-						font-weight: 700;
+						font-size: 24px;
+						font-weight: 600;
 						color: #1f2937;
 						line-height: 1;
 					}
 
 					.today-label {
-						font-size: 12px;
+						font-size: 13px;
 						color: #9ca3af;
 						margin-top: 4px;
 					}
@@ -3060,7 +3066,7 @@ onUnmounted(() => {
 			}
 
 			.today-view-compact {
-				grid-template-columns: repeat(3, 1fr);
+				grid-template-columns: repeat(2, 1fr);
 			}
 		}
 	}
@@ -3085,6 +3091,10 @@ onUnmounted(() => {
 				.type-list-compact {
 					grid-template-columns: repeat(2, 1fr);
 				}
+			}
+
+			.today-view-compact {
+				grid-template-columns: repeat(2, 1fr);
 			}
 		}
 	}
