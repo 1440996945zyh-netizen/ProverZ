@@ -63,6 +63,7 @@
 		"prismjs": "^1.30.0",
 		"sortablejs": "^1.15.0",
 		"steady-xml": "^0.1.0",
+		"three": "^0.183.2",
 		"url-polyfill": "^1.1.13",
 		"v-viewer": "^3.0.11",
 		"viewerjs": "^1.11.6",
@@ -83,6 +84,7 @@
 		"yarn": "^1.22.22"
 	},
 	"devDependencies": {
+		"@types/three": "^0.183.1",
 		"@unocss/eslint-config": "^0.57.4",
 		"@unocss/eslint-plugin": "66.1.0-beta.5",
 		"@unocss/transformer-variant-group": "^0.58.5",
