@@ -1,33 +1,26 @@
 <template>
   <div class="app-container">
-    <div class="table-wrapper">
-      <BaseTable
-        ref="baseTable"
-        :showSearchHeader="true"
-        :selectData="selectData"
-        :searchClick="getList"
-        :buttonList="buttonList"
-        :tableColumns="tableColumns"
-        :tableData="tableData"
-        :loading="loading"
-        :total="total"
-        :tableHeight="tableHeight"
-        :checkbox-config="checkboxConfig"
-        @checkbox-change="checkboxChange"
-      />
-    </div>
+    <BaseTable
+      ref="baseTable"
+      :showSearchHeader="true"
+      :selectData="selectData"
+      :searchClick="getList"
+      :buttonList="buttonList"
+      :tableColumns="tableColumns"
+      :tableData="tableData"
+      :loading="loading"
+      :total="total"
+      :checkbox-config="checkboxConfig"
+      @checkbox-change="checkboxChange"
+    />
   </div>
 </template>
 
 <script setup name="materialWarningRecord">
-import { ref, reactive, computed, getCurrentInstance, toRefs, h } from 'vue'
+import { ref, reactive, getCurrentInstance, toRefs, h } from 'vue'
 import { ElTag } from 'element-plus'
 import BaseTable from '@/components/BaseTable/index.vue'
 import api from '@/api/equipment/materialWarningRecord/index'
-import tableParamsStore from '@/store/modules/tableParams'
-
-const storeHeight = computed(() => tableParamsStore().normalTableHeight)
-const tableHeight = computed(() => storeHeight.value - 90)
 
 const { proxy } = getCurrentInstance()
 const baseTable = ref()
