@@ -76,24 +76,24 @@
 							<div class="card-desc">维修工单管理</div>
 						</div>
 					</div>
-					<div class="card-badge warning">{{ workOrderCenter.dispatch + workOrderCenter.repairing }}项进行中</div>
+					<div class="card-badge warning">{{ maintenanceInfo.dpg + maintenanceInfo.dys }}项进行中</div>
 				</div>
 				<div class="card-body">
 					<div class="stat-row">
 						<div class="stat-item" @click.stop="navigateToWorkOrder('total')">
-							<span class="stat-num">{{ workOrderCenter.total }}</span>
-							<span class="stat-label">工单总数</span>
+							<span class="stat-num">{{ maintenanceInfo.sumCount }}</span>
+							<span class="stat-label">维修总数</span>
 						</div>
-						<div class="stat-item highlight" @click.stop="navigateToWorkOrder('dispatch')">
-							<span class="stat-num">{{ workOrderCenter.dispatch }}</span>
+						<div class="stat-item" @click.stop="navigateTo('/equipment/maintInfo?status=wxz')">
+							<span class="stat-num">{{ maintenanceInfo.wxz }}</span>
+							<span class="stat-label">待维修</span>
+						</div>
+						<div class="stat-item" @click.stop="navigateTo('/equipment/maintInfo?status=dpg')">
+							<span class="stat-num">{{ maintenanceInfo.dpg }}</span>
 							<span class="stat-label">待派工</span>
 						</div>
-						<div class="stat-item" @click.stop="navigateToWorkOrder('repairing')">
-							<span class="stat-num">{{ workOrderCenter.repairing }}</span>
-							<span class="stat-label">维修中</span>
-						</div>
-						<div class="stat-item" @click.stop="navigateToWorkOrder('acceptance')">
-							<span class="stat-num">{{ workOrderCenter.acceptance }}</span>
+						<div class="stat-item" @click.stop="navigateTo('/equipment/maintInfo?status=dys')">
+							<span class="stat-num">{{ maintenanceInfo.dys }}</span>
 							<span class="stat-label">待验收</span>
 						</div>
 					</div>
@@ -171,16 +171,30 @@
 				<div class="panel-header">
 					<div class="panel-title">
 						<div class="title-icon"></div>
-						<span>工单趋势（近7天）</span>
+						<span>工单趋势</span>
+					</div>
+					<div class="trend-filter">
+						<el-date-picker
+							v-model="trendDateRange"
+							type="daterange"
+							range-separator="至"
+							start-placeholder="开始日期"
+							end-placeholder="结束日期"
+							format="YYYY-MM-DD"
+							value-format="YYYY-MM-DD"
+							:clearable="false"
+							@change="handleTrendDateChange"
+							style="width: 220px"
+						/>
 					</div>
 					<div class="trend-summary">
 						<div class="summary-item">
 							<span class="summary-num">{{ weekSummary.total }}</span>
-							<span class="summary-label">本周提报</span>
+							<span class="summary-label">提报</span>
 						</div>
 						<div class="summary-item">
 							<span class="summary-num">{{ weekSummary.completed }}</span>
-							<span class="summary-label">已完成</span>
+							<span class="summary-label">完成</span>
 						</div>
 						<div class="summary-item">
 							<span class="summary-num">{{ weekSummary.rate }}%</span>
@@ -230,33 +244,11 @@
 						<span>工单统计</span>
 					</div>
 					<div class="panel-tabs">
-						<span :class="{ active: workOrderTab === 'type' }" @click="workOrderTab = 'type'">类型</span>
-						<span :class="{ active: workOrderTab === 'node' }" @click="workOrderTab = 'node'">节点</span>
 						<span :class="{ active: workOrderTab === 'today' }" @click="workOrderTab = 'today'">今日</span>
+						<span :class="{ active: workOrderTab === 'type' }" @click="workOrderTab = 'type'">类型</span>
 					</div>
 				</div>
 				<div class="panel-body">
-					<div v-if="workOrderTab === 'type'" class="type-view-compact">
-						<div ref="workOrderTypeChartRef" class="chart-pie-compact"></div>
-						<div class="type-list-compact">
-							<div class="type-item-compact" v-for="(item, index) in workOrderByType" :key="index">
-								<span class="type-dot" :style="{ background: item.color }"></span>
-								<span class="type-name">{{ item.name }}</span>
-								<span class="type-value">{{ item.value }}</span>
-							</div>
-						</div>
-					</div>
-					<div v-if="workOrderTab === 'node'" class="node-view-compact">
-						<div class="node-item-compact" v-for="(item, index) in workOrderByNode" :key="index">
-							<div class="node-header">
-								<span class="node-name">{{ item.name }}</span>
-								<span class="node-value">{{ item.value }}</span>
-							</div>
-							<div class="node-progress">
-								<div class="node-bar" :style="{ width: item.percent + '%', background: item.color }"></div>
-							</div>
-						</div>
-					</div>
 					<div v-if="workOrderTab === 'today'" class="today-view-compact">
 						<div class="today-item-compact" v-for="(item, index) in todayWorkOrder" :key="index">
 							<div class="today-icon" :class="item.type">
@@ -265,6 +257,16 @@
 							<div class="today-info">
 								<div class="today-num">{{ item.value }}</div>
 								<div class="today-label">{{ item.label }}</div>
+							</div>
+						</div>
+					</div>
+					<div v-if="workOrderTab === 'type'" class="type-view-compact">
+						<div ref="workOrderTypeChartRef" class="chart-pie-compact"></div>
+						<div class="type-list-compact">
+							<div class="type-item-compact" v-for="(item, index) in workOrderByType" :key="index">
+								<span class="type-dot" :style="{ background: item.color }"></span>
+								<span class="type-name">{{ item.name }}</span>
+								<span class="type-value">{{ item.value }}</span>
 							</div>
 						</div>
 					</div>
@@ -399,6 +401,7 @@ import {
 import * as echarts from 'echarts'
 import usePermissionStore from '@/store/modules/permission'
 import { getTaskTodoPage } from '@/api/system/bpm/task'
+import { getHomeMap, getMaintInfo } from '@/api/equipment/home'
 const permissionStore = usePermissionStore()
 const router = useRouter()
 
@@ -575,13 +578,49 @@ const handleTodoClick = item => {
 	})
 }
 
+// 设备管理中心数据
 const workOrderCenter = ref({
-	total: 28,
-	dispatch: 8,
-	repairing: 15,
-	acceptance: 5,
-	completed: 156,
-	monthTotal: 200,
+	total: 0,
+	dispatch: 0,
+	repairing: 0,
+	acceptance: 0,
+	completed: 0,
+	monthTotal: 0,
+})
+
+// 设备统计
+const equipmentByType = ref([
+	{ name: '车辆', value: 0, color: '#3b82f6' },
+	{ name: '船舶', value: 0, color: '#10b981' },
+	{ name: '装卸机械', value: 0, color: '#f59e0b' },
+	{ name: '电力设备', value: 0, color: '#8b5cf6' },
+])
+
+const equipmentByStatus = ref([
+	{ name: '在用', value: 0, color: '#10b981' },
+	{ name: '在修', value: 0, color: '#f59e0b' },
+	{ name: '停用', value: 0, color: '#6b7280' },
+	{ name: '报废', value: 0, color: '#ef4444' },
+])
+
+// 巡检状态
+const inspectionStatusList = ref([
+	{ label: '待巡检', value: 0, type: 'inspection-pending', isPending: true },
+	{ label: '已巡检', value: 0, type: 'inspection-done', isPending: false },
+	{ label: '待点检', value: 0, type: 'check-pending', isPending: true },
+	{ label: '已点检', value: 0, type: 'check-done', isPending: false },
+	{ label: '待润滑', value: 0, type: 'lubrication-pending', isPending: true },
+	{ label: '已润滑', value: 0, type: 'lubrication-done', isPending: false },
+	{ label: '待保养', value: 0, type: 'maintenance-pending', isPending: true },
+	{ label: '已保养', value: 0, type: 'maintenance-done', isPending: false },
+])
+
+// 维修信息
+const maintenanceInfo = ref({
+	sumCount: 0,
+	wxz: 0,
+	dpg: 0,
+	dys: 0,
 })
 
 const workOrderProgress = computed(() => {
@@ -589,17 +628,6 @@ const workOrderProgress = computed(() => {
 	const completed = workOrderCenter.value.completed || 0
 	return Math.round((completed / total) * 100)
 })
-
-const inspectionStatusList = ref([
-	{ label: '待巡检', value: 12, type: 'inspection-pending', isPending: true },
-	{ label: '已巡检', value: 45, type: 'inspection-done', isPending: false },
-	{ label: '待点检', value: 8, type: 'check-pending', isPending: true },
-	{ label: '已点检', value: 38, type: 'check-done', isPending: false },
-	{ label: '待润滑', value: 6, type: 'lubrication-pending', isPending: true },
-	{ label: '已润滑', value: 24, type: 'lubrication-done', isPending: false },
-	{ label: '待保养', value: 10, type: 'maintenance-pending', isPending: true },
-	{ label: '已保养', value: 32, type: 'maintenance-done', isPending: false },
-])
 
 const messageList = ref([
 	{ title: '设备维修工单已审批通过', desc: '您提交的设备维修申请已通过审批', time: '10分钟前', type: 'success', read: false },
@@ -611,26 +639,19 @@ const messageTotal = computed(() => {
 	return messageList.value.filter(item => !item.read).length
 })
 
-const workOrderTab = ref('type')
+const workOrderTab = ref('today')
 
 const workOrderByType = ref([
-	{ name: '定额工单', value: 128, color: '#3b82f6' },
-	{ name: '非定额工单', value: 85, color: '#10b981' },
-	{ name: '大包工单', value: 56, color: '#f59e0b' },
-	{ name: '内修工单', value: 92, color: '#8b5cf6' },
-])
-
-const workOrderByNode = ref([
-	{ name: '工单总数', value: 361, percent: 100, color: '#3b82f6' },
-	{ name: '未派工', value: 45, percent: 12, color: '#f59e0b' },
-	{ name: '进行中', value: 128, percent: 35, color: '#3b82f6' },
-	{ name: '已完成', value: 188, percent: 52, color: '#10b981' },
+	{ name: '定额工单', value: 0, color: '#3b82f6' },
+	{ name: '非定额工单', value: 0, color: '#10b981' },
+	{ name: '大包工单', value: 0, color: '#f59e0b' },
+	{ name: '内修工单', value: 0, color: '#8b5cf6' },
 ])
 
 const todayWorkOrder = ref([
-	{ label: '已提报', value: 35, type: 'blue', icon: 'Files' },
-	{ label: '已派工', value: 28, type: 'orange', icon: 'Operation' },
-	{ label: '已完成', value: 22, type: 'green', icon: 'Finished' },
+	{ label: '已提报', value: 0, type: 'blue', icon: 'Files' },
+	{ label: '已派工', value: 0, type: 'orange', icon: 'Operation' },
+	{ label: '已完成', value: 0, type: 'green', icon: 'Finished' },
 ])
 
 const weekSummary = ref({
@@ -639,21 +660,26 @@ const weekSummary = ref({
 	rate: 85,
 })
 
+const getDefaultDateRange = () => {
+	const end = new Date()
+	const start = new Date()
+	start.setDate(start.getDate() - 6)
+	const formatDate = date => {
+		const year = date.getFullYear()
+		const month = String(date.getMonth() + 1).padStart(2, '0')
+		const day = String(date.getDate()).padStart(2, '0')
+		return `${year}-${month}-${day}`
+	}
+	return [formatDate(start), formatDate(end)]
+}
+
+const trendDateRange = ref(getDefaultDateRange())
+
+const handleTrendDateChange = () => {
+	initTrendChart()
+}
+
 const equipmentView = ref('type')
-
-const equipmentByType = ref([
-	{ name: '机械设备', value: 186, color: '#3b82f6' },
-	{ name: '电气设备', value: 128, color: '#10b981' },
-	{ name: '仪表设备', value: 95, color: '#f59e0b' },
-	{ name: '特种设备', value: 67, color: '#8b5cf6' },
-])
-
-const equipmentByStatus = ref([
-	{ name: '在用', value: 486, color: '#10b981' },
-	{ name: '在修', value: 32, color: '#f59e0b' },
-	{ name: '停用', value: 15, color: '#6b7280' },
-	{ name: '报废', value: 18, color: '#ef4444' },
-])
 
 const equipmentIcons = ['Operation', 'Connection', 'Monitor', 'Setting']
 
@@ -731,100 +757,123 @@ const initWorkOrderTypeChart = () => {
 	workOrderTypeChart.setOption(option)
 }
 
-const initTrendChart = () => {
+const initTrendChart = async () => {
 	if (!trendChartRef.value) return
 	trendChart = echarts.init(trendChartRef.value)
-	const dates = []
-	const today = new Date()
-	for (let i = 6; i >= 0; i--) {
-		const d = new Date(today)
-		d.setDate(d.getDate() - i)
-		dates.push(`${d.getMonth() + 1}/${d.getDate()}`)
-	}
-	const option = {
-		tooltip: {
-			trigger: 'axis',
-			backgroundColor: 'rgba(255, 255, 255, 0.95)',
-			borderColor: '#e5e7eb',
-			borderWidth: 1,
-			textStyle: { color: '#374151', fontSize: 13 },
-			padding: [10, 15],
-		},
-		legend: {
-			data: ['提报数', '进行中', '已完成'],
-			right: 20,
-			top: 5,
-			textStyle: { color: '#6b7280', fontSize: 12 },
-			itemWidth: 16,
-			itemHeight: 8,
-			itemGap: 20,
-		},
-		grid: {
-			top: 50,
-			right: 30,
-			bottom: 40,
-			left: 50,
-		},
-		xAxis: {
-			type: 'category',
-			data: dates,
-			axisLine: { lineStyle: { color: '#e5e7eb' } },
-			axisLabel: { color: '#6b7280', fontSize: 12 },
-			axisTick: { show: false },
-		},
-		yAxis: {
-			type: 'value',
-			axisLine: { show: false },
-			axisTick: { show: false },
-			axisLabel: { color: '#9ca3af', fontSize: 11 },
-			splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
-		},
-		series: [
-			{
-				name: '提报数',
-				type: 'line',
-				smooth: true,
-				symbol: 'circle',
-				symbolSize: 8,
-				data: [23, 18, 32, 28, 35, 15, 22],
-				lineStyle: { width: 3, color: '#3b82f6' },
-				itemStyle: { color: '#3b82f6', borderWidth: 2, borderColor: '#fff' },
-				areaStyle: {
-					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-						{ offset: 0, color: 'rgba(59, 130, 246, 0.25)' },
-						{ offset: 1, color: 'rgba(59, 130, 246, 0)' },
-					]),
+
+	if (!trendDateRange.value || trendDateRange.value.length !== 2) return
+
+	try {
+		const res = await getMaintInfo(trendDateRange.value[0], trendDateRange.value[1])
+		const data = res.data || []
+
+		data.sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
+
+		const dates = data.map(item => {
+			const date = new Date(item.createDate)
+			return `${date.getMonth() + 1}/${date.getDate()}`
+		})
+
+		const submitData = data.map(item => item.tbs || 0)
+		const inProgressData = data.map(item => item.jxz || 0)
+		const completedData = data.map(item => item.ywc || 0)
+
+		const lastItem = data[data.length - 1]
+		if (lastItem) {
+			weekSummary.value = {
+				total: lastItem.sumTb || 0,
+				completed: lastItem.sumWc || 0,
+				rate: lastItem.wcl ? parseFloat(lastItem.wcl) : 0,
+			}
+		}
+
+		const option = {
+			tooltip: {
+				trigger: 'axis',
+				backgroundColor: 'rgba(255, 255, 255, 0.95)',
+				borderColor: '#e5e7eb',
+				borderWidth: 1,
+				textStyle: { color: '#374151', fontSize: 13 },
+				padding: [10, 15],
+			},
+			legend: {
+				data: ['提报数', '进行中', '已完成'],
+				right: 20,
+				top: 5,
+				textStyle: { color: '#6b7280', fontSize: 12 },
+				itemWidth: 16,
+				itemHeight: 8,
+				itemGap: 20,
+			},
+			grid: {
+				top: 50,
+				right: 30,
+				bottom: 40,
+				left: 50,
+			},
+			xAxis: {
+				type: 'category',
+				data: dates,
+				axisLine: { lineStyle: { color: '#e5e7eb' } },
+				axisLabel: { color: '#6b7280', fontSize: 12 },
+				axisTick: { show: false },
+			},
+			yAxis: {
+				type: 'value',
+				axisLine: { show: false },
+				axisTick: { show: false },
+				axisLabel: { color: '#9ca3af', fontSize: 11 },
+				splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
+			},
+			series: [
+				{
+					name: '提报数',
+					type: 'line',
+					smooth: true,
+					symbol: 'circle',
+					symbolSize: 8,
+					data: submitData,
+					lineStyle: { width: 3, color: '#3b82f6' },
+					itemStyle: { color: '#3b82f6', borderWidth: 2, borderColor: '#fff' },
+					areaStyle: {
+						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+							{ offset: 0, color: 'rgba(59, 130, 246, 0.25)' },
+							{ offset: 1, color: 'rgba(59, 130, 246, 0)' },
+						]),
+					},
 				},
-			},
-			{
-				name: '进行中',
-				type: 'line',
-				smooth: true,
-				symbol: 'circle',
-				symbolSize: 8,
-				data: [45, 38, 52, 48, 55, 35, 42],
-				lineStyle: { width: 3, color: '#f59e0b' },
-				itemStyle: { color: '#f59e0b', borderWidth: 2, borderColor: '#fff' },
-			},
-			{
-				name: '已完成',
-				type: 'line',
-				smooth: true,
-				symbol: 'circle',
-				symbolSize: 8,
-				data: [20, 15, 28, 30, 32, 18, 25],
-				lineStyle: { width: 3, color: '#10b981' },
-				itemStyle: { color: '#10b981', borderWidth: 2, borderColor: '#fff' },
-				areaStyle: {
-					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-						{ offset: 0, color: 'rgba(16, 185, 129, 0.25)' },
-						{ offset: 1, color: 'rgba(16, 185, 129, 0)' },
-					]),
+				{
+					name: '进行中',
+					type: 'line',
+					smooth: true,
+					symbol: 'circle',
+					symbolSize: 8,
+					data: inProgressData,
+					lineStyle: { width: 3, color: '#f59e0b' },
+					itemStyle: { color: '#f59e0b', borderWidth: 2, borderColor: '#fff' },
 				},
-			},
-		],
+				{
+					name: '已完成',
+					type: 'line',
+					smooth: true,
+					symbol: 'circle',
+					symbolSize: 8,
+					data: completedData,
+					lineStyle: { width: 3, color: '#10b981' },
+					itemStyle: { color: '#10b981', borderWidth: 2, borderColor: '#fff' },
+					areaStyle: {
+						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+							{ offset: 0, color: 'rgba(16, 185, 129, 0.25)' },
+							{ offset: 1, color: 'rgba(16, 185, 129, 0)' },
+						]),
+					},
+				},
+			],
+		}
+		trendChart.setOption(option)
+	} catch (error) {
+		console.error('获取工单趋势数据失败:', error)
 	}
-	trendChart.setOption(option)
 }
 
 const initCostChart = () => {
@@ -1099,10 +1148,91 @@ watch(equipmentView, () => {
 	updateEquipmentChart()
 })
 
+// 获取首页数据
+const getHomeData = async () => {
+	try {
+		const res = await getHomeMap()
+		const data = res.data
+
+		// 设备信息
+		if (data.mEqptInfo) {
+			equipmentByType.value = [
+				{ name: '车辆', value: parseInt(data.mEqptInfo.cl) || 0, color: '#3b82f6' },
+				{ name: '船舶', value: parseInt(data.mEqptInfo.cb) || 0, color: '#10b981' },
+				{ name: '装卸机械', value: parseInt(data.mEqptInfo.zxjx) || 0, color: '#f59e0b' },
+				{ name: '电力设备', value: parseInt(data.mEqptInfo.dlsb) || 0, color: '#8b5cf6' },
+			]
+		}
+
+		// 设备状态
+		if (data.mEqptStatus) {
+			equipmentByStatus.value = [
+				{ name: '在用', value: parseInt(data.mEqptStatus.zx) || 0, color: '#10b981' },
+				{ name: '在修', value: parseInt(data.mEqptStatus.zy) || 0, color: '#f59e0b' },
+				{ name: '停用', value: parseInt(data.mEqptStatus.ty) || 0, color: '#6b7280' },
+				{ name: '报废', value: parseInt(data.mEqptStatus.bf) || 0, color: '#ef4444' },
+			]
+		}
+
+		// 维修信息
+		if (data.eMaintInfo) {
+			maintenanceInfo.value = {
+				sumCount: parseInt(data.eMaintInfo.sumCount) || 0,
+				wxz: parseInt(data.eMaintInfo.wxz) || 0,
+				dpg: parseInt(data.eMaintInfo.dpg) || 0,
+				dys: parseInt(data.eMaintInfo.dys) || 0,
+			}
+		}
+
+		// 巡检任务
+		if (data.ePatrolTask) {
+			inspectionStatusList.value[0].value = parseInt(data.ePatrolTask.wj) || 0 // 待巡检
+			inspectionStatusList.value[1].value = parseInt(data.ePatrolTask.yj) || 0 // 已巡检
+		}
+
+		// 点检计划
+		if (data.eCheckPlan) {
+			inspectionStatusList.value[2].value = parseInt(data.eCheckPlan.wj) || 0 // 待点检
+			inspectionStatusList.value[3].value = parseInt(data.eCheckPlan.yj) || 0 // 已点检
+		}
+
+		// 润滑保养任务
+		if (data.ePmMaintainTask) {
+			inspectionStatusList.value[4].value = parseInt(data.ePmMaintainTask.drh) || 0 // 待润滑
+			inspectionStatusList.value[5].value = parseInt(data.ePmMaintainTask.yrh) || 0 // 已润滑
+			inspectionStatusList.value[6].value = parseInt(data.ePmMaintainTask.dby) || 0 // 待保养
+			inspectionStatusList.value[7].value = parseInt(data.ePmMaintainTask.yby) || 0 // 已保养
+		}
+
+		// 工单类型统计
+		if (data.eMaintIfonType) {
+			workOrderByType.value = [
+				{ name: '定额工单', value: parseInt(data.eMaintIfonType.degd) || 0, color: '#3b82f6' },
+				{ name: '非定额工单', value: parseInt(data.eMaintIfonType.fdegd) || 0, color: '#10b981' },
+				{ name: '大包工单', value: parseInt(data.eMaintIfonType.dbgd) || 0, color: '#f59e0b' },
+				{ name: '内修工单', value: parseInt(data.eMaintIfonType.nxgd) || 0, color: '#8b5cf6' },
+			]
+		}
+		// 工单今日统计
+		if (data.eMaintIfonToday) {
+			todayWorkOrder.value = [
+				{ label: '已提报', value: parseInt(data.eMaintIfonToday.ytb), type: 'blue', icon: 'Files' },
+				{ label: '已派工', value: parseInt(data.eMaintIfonToday.ypg), type: 'orange', icon: 'Operation' },
+				{ label: '已完成', value: parseInt(data.eMaintIfonToday.ywc), type: 'green', icon: 'Finished' },
+			]
+		}
+
+		// 更新设备图表
+		updateEquipmentChart()
+	} catch (error) {
+		console.error('获取首页数据失败:', error)
+	}
+}
+
 onMounted(() => {
 	getTodoList()
+	getHomeData()
 	setTimeout(() => {
-		initWorkOrderTypeChart()
 		initTrendChart()
 		initCostChart()
 		initMaterialTopChart()
@@ -1733,6 +1863,13 @@ onUnmounted(() => {
 				}
 			}
 
+			.trend-filter {
+				flex: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
 			.trend-summary {
 				display: flex;
 				gap: 32px;
@@ -2032,43 +2169,6 @@ onUnmounted(() => {
 						font-size: 14px;
 						font-weight: 600;
 						color: #1f2937;
-					}
-				}
-			}
-		}
-
-		.node-view-compact {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 12px;
-
-			.node-item-compact {
-				.node-header {
-					display: flex;
-					justify-content: space-between;
-					margin-bottom: 6px;
-
-					.node-name {
-						font-size: 12px;
-						color: #6b7280;
-					}
-
-					.node-value {
-						font-size: 12px;
-						font-weight: 600;
-						color: #1f2937;
-					}
-				}
-
-				.node-progress {
-					height: 6px;
-					background: #e5e7eb;
-					border-radius: 3px;
-					overflow: hidden;
-
-					.node-bar {
-						height: 100%;
-						border-radius: 3px;
 					}
 				}
 			}
@@ -2969,10 +3069,6 @@ onUnmounted(() => {
 				.type-list-compact {
 					grid-template-columns: repeat(2, 1fr);
 				}
-			}
-
-			.node-view-compact {
-				grid-template-columns: 1fr;
 			}
 		}
 	}
