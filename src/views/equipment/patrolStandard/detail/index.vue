@@ -6,7 +6,13 @@
           <el-row :gutter="24">
             <el-col :span="8">
               <el-form-item label="标准编号" prop="standardCode">
-                <el-input v-model="formData.standardCode" placeholder="请输入标准编号" maxlength="255" />
+                <el-input
+                  v-model="formData.standardCode"
+                  placeholder="请输入标准编号"
+                  maxlength="20"
+                  inputmode="numeric"
+                  @input="handleStandardCodeInput"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -83,7 +89,14 @@ const data = reactive({
 const { formData, subTableData } = toRefs(data)
 
 const rules = reactive({
-  standardCode: proxy.getRules({ required: true }),
+  standardCode: [
+    ...proxy.getRules({ required: true }),
+    {
+      pattern: /^\d+$/,
+      message: '标准编号只能输入数字',
+      trigger: 'blur',
+    },
+  ],
   standardName: proxy.getRules({ required: true }),
   eqptId: proxy.getRules({ required: true }),
 })
@@ -141,6 +154,10 @@ const subTableColumns = reactive([
   },
 ])
 
+const handleStandardCodeInput = value => {
+  formData.value.standardCode = String(value || '').replace(/\D/g, '')
+}
+
 const handleAddSubRow = () => {
   subTableData.value.push({
     row_id: Date.now() + Math.random(),
@@ -195,7 +212,7 @@ const resetForm = () => {
 
 const setFormData = (data = {}) => {
   formData.value.id = data.id || null
-  formData.value.standardCode = data.standardCode || ''
+  formData.value.standardCode = String(data.standardCode || '')
   formData.value.standardName = data.standardName || ''
   formData.value.eqptId = data.eqptId || ''
   formData.value.eqptName = data.eqptName || ''

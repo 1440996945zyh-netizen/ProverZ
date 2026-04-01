@@ -28,8 +28,12 @@
 			<template v-if="appStore.device !== 'mobile'">
 						<!-- 新增：更多菜单 -->
 				<MoreMenuDropdown class="right-menu-item hover-effect" />
-			
-		
+
+				<el-tooltip content="A-Port智能体" effect="dark" placement="bottom">
+					<div class="right-menu-item hover-effect">
+						<img src="/src/assets/icons/ai.png" @click="aPortClick" style="width: 22px" />
+					</div>
+				</el-tooltip>
 				<el-tooltip content="菜单搜索" effect="dark" placement="bottom">
 					<header-search
 						id="header-search"
@@ -128,7 +132,7 @@ function toggleSideBar() {
 }
 const logoStyle = computed(() => {
 	if (settingsStore.topNav) {
-		return { width: '150px' }
+		return { width: '250px', minWidth: '250px' }
 	}
 	return { width: isCollapse ? '54px' : variables.sideBarWidth }
 })
@@ -186,6 +190,10 @@ function setLayout() {
 // 跳转站内导航
 const toNavigation = () => {
 	router.push({ name: 'Navigation' })
+}
+// 跳转A-Port智能体页面
+const aPortClick = () => {
+	router.push({ name: 'chatAgent' })
 }
 </script>
 
@@ -289,6 +297,9 @@ const toNavigation = () => {
 				// margin-top: 17px;
 				position: relative;
 				font-size: 14px;
+				display: flex;
+				align-items: center;
+				white-space: nowrap;
 
 				.user-avatar {
 					cursor: pointer;
@@ -297,11 +308,9 @@ const toNavigation = () => {
 					border-radius: 10px;
 				}
 
-				i {
+				.el-icon {
+					margin-left: 5px;
 					cursor: pointer;
-					position: absolute;
-					right: -10px;
-					// top: 10px;
 					font-size: 12px;
 				}
 			}

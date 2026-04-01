@@ -86,6 +86,12 @@ export const constantRoutes = [
 				name: 'Navigation',
 				meta: { title: '站内导航', icon: 'dashboard' },
 			},
+			{
+				path: '/chatAgent',
+				component: () => import('@/views/system/chatAgent/index'),
+				name: 'chatAgent',
+				meta: { title: 'A-Port智能体', icon: 'dashboard' },
+			},
 		],
 	},
 	{

@@ -86,7 +86,8 @@ const tableColumns = ref([
       )
     },
   },
-  { label: '标准名称', prop: 'standardName', align: 'left', minWidth: 500, showOverFlow: true },
+  { label: '标准名称', prop: 'standardName', align: 'left', minWidth: 320, showOverFlow: true },
+  { label: '设备名称', prop: 'eqptName', align: 'left', minWidth: 320, showOverFlow: true },
   {
     prop: 'operate',
     label: '操作',

@@ -94,7 +94,23 @@ const tableColumns = reactive([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '计划名称', prop: 'planName', width: 150 },
 	{ label: '巡检路线', prop: 'routeName', width: 150 },
-	{ label: '巡检路线等级', prop: 'routeLevel', width: 150 },
+  {
+    label: '巡检路线等级',
+    prop: 'routeLevel',
+    render: row => {
+      return [
+        h(
+          ElTag,
+          {
+            type: row.routeLevel == '1' ? '' : 'warning',
+          },
+          {
+            default: () => (row.routeLevel == '1' ? '普通' : '高危'),
+          },
+        ),
+      ]
+    },
+  },
 	{ label: '巡检员', prop: 'patrolName', minWidth: 120 },
 	{ label: '开始日期', prop: 'startDate', width: 160 },
 	{ label: '结束日期', prop: 'endDate', width: 160 },
