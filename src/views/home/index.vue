@@ -173,18 +173,18 @@
 						<div class="title-icon"></div>
 						<span>工单趋势</span>
 					</div>
-					<div class="trend-filter">
+					<div style="display: flex; align-items: center; justify-content: center; margin: 0 20px;">
 						<el-date-picker
 							v-model="trendDateRange"
 							type="daterange"
 							range-separator="至"
-							start-placeholder="开始日期"
-							end-placeholder="结束日期"
+							start-placeholder="开始"
+							end-placeholder="结束"
 							format="YYYY-MM-DD"
 							value-format="YYYY-MM-DD"
 							:clearable="false"
 							@change="handleTrendDateChange"
-							style="width: 220px"
+							style="width: 320px; font-size: 13px;"
 						/>
 					</div>
 					<div class="trend-summary">
@@ -241,10 +241,10 @@
 				<div class="panel-header">
 					<div class="panel-title">
 						<div class="title-icon"></div>
-						<span>工单来源统计</span>
+						<span>工单统计</span>
 					</div>
 					<div class="panel-tabs">
-						<span :class="{ active: workOrderTab === 'today' }" @click="workOrderTab = 'today'">今日</span>
+						<span :class="{ active: workOrderTab === 'today' }" @click="workOrderTab = 'today'">来源</span>
 						<span :class="{ active: workOrderTab === 'type' }" @click="workOrderTab = 'type'">类型</span>
 					</div>
 				</div>
@@ -801,7 +801,7 @@ const initTrendChart = async () => {
 				padding: [10, 15],
 			},
 			legend: {
-				data: ['提报数', '进行中', '已完成'],
+				data: ['工单数', '进行中', '已完成'],
 				right: 20,
 				top: 5,
 				textStyle: { color: '#6b7280', fontSize: 12 },
@@ -831,7 +831,7 @@ const initTrendChart = async () => {
 			},
 			series: [
 				{
-					name: '提报数',
+					name: '工单数',
 					type: 'line',
 					smooth: true,
 					symbol: 'circle',
@@ -3078,11 +3078,33 @@ onUnmounted(() => {
 			}
 		}
 	}
+
+	.trend-filter {
+		.el-date-picker,
+		.compact-date-picker {
+			width: 150px !important;
+
+			:deep(.el-range__start), :deep(.el-range__end) {
+				width: 52px !important;
+			}
+		}
+	}
 }
 
 @media (max-width: 1200px) {
 	.main-section {
 		grid-template-columns: 1fr;
+	}
+
+	.trend-filter {
+		.el-date-picker,
+		.compact-date-picker {
+			width: 160px !important;
+
+			:deep(.el-range__start), :deep(.el-range__end) {
+				width: 55px !important;
+			}
+		}
 	}
 
 	.workorder-stats-panel-full {
@@ -3104,6 +3126,26 @@ onUnmounted(() => {
 			.module-pool-grid {
 				grid-template-columns: repeat(2, 1fr);
 			}
+		}
+	}
+
+	// 紧凑日期选择器样式
+	.trend-filter .compact-date-picker {
+		width: 140px !important;
+
+		:deep(.el-range__start), :deep(.el-range__end) {
+			width: 55px !important;
+			padding: 0 4px;
+			font-size: 12px;
+		}
+
+		:deep(.el-range-input) {
+			font-size: 12px;
+		}
+
+		:deep(.el-range-separator) {
+			padding: 0 2px;
+			font-size: 12px;
 		}
 	}
 }

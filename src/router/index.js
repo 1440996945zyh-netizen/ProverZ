@@ -241,7 +241,7 @@ export const constantRoutes = [
 		},
 	},
 	{
-		path: '/dashboard/BigScreenDashboard',
+		path: '/dashboard/dashboard1',
 		component: () => import('@/views/dashboard/BigScreenDashboard'),
 		hidden: true,
 		meta: { title: '数据大屏' },

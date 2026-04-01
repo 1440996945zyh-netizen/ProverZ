@@ -1,123 +1,163 @@
 <template>
 	<div class="big-screen-container">
-		<div class="bg-pattern"></div>
-		<div class="bg-overlay"></div>
-		<div class="corner-decoration corner-tl"></div>
-		<div class="corner-decoration corner-tr"></div>
-		<div class="corner-decoration corner-bl"></div>
-		<div class="corner-decoration corner-br"></div>
+		<div class="bg-layer">
+			<div class="bg-grid"></div>
+			<div class="bg-glow"></div>
+			<div class="bg-particles" ref="particlesRef"></div>
+		</div>
+
+		<div class="corner-deco corner-tl">
+			<div class="corner-line-h"></div>
+			<div class="corner-line-v"></div>
+			<div class="corner-dot"></div>
+		</div>
+		<div class="corner-deco corner-tr">
+			<div class="corner-line-h"></div>
+			<div class="corner-line-v"></div>
+			<div class="corner-dot"></div>
+		</div>
+		<div class="corner-deco corner-bl">
+			<div class="corner-line-h"></div>
+			<div class="corner-line-v"></div>
+			<div class="corner-dot"></div>
+		</div>
+		<div class="corner-deco corner-br">
+			<div class="corner-line-h"></div>
+			<div class="corner-line-v"></div>
+			<div class="corner-dot"></div>
+		</div>
 
 		<div class="screen-header">
 			<div class="header-left">
-				<div class="logo-box">
-					<img src="@/assets/logo/logo-h-white2.png" class="logo" />
+				<div class="logo-container">
+					<div class="logo-ring"></div>
+					<div class="logo-inner">
+						<el-icon :size="28"><Monitor /></el-icon>
+					</div>
+				</div>
+				<div class="system-name">
+					<div class="name-main">智慧设备物资管理平台</div>
+					<div class="name-sub">Smart Equipment & Material Management</div>
 				</div>
 			</div>
 			<div class="header-center">
-				<div class="title-wrapper">
-					<div class="title-decoration left"></div>
-					<h1 class="main-title">智慧设备管理平台</h1>
-					<div class="title-decoration right"></div>
+				<div class="title-box">
+					<div class="title-deco left">
+						<div class="deco-line"></div>
+						<div class="deco-diamond"></div>
+					</div>
+					<h1 class="main-title">设备物资数据可视化中心</h1>
+					<div class="title-deco right">
+						<div class="deco-diamond"></div>
+						<div class="deco-line"></div>
+					</div>
 				</div>
-				<div class="subtitle">数据可视化大屏</div>
 			</div>
 			<div class="header-right">
-				<div class="time-box">
+				<!-- <div class="time-box">
 					<div class="time">{{ currentTime }}</div>
 					<div class="date">{{ currentDate }} {{ currentWeek }}</div>
 				</div>
 				<div class="more-btn" @click="goToMore">
 					<span>查看更多</span>
 					<el-icon><ArrowRight /></el-icon>
+				</div> -->
+				<div class="datetime-box">
+					<div class="time-display">
+						<span class="time-num">{{ currentTime.split(':')[0] }}</span>
+						<span class="time-sep">:</span>
+						<span class="time-num">{{ currentTime.split(':')[1] }}</span>
+						<span class="time-sep">:</span>
+						<span class="time-num">{{ currentTime.split(':')[2] }}</span>
+					</div>
+					<div class="date-display">
+						<span class="date-text">{{ currentDate }}</span>
+						<span class="week-text">{{ currentWeek }}</span>
+					</div>
+				</div>
+				<div class="action-btn" @click="goToMore">
+					<el-icon><DataAnalysis /></el-icon>
+					<span>查看更多</span>
 				</div>
 			</div>
 		</div>
 
 		<div class="screen-body">
 			<div class="left-column">
-				<div class="panel-card device-status-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">设备状态监测情况</h3>
+				<div class="panel-card equipment-overview">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Monitor /></el-icon>
+						</div>
+						<h3 class="panel-title">设备总览</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
-						<div class="device-status-chart">
-							<div ref="deviceStatusChartRef" class="chart-container"></div>
-							<div class="chart-center">
-								<div class="center-value">{{ deviceStats.total }}</div>
-								<div class="center-label">监测设备总数</div>
+					<div class="panel-body">
+						<div class="equipment-chart-box">
+							<div ref="equipmentChartRef" class="chart-ring"></div>
+							<div class="chart-center-info">
+								<div class="center-num">{{ equipmentStats.total }}</div>
+								<div class="center-label">设备总数</div>
 							</div>
 						</div>
-						<div class="status-legend">
-							<div class="legend-item" v-for="item in deviceStats.list" :key="item.label">
-								<div class="legend-dot" :style="{ background: item.color }"></div>
-								<span class="legend-label">{{ item.label }}</span>
+						<div class="equipment-legend">
+							<div class="legend-item" v-for="item in equipmentStats.list" :key="item.label">
+								<div class="legend-color" :style="{ background: item.color }"></div>
+								<span class="legend-name">{{ item.label }}</span>
 								<span class="legend-value">{{ item.value }}</span>
+								<span class="legend-percent">{{ item.percent }}%</span>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="panel-card workorder-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">维修工单统计</h3>
+				<div class="panel-card workorder-stats">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Tickets /></el-icon>
+						</div>
+						<h3 class="panel-title">维修工单统计</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
+					<div class="panel-body">
 						<div class="workorder-grid">
 							<div class="workorder-item" v-for="item in workOrderStats" :key="item.label">
-								<div class="workorder-icon" :style="{ background: item.color }">
-									<el-icon :size="24"><component :is="item.icon" /></el-icon>
+								<div class="item-icon" :style="{ background: item.gradient }">
+									<el-icon><component :is="item.icon" /></el-icon>
 								</div>
-								<div class="workorder-info">
-									<div class="workorder-value">{{ item.value }}</div>
-									<div class="workorder-label">{{ item.label }}</div>
+								<div class="item-content">
+									<div class="item-value">{{ item.value }}</div>
+									<div class="item-label">{{ item.label }}</div>
 								</div>
 							</div>
+						</div>
+						<div class="workorder-trend">
+							<div class="trend-header">
+								<span class="trend-title">近7日工单趋势</span>
+							</div>
+							<div ref="workorderTrendRef" class="trend-chart"></div>
 						</div>
 					</div>
 				</div>
 
-				<div class="panel-card cost-progress-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">公司维保成本使用进度</h3>
+				<div class="panel-card inspection-stats">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Search /></el-icon>
+						</div>
+						<h3 class="panel-title">巡检保养任务</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
-						<div class="cost-progress-list" :class="{ 'auto-scroll': costProgressList.length > 4 }">
-							<div class="scroll-content" ref="costScrollRef" @mouseenter="pauseCostScroll" @mouseleave="resumeCostScroll">
-								<div class="cost-progress-item" v-for="(item, index) in costProgressList" :key="'original-' + index">
-									<div class="cost-header">
-										<span class="cost-name">{{ item.name }}</span>
-										<span class="cost-total">总费用: {{ item.total }}万元</span>
+					<div class="panel-body">
+						<div class="inspection-grid">
+							<div class="inspection-row" v-for="(row, rowIndex) in inspectionRows" :key="rowIndex">
+								<div class="inspection-item" v-for="item in row" :key="item.label" :class="item.status">
+									<div class="item-header">
+										<span class="item-name">{{ item.label }}</span>
+										<span class="item-badge" :class="item.status">{{ item.statusText }}</span>
 									</div>
-									<div class="progress-bar-wrapper">
-										<div class="progress-track">
-											<div class="progress-fill" :style="{ width: item.percent + '%', background: item.color }"></div>
-										</div>
-										<span class="progress-percent">{{ item.percent }}%</span>
-									</div>
+									<div class="item-value">{{ item.value }}</div>
 								</div>
-								<template v-if="costProgressList.length > 4">
-									<div class="cost-progress-item" v-for="(item, index) in costProgressList" :key="'clone-' + index">
-										<div class="cost-header">
-											<span class="cost-name">{{ item.name }}</span>
-											<span class="cost-total">总费用: {{ item.total }}万元</span>
-										</div>
-										<div class="progress-bar-wrapper">
-											<div class="progress-track">
-												<div
-													class="progress-fill"
-													:style="{ width: item.percent + '%', background: item.color }"
-												></div>
-											</div>
-											<span class="progress-percent">{{ item.percent }}%</span>
-										</div>
-									</div>
-								</template>
 							</div>
 						</div>
 					</div>
@@ -125,103 +165,163 @@
 			</div>
 
 			<div class="center-column">
-				<div class="center-top">
-					<div class="stat-panel">
-						<div class="stat-item" v-for="(stat, index) in topStats" :key="index">
-							<div class="stat-bg"></div>
-							<div class="stat-glow"></div>
-							<div class="stat-icon-wrapper">
-								<div class="stat-icon" :style="{ background: stat.gradient }">
-									<el-icon :size="28"><component :is="stat.icon" /></el-icon>
-								</div>
-								<div class="icon-ring"></div>
+				<div class="top-stats">
+					<div class="stat-card" v-for="(stat, index) in topStats" :key="index">
+						<div class="stat-bg"></div>
+						<div class="stat-glow"></div>
+						<div class="stat-icon" :style="{ background: stat.gradient }">
+							<el-icon><component :is="stat.icon" /></el-icon>
+						</div>
+						<div class="stat-info">
+							<div class="stat-label">{{ stat.label }}</div>
+							<div class="stat-value">
+								<span class="value-num">{{ stat.value.toLocaleString() }}</span>
+								<span class="value-unit">{{ stat.unit }}</span>
 							</div>
-							<div class="stat-content">
-								<div class="stat-label">{{ stat.label }}</div>
-								<div class="stat-value">{{ stat.value.toLocaleString() }}</div>
-								<div class="stat-trend" :class="stat.trend > 0 ? 'up' : 'down'">
-									<el-icon><component :is="stat.trend > 0 ? 'ArrowUp' : 'ArrowDown'" /></el-icon>
-									{{ Math.abs(stat.trend) }}%
-								</div>
+							<div class="stat-trend" :class="stat.trend > 0 ? 'up' : 'down'">
+								<el-icon><component :is="stat.trend > 0 ? 'CaretTop' : 'CaretBottom'" /></el-icon>
+								<span>{{ Math.abs(stat.trend) }}%</span>
 							</div>
-							<div class="stat-decoration">
-								<div class="deco-line"></div>
-								<div class="deco-dot"></div>
-							</div>
+						</div>
+						<div class="stat-decoration">
+							<div class="deco-ring"></div>
 						</div>
 					</div>
 				</div>
 
-				<div class="center-map">
+				<div class="center-map-panel">
 					<div class="panel-card map-card">
-						<div class="card-header">
-							<div class="header-icon"></div>
-							<h3 class="card-title">技术创新中心 - 设备分布</h3>
+						<div class="panel-header">
+							<div class="header-icon-box">
+								<el-icon><Location /></el-icon>
+							</div>
+							<h3 class="panel-title">设备分布地图</h3>
+							<div class="header-line"></div>
+							<div class="map-legend">
+								<span class="legend-dot active"></span>
+								<span class="legend-text">维修中心</span>
+							</div>
+						</div>
+						<div class="panel-body">
+							<div ref="mapChartRef" class="map-container"></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="bottom-charts">
+					<div class="panel-card cost-chart-card">
+						<div class="panel-header">
+							<div class="header-icon-box">
+								<el-icon><Wallet /></el-icon>
+							</div>
+							<h3 class="panel-title">维保成本分析</h3>
 							<div class="header-line"></div>
 						</div>
-						<div class="card-body">
-							<div ref="centerMapChartRef" class="map-chart"></div>
+						<div class="panel-body">
+							<div ref="costChartRef" class="cost-chart"></div>
+						</div>
+					</div>
+					<div class="panel-card material-chart-card">
+						<div class="panel-header">
+							<div class="header-icon-box">
+								<el-icon><Box /></el-icon>
+							</div>
+							<h3 class="panel-title">物资消耗TOP5</h3>
+							<div class="header-line"></div>
+						</div>
+						<div class="panel-body">
+							<div ref="materialChartRef" class="material-chart"></div>
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<div class="right-column">
-				<div class="panel-card company-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">内部公司统计</h3>
+				<div class="panel-card company-stats">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><OfficeBuilding /></el-icon>
+						</div>
+						<h3 class="panel-title">公司设备统计</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
+					<div class="panel-body">
 						<div class="company-list">
-							<div class="company-item" v-for="item in companyList" :key="item.name">
-								<div class="company-icon" :style="{ background: item.gradient }">
-									<el-icon><OfficeBuilding /></el-icon>
-								</div>
+							<div class="company-item" v-for="(item, index) in companyList" :key="item.name">
+								<div class="company-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</div>
 								<div class="company-info">
 									<div class="company-name">{{ item.name }}</div>
-									<div class="company-stats">
+									<div class="company-data">
 										<span>设备: {{ item.equipment }}台</span>
 										<span>人员: {{ item.personnel }}人</span>
 									</div>
 								</div>
-								<div class="company-badge">{{ item.status }}</div>
+								<div class="company-progress">
+									<div class="progress-bar">
+										<div class="progress-fill" :style="{ width: item.percent + '%' }"></div>
+									</div>
+									<span class="progress-value">{{ item.percent }}%</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="panel-card warning-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">物资预警统计</h3>
+				<div class="panel-card warning-panel">
+					<div class="panel-header">
+						<div class="header-icon-box warning">
+							<el-icon><WarningFilled /></el-icon>
+						</div>
+						<h3 class="panel-title">物资预警</h3>
 						<div class="header-line"></div>
+						<div class="warning-count">
+							<span class="count-num">{{ materialWarning.length }}</span>
+							<span class="count-label">项预警</span>
+						</div>
 					</div>
-					<div class="card-body">
-						<div class="warning-container">
-							<div class="warning-item" v-for="item in materialWarning" :key="item.name">
-								<div class="warning-header">
-									<span class="warning-name">{{ item.name }}</span>
-									<span class="warning-level" :class="item.level">
-										<el-icon><Warning /></el-icon>
-										{{ item.levelText }}
-									</span>
+					<div class="panel-body">
+						<div class="warning-list">
+							<div class="warning-item" v-for="item in materialWarning" :key="item.name" :class="item.level">
+								<div class="warning-icon">
+									<el-icon><Warning /></el-icon>
 								</div>
-								<div class="warning-progress">
+								<div class="warning-content">
+									<div class="warning-name">{{ item.name }}</div>
 									<div class="warning-bar">
-										<div
-											class="warning-fill"
-											:style="{
-												width: (item.stock / item.threshold) * 100 + '%',
-												background: item.level === 'danger' ? '#ef4444' : '#f59e0b',
-											}"
-										></div>
+										<div class="bar-track">
+											<div class="bar-fill" :style="{ width: (item.stock / item.threshold) * 100 + '%' }"></div>
+										</div>
 									</div>
-									<div class="warning-stats">
+									<div class="warning-info">
 										<span>库存: {{ item.stock }}</span>
-										<span>预警线: {{ item.threshold }}</span>
+										<span>预警: {{ item.threshold }}</span>
 									</div>
+								</div>
+								<div class="warning-level" :class="item.level">{{ item.levelText }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel-card realtime-panel">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Bell /></el-icon>
+						</div>
+						<h3 class="panel-title">实时动态</h3>
+						<div class="header-line"></div>
+						<div class="live-indicator">
+							<span class="live-dot"></span>
+							<span class="live-text">LIVE</span>
+						</div>
+					</div>
+					<div class="panel-body">
+						<div class="realtime-list" ref="realtimeListRef">
+							<div class="realtime-item" v-for="(item, index) in realtimeList" :key="index" :class="item.type">
+								<div class="item-time">{{ item.time }}</div>
+								<div class="item-content">
+									<div class="item-title">{{ item.title }}</div>
+									<div class="item-desc">{{ item.desc }}</div>
 								</div>
 							</div>
 						</div>
@@ -237,48 +337,45 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import {
 	Monitor,
+	Tickets,
+	Search,
+	Location,
+	Wallet,
+	Box,
+	OfficeBuilding,
+	WarningFilled,
 	Warning,
-	User,
+	Bell,
+	DataAnalysis,
 	Document,
 	Clock,
 	Operation,
 	CircleCheck,
-	ArrowUp,
-	ArrowDown,
-	ArrowRight,
-	DataAnalysis,
-	OfficeBuilding,
+	CaretTop,
+	CaretBottom,
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 
 const router = useRouter()
 
-const currentTime = ref('')
+const currentTime = ref('00:00:00')
 const currentDate = ref('')
 const currentWeek = ref('')
 let timer = null
 
-const deviceStatusChartRef = ref(null)
-const centerMapChartRef = ref(null)
-const costScrollRef = ref(null)
-let deviceStatusChart = null
-let centerMapChart = null
-let costScrollAnimation = null
-let isCostScrollPaused = false
+const equipmentChartRef = ref(null)
+const workorderTrendRef = ref(null)
+const mapChartRef = ref(null)
+const costChartRef = ref(null)
+const materialChartRef = ref(null)
+const particlesRef = ref(null)
+const realtimeListRef = ref(null)
 
-const pauseCostScroll = () => {
-	isCostScrollPaused = true
-	if (costScrollRef.value) {
-		costScrollRef.value.style.animationPlayState = 'paused'
-	}
-}
-
-const resumeCostScroll = () => {
-	isCostScrollPaused = false
-	if (costScrollRef.value) {
-		costScrollRef.value.style.animationPlayState = 'running'
-	}
-}
+let equipmentChart = null
+let workorderTrendChart = null
+let mapChart = null
+let costChart = null
+let materialChart = null
 
 const updateTime = () => {
 	const now = new Date()
@@ -300,56 +397,72 @@ const topStats = ref([
 	{
 		label: '设备总数',
 		value: 6739,
+		unit: '台',
 		icon: 'Monitor',
-		gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+		gradient: 'linear-gradient(135deg, #00d4ff 0%, #0096ff 100%)',
 		trend: 5.2,
 	},
 	{
-		label: '监测设备数',
+		label: '监测设备',
 		value: 287,
+		unit: '台',
 		icon: 'Warning',
 		gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
 		trend: 12.8,
 	},
-	{
-		label: '维保人员',
-		value: 357,
-		icon: 'User',
-		gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-		trend: 3.5,
-	},
+	{ label: '维保人员', value: 357, unit: '人', icon: 'User', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', trend: 3.5 },
 	{
 		label: '本月工单',
 		value: 348,
+		unit: '个',
 		icon: 'Document',
 		gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
 		trend: -2.1,
 	},
 ])
 
-const deviceStats = ref({
-	total: 287,
+const equipmentStats = ref({
+	total: 6739,
 	list: [
-		{ label: '运行', value: 115, color: '#10b981' },
-		{ label: '待机', value: 0, color: '#f59e0b' },
-		{ label: '故障', value: 0, color: '#ef4444' },
-		{ label: '停机', value: 122, color: '#6b7280' },
+		{ label: '在用', value: 4521, color: '#00d4ff', percent: 67 },
+		{ label: '在修', value: 328, color: '#f59e0b', percent: 5 },
+		{ label: '停用', value: 1562, color: '#6b7280', percent: 23 },
+		{ label: '报废', value: 328, color: '#ef4444', percent: 5 },
 	],
 })
 
 const workOrderStats = ref([
-	{ label: '工单总数', value: 240, icon: 'Document', color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-	{ label: '待处理', value: 0, icon: 'Clock', color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-	{ label: '进行中', value: 233, icon: 'Operation', color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-	{ label: '已完成', value: 3, icon: 'CircleCheck', color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+	{ label: '工单总数', value: 240, icon: 'Document', gradient: 'linear-gradient(135deg, #00d4ff 0%, #0096ff 100%)' },
+	{ label: '待处理', value: 45, icon: 'Clock', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+	{ label: '进行中', value: 128, icon: 'Operation', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+	{ label: '已完成', value: 67, icon: 'CircleCheck', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
 ])
 
-const costProgressList = ref([
-	{ name: '一公司', total: '156.8', percent: 78, color: '#667eea' },
-	{ name: '二公司', total: '132.5', percent: 65, color: '#f093fb' },
-	{ name: '三公司', total: '98.6', percent: 82, color: '#4facfe' },
-	{ name: '集装箱公司', total: '185.2', percent: 92, color: '#43e97b' },
-	{ name: '岚山公司', total: '76.4', percent: 54, color: '#f59e0b' },
+const inspectionRows = ref([
+	[
+		{ label: '待巡检', value: 12, status: 'pending', statusText: '待处理' },
+		{ label: '已巡检', value: 89, status: 'done', statusText: '已完成' },
+	],
+	[
+		{ label: '待点检', value: 8, status: 'pending', statusText: '待处理' },
+		{ label: '已点检', value: 56, status: 'done', statusText: '已完成' },
+	],
+	[
+		{ label: '待润滑', value: 5, status: 'pending', statusText: '待处理' },
+		{ label: '已润滑', value: 34, status: 'done', statusText: '已完成' },
+	],
+	[
+		{ label: '待保养', value: 15, status: 'pending', statusText: '待处理' },
+		{ label: '已保养', value: 78, status: 'done', statusText: '已完成' },
+	],
+])
+
+const companyList = ref([
+	{ name: '一公司', equipment: 1256, personnel: 186, percent: 78 },
+	{ name: '二公司', equipment: 1089, personnel: 152, percent: 65 },
+	{ name: '三公司', equipment: 945, personnel: 128, percent: 82 },
+	{ name: '集装箱公司', equipment: 1567, personnel: 203, percent: 92 },
+	{ name: '岚山公司', equipment: 882, personnel: 115, percent: 54 },
 ])
 
 const materialWarning = ref([
@@ -360,143 +473,403 @@ const materialWarning = ref([
 	{ name: '滤芯', stock: 45, threshold: 60, level: 'warning', levelText: '预警' },
 ])
 
-const companyList = ref([
-	{ name: '一公司', equipment: 1256, personnel: 186, status: '运行中', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-	{ name: '二公司', equipment: 1089, personnel: 152, status: '运行中', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-	{ name: '三公司', equipment: 945, personnel: 128, status: '运行中', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-	{
-		name: '集装箱公司',
-		equipment: 1567,
-		personnel: 203,
-		status: '运行中',
-		gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-	},
-	{ name: '岚山公司', equipment: 882, personnel: 115, status: '运行中', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
+const realtimeList = ref([
+	{ time: '10:25', title: '设备维修工单完成', desc: '叉车设备维修已完成验收', type: 'success' },
+	{ time: '10:18', title: '物资出库审批通过', desc: '润滑油领用申请已审批', type: 'info' },
+	{ time: '10:12', title: '巡检任务超时预警', desc: '东区巡检任务已超时', type: 'warning' },
+	{ time: '10:05', title: '新设备入库登记', desc: '新增电动叉车3台', type: 'info' },
+	{ time: '09:58', title: '保养计划生成', desc: '本周保养计划已自动生成', type: 'success' },
 ])
 
 const goToMore = () => {
 	router.push('/dashboard/more')
 }
 
-const initDeviceStatusChart = () => {
-	if (!deviceStatusChartRef.value) return
-	deviceStatusChart = echarts.init(deviceStatusChartRef.value)
+const initEquipmentChart = () => {
+	if (!equipmentChartRef.value) return
+	equipmentChart = echarts.init(equipmentChartRef.value)
 	const option = {
 		series: [
 			{
 				type: 'pie',
-				radius: ['65%', '85%'],
+				radius: ['70%', '90%'],
 				center: ['50%', '50%'],
 				avoidLabelOverlap: false,
 				label: { show: false },
 				labelLine: { show: false },
-				data: deviceStats.value.list.map(item => ({
+				data: equipmentStats.value.list.map(item => ({
 					value: item.value,
 					name: item.label,
 					itemStyle: {
 						color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
 							{ offset: 0, color: item.color },
-							{ offset: 1, color: item.color + '80' },
+							{ offset: 1, color: item.color + '99' },
 						]),
 					},
 				})),
 				emphasis: {
-					itemStyle: {
-						shadowBlur: 20,
-						shadowColor: 'rgba(0, 0, 0, 0.5)',
-					},
+					scale: true,
+					scaleSize: 8,
 				},
 			},
 		],
 	}
-	deviceStatusChart.setOption(option)
+	equipmentChart.setOption(option)
 }
 
-const initCenterMapChart = () => {
-	if (!centerMapChartRef.value) return
-	centerMapChart = echarts.init(centerMapChartRef.value)
+const initWorkorderTrendChart = () => {
+	if (!workorderTrendRef.value) return
+	workorderTrendChart = echarts.init(workorderTrendRef.value)
+	const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+	const option = {
+		grid: { top: 10, right: 10, bottom: 20, left: 30 },
+		xAxis: {
+			type: 'category',
+			data: days,
+			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
+			axisLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 10 },
+			axisTick: { show: false },
+		},
+		yAxis: {
+			type: 'value',
+			axisLine: { show: false },
+			axisLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 10 },
+			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+		},
+		series: [
+			{
+				data: [32, 45, 38, 52, 48, 35, 42],
+				type: 'line',
+				smooth: true,
+				symbol: 'circle',
+				symbolSize: 6,
+				lineStyle: { color: '#00d4ff', width: 2 },
+				itemStyle: { color: '#00d4ff' },
+				areaStyle: {
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+						{ offset: 0, color: 'rgba(0, 212, 255, 0.3)' },
+						{ offset: 1, color: 'rgba(0, 212, 255, 0)' },
+					]),
+				},
+			},
+		],
+	}
+	workorderTrendChart.setOption(option)
+}
 
-	const centers = [
-		{ name: '东区维修中心', value: [119.46, 35.12, 80] },
-		{ name: '西区维修中心', value: [119.38, 35.08, 96] },
-		{ name: '南区维修中心', value: [119.42, 35.05, 104] },
-		{ name: '岚南维修中心', value: [119.35, 35.1, 54] },
-		{ name: '岚中维修中心', value: [119.4, 35.15, 12] },
+const initMapChart = () => {
+	if (!mapChartRef.value) return
+	mapChart = echarts.init(mapChartRef.value)
+
+	const areaData = [
+		{ name: '黄骅港东区', value: 186, color: '#00d4ff' },
+		{ name: '黄骅港西区', value: 142, color: '#0096ff' },
+		{ name: '煤炭港区', value: 210, color: '#667eea' },
+		{ name: '矿石港区', value: 168, color: '#764ba2' },
+		{ name: '集装箱港区', value: 134, color: '#4facfe' },
+		{ name: '综合保税区', value: 156, color: '#43e97b' },
+		{ name: '黄骅港南区', value: 98, color: '#38f9d7' },
+		{ name: '物流园区', value: 78, color: '#fa709a' },
 	]
+
+	const maxValue = Math.max(...areaData.map(d => d.value))
 
 	const option = {
 		backgroundColor: 'transparent',
-		geo: {
-			map: 'china',
-			roam: false,
-			zoom: 1.2,
-			center: [119.42, 35.1],
-			label: { show: false },
-			itemStyle: {
-				areaColor: 'rgba(59, 130, 246, 0.1)',
-				borderColor: 'rgba(59, 130, 246, 0.3)',
-				borderWidth: 1,
+		title: {
+			text: '设备物资区域分布',
+			left: 'center',
+			top: 15,
+			textStyle: {
+				color: 'rgba(255, 255, 255, 0.9)',
+				fontSize: 16,
+				fontWeight: 'bold',
+				letterSpacing: 2,
 			},
-			emphasis: {
-				itemStyle: {
-					areaColor: 'rgba(59, 130, 246, 0.3)',
+		},
+		tooltip: {
+			trigger: 'axis',
+			backgroundColor: 'rgba(0, 20, 40, 0.95)',
+			borderColor: '#00d4ff',
+			borderWidth: 1,
+			textStyle: { color: '#fff', fontSize: 12 },
+			axisPointer: {
+				type: 'shadow',
+				shadowStyle: {
+					color: 'rgba(0, 212, 255, 0.1)',
+				},
+			},
+			formatter: params => {
+				const data = params[0]
+				return `<div style="padding: 8px;">
+					<div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">${data.name}</div>
+					<div style="display: flex; align-items: center; gap: 8px;">
+						<span style="display: inline-block; width: 10px; height: 10px; background: ${data.color}; border-radius: 50%;"></span>
+						<span>设备数量: <span style="color: #00d4ff; font-weight: bold; font-size: 16px;">${data.value}</span> 台</span>
+					</div>
+					<div style="margin-top: 5px; color: rgba(255,255,255,0.6); font-size: 11px;">
+						占比: ${((data.value / 1172) * 100).toFixed(1)}%
+					</div>
+				</div>`
+			},
+		},
+		grid: {
+			left: '5%',
+			right: '5%',
+			bottom: '15%',
+			top: '20%',
+			containLabel: true,
+		},
+		xAxis: {
+			type: 'category',
+			data: areaData.map(d => d.name),
+			axisLine: {
+				show: true,
+				lineStyle: {
+					color: 'rgba(0, 212, 255, 0.3)',
+					width: 2,
+				},
+			},
+			axisTick: { show: false },
+			axisLabel: {
+				color: 'rgba(255, 255, 255, 0.8)',
+				fontSize: 11,
+				interval: 0,
+				rotate: 25,
+				margin: 15,
+			},
+			splitLine: { show: false },
+		},
+		yAxis: {
+			type: 'value',
+			name: '设备数量',
+			nameTextStyle: {
+				color: 'rgba(255, 255, 255, 0.6)',
+				fontSize: 11,
+				padding: [0, 0, 5, 0],
+			},
+			axisLine: { show: false },
+			axisTick: { show: false },
+			axisLabel: {
+				color: 'rgba(255, 255, 255, 0.6)',
+				fontSize: 10,
+			},
+			splitLine: {
+				lineStyle: {
+					color: 'rgba(0, 212, 255, 0.1)',
+					type: 'dashed',
 				},
 			},
 		},
 		series: [
 			{
-				type: 'scatter',
-				coordinateSystem: 'geo',
-				data: centers.map((item, index) => ({
-					name: item.name,
-					value: item.value,
-					symbolSize: item.value[2] / 5,
+				name: '设备数量',
+				type: 'bar',
+				data: areaData.map((d, i) => ({
+					value: d.value,
 					itemStyle: {
-						color: new echarts.graphic.RadialGradient(0.5, 0.5, 0.5, [
-							{ offset: 0, color: '#60a5fa' },
-							{ offset: 1, color: '#3b82f6' },
+						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+							{ offset: 0, color: d.color },
+							{ offset: 0.5, color: d.color },
+							{ offset: 1, color: 'rgba(0, 20, 40, 0.3)' },
 						]),
+						shadowColor: d.color,
 						shadowBlur: 20,
-						shadowColor: 'rgba(59, 130, 246, 0.8)',
-					},
-					label: {
-						show: true,
-						formatter: '{b}',
-						position: 'bottom',
-						color: '#fff',
-						fontSize: 11,
-						fontWeight: 'bold',
+						shadowOffsetY: 5,
 					},
 				})),
+				barWidth: '45%',
+				barMaxWidth: 50,
+				itemStyle: {
+					borderRadius: [8, 8, 0, 0],
+				},
+				emphasis: {
+					itemStyle: {
+						shadowBlur: 30,
+						shadowColor: 'rgba(0, 212, 255, 0.8)',
+					},
+				},
+				label: {
+					show: true,
+					position: 'top',
+					color: '#fff',
+					fontSize: 12,
+					fontWeight: 'bold',
+					formatter: '{c}',
+					textShadowColor: 'rgba(0, 212, 255, 0.8)',
+					textShadowBlur: 10,
+				},
+				animationDelay: idx => idx * 100,
+				animationEasing: 'elasticOut',
 			},
 			{
-				type: 'effectScatter',
-				coordinateSystem: 'geo',
-				data: centers.slice(0, 3).map(item => ({
-					name: item.name,
-					value: item.value,
-					symbolSize: 6,
+				name: '底部光效',
+				type: 'bar',
+				data: areaData.map(d => ({
+					value: 5,
 					itemStyle: {
-						color: '#60a5fa',
-						shadowBlur: 10,
-						shadowColor: '#3b82f6',
+						color: new echarts.graphic.RadialGradient(0.5, 1, 0.5, [
+							{ offset: 0, color: d.color },
+							{ offset: 1, color: 'transparent' },
+						]),
 					},
 				})),
-				rippleEffect: {
-					brushType: 'stroke',
-					scale: 3,
-					period: 4,
+				barWidth: '60%',
+				barMaxWidth: 60,
+				barGap: '-110%',
+				z: -1,
+				silent: true,
+			},
+			{
+				name: '顶部发光点',
+				type: 'scatter',
+				data: areaData.map((d, i) => [i, d.value]),
+				symbolSize: 12,
+				itemStyle: {
+					color: '#fff',
+					shadowColor: 'rgba(0, 212, 255, 1)',
+					shadowBlur: 15,
 				},
+				z: 10,
+			},
+			{
+				name: '装饰线',
+				type: 'line',
+				data: areaData.map(d => d.value),
+				symbol: 'none',
+				lineStyle: {
+					color: 'rgba(0, 212, 255, 0.3)',
+					width: 2,
+					type: 'dashed',
+				},
+				smooth: true,
+				z: 1,
+			},
+		],
+		graphic: [
+			{
+				type: 'group',
+				left: 'center',
+				bottom: 10,
+				children: [
+					{
+						type: 'text',
+						style: {
+							text: '总计: 1,172 台设备',
+							fill: 'rgba(255, 255, 255, 0.7)',
+							font: '12px Microsoft YaHei',
+						},
+					},
+				],
 			},
 		],
 	}
 
-	centerMapChart.setOption(option)
+	mapChart.setOption(option)
+}
+
+const initCostChart = () => {
+	if (!costChartRef.value) return
+	costChart = echarts.init(costChartRef.value)
+	const option = {
+		tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#00d4ff', textStyle: { color: '#fff' } },
+		grid: { top: 30, right: 15, bottom: 25, left: 50 },
+		xAxis: {
+			type: 'category',
+			data: ['维修费', '材料费', '人工费', '外协费', '其他'],
+			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
+			axisLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 10 },
+			axisTick: { show: false },
+		},
+		yAxis: {
+			type: 'value',
+			axisLine: { show: false },
+			axisLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 10 },
+			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+		},
+		series: [
+			{
+				name: '预算',
+				type: 'bar',
+				barWidth: 12,
+				data: [85, 62, 45, 28, 15],
+				itemStyle: {
+					borderRadius: [4, 4, 0, 0],
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+						{ offset: 0, color: '#00d4ff' },
+						{ offset: 1, color: '#0096ff' },
+					]),
+				},
+			},
+			{
+				name: '实际',
+				type: 'bar',
+				barWidth: 12,
+				data: [78, 58, 42, 31, 12],
+				itemStyle: {
+					borderRadius: [4, 4, 0, 0],
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+						{ offset: 0, color: '#43e97b' },
+						{ offset: 1, color: '#38f9d7' },
+					]),
+				},
+			},
+		],
+	}
+	costChart.setOption(option)
+}
+
+const initMaterialChart = () => {
+	if (!materialChartRef.value) return
+	materialChart = echarts.init(materialChartRef.value)
+	const data = [
+		{ name: '润滑油', value: 2580 },
+		{ name: '螺栓', value: 1890 },
+		{ name: '电缆', value: 1450 },
+		{ name: '密封圈', value: 1320 },
+		{ name: '轴承', value: 1156 },
+	]
+	const option = {
+		grid: { top: 5, right: 50, bottom: 5, left: 60 },
+		xAxis: { type: 'value', show: false },
+		yAxis: {
+			type: 'category',
+			data: data.map(d => d.name).reverse(),
+			axisLine: { show: false },
+			axisTick: { show: false },
+			axisLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 11 },
+		},
+		series: [
+			{
+				type: 'bar',
+				data: data.map(d => d.value).reverse(),
+				barWidth: 12,
+				itemStyle: {
+					borderRadius: [0, 6, 6, 0],
+					color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+						{ offset: 0, color: '#00d4ff' },
+						{ offset: 1, color: '#0096ff' },
+					]),
+				},
+				label: {
+					show: true,
+					position: 'right',
+					color: '#00d4ff',
+					fontSize: 11,
+					formatter: '{c}',
+				},
+			},
+		],
+	}
+	materialChart.setOption(option)
 }
 
 const handleResize = () => {
-	deviceStatusChart?.resize()
-	centerMapChart?.resize()
+	equipmentChart?.resize()
+	workorderTrendChart?.resize()
+	mapChart?.resize()
+	costChart?.resize()
+	materialChart?.resize()
 }
 
 onMounted(() => {
@@ -504,8 +877,11 @@ onMounted(() => {
 	timer = setInterval(updateTime, 1000)
 
 	setTimeout(() => {
-		initDeviceStatusChart()
-		initCenterMapChart()
+		initEquipmentChart()
+		initWorkorderTrendChart()
+		initMapChart()
+		initCostChart()
+		initMaterialChart()
 	}, 200)
 
 	window.addEventListener('resize', handleResize)
@@ -514,13 +890,31 @@ onMounted(() => {
 onBeforeUnmount(() => {
 	if (timer) clearInterval(timer)
 	window.removeEventListener('resize', handleResize)
-	deviceStatusChart?.dispose()
-	centerMapChart?.dispose()
+	equipmentChart?.dispose()
+	workorderTrendChart?.dispose()
+	mapChart?.dispose()
+	costChart?.dispose()
+	materialChart?.dispose()
 })
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
+
+$primary-color: #00d4ff;
+$primary-dark: #0096ff;
+$bg-dark: #030810;
+$bg-card: rgba(0, 20, 40, 0.6);
+$border-color: rgba(0, 212, 255, 0.2);
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+$text-muted: rgba(255, 255, 255, 0.5);
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
 
 .big-screen-container {
 	width: 100vw;
@@ -528,346 +922,1093 @@ onBeforeUnmount(() => {
 	position: relative;
 	overflow: hidden;
 	font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-	background: #050d19;
+	background: $bg-dark;
+	color: $text-primary;
+}
 
-	.bg-pattern {
+.bg-layer {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+
+	.bg-grid {
 		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
+		inset: 0;
 		background-image:
-			linear-gradient(90deg, rgba(0, 150, 255, 0.03) 1px, transparent 1px),
-			linear-gradient(rgba(0, 150, 255, 0.03) 1px, transparent 1px),
-			radial-gradient(circle at 20% 30%, rgba(0, 150, 255, 0.1) 0%, transparent 40%),
-			radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.1) 0%, transparent 40%);
-		background-size:
-			50px 50px,
-			50px 50px,
-			100% 100%,
-			100% 100%;
-		animation: bgMove 30s linear infinite;
-		z-index: 0;
+			linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+		background-size: 60px 60px;
+		animation: gridMove 20s linear infinite;
 	}
 
-	.bg-overlay {
+	.bg-glow {
 		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
+		inset: 0;
 		background:
-			linear-gradient(180deg, rgba(5, 13, 25, 0.4) 0%, rgba(5, 13, 25, 0.2) 50%, rgba(5, 13, 25, 0.4) 100%),
-			radial-gradient(ellipse at center, transparent 0%, rgba(5, 13, 25, 0.8) 100%);
-		z-index: 1;
+			radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 150, 255, 0.15) 0%, transparent 50%),
+			radial-gradient(ellipse 60% 40% at 20% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+			radial-gradient(ellipse 60% 40% at 80% 100%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
 	}
 
-	@keyframes bgMove {
-		0% {
-			background-position:
-				0 0,
-				0 0,
-				0 0,
-				0 0;
-		}
-		100% {
-			background-position:
-				50px 50px,
-				50px 50px,
-				0 0,
-				0 0;
+	.bg-particles {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+
+		&::before {
+			content: '';
+			position: absolute;
+			width: 2px;
+			height: 2px;
+			background: $primary-color;
+			border-radius: 50%;
+			box-shadow:
+				100px 50px $primary-color,
+				200px 150px $primary-color,
+				300px 100px $primary-color,
+				400px 200px $primary-color,
+				500px 50px $primary-color,
+				600px 180px $primary-color,
+				700px 120px $primary-color,
+				800px 220px $primary-color,
+				900px 80px $primary-color,
+				1000px 160px $primary-color;
+			animation: particleFloat 15s linear infinite;
+			opacity: 0.6;
 		}
 	}
 }
 
-.corner-decoration {
-	position: absolute;
-	width: 120px;
-	height: 120px;
-	z-index: 5;
+@keyframes gridMove {
+	0% {
+		background-position: 0 0;
+	}
+	100% {
+		background-position: 60px 60px;
+	}
+}
 
-	&::before,
-	&::after {
-		content: '';
+@keyframes particleFloat {
+	0% {
+		transform: translateY(0);
+		opacity: 0;
+	}
+	10% {
+		opacity: 0.6;
+	}
+	90% {
+		opacity: 0.6;
+	}
+	100% {
+		transform: translateY(-100vh);
+		opacity: 0;
+	}
+}
+
+.corner-deco {
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	z-index: 10;
+
+	.corner-line-h,
+	.corner-line-v {
 		position: absolute;
-		background: linear-gradient(135deg, #00d4ff, #0096ff);
+		background: linear-gradient(135deg, $primary-color, $primary-dark);
+	}
+
+	.corner-line-h {
+		width: 50px;
+		height: 2px;
+	}
+
+	.corner-line-v {
+		width: 2px;
+		height: 50px;
+	}
+
+	.corner-dot {
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		background: $primary-color;
+		border-radius: 50%;
+		box-shadow: 0 0 10px $primary-color;
 	}
 
 	&.corner-tl {
-		top: 10px;
-		left: 10px;
-		&::before {
+		top: 15px;
+		left: 15px;
+		.corner-line-h {
 			top: 0;
 			left: 0;
-			width: 3px;
-			height: 40px;
 		}
-		&::after {
+		.corner-line-v {
 			top: 0;
 			left: 0;
-			width: 40px;
-			height: 3px;
+		}
+		.corner-dot {
+			top: -2px;
+			left: -2px;
 		}
 	}
 
 	&.corner-tr {
-		top: 10px;
-		right: 10px;
-		&::before {
+		top: 15px;
+		right: 15px;
+		.corner-line-h {
 			top: 0;
 			right: 0;
-			width: 3px;
-			height: 40px;
 		}
-		&::after {
+		.corner-line-v {
 			top: 0;
 			right: 0;
-			width: 40px;
-			height: 3px;
+		}
+		.corner-dot {
+			top: -2px;
+			right: -2px;
 		}
 	}
 
 	&.corner-bl {
-		bottom: 10px;
-		left: 10px;
-		&::before {
+		bottom: 15px;
+		left: 15px;
+		.corner-line-h {
 			bottom: 0;
 			left: 0;
-			width: 3px;
-			height: 40px;
 		}
-		&::after {
+		.corner-line-v {
 			bottom: 0;
 			left: 0;
-			width: 40px;
-			height: 3px;
+		}
+		.corner-dot {
+			bottom: -2px;
+			left: -2px;
 		}
 	}
 
 	&.corner-br {
-		bottom: 10px;
-		right: 10px;
-		&::before {
+		bottom: 15px;
+		right: 15px;
+		.corner-line-h {
 			bottom: 0;
 			right: 0;
-			width: 3px;
-			height: 40px;
 		}
-		&::after {
+		.corner-line-v {
 			bottom: 0;
 			right: 0;
-			width: 40px;
-			height: 3px;
+		}
+		.corner-dot {
+			bottom: -2px;
+			right: -2px;
 		}
 	}
 }
 
 .screen-header {
-	height: 80px;
+	height: 90px;
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	padding: 0 40px;
+	justify-content: space-between;
+	padding: 0 30px;
 	position: relative;
-	z-index: 10;
-
-	.header-left,
-	.header-right {
-		flex: 1;
-		display: flex;
-		align-items: center;
-	}
+	z-index: 20;
+	background: linear-gradient(180deg, rgba(0, 20, 40, 0.8) 0%, transparent 100%);
+	border-bottom: 1px solid $border-color;
 
 	.header-left {
-		justify-content: flex-start;
+		display: flex;
+		align-items: center;
+		gap: 15px;
+
+		.logo-container {
+			position: relative;
+			width: 50px;
+			height: 50px;
+
+			.logo-ring {
+				position: absolute;
+				inset: 0;
+				border: 2px solid $primary-color;
+				border-radius: 50%;
+				animation: ringRotate 10s linear infinite;
+				opacity: 0.5;
+
+				&::before {
+					content: '';
+					position: absolute;
+					top: -4px;
+					left: 50%;
+					transform: translateX(-50%);
+					width: 8px;
+					height: 8px;
+					background: $primary-color;
+					border-radius: 50%;
+				}
+			}
+
+			.logo-inner {
+				position: absolute;
+				inset: 6px;
+				background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 150, 255, 0.2));
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: $primary-color;
+			}
+		}
+
+		.system-name {
+			.name-main {
+				font-size: 18px;
+				font-weight: 700;
+				color: $text-primary;
+				letter-spacing: 2px;
+			}
+
+			.name-sub {
+				font-size: 10px;
+				color: $text-muted;
+				letter-spacing: 1px;
+				margin-top: 2px;
+			}
+		}
 	}
 
 	.header-center {
-		flex: 2;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+
+		.title-box {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+
+			.title-deco {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+
+				.deco-line {
+					width: 80px;
+					height: 2px;
+					background: linear-gradient(90deg, transparent, $primary-color);
+				}
+
+				.deco-diamond {
+					width: 8px;
+					height: 8px;
+					background: $primary-color;
+					transform: rotate(45deg);
+					box-shadow: 0 0 10px $primary-color;
+				}
+
+				&.right {
+					.deco-line {
+						background: linear-gradient(90deg, $primary-color, transparent);
+					}
+				}
+			}
+
+			.main-title {
+				font-size: 32px;
+				font-weight: 900;
+				background: linear-gradient(135deg, $primary-color 0%, $primary-dark 50%, #8a2be2 100%);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				letter-spacing: 6px;
+				font-family: 'Orbitron', 'Microsoft YaHei', sans-serif;
+				text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+				white-space: nowrap;
+			}
+		}
 	}
 
 	.header-right {
-		justify-content: flex-end;
-		gap: 20px;
-	}
-
-	.logo-box {
 		display: flex;
 		align-items: center;
+		gap: 25px;
 
-		.logo {
-			height: 50px;
-			object-fit: contain;
-		}
-	}
+		.datetime-box {
+			text-align: right;
 
-	.title-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 20px;
+			.time-display {
+				display: flex;
+				align-items: center;
+				gap: 2px;
 
-		.title-decoration {
-			width: 120px;
-			height: 2px;
-			background: linear-gradient(90deg, transparent, #00d4ff, #0096ff, transparent);
+				.time-num {
+					font-size: 32px;
+					font-weight: 700;
+					color: $primary-color;
+					font-family: 'Orbitron', monospace;
+					text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+					min-width: 45px;
+					text-align: center;
+				}
 
-			&.left {
-				background: linear-gradient(90deg, transparent, #00d4ff, #0096ff);
+				.time-sep {
+					font-size: 28px;
+					font-weight: 700;
+					color: $primary-color;
+					animation: timeSepBlink 1s ease-in-out infinite;
+				}
 			}
 
-			&.right {
-				background: linear-gradient(90deg, #0096ff, #00d4ff, transparent);
+			.date-display {
+				display: flex;
+				justify-content: flex-end;
+				gap: 10px;
+				margin-top: 4px;
+
+				.date-text,
+				.week-text {
+					font-size: 12px;
+					color: $text-secondary;
+				}
 			}
 		}
-	}
 
-	.main-title {
-		font-size: 32px;
-		font-weight: 900;
-		margin: 0;
-		background: linear-gradient(135deg, #00d4ff 0%, #0096ff 50%, #8a2be2 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		letter-spacing: 4px;
-		font-family: 'Orbitron', 'Microsoft YaHei', sans-serif;
-		text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
-	}
+		.action-btn {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 10px 20px;
+			background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 150, 255, 0.1));
+			border: 1px solid rgba(0, 212, 255, 0.4);
+			border-radius: 20px;
+			color: $primary-color;
+			font-size: 13px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s ease;
 
-	.subtitle {
-		font-size: 14px;
-		color: rgba(0, 212, 255, 0.7);
-		letter-spacing: 4px;
-		margin-top: 5px;
-	}
-
-	.time-box {
-		text-align: right;
-
-		.time {
-			font-size: 36px;
-			font-weight: 700;
-			color: #00d4ff;
-			font-family: 'Orbitron', monospace;
-			letter-spacing: 3px;
-			text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
-		}
-
-		.date {
-			font-size: 14px;
-			color: rgba(255, 255, 255, 0.7);
-			margin-top: 3px;
-		}
-	}
-
-	.more-btn {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 12px 24px;
-		background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(138, 43, 226, 0.25));
-		border: 2px solid rgba(0, 212, 255, 0.5);
-		border-radius: 25px;
-		color: #00d4ff;
-		font-size: 15px;
-		font-weight: 700;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
-
-		&:hover {
-			background: linear-gradient(135deg, rgba(0, 212, 255, 0.4), rgba(138, 43, 226, 0.4));
-			border-color: rgba(0, 212, 255, 0.8);
-			transform: translateY(-3px);
-			box-shadow: 0 8px 30px rgba(0, 212, 255, 0.4);
+			&:hover {
+				background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(0, 150, 255, 0.2));
+				border-color: $primary-color;
+				transform: translateY(-2px);
+				box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+			}
 		}
 	}
 }
 
+@keyframes ringRotate {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes timeSepBlink {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
 .screen-body {
-	padding: 12px 15px;
-	height: calc(100vh - 80px);
 	display: grid;
-	grid-template-columns: 0.8fr 1.5fr 0.8fr;
-	gap: 12px;
+	grid-template-columns: 1fr 1.8fr 1fr;
+	gap: 15px;
+	height: calc(100vh - 90px);
+	padding: 15px 20px;
 	position: relative;
-	z-index: 2;
+	z-index: 10;
 }
 
 .left-column,
 .right-column {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 15px;
 }
 
 .center-column {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 15px;
 }
 
 .panel-card {
-	background: linear-gradient(135deg, rgba(0, 150, 255, 0.08) 0%, rgba(0, 50, 100, 0.08) 100%);
-	border: 1px solid rgba(0, 212, 255, 0.2);
-	border-radius: 8px;
+	background: $bg-card;
+	border: 1px solid $border-color;
+	border-radius: 12px;
 	overflow: hidden;
 	backdrop-filter: blur(10px);
 	display: flex;
 	flex-direction: column;
-	position: relative;
 
-	&::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: linear-gradient(90deg, transparent, #00d4ff, #0096ff, transparent);
-	}
-
-	.card-header {
-		padding: 6px 10px;
-		background: linear-gradient(90deg, rgba(0, 150, 255, 0.1), transparent);
-		border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+	.panel-header {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		flex-shrink: 0;
+		gap: 10px;
+		padding: 12px 15px;
+		background: linear-gradient(90deg, rgba(0, 212, 255, 0.08), transparent);
+		border-bottom: 1px solid $border-color;
+		position: relative;
 
-		.header-icon {
-			width: 3px;
-			height: 12px;
-			background: linear-gradient(180deg, #00d4ff, #0096ff);
-			border-radius: 2px;
+		.header-icon-box {
+			width: 28px;
+			height: 28px;
+			background: linear-gradient(135deg, $primary-color, $primary-dark);
+			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 14px;
+
+			&.warning {
+				background: linear-gradient(135deg, #f59e0b, #ef4444);
+			}
 		}
 
-		.card-title {
-			flex: 1;
-			font-size: 12px;
+		.panel-title {
+			font-size: 14px;
 			font-weight: 600;
-			color: #00d4ff;
-			margin: 0;
+			color: $text-primary;
 			letter-spacing: 1px;
 		}
 
 		.header-line {
 			flex: 1;
 			height: 1px;
-			background: linear-gradient(90deg, rgba(0, 212, 255, 0.3), transparent);
+			background: linear-gradient(90deg, $border-color, transparent);
+		}
+
+		.map-legend {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			.legend-dot {
+				width: 8px;
+				height: 8px;
+				background: $primary-color;
+				border-radius: 50%;
+				animation: legendPulse 2s ease-in-out infinite;
+
+				&.active {
+					box-shadow: 0 0 10px $primary-color;
+				}
+			}
+
+			.legend-text {
+				font-size: 11px;
+				color: $text-secondary;
+			}
+		}
+
+		.warning-count {
+			display: flex;
+			align-items: baseline;
+			gap: 4px;
+
+			.count-num {
+				font-size: 20px;
+				font-weight: 700;
+				color: #ef4444;
+				font-family: 'Orbitron', monospace;
+			}
+
+			.count-label {
+				font-size: 11px;
+				color: $text-muted;
+			}
+		}
+
+		.live-indicator {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			.live-dot {
+				width: 8px;
+				height: 8px;
+				background: #ef4444;
+				border-radius: 50%;
+				animation: livePulse 1.5s ease-in-out infinite;
+			}
+
+			.live-text {
+				font-size: 11px;
+				font-weight: 700;
+				color: #ef4444;
+				letter-spacing: 1px;
+			}
 		}
 	}
 
-	.card-body {
+	.panel-body {
 		flex: 1;
-		padding: 8px;
+		padding: 12px;
+		overflow: hidden;
+	}
+}
+
+@keyframes legendPulse {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	50% {
+		transform: scale(1.2);
+		opacity: 0.7;
+	}
+}
+
+@keyframes livePulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+.equipment-overview {
+	flex: 1.2;
+
+	.panel-body {
+		display: flex;
+		gap: 15px;
+	}
+
+	.equipment-chart-box {
+		position: relative;
+		width: 140px;
+		height: 140px;
+		flex-shrink: 0;
+
+		.chart-ring {
+			width: 100%;
+			height: 100%;
+		}
+
+		.chart-center-info {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+
+			.center-num {
+				font-size: 28px;
+				font-weight: 900;
+				color: $primary-color;
+				font-family: 'Orbitron', monospace;
+				text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+			}
+
+			.center-label {
+				font-size: 10px;
+				color: $text-muted;
+				margin-top: 2px;
+			}
+		}
+	}
+
+	.equipment-legend {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+
+		.legend-item {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 10px;
+			background: rgba(255, 255, 255, 0.03);
+			border-radius: 6px;
+			transition: all 0.3s ease;
+
+			&:hover {
+				background: rgba(0, 212, 255, 0.1);
+				transform: translateX(3px);
+			}
+
+			.legend-color {
+				width: 10px;
+				height: 10px;
+				border-radius: 3px;
+			}
+
+			.legend-name {
+				flex: 1;
+				font-size: 12px;
+				color: $text-secondary;
+			}
+
+			.legend-value {
+				font-size: 14px;
+				font-weight: 600;
+				color: $text-primary;
+				font-family: 'Orbitron', monospace;
+			}
+
+			.legend-percent {
+				font-size: 11px;
+				color: $text-muted;
+				min-width: 35px;
+				text-align: right;
+			}
+		}
+	}
+}
+
+.workorder-stats {
+	flex: 1.5;
+
+	.workorder-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 10px;
+		margin-bottom: 15px;
+
+		.workorder-item {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 12px;
+			background: rgba(255, 255, 255, 0.03);
+			border-radius: 8px;
+			transition: all 0.3s ease;
+
+			&:hover {
+				background: rgba(0, 212, 255, 0.1);
+				transform: translateY(-2px);
+			}
+
+			.item-icon {
+				width: 40px;
+				height: 40px;
+				border-radius: 10px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #fff;
+				font-size: 18px;
+			}
+
+			.item-content {
+				.item-value {
+					font-size: 22px;
+					font-weight: 700;
+					color: $text-primary;
+					font-family: 'Orbitron', monospace;
+				}
+
+				.item-label {
+					font-size: 11px;
+					color: $text-muted;
+					margin-top: 2px;
+				}
+			}
+		}
+	}
+
+	.workorder-trend {
+		.trend-header {
+			margin-bottom: 8px;
+
+			.trend-title {
+				font-size: 11px;
+				color: $text-muted;
+			}
+		}
+
+		.trend-chart {
+			height: 80px;
+		}
+	}
+}
+
+.inspection-stats {
+	flex: 1;
+
+	.inspection-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+
+		.inspection-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+
+			.inspection-item {
+				padding: 10px 12px;
+				background: rgba(255, 255, 255, 0.03);
+				border-radius: 8px;
+				border-left: 3px solid transparent;
+				transition: all 0.3s ease;
+
+				&.pending {
+					border-left-color: #f59e0b;
+					background: rgba(245, 158, 11, 0.05);
+				}
+
+				&.done {
+					border-left-color: #10b981;
+					background: rgba(16, 185, 129, 0.05);
+				}
+
+				&:hover {
+					transform: translateX(3px);
+				}
+
+				.item-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 6px;
+
+					.item-name {
+						font-size: 11px;
+						color: $text-secondary;
+					}
+
+					.item-badge {
+						font-size: 9px;
+						padding: 2px 6px;
+						border-radius: 8px;
+
+						&.pending {
+							color: #f59e0b;
+							background: rgba(245, 158, 11, 0.15);
+						}
+
+						&.done {
+							color: #10b981;
+							background: rgba(16, 185, 129, 0.15);
+						}
+					}
+				}
+
+				.item-value {
+					font-size: 20px;
+					font-weight: 700;
+					color: $text-primary;
+					font-family: 'Orbitron', monospace;
+				}
+			}
+		}
+	}
+}
+
+.top-stats {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 15px;
+	flex-shrink: 0;
+
+	.stat-card {
+		position: relative;
+		padding: 18px 20px;
+		border-radius: 12px;
+		overflow: hidden;
+		cursor: pointer;
+		transition: all 0.4s ease;
+
+		.stat-bg {
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 50, 100, 0.05) 100%);
+			border: 1px solid $border-color;
+			border-radius: 12px;
+			transition: all 0.4s ease;
+		}
+
+		.stat-glow {
+			position: absolute;
+			inset: -2px;
+			background: radial-gradient(circle at center, rgba(0, 212, 255, 0.2), transparent 70%);
+			border-radius: 14px;
+			opacity: 0;
+			transition: opacity 0.4s ease;
+		}
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 2px;
+			background: linear-gradient(90deg, transparent, $primary-color, transparent);
+		}
+
+		&:hover {
+			transform: translateY(-5px);
+
+			.stat-bg {
+				border-color: $primary-color;
+				background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 50, 100, 0.1) 100%);
+			}
+
+			.stat-glow {
+				opacity: 1;
+			}
+
+			.stat-icon {
+				transform: scale(1.1) rotate(5deg);
+				box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+			}
+
+			.stat-value .value-num {
+				text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+			}
+
+			.stat-decoration .deco-ring {
+				transform: scale(1.2);
+				opacity: 1;
+			}
+		}
+
+		.stat-icon {
+			position: relative;
+			width: 48px;
+			height: 48px;
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 22px;
+			margin-bottom: 12px;
+			transition: all 0.4s ease;
+			z-index: 1;
+		}
+
+		.stat-info {
+			position: relative;
+			z-index: 1;
+
+			.stat-label {
+				font-size: 12px;
+				color: $text-muted;
+				letter-spacing: 1px;
+				margin-bottom: 6px;
+			}
+
+			.stat-value {
+				display: flex;
+				align-items: baseline;
+				gap: 4px;
+				margin-bottom: 8px;
+
+				.value-num {
+					font-size: 28px;
+					font-weight: 900;
+					color: $text-primary;
+					font-family: 'Orbitron', monospace;
+					transition: all 0.4s ease;
+				}
+
+				.value-unit {
+					font-size: 12px;
+					color: $text-muted;
+				}
+			}
+
+			.stat-trend {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				font-size: 11px;
+				font-weight: 600;
+				padding: 3px 8px;
+				border-radius: 10px;
+
+				&.up {
+					color: #10b981;
+					background: rgba(16, 185, 129, 0.15);
+				}
+
+				&.down {
+					color: #ef4444;
+					background: rgba(239, 68, 68, 0.15);
+				}
+			}
+		}
+
+		.stat-decoration {
+			position: absolute;
+			right: 15px;
+			bottom: 15px;
+			z-index: 1;
+
+			.deco-ring {
+				width: 40px;
+				height: 40px;
+				border: 2px solid rgba(0, 212, 255, 0.2);
+				border-radius: 50%;
+				opacity: 0.5;
+				transition: all 0.4s ease;
+			}
+		}
+	}
+}
+
+.center-map-panel {
+	flex: 1;
+	min-height: 0;
+
+	.map-card {
+		height: 100%;
+
+		.panel-body {
+			padding: 0;
+			height: calc(100% - 45px);
+		}
+
+		.map-container {
+			width: 100%;
+			height: 100%;
+			min-height: 200px;
+		}
+	}
+}
+
+.bottom-charts {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 15px;
+	flex-shrink: 0;
+
+	.cost-chart-card,
+	.material-chart-card {
+		.cost-chart,
+		.material-chart {
+			height: 150px;
+		}
+	}
+}
+
+.company-stats {
+	flex: 1;
+
+	.company-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+
+		.company-item {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 10px 12px;
+			background: rgba(255, 255, 255, 0.03);
+			border-radius: 8px;
+			transition: all 0.3s ease;
+
+			&:hover {
+				background: rgba(0, 212, 255, 0.1);
+				transform: translateX(5px);
+			}
+
+			.company-rank {
+				width: 24px;
+				height: 24px;
+				border-radius: 6px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 12px;
+				font-weight: 700;
+				background: rgba(255, 255, 255, 0.1);
+				color: $text-secondary;
+
+				&.rank-1 {
+					background: linear-gradient(135deg, #ffd700, #ffb800);
+					color: #000;
+				}
+
+				&.rank-2 {
+					background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+					color: #000;
+				}
+
+				&.rank-3 {
+					background: linear-gradient(135deg, #cd7f32, #b87333);
+					color: #fff;
+				}
+			}
+
+			.company-info {
+				flex: 1;
+
+				.company-name {
+					font-size: 12px;
+					font-weight: 600;
+					color: $text-primary;
+					margin-bottom: 4px;
+				}
+
+				.company-data {
+					display: flex;
+					gap: 12px;
+
+					span {
+						font-size: 10px;
+						color: $text-muted;
+					}
+				}
+			}
+
+			.company-progress {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				width: 100px;
+
+				.progress-bar {
+					flex: 1;
+					height: 6px;
+					background: rgba(255, 255, 255, 0.1);
+					border-radius: 3px;
+					overflow: hidden;
+
+					.progress-fill {
+						height: 100%;
+						background: linear-gradient(90deg, $primary-color, $primary-dark);
+						border-radius: 3px;
+						transition: width 1s ease;
+					}
+				}
+
+				.progress-value {
+					font-size: 11px;
+					font-weight: 600;
+					color: $primary-color;
+					font-family: 'Orbitron', monospace;
+				}
+			}
+		}
+	}
+}
+
+.warning-panel {
+	flex: 1.2;
+
+	.warning-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-height: 100%;
 		overflow-y: auto;
-		overflow-x: hidden;
-		min-height: 0;
 
 		&::-webkit-scrollbar {
 			width: 4px;
@@ -881,1691 +2022,739 @@ onBeforeUnmount(() => {
 		&::-webkit-scrollbar-thumb {
 			background: rgba(0, 212, 255, 0.3);
 			border-radius: 2px;
-
-			&:hover {
-				background: rgba(0, 212, 255, 0.5);
-			}
-		}
-	}
-
-	&.compact-card {
-		flex: 0.7;
-
-		.card-header {
-			padding: 8px 12px;
-
-			.card-title {
-				font-size: 13px;
-			}
 		}
 
-		.compact-body {
+		.warning-item {
+			display: flex;
+			align-items: flex-start;
+			gap: 10px;
 			padding: 10px;
+			background: rgba(255, 255, 255, 0.03);
+			border-radius: 8px;
+			border-left: 3px solid transparent;
+			transition: all 0.3s ease;
 
-			.org-item,
-			.rank-item {
-				padding: 6px 8px;
+			&.danger {
+				border-left-color: #ef4444;
+				background: rgba(239, 68, 68, 0.05);
 			}
 
-			.org-icon,
-			.rank-number {
-				width: 32px;
-				height: 32px;
-			}
-
-			.org-name,
-			.rank-name {
-				font-size: 11px;
-			}
-
-			.org-stats span,
-			.rank-detail span {
-				font-size: 9px;
-			}
-		}
-	}
-
-	&.device-status-card {
-		flex: 0 0 auto;
-		max-height: 35%;
-		min-height: 180px;
-	}
-
-	&.workorder-card {
-		flex: 0 0 auto;
-		max-height: 25%;
-		min-height: 120px;
-	}
-
-	&.cost-progress-card {
-		flex: 1;
-		min-height: 150px;
-	}
-
-	&.company-card {
-		flex: 0 0 auto;
-		max-height: 40%;
-		min-height: 200px;
-	}
-
-	&.warning-card {
-		flex: 1;
-		min-height: 150px;
-	}
-
-	&.map-card {
-		flex: 1;
-		min-height: 0;
-	}
-}
-
-.device-status-chart {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 6px;
-
-	.chart-container {
-		width: 100px;
-		height: 100px;
-		position: relative;
-	}
-
-	.chart-center {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		text-align: center;
-
-		.center-value {
-			font-size: 20px;
-			font-weight: 700;
-			color: #00d4ff;
-			font-family: 'Orbitron', monospace;
-		}
-
-		.center-label {
-			font-size: 9px;
-			color: rgba(255, 255, 255, 0.6);
-			margin-top: 1px;
-		}
-	}
-}
-
-.status-legend {
-	display: flex;
-	flex-direction: column;
-	gap: 3px;
-	width: 100%;
-
-	.legend-item {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		padding: 4px 8px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 4px;
-		transition: all 0.3s ease;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateX(3px);
-		}
-
-		.legend-dot {
-			width: 6px;
-			height: 6px;
-			border-radius: 50%;
-			flex-shrink: 0;
-		}
-
-		.legend-label {
-			flex: 1;
-			color: rgba(255, 255, 255, 0.7);
-			font-size: 10px;
-		}
-
-		.legend-value {
-			color: #fff;
-			font-weight: 600;
-			font-size: 12px;
-			font-family: 'Orbitron', monospace;
-		}
-	}
-}
-
-.workorder-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 6px;
-
-	.workorder-item {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		padding: 6px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 5px;
-		transition: all 0.3s ease;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: scale(1.02);
-		}
-
-		.workorder-icon {
-			width: 28px;
-			height: 28px;
-			border-radius: 5px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: #fff;
-			flex-shrink: 0;
-		}
-
-		.workorder-info {
-			.workorder-value {
-				font-size: 14px;
-				font-weight: 700;
-				color: #fff;
-				font-family: 'Orbitron', monospace;
-			}
-
-			.workorder-label {
-				font-size: 9px;
-				color: rgba(255, 255, 255, 0.6);
-				margin-top: 1px;
-			}
-		}
-	}
-}
-
-.cost-progress-list {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	max-height: 100%;
-	overflow: hidden;
-	padding-right: 4px;
-	position: relative;
-
-	&.auto-scroll {
-		overflow: hidden;
-
-		.scroll-content {
-			animation: costScrollUp 12s linear infinite;
-		}
-	}
-
-	.scroll-content {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
-
-	.cost-progress-item {
-		padding: 6px 8px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 5px;
-		transition: all 0.3s ease;
-		flex-shrink: 0;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateX(3px);
-		}
-
-		.cost-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 4px;
-
-			.cost-name {
-				color: #fff;
-				font-size: 10px;
-				font-weight: 500;
-			}
-
-			.cost-total {
-				color: #00d4ff;
-				font-size: 9px;
-			}
-		}
-
-		.progress-bar-wrapper {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-
-			.progress-track {
-				flex: 1;
-				height: 5px;
-				background: rgba(255, 255, 255, 0.1);
-				border-radius: 3px;
-				overflow: hidden;
-
-				.progress-fill {
-					height: 100%;
-					border-radius: 3px;
-					transition: width 1s ease;
-				}
-			}
-
-			.progress-percent {
-				color: #fff;
-				font-size: 11px;
-				font-weight: 600;
-				min-width: 35px;
-				text-align: right;
-				font-family: 'Orbitron', monospace;
-			}
-		}
-	}
-}
-
-@keyframes costScrollUp {
-	0% {
-		transform: translateY(0);
-	}
-	100% {
-		transform: translateY(-50%);
-	}
-}
-
-.center-top {
-	flex-shrink: 0;
-	padding: 15px 0;
-
-	.stat-panel {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 15px;
-
-		.stat-item {
-			height: 100px;
-			border-radius: 12px;
-			padding: 15px 18px;
-			display: flex;
-			align-items: center;
-			gap: 15px;
-			transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-			position: relative;
-			overflow: hidden;
-			cursor: pointer;
-
-			.stat-bg {
-				position: absolute;
-				inset: 0;
-				background: linear-gradient(135deg, rgba(0, 150, 255, 0.12) 0%, rgba(0, 50, 100, 0.08) 100%);
-				border: 1px solid rgba(0, 212, 255, 0.25);
-				border-radius: 12px;
-				transition: all 0.5s ease;
-			}
-
-			.stat-glow {
-				position: absolute;
-				inset: -2px;
-				background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), transparent, rgba(0, 150, 255, 0.15));
-				border-radius: 14px;
-				opacity: 0;
-				transition: opacity 0.5s ease;
-				filter: blur(8px);
-			}
-
-			&::before {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: 2px;
-				background: linear-gradient(90deg, transparent, #00d4ff, #0096ff, transparent);
-				animation: headerGlow 2s ease-in-out infinite;
-			}
-
-			&::after {
-				content: '';
-				position: absolute;
-				top: -50%;
-				left: -50%;
-				width: 200%;
-				height: 200%;
-				background: conic-gradient(from 0deg, transparent, rgba(0, 212, 255, 0.1), transparent 30%);
-				animation: rotate 4s linear infinite;
-				opacity: 0;
-				transition: opacity 0.5s ease;
+			&.warning {
+				border-left-color: #f59e0b;
+				background: rgba(245, 158, 11, 0.05);
 			}
 
 			&:hover {
-				transform: translateY(-8px) scale(1.02);
-
-				.stat-bg {
-					border-color: rgba(0, 212, 255, 0.5);
-					background: linear-gradient(135deg, rgba(0, 150, 255, 0.2) 0%, rgba(0, 50, 100, 0.15) 100%);
-				}
-
-				.stat-glow {
-					opacity: 1;
-				}
-
-				&::after {
-					opacity: 1;
-				}
-
-				.stat-icon-wrapper {
-					.icon-ring {
-						transform: scale(1.3);
-						opacity: 1;
-					}
-
-					.stat-icon {
-						transform: scale(1.1);
-						box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-					}
-				}
-
-				.stat-value {
-					transform: scale(1.05);
-					text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
-				}
-
-				.stat-decoration {
-					.deco-line {
-						width: 100%;
-					}
-
-					.deco-dot {
-						animation: dotPulse 1s ease-in-out infinite;
-					}
-				}
+				transform: translateX(3px);
 			}
 
-			.stat-icon-wrapper {
-				position: relative;
-				width: 50px;
-				height: 50px;
+			.warning-icon {
+				width: 28px;
+				height: 28px;
+				border-radius: 6px;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				flex-shrink: 0;
-				z-index: 1;
-
-				.stat-icon {
-					width: 46px;
-					height: 46px;
-					border-radius: 12px;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					color: #fff;
-					transition: all 0.5s ease;
-					position: relative;
-					z-index: 2;
-					box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-				}
-
-				.icon-ring {
-					position: absolute;
-					inset: -4px;
-					border: 2px solid rgba(0, 212, 255, 0.3);
-					border-radius: 16px;
-					opacity: 0;
-					transition: all 0.5s ease;
-					animation: ringPulse 2s ease-in-out infinite;
-				}
+				font-size: 14px;
+				background: rgba(255, 255, 255, 0.1);
+				color: $text-secondary;
 			}
 
-			.stat-content {
+			.warning-content {
 				flex: 1;
-				position: relative;
-				z-index: 1;
-				display: flex;
-				flex-direction: column;
-				gap: 4px;
 
-				.stat-label {
+				.warning-name {
 					font-size: 12px;
-					color: rgba(255, 255, 255, 0.65);
-					letter-spacing: 1px;
-					text-transform: uppercase;
-					font-weight: 500;
-				}
-
-				.stat-value {
-					font-size: 26px;
-					font-weight: 700;
-					color: #fff;
-					font-family: 'Orbitron', monospace;
-					letter-spacing: 1px;
-					transition: all 0.5s ease;
-					line-height: 1;
-				}
-
-				.stat-trend {
-					display: inline-flex;
-					align-items: center;
-					gap: 4px;
-					font-size: 11px;
 					font-weight: 600;
-					padding: 3px 8px;
-					border-radius: 10px;
-					width: fit-content;
-					margin-top: 2px;
-					transition: all 0.3s ease;
+					color: $text-primary;
+					margin-bottom: 6px;
+				}
 
-					&.up {
-						color: #10b981;
-						background: rgba(16, 185, 129, 0.15);
-						border: 1px solid rgba(16, 185, 129, 0.3);
+				.warning-bar {
+					margin-bottom: 4px;
+
+					.bar-track {
+						height: 4px;
+						background: rgba(255, 255, 255, 0.1);
+						border-radius: 2px;
+						overflow: hidden;
+
+						.bar-fill {
+							height: 100%;
+							border-radius: 2px;
+							transition: width 1s ease;
+						}
 					}
+				}
 
-					&.down {
-						color: #ef4444;
-						background: rgba(239, 68, 68, 0.15);
-						border: 1px solid rgba(239, 68, 68, 0.3);
+				.warning-info {
+					display: flex;
+					justify-content: space-between;
+
+					span {
+						font-size: 10px;
+						color: $text-muted;
 					}
 				}
-			}
-
-			.stat-decoration {
-				position: absolute;
-				right: 15px;
-				bottom: 10px;
-				display: flex;
-				flex-direction: column;
-				align-items: flex-end;
-				gap: 4px;
-				z-index: 1;
-				opacity: 0.6;
-
-				.deco-line {
-					width: 30px;
-					height: 2px;
-					background: linear-gradient(90deg, rgba(0, 212, 255, 0.5), transparent);
-					transition: width 0.5s ease;
-				}
-
-				.deco-dot {
-					width: 4px;
-					height: 4px;
-					background: #00d4ff;
-					border-radius: 50%;
-					box-shadow: 0 0 6px #00d4ff;
-				}
-			}
-		}
-	}
-}
-
-@keyframes headerGlow {
-	0%,
-	100% {
-		opacity: 0.5;
-	}
-	50% {
-		opacity: 1;
-	}
-}
-
-@keyframes rotate {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
-}
-
-@keyframes ringPulse {
-	0%,
-	100% {
-		opacity: 0.3;
-		transform: scale(1);
-	}
-	50% {
-		opacity: 0.6;
-		transform: scale(1.1);
-	}
-}
-
-@keyframes dotPulse {
-	0%,
-	100% {
-		transform: scale(1);
-		opacity: 1;
-	}
-	50% {
-		transform: scale(1.5);
-		opacity: 0.5;
-	}
-}
-
-.center-map {
-	flex: 1;
-	min-height: 0;
-
-	.map-card {
-		height: 100%;
-
-		.card-body {
-			padding: 0;
-		}
-
-		.map-chart {
-			width: 100%;
-			height: 100%;
-			min-height: 200px;
-		}
-	}
-}
-
-.warning-container {
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
-	max-height: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding-right: 4px;
-
-	&::-webkit-scrollbar {
-		width: 3px;
-	}
-
-	&::-webkit-scrollbar-track {
-		background: rgba(0, 212, 255, 0.1);
-		border-radius: 2px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: rgba(0, 212, 255, 0.3);
-		border-radius: 2px;
-
-		&:hover {
-			background: rgba(0, 212, 255, 0.5);
-		}
-	}
-
-	.warning-item {
-		padding: 6px 8px;
-		background: linear-gradient(135deg, rgba(0, 150, 255, 0.08) 0%, rgba(0, 50, 100, 0.05) 100%);
-		border: 1px solid rgba(0, 212, 255, 0.15);
-		border-radius: 6px;
-		transition: all 0.3s ease;
-		flex-shrink: 0;
-
-		&:hover {
-			background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 50, 100, 0.1) 100%);
-			border-color: rgba(0, 212, 255, 0.3);
-		}
-
-		.warning-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 5px;
-
-			.warning-name {
-				font-size: 11px;
-				font-weight: 600;
-				color: #fff;
 			}
 
 			.warning-level {
-				display: flex;
-				align-items: center;
-				gap: 3px;
-				padding: 2px 8px;
-				border-radius: 8px;
 				font-size: 10px;
 				font-weight: 600;
+				padding: 3px 8px;
+				border-radius: 8px;
 
 				&.danger {
 					color: #ef4444;
 					background: rgba(239, 68, 68, 0.15);
-					border: 1px solid rgba(239, 68, 68, 0.3);
 				}
 
 				&.warning {
 					color: #f59e0b;
 					background: rgba(245, 158, 11, 0.15);
-					border: 1px solid rgba(245, 158, 11, 0.3);
-				}
-			}
-		}
-
-		.warning-progress {
-			.warning-bar {
-				height: 6px;
-				background: rgba(255, 255, 255, 0.1);
-				border-radius: 3px;
-				overflow: hidden;
-				margin-bottom: 4px;
-
-				.warning-fill {
-					height: 100%;
-					border-radius: 3px;
-					transition: width 1s ease;
-				}
-			}
-
-			.warning-stats {
-				display: flex;
-				justify-content: space-between;
-
-				span {
-					font-size: 10px;
-					color: rgba(255, 255, 255, 0.6);
 				}
 			}
 		}
 	}
 }
 
-.company-list {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	max-height: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding-right: 4px;
+.realtime-panel {
+	flex: 0.8;
 
-	&::-webkit-scrollbar {
-		width: 3px;
-	}
-
-	&::-webkit-scrollbar-track {
-		background: rgba(0, 212, 255, 0.1);
-		border-radius: 2px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: rgba(0, 212, 255, 0.3);
-		border-radius: 2px;
-
-		&:hover {
-			background: rgba(0, 212, 255, 0.5);
-		}
-	}
-
-	.company-item {
+	.realtime-list {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		gap: 8px;
-		padding: 6px 8px;
-		background: linear-gradient(135deg, rgba(0, 150, 255, 0.08) 0%, rgba(0, 50, 100, 0.05) 100%);
-		border: 1px solid rgba(0, 212, 255, 0.15);
-		border-radius: 6px;
-		transition: all 0.3s ease;
-		position: relative;
-		overflow: hidden;
-		flex-shrink: 0;
+		max-height: 100%;
+		overflow-y: auto;
 
-		&::before {
-			content: '';
-			position: absolute;
-			left: 0;
-			top: 0;
-			bottom: 0;
-			width: 3px;
-			background: linear-gradient(180deg, #00d4ff, #0096ff);
-			opacity: 0;
-			transition: opacity 0.3s ease;
+		&::-webkit-scrollbar {
+			width: 4px;
 		}
 
-		&:hover {
-			background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 50, 100, 0.1) 100%);
-			border-color: rgba(0, 212, 255, 0.3);
-			transform: translateX(5px);
-
-			&::before {
-				opacity: 1;
-			}
+		&::-webkit-scrollbar-track {
+			background: rgba(0, 212, 255, 0.1);
+			border-radius: 2px;
 		}
 
-		.company-icon {
-			width: 32px;
-			height: 32px;
-			border-radius: 8px;
+		&::-webkit-scrollbar-thumb {
+			background: rgba(0, 212, 255, 0.3);
+			border-radius: 2px;
+		}
+
+		.realtime-item {
 			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: #fff;
-			flex-shrink: 0;
-			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+			gap: 10px;
+			padding: 8px 10px;
+			background: rgba(255, 255, 255, 0.03);
+			border-radius: 6px;
+			transition: all 0.3s ease;
 
-			.el-icon {
-				font-size: 16px;
+			&:hover {
+				background: rgba(0, 212, 255, 0.1);
 			}
-		}
 
-		.company-info {
-			flex: 1;
-
-			.company-name {
-				color: #fff;
+			.item-time {
 				font-size: 11px;
 				font-weight: 600;
-				margin-bottom: 2px;
-				letter-spacing: 1px;
+				color: $primary-color;
+				font-family: 'Orbitron', monospace;
+				min-width: 40px;
 			}
 
-			.company-stats {
-				display: flex;
-				gap: 12px;
+			.item-content {
+				flex: 1;
 
-				span {
+				.item-title {
+					font-size: 11px;
+					font-weight: 600;
+					color: $text-primary;
+					margin-bottom: 2px;
+				}
+
+				.item-desc {
 					font-size: 10px;
-					color: rgba(255, 255, 255, 0.6);
+					color: $text-muted;
 				}
 			}
-		}
 
-		.company-badge {
-			padding: 3px 8px;
-			background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
-			border: 1px solid rgba(16, 185, 129, 0.3);
-			border-radius: 10px;
-			font-size: 9px;
-			color: #10b981;
-			font-weight: 500;
-		}
-	}
-}
+			&.success {
+				border-left: 2px solid #10b981;
+			}
 
-@keyframes pulse {
-	0%,
-	100% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.05);
+			&.warning {
+				border-left: 2px solid #f59e0b;
+			}
+
+			&.info {
+				border-left: 2px solid $primary-color;
+			}
+		}
 	}
 }
 
 @media screen and (max-width: 1600px) {
 	.screen-header {
-		height: 70px;
-		padding: 0 25px;
+		height: 75px;
+		padding: 0 20px;
 
-		.main-title {
-			font-size: 26px;
-			letter-spacing: 2px;
-		}
-
-		.subtitle {
-			font-size: 12px;
-		}
-
-		.time-box {
-			.time {
-				font-size: 28px;
+		.header-center .title-box {
+			.main-title {
+				font-size: 26px;
+				letter-spacing: 4px;
 			}
 
-			.date {
+			.title-deco .deco-line {
+				width: 60px;
+			}
+		}
+
+		.header-right {
+			.datetime-box .time-display .time-num {
+				font-size: 26px;
+				min-width: 38px;
+			}
+
+			.action-btn {
+				padding: 8px 16px;
 				font-size: 12px;
 			}
 		}
 
-		.more-btn {
-			padding: 10px 18px;
-			font-size: 13px;
-		}
+		.header-left {
+			.logo-container {
+				width: 42px;
+				height: 42px;
+			}
 
-		.logo-box .logo {
-			height: 40px;
+			.system-name .name-main {
+				font-size: 15px;
+			}
 		}
 	}
 
 	.screen-body {
-		padding: 8px 12px;
-		height: calc(100vh - 70px);
-		gap: 8px;
-		grid-template-columns: 0.75fr 1.4fr 0.75fr;
+		padding: 10px 15px;
+		gap: 12px;
 	}
 
-	.panel-card {
-		.card-header {
-			padding: 10px 12px;
+	.top-stats .stat-card {
+		padding: 14px 16px;
 
-			.card-title {
-				font-size: 13px;
-			}
+		.stat-icon {
+			width: 42px;
+			height: 42px;
+			font-size: 18px;
 		}
 
-		.card-body {
-			padding: 10px;
+		.stat-info .stat-value .value-num {
+			font-size: 24px;
 		}
-	}
-
-	.center-top .stat-panel {
-		gap: 10px;
-
-		.stat-item {
-			padding: 12px;
-
-			.stat-icon {
-				width: 48px;
-				height: 48px;
-			}
-
-			.stat-content {
-				.stat-value {
-					font-size: 22px;
-				}
-
-				.stat-label {
-					font-size: 11px;
-				}
-			}
-
-			.stat-trend {
-				font-size: 11px;
-				padding: 4px 8px;
-			}
-		}
-	}
-
-	.device-status-chart {
-		.chart-container {
-			width: 130px;
-			height: 130px;
-		}
-
-		.chart-center .center-value {
-			font-size: 26px;
-		}
-	}
-
-	.workorder-grid .workorder-item {
-		padding: 10px;
-
-		.workorder-icon {
-			width: 36px;
-			height: 36px;
-		}
-
-		.workorder-info {
-			.workorder-value {
-				font-size: 18px;
-			}
-
-			.workorder-label {
-				font-size: 10px;
-			}
-		}
-	}
-
-	.more-entrance-card {
-		padding: 15px;
-
-		.more-entrance-content {
-			gap: 15px;
-
-			.more-entrance-icon {
-				width: 70px;
-				height: 70px;
-			}
-
-			.more-entrance-text {
-				.more-entrance-title {
-					font-size: 22px;
-				}
-
-				.more-entrance-desc {
-					font-size: 11px;
-				}
-			}
-		}
-	}
-
-	.center-map .map-card .map-chart {
-		min-height: 220px;
 	}
 }
 
 @media screen and (max-width: 1366px) {
 	.screen-header {
-		height: 60px;
-		padding: 0 20px;
+		height: 65px;
 
-		.title-wrapper {
+		.header-center .title-box {
 			gap: 15px;
 
-			.title-decoration {
-				width: 80px;
+			.main-title {
+				font-size: 22px;
+				letter-spacing: 3px;
+			}
+
+			.title-deco .deco-line {
+				width: 50px;
 			}
 		}
 
-		.main-title {
-			font-size: 22px;
-		}
+		.header-right {
+			gap: 15px;
 
-		.subtitle {
-			font-size: 11px;
-		}
+			.datetime-box .time-display {
+				.time-num {
+					font-size: 22px;
+					min-width: 32px;
+				}
 
-		.time-box {
-			.time {
-				font-size: 24px;
-			}
-
-			.date {
-				font-size: 11px;
+				.time-sep {
+					font-size: 20px;
+				}
 			}
 		}
 
-		.more-btn {
-			padding: 8px 14px;
-			font-size: 12px;
-		}
+		.header-left {
+			.logo-container {
+				width: 36px;
+				height: 36px;
 
-		.logo-box .logo {
-			height: 35px;
-		}
-	}
-
-	.screen-body {
-		padding: 6px 10px;
-		height: calc(100vh - 60px);
-		gap: 6px;
-		grid-template-columns: 0.7fr 1.3fr 0.7fr;
-	}
-
-	.left-column,
-	.right-column {
-		gap: 6px;
-	}
-
-	.center-column {
-		gap: 6px;
-	}
-
-	.panel-card {
-		.card-header {
-			padding: 8px 10px;
-
-			.header-icon {
-				width: 3px;
-				height: 14px;
-			}
-
-			.card-title {
-				font-size: 12px;
-				letter-spacing: 1px;
-			}
-		}
-
-		.card-body {
-			padding: 8px;
-		}
-	}
-
-	.center-top .stat-panel {
-		gap: 8px;
-
-		.stat-item {
-			padding: 10px;
-			gap: 10px;
-
-			.stat-icon {
-				width: 40px;
-				height: 40px;
-
-				.el-icon {
-					font-size: 24px;
+				.logo-inner {
+					inset: 4px;
 				}
 			}
 
-			.stat-content {
-				.stat-value {
-					font-size: 18px;
+			.system-name {
+				.name-main {
+					font-size: 13px;
 				}
 
-				.stat-label {
-					font-size: 10px;
-				}
-			}
-
-			.stat-trend {
-				font-size: 10px;
-				padding: 3px 6px;
-			}
-		}
-	}
-
-	.device-status-chart {
-		gap: 10px;
-
-		.chart-container {
-			width: 110px;
-			height: 110px;
-		}
-
-		.chart-center .center-value {
-			font-size: 22px;
-		}
-
-		.chart-center .center-label {
-			font-size: 10px;
-		}
-	}
-
-	.status-legend .legend-item {
-		padding: 6px 10px;
-
-		.legend-label {
-			font-size: 11px;
-		}
-
-		.legend-value {
-			font-size: 14px;
-		}
-	}
-
-	.workorder-grid {
-		gap: 8px;
-
-		.workorder-item {
-			padding: 8px;
-			gap: 8px;
-
-			.workorder-icon {
-				width: 32px;
-				height: 32px;
-
-				.el-icon {
-					font-size: 18px;
-				}
-			}
-
-			.workorder-info {
-				.workorder-value {
-					font-size: 16px;
-				}
-
-				.workorder-label {
+				.name-sub {
 					font-size: 9px;
 				}
 			}
 		}
 	}
 
-	.cost-progress-list {
-		gap: 8px;
-
-		.cost-progress-item {
-			padding: 8px;
-
-			.cost-header {
-				.cost-name {
-					font-size: 11px;
-				}
-
-				.cost-total {
-					font-size: 10px;
-				}
-			}
-
-			.progress-bar-wrapper .progress-percent {
-				font-size: 10px;
-			}
-		}
-	}
-
-	.center-map .map-card .map-chart {
-		min-height: 180px;
-	}
-}
-
-@media screen and (max-width: 1200px) {
-	.screen-header {
-		height: 55px;
-		padding: 0 15px;
-
-		.title-wrapper {
-			gap: 10px;
-
-			.title-decoration {
-				width: 60px;
-			}
-		}
-
-		.main-title {
-			font-size: 18px;
-		}
-
-		.subtitle {
-			font-size: 10px;
-		}
-
-		.time-box {
-			.time {
-				font-size: 20px;
-			}
-
-			.date {
-				font-size: 10px;
-			}
-		}
-
-		.more-btn {
-			padding: 6px 12px;
-			font-size: 11px;
-			gap: 5px;
-		}
-
-		.logo-box .logo {
-			height: 30px;
-		}
-	}
-
 	.screen-body {
-		padding: 5px 8px;
-		height: calc(100vh - 55px);
-		gap: 5px;
-		grid-template-columns: 0.65fr 1.2fr 0.65fr;
+		grid-template-columns: 1fr 1.6fr 1fr;
+		gap: 10px;
+		padding: 10px 12px;
 	}
 
-	.left-column,
-	.right-column {
-		gap: 5px;
-	}
+	.panel-card .panel-header {
+		padding: 10px 12px;
 
-	.center-column {
-		gap: 5px;
-	}
-
-	.panel-card {
-		border-radius: 6px;
-
-		.card-header {
-			padding: 6px 8px;
-
-			.header-icon {
-				width: 3px;
-				height: 12px;
-			}
-
-			.card-title {
-				font-size: 11px;
-			}
+		.panel-title {
+			font-size: 13px;
 		}
 
-		.card-body {
-			padding: 6px;
+		.header-icon-box {
+			width: 24px;
+			height: 24px;
+			font-size: 12px;
 		}
 	}
 
-	.center-top .stat-panel {
-		gap: 6px;
+	.top-stats {
+		gap: 10px;
 
-		.stat-item {
-			padding: 8px;
-			gap: 8px;
+		.stat-card {
+			padding: 12px;
 
 			.stat-icon {
 				width: 36px;
 				height: 36px;
+				font-size: 16px;
+				margin-bottom: 8px;
+			}
 
-				.el-icon {
+			.stat-info {
+				.stat-label {
+					font-size: 11px;
+				}
+
+				.stat-value .value-num {
 					font-size: 20px;
 				}
 			}
-
-			.stat-content {
-				.stat-value {
-					font-size: 16px;
-				}
-
-				.stat-label {
-					font-size: 9px;
-				}
-			}
-
-			.stat-trend {
-				font-size: 9px;
-				padding: 2px 5px;
-			}
 		}
 	}
 
-	.device-status-chart {
-		gap: 8px;
+	.bottom-charts {
+		gap: 10px;
 
-		.chart-container {
-			width: 90px;
-			height: 90px;
-		}
-
-		.chart-center .center-value {
-			font-size: 18px;
-		}
-
-		.chart-center .center-label {
-			font-size: 9px;
-		}
-	}
-
-	.status-legend .legend-item {
-		padding: 5px 8px;
-
-		.legend-dot {
-			width: 8px;
-			height: 8px;
-		}
-
-		.legend-label {
-			font-size: 10px;
-		}
-
-		.legend-value {
-			font-size: 12px;
-		}
-	}
-
-	.workorder-grid {
-		gap: 6px;
-
-		.workorder-item {
-			padding: 6px;
-			gap: 6px;
-
-			.workorder-icon {
-				width: 28px;
-				height: 28px;
-
-				.el-icon {
-					font-size: 16px;
-				}
-			}
-
-			.workorder-info {
-				.workorder-value {
-					font-size: 14px;
-				}
-
-				.workorder-label {
-					font-size: 8px;
-				}
+		.cost-chart-card,
+		.material-chart-card {
+			.cost-chart,
+			.material-chart {
+				height: 120px;
 			}
 		}
 	}
+}
 
-	.cost-progress-list {
-		gap: 6px;
-
-		.cost-progress-item {
-			padding: 6px;
-
-			.cost-header {
-				margin-bottom: 5px;
-
-				.cost-name {
-					font-size: 10px;
-				}
-
-				.cost-total {
-					font-size: 9px;
-				}
-			}
-
-			.progress-bar-wrapper {
-				gap: 8px;
-
-				.progress-track {
-					height: 5px;
-				}
-
-				.progress-percent {
-					font-size: 9px;
-					min-width: 35px;
-				}
-			}
-		}
+@media screen and (max-width: 1200px) {
+	.screen-body {
+		grid-template-columns: 1fr 1.4fr 1fr;
 	}
 
-	.center-map .map-card .map-chart {
-		min-height: 150px;
-	}
-
-	.corner-decoration {
-		width: 80px;
-		height: 80px;
-
-		&.corner-tl::before,
-		&.corner-tr::before,
-		&.corner-bl::before,
-		&.corner-br::before {
-			height: 30px;
-		}
-
-		&.corner-tl::after,
-		&.corner-tr::after,
-		&.corner-bl::after,
-		&.corner-br::after {
-			width: 30px;
-		}
+	.corner-deco {
+		display: none;
 	}
 }
 
 @media screen and (max-width: 992px) {
 	.screen-header {
-		height: 50px;
-		padding: 0 10px;
-
 		.header-left {
 			display: none;
 		}
 
 		.header-center {
-			flex: 1;
+			position: static;
+			transform: none;
 		}
 
-		.title-wrapper {
-			gap: 8px;
-
-			.title-decoration {
-				width: 40px;
+		.header-right {
+			.datetime-box .date-display {
+				display: none;
 			}
-		}
-
-		.main-title {
-			font-size: 16px;
-		}
-
-		.subtitle {
-			font-size: 9px;
-		}
-
-		.time-box {
-			.time {
-				font-size: 18px;
-			}
-
-			.date {
-				font-size: 9px;
-			}
-		}
-
-		.more-btn {
-			padding: 5px 10px;
-			font-size: 10px;
 		}
 	}
 
 	.screen-body {
-		padding: 5px 8px;
-		height: calc(100vh - 50px);
-		gap: 5px;
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: auto auto 1fr;
-	}
 
-	.left-column {
-		grid-column: 1;
-		grid-row: 1 / 3;
-	}
+		.left-column {
+			grid-column: 1;
+			grid-row: 1 / 3;
+		}
 
-	.center-column {
-		grid-column: 2;
-		grid-row: 1 / 3;
-	}
+		.center-column {
+			grid-column: 2;
+			grid-row: 1 / 3;
+		}
 
-	.right-column {
-		grid-column: 1 / -1;
-		grid-row: 3;
-		flex-direction: row;
-		gap: 8px;
+		.right-column {
+			grid-column: 1 / -1;
+			grid-row: 3;
+			flex-direction: row;
 
-		.panel-card {
-			flex: 1;
+			.panel-card {
+				flex: 1;
+			}
 		}
 	}
 
-	.center-top .stat-panel {
+	.top-stats {
 		grid-template-columns: repeat(2, 1fr);
 	}
 
-	.more-entrance-card {
-		flex: 1;
-		min-height: 80px;
-	}
-
-	.corner-decoration {
-		display: none;
+	.bottom-charts {
+		grid-template-columns: 1fr;
 	}
 }
 
 @media screen and (max-width: 768px) {
 	.screen-header {
-		height: 45px;
-		padding: 0 8px;
+		height: 55px;
+		padding: 0 15px;
 
-		.title-wrapper {
-			gap: 5px;
+		.header-center .title-box {
+			gap: 10px;
 
-			.title-decoration {
-				width: 25px;
-			}
-		}
-
-		.main-title {
-			font-size: 14px;
-			letter-spacing: 1px;
-		}
-
-		.subtitle {
-			display: none;
-		}
-
-		.time-box {
-			.time {
+			.main-title {
 				font-size: 16px;
+				letter-spacing: 2px;
 			}
 
-			.date {
-				font-size: 8px;
+			.title-deco {
+				display: none;
 			}
 		}
 
-		.more-btn {
-			padding: 4px 8px;
-			font-size: 9px;
-			border-radius: 15px;
+		.header-right {
+			gap: 10px;
 
-			.el-icon {
-				font-size: 12px;
+			.datetime-box .time-display {
+				.time-num {
+					font-size: 18px;
+					min-width: 26px;
+				}
+
+				.time-sep {
+					font-size: 16px;
+				}
+			}
+
+			.action-btn {
+				padding: 6px 12px;
+				font-size: 11px;
+
+				span {
+					display: none;
+				}
 			}
 		}
 	}
 
 	.screen-body {
-		padding: 4px 6px;
-		height: calc(100vh - 45px);
-		gap: 4px;
 		grid-template-columns: 1fr;
-		grid-template-rows: auto auto auto auto;
-	}
+		grid-template-rows: auto;
+		gap: 8px;
+		padding: 8px 10px;
 
-	.left-column {
-		grid-column: 1;
-		grid-row: 1;
-		flex-direction: row;
-		gap: 6px;
+		.left-column,
+		.center-column,
+		.right-column {
+			grid-column: 1;
+			grid-row: auto;
+		}
 
-		.panel-card {
-			flex: 1;
+		.right-column {
+			flex-direction: column;
 		}
 	}
 
-	.center-column {
-		grid-column: 1;
-		grid-row: 2;
-	}
-
-	.right-column {
-		grid-column: 1;
-		grid-row: 3;
-		flex-direction: column;
-	}
-
-	.center-top .stat-panel {
+	.top-stats {
 		grid-template-columns: repeat(2, 1fr);
-		gap: 4px;
+		gap: 8px;
 
-		.stat-item {
-			padding: 6px;
-			gap: 6px;
+		.stat-card {
+			padding: 10px;
 
 			.stat-icon {
-				width: 30px;
-				height: 30px;
-
-				.el-icon {
-					font-size: 16px;
-				}
+				width: 32px;
+				height: 32px;
+				font-size: 14px;
+				margin-bottom: 6px;
 			}
 
-			.stat-content {
-				.stat-value {
-					font-size: 14px;
-				}
-
+			.stat-info {
 				.stat-label {
-					font-size: 8px;
+					font-size: 10px;
+				}
+
+				.stat-value .value-num {
+					font-size: 18px;
+				}
+
+				.stat-trend {
+					font-size: 10px;
 				}
 			}
 
-			.stat-trend {
-				font-size: 8px;
-				padding: 2px 4px;
+			.stat-decoration {
+				display: none;
 			}
 		}
 	}
 
 	.panel-card {
-		.card-header {
-			padding: 5px 6px;
+		.panel-header {
+			padding: 8px 10px;
 
-			.header-icon {
-				width: 2px;
-				height: 10px;
+			.panel-title {
+				font-size: 12px;
 			}
 
-			.card-title {
-				font-size: 10px;
+			.header-icon-box {
+				width: 22px;
+				height: 22px;
+				font-size: 11px;
 			}
 		}
 
-		.card-body {
-			padding: 5px;
+		.panel-body {
+			padding: 10px;
 		}
 	}
 
-	.device-status-chart {
-		flex-direction: row;
-		gap: 10px;
+	.equipment-overview .panel-body {
+		flex-direction: column;
+		align-items: center;
 
-		.chart-container {
-			width: 70px;
-			height: 70px;
+		.equipment-chart-box {
+			width: 120px;
+			height: 120px;
+
+			.chart-center-info .center-num {
+				font-size: 22px;
+			}
 		}
 
-		.chart-center .center-value {
-			font-size: 14px;
+		.equipment-legend {
+			width: 100%;
 		}
 	}
 
-	.status-legend {
-		flex-direction: row;
-		flex-wrap: wrap;
-		gap: 4px;
-
-		.legend-item {
-			padding: 3px 6px;
-
-			.legend-label {
-				font-size: 9px;
-			}
-
-			.legend-value {
-				font-size: 10px;
-			}
-		}
-	}
-
-	.workorder-grid {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 4px;
+	.workorder-stats .workorder-grid {
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
 
 		.workorder-item {
-			padding: 4px;
-			flex-direction: column;
-			gap: 2px;
-			align-items: center;
-			text-align: center;
+			padding: 10px;
 
-			.workorder-icon {
-				width: 24px;
-				height: 24px;
-
-				.el-icon {
-					font-size: 12px;
-				}
+			.item-icon {
+				width: 32px;
+				height: 32px;
+				font-size: 14px;
 			}
 
-			.workorder-info {
-				.workorder-value {
-					font-size: 12px;
-				}
-
-				.workorder-label {
-					font-size: 7px;
-				}
+			.item-content .item-value {
+				font-size: 18px;
 			}
 		}
 	}
 
-	.cost-progress-list {
-		gap: 4px;
+	.center-map-panel {
+		min-height: 250px;
+	}
 
-		.cost-progress-item {
-			padding: 4px;
+	.bottom-charts {
+		.cost-chart-card,
+		.material-chart-card {
+			.cost-chart,
+			.material-chart {
+				height: 100px;
+			}
+		}
+	}
+}
 
-			.cost-header {
-				margin-bottom: 3px;
+@media screen and (max-width: 480px) {
+	.screen-header {
+		.header-center .title-box .main-title {
+			font-size: 14px;
+			letter-spacing: 1px;
+		}
 
-				.cost-name {
+		.header-right {
+			.datetime-box .time-display {
+				.time-num {
+					font-size: 16px;
+					min-width: 22px;
+				}
+			}
+
+			.action-btn {
+				display: none;
+			}
+		}
+	}
+
+	.top-stats {
+		grid-template-columns: 1fr 1fr;
+		gap: 6px;
+
+		.stat-card {
+			padding: 8px;
+
+			.stat-icon {
+				width: 28px;
+				height: 28px;
+				font-size: 12px;
+				margin-bottom: 4px;
+			}
+
+			.stat-info {
+				.stat-label {
 					font-size: 9px;
 				}
 
-				.cost-total {
-					font-size: 8px;
-				}
-			}
+				.stat-value {
+					.value-num {
+						font-size: 16px;
+					}
 
-			.progress-bar-wrapper {
-				gap: 5px;
-
-				.progress-track {
-					height: 4px;
-				}
-
-				.progress-percent {
-					font-size: 8px;
-					min-width: 30px;
+					.value-unit {
+						font-size: 10px;
+					}
 				}
 			}
 		}
 	}
 
-	.center-map .map-card .map-chart {
-		min-height: 120px;
+	.panel-card {
+		.panel-header {
+			padding: 6px 8px;
+
+			.panel-title {
+				font-size: 11px;
+			}
+		}
+
+		.panel-body {
+			padding: 8px;
+		}
+	}
+
+	.workorder-stats .workorder-grid {
+		.workorder-item {
+			padding: 8px;
+
+			.item-icon {
+				width: 28px;
+				height: 28px;
+				font-size: 12px;
+			}
+
+			.item-content .item-value {
+				font-size: 16px;
+			}
+		}
+	}
+
+	.inspection-stats .inspection-grid .inspection-row .inspection-item {
+		padding: 8px;
+
+		.item-value {
+			font-size: 16px;
+		}
+	}
+
+	.company-stats .company-list .company-item {
+		padding: 8px;
+
+		.company-rank {
+			width: 20px;
+			height: 20px;
+			font-size: 10px;
+		}
+
+		.company-info {
+			.company-name {
+				font-size: 11px;
+			}
+
+			.company-data span {
+				font-size: 9px;
+			}
+		}
+
+		.company-progress {
+			width: 80px;
+
+			.progress-value {
+				font-size: 10px;
+			}
+		}
+	}
+
+	.warning-panel .warning-list .warning-item {
+		padding: 8px;
+
+		.warning-icon {
+			width: 24px;
+			height: 24px;
+			font-size: 12px;
+		}
+
+		.warning-content {
+			.warning-name {
+				font-size: 11px;
+			}
+
+			.warning-info span {
+				font-size: 9px;
+			}
+		}
+
+		.warning-level {
+			font-size: 9px;
+			padding: 2px 6px;
+		}
+	}
+
+	.realtime-panel .realtime-list .realtime-item {
+		padding: 6px 8px;
+
+		.item-time {
+			font-size: 10px;
+			min-width: 35px;
+		}
+
+		.item-content {
+			.item-title {
+				font-size: 10px;
+			}
+
+			.item-desc {
+				font-size: 9px;
+			}
+		}
 	}
 }
 </style>

@@ -3,87 +3,52 @@
 		<div class="screen-body">
 			<div class="left-column">
 				<div class="panel-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">维修工单统计</h3>
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Tickets /></el-icon>
+						</div>
+						<h3 class="panel-title">工单统计概览</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
-						<div class="workorder-header">
-							<div class="workorder-total">
-								<div class="total-icon">
-									<el-icon :size="32"><Document /></el-icon>
+					<div class="panel-body">
+						<div class="order-summary">
+							<div class="summary-item" v-for="item in orderSummary" :key="item.label">
+								<div class="summary-icon" :style="{ background: item.gradient }">
+									<el-icon :size="20"><component :is="item.icon" /></el-icon>
 								</div>
-								<div class="total-info">
-									<div class="total-value">240</div>
-									<div class="total-label">工单总数</div>
-								</div>
-							</div>
-							<div class="workorder-status">
-								<div class="status-item">
-									<div class="status-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
-										<el-icon :size="20"><Clock /></el-icon>
-									</div>
-									<div class="status-info">
-										<div class="status-value">0</div>
-										<div class="status-label">待处理</div>
-									</div>
-								</div>
-								<div class="status-item">
-									<div class="status-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
-										<el-icon :size="20"><Operation /></el-icon>
-									</div>
-									<div class="status-info">
-										<div class="status-value">234</div>
-										<div class="status-label">进行中</div>
-									</div>
-								</div>
-								<div class="status-item">
-									<div class="status-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
-										<el-icon :size="20"><CircleCheck /></el-icon>
-									</div>
-									<div class="status-info">
-										<div class="status-value">3</div>
-										<div class="status-label">已完成</div>
-									</div>
+								<div class="summary-info">
+									<div class="summary-value">{{ item.value }}</div>
+									<div class="summary-label">{{ item.label }}</div>
 								</div>
 							</div>
 						</div>
-						<div class="workorder-list">
-							<div class="workorder-list-item" v-for="item in workorderList" :key="item.name">
-								<div class="workorder-name">{{ item.name }}</div>
-								<div class="workorder-counts">
-									<span>工单数: {{ item.total }}</span>
-									<span>待处理: {{ item.pending }}</span>
-									<span>进行中: {{ item.ongoing }}</span>
-									<span>已完成: {{ item.completed }}</span>
-								</div>
-							</div>
-						</div>
+						<div ref="orderPieChartRef" class="order-pie-chart"></div>
 					</div>
 				</div>
 
 				<div class="panel-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">站队月度人均工时排名</h3>
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Clock /></el-icon>
+						</div>
+						<h3 class="panel-title">待处理工单</h3>
 						<div class="header-line"></div>
+						<div class="header-badge warning">
+							<span class="badge-num">{{ pendingOrders.length }}</span>
+							<span class="badge-label">条</span>
+						</div>
 					</div>
-					<div class="card-body">
-						<div class="rank-list">
-							<div class="rank-item" v-for="(item, index) in workHourRank" :key="item.center">
-								<div class="rank-badge" :class="'rank-' + (index + 1)">
-									<span class="rank-number">{{ index + 1 }}</span>
+					<div class="panel-body">
+						<div class="pending-list">
+							<div class="pending-item" v-for="order in pendingOrders" :key="order.id" :class="order.priority">
+								<div class="order-header">
+									<span class="order-id">{{ order.id }}</span>
+									<span class="order-priority" :class="order.priority">{{ order.priorityText }}</span>
 								</div>
-								<div class="rank-content">
-									<div class="rank-name">{{ item.center }}</div>
-									<div class="rank-detail">
-										<span>维修中心: {{ item.personnel }}人</span>
-										<span>总工时: {{ item.totalHours }}h</span>
-									</div>
-									<div class="rank-avg">
-										<span>人均工时: {{ item.avgHours }}h/人/月</span>
-									</div>
+								<div class="order-title">{{ order.title }}</div>
+								<div class="order-meta">
+									<span class="order-team">{{ order.team }}</span>
+									<span class="order-time">{{ order.time }}</span>
 								</div>
 							</div>
 						</div>
@@ -92,157 +57,117 @@
 			</div>
 
 			<div class="center-column">
-				<div class="panel-card center-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">中心维修工单统计</h3>
-						<div class="header-line"></div>
-					</div>
-					<div class="card-body">
-						<div class="center-workorder-wrapper">
-							<div class="workorder-chart-container">
-								<div ref="workorderChartRef" class="workorder-chart"></div>
-								<div class="chart-center-info">
-									<div class="center-value">{{ workorderStats.total }}</div>
-									<div class="center-label">维保事项总数</div>
-								</div>
-							</div>
-							<div class="workorder-side-stats">
-								<div class="side-stat left">
-									<div class="stat-icon pending">
-										<el-icon :size="24"><Clock /></el-icon>
-									</div>
-									<div class="stat-info">
-										<div class="stat-value">{{ workorderStats.pending }}</div>
-										<div class="stat-label">待处理</div>
-									</div>
-								</div>
-								<div class="side-stat right">
-									<div class="stat-icon ongoing">
-										<el-icon :size="24"><Operation /></el-icon>
-									</div>
-									<div class="stat-info">
-										<div class="stat-value">{{ workorderStats.ongoing }}</div>
-										<div class="stat-label">进行中</div>
-									</div>
-								</div>
-							</div>
+				<div class="panel-card trend-card">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><TrendCharts /></el-icon>
 						</div>
+						<h3 class="panel-title">工单趋势分析</h3>
+						<div class="header-line"></div>
+						<div class="time-tabs">
+							<span class="time-tab" :class="{ active: timeRange === 'week' }" @click="timeRange = 'week'">周</span>
+							<span class="time-tab" :class="{ active: timeRange === 'month' }" @click="timeRange = 'month'">月</span>
+							<span class="time-tab" :class="{ active: timeRange === 'year' }" @click="timeRange = 'year'">年</span>
+						</div>
+					</div>
+					<div class="panel-body">
+						<div ref="trendChartRef" class="trend-chart"></div>
 					</div>
 				</div>
 
 				<div class="panel-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">包机组工时排名</h3>
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><DataAnalysis /></el-icon>
+						</div>
+						<h3 class="panel-title">站队工单完成情况</h3>
 						<div class="header-line"></div>
-						<div class="time-tabs">
-							<span class="time-tab" :class="{ active: timeType === 'day' }" @click="timeType = 'day'">日</span>
-							<span class="time-tab" :class="{ active: timeType === 'month' }" @click="timeType = 'month'">月</span>
-							<span class="time-tab" :class="{ active: timeType === 'year' }" @click="timeType = 'year'">年</span>
-						</div>
 					</div>
-					<div class="card-body">
-						<div class="team-tabs">
-							<span
-								class="team-tab"
-								v-for="team in teams"
-								:key="team"
-								:class="{ active: activeTeam === team }"
-								@click="activeTeam = team"
-							>
-								{{ team }}
-							</span>
-						</div>
-						<div class="team-hour-list">
-							<div class="team-hour-item" v-for="item in teamHourList" :key="item.name">
-								<div class="team-hour-name">{{ item.name }}</div>
-								<div class="team-hour-detail">
-									<span>总工时: {{ item.totalHours }}h</span>
-									<span>巡检人数: {{ item.personnel }}人</span>
-									<span>设备总数: {{ item.equipment }}台套</span>
-								</div>
-							</div>
-						</div>
+					<div class="panel-body">
+						<div ref="teamBarChartRef" class="team-bar-chart"></div>
 					</div>
 				</div>
 			</div>
 
 			<div class="right-column">
 				<div class="panel-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">站队月度计划兑现率</h3>
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Timer /></el-icon>
+						</div>
+						<h3 class="panel-title">响应时效统计</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
-						<div class="fulfill-list">
-							<div class="fulfill-item" v-for="item in fulfillList" :key="item.name">
-								<div class="fulfill-name">{{ item.name }}</div>
-								<div class="fulfill-bar">
-									<div class="fulfill-track">
-										<div class="fulfill-fill" :style="{ width: item.rate + '%' }"></div>
+					<div class="panel-body">
+						<div class="response-metrics">
+							<div class="response-item" v-for="item in responseMetrics" :key="item.label">
+								<div class="response-gauge">
+									<div
+										ref="gaugeChartRefs"
+										class="gauge-chart"
+										v-for="(_, index) in 4"
+										:key="index"
+										v-show="gaugeIndex === index"
+									></div>
+								</div>
+								<div class="response-info">
+									<div class="response-value">
+										{{ item.value }}
+										<span class="unit">{{ item.unit }}</span>
 									</div>
-									<span class="fulfill-rate">{{ item.rate }}%</span>
+									<div class="response-label">{{ item.label }}</div>
+									<div class="response-change" :class="item.change > 0 ? 'up' : 'down'">
+										<el-icon><component :is="item.change > 0 ? 'CaretTop' : 'CaretBottom'" /></el-icon>
+										{{ Math.abs(item.change) }}% 同比
+									</div>
 								</div>
 							</div>
+						</div>
+						<div class="response-nav">
+							<span
+								class="nav-dot"
+								v-for="(_, index) in 4"
+								:key="index"
+								:class="{ active: gaugeIndex === index }"
+								@click="gaugeIndex = index"
+							></span>
 						</div>
 					</div>
 				</div>
 
 				<div class="panel-card">
-					<div class="card-header">
-						<div class="header-icon"></div>
-						<h3 class="card-title">站队月度计划进展统计</h3>
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Tools /></el-icon>
+						</div>
+						<h3 class="panel-title">维修类型分布</h3>
 						<div class="header-line"></div>
 					</div>
-					<div class="card-body">
-						<div class="plan-stats">
-							<div class="plan-stat-item">
-								<div class="plan-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
-									<el-icon :size="28"><Document /></el-icon>
-								</div>
-								<div class="plan-info">
-									<div class="plan-value">169423</div>
-									<div class="plan-label">年度计划总数</div>
-								</div>
-							</div>
-							<div class="plan-stat-item">
-								<div class="plan-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
-									<el-icon :size="28"><Operation /></el-icon>
-								</div>
-								<div class="plan-info">
-									<div class="plan-value">1291</div>
-									<div class="plan-label">进行中</div>
-								</div>
-							</div>
-							<div class="plan-stat-item">
-								<div class="plan-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
-									<el-icon :size="28"><CircleCheck /></el-icon>
-								</div>
-								<div class="plan-info">
-									<div class="plan-value">168107</div>
-									<div class="plan-label">按期完成</div>
-								</div>
-							</div>
-							<div class="plan-stat-item">
-								<div class="plan-icon" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)">
-									<el-icon :size="28"><Clock /></el-icon>
-								</div>
-								<div class="plan-info">
-									<div class="plan-value">25</div>
-									<div class="plan-label">已逾期</div>
-								</div>
-							</div>
+					<div class="panel-body">
+						<div ref="typeChartRef" class="type-chart"></div>
+					</div>
+				</div>
+
+				<div class="panel-card">
+					<div class="panel-header">
+						<div class="header-icon-box">
+							<el-icon><Rank /></el-icon>
 						</div>
-						<div class="plan-list">
-							<div class="plan-list-item" v-for="item in planList" :key="item.name">
-								<div class="plan-list-name">{{ item.name }}</div>
-								<div class="plan-list-counts">
-									<span>年度计划: {{ item.yearly }}</span>
-									<span>进行中: {{ item.ongoing }}</span>
-									<span>按期完成: {{ item.completed }}</span>
-									<span>已逾期: {{ item.overdue }}</span>
+						<h3 class="panel-title">维修人员排行榜</h3>
+						<div class="header-line"></div>
+					</div>
+					<div class="panel-body">
+						<div class="rank-list">
+							<div class="rank-item" v-for="(person, index) in rankList" :key="person.name">
+								<div class="rank-num" :class="'rank-' + (index + 1)">{{ index + 1 }}</div>
+								<div class="rank-avatar">{{ person.name.charAt(0) }}</div>
+								<div class="rank-info">
+									<div class="rank-name">{{ person.name }}</div>
+									<div class="rank-team">{{ person.team }}</div>
+								</div>
+								<div class="rank-score">
+									<span class="score-value">{{ person.score }}</span>
+									<span class="score-label">工单</span>
 								</div>
 							</div>
 						</div>
@@ -256,81 +181,99 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import {
-	Document,
+	Tickets,
 	Clock,
-	Operation,
+	TrendCharts,
+	DataAnalysis,
+	Timer,
+	Tools,
+	Rank,
+	CaretTop,
+	CaretBottom,
+	DocumentChecked,
 	CircleCheck,
+	Loading,
+	Warning,
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 
-const timeType = ref('month')
-const activeTeam = ref('南区维修中心')
-const workorderChartRef = ref(null)
-let workorderChart = null
+const timeRange = ref('month')
+const gaugeIndex = ref(0)
+const orderPieChartRef = ref(null)
+const trendChartRef = ref(null)
+const teamBarChartRef = ref(null)
+const typeChartRef = ref(null)
+const gaugeChartRefs = ref([])
+let orderPieChart = null
+let trendChart = null
+let teamBarChart = null
+let typeChart = null
+let gaugeCharts = []
 
-const teams = ref(['南区维修中心', '东区维修中心', '西区维修中心', '岚南维修中心', '岚中维修中心'])
-
-const workorderStats = ref({
-	total: 153537,
-	pending: 544,
-	ongoing: 3991,
-})
-
-const workorderList = ref([
-	{ name: '维修中心', total: 59, pending: 0, ongoing: 59, completed: 0 },
-	{ name: '东区维修中心', total: 62, pending: 0, ongoing: 62, completed: 0 },
-	{ name: '西区维修中心', total: 43, pending: 0, ongoing: 42, completed: 1 },
-	{ name: '南区维修中心', total: 42, pending: 0, ongoing: 41, completed: 1 },
-	{ name: '岚南维修中心', total: 40, pending: 0, ongoing: 40, completed: 0 },
+const orderSummary = ref([
+	{ label: '本月工单', value: '1,256', icon: 'Tickets', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+	{ label: '已完成', value: '1,089', icon: 'CircleCheck', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+	{ label: '处理中', value: '128', icon: 'Loading', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+	{ label: '待处理', value: '39', icon: 'Warning', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
 ])
 
-const workHourRank = ref([
-	{ center: '东区维修中心', personnel: '59331.52', totalHours: '59331.52', avgHours: '3318.63' },
-	{ center: '岚南维修中心', personnel: '28693.36', totalHours: '28693.36', avgHours: '1.50' },
-	{ center: '西区维修中心', personnel: '27083.43', totalHours: '27083.43', avgHours: '0.93' },
-	{ center: '南区维修中心', personnel: '27835.49', totalHours: '27835.49', avgHours: '0.00' },
-	{ center: '岚中维修中心', personnel: '6931.32', totalHours: '6931.32', avgHours: '0.00' },
+const pendingOrders = ref([
+	{
+		id: 'WO-2024-1256',
+		title: '门机液压系统故障维修',
+		team: '南区维修中心',
+		time: '2小时前',
+		priority: 'critical',
+		priorityText: '紧急',
+	},
+	{ id: 'WO-2024-1255', title: '铲车发动机定期保养', team: '东区维修中心', time: '3小时前', priority: 'high', priorityText: '高优' },
+	{ id: 'WO-2024-1254', title: '传送带轴承更换', team: '岚南维修中心', time: '5小时前', priority: 'normal', priorityText: '普通' },
+	{ id: 'WO-2024-1253', title: '电机控制系统检修', team: '西区维修中心', time: '昨天', priority: 'normal', priorityText: '普通' },
 ])
 
-const teamHourList = ref([
-	{ name: '第一包机组', totalHours: '1.37', personnel: '4', equipment: '111' },
-	{ name: '第六包机组', totalHours: '0.35', personnel: '0', equipment: '59' },
-	{ name: '第五包机组', totalHours: '0.45', personnel: '0', equipment: '258' },
+const responseMetrics = ref([
+	{ label: '平均响应时间', value: '2.5', unit: 'h', change: -15.3 },
+	{ label: '平均完成时间', value: '8.2', unit: 'h', change: -8.5 },
+	{ label: '准时完成率', value: '94.5', unit: '%', change: 5.2 },
+	{ label: '客户满意度', value: '4.8', unit: '分', change: 3.1 },
 ])
 
-const fulfillList = ref([
-	{ name: '西区维修中心', rate: 99.51 },
-	{ name: '东区维修中心', rate: 99.04 },
-	{ name: '岚南维修中心', rate: 99.79 },
-	{ name: '南区维修中心', rate: 99.34 },
-	{ name: '岚中维修中心', rate: 53.13 },
+const rankList = ref([
+	{ name: '张伟', team: '南区维修中心', score: 156 },
+	{ name: '李强', team: '东区维修中心', score: 142 },
+	{ name: '王磊', team: '岚南维修中心', score: 138 },
+	{ name: '刘洋', team: '西区维修中心', score: 125 },
+	{ name: '陈明', team: '岚中维修中心', score: 118 },
 ])
 
-const planList = ref([
-	{ name: '东区维修中心', yearly: '57284', ongoing: '528', completed: '56532', overdue: '1' },
-	{ name: '西区维修中心', yearly: '49503', ongoing: '477', completed: '49026', overdue: '6' },
-	{ name: '岚南维修中心', yearly: '32650', ongoing: '176', completed: '32471', overdue: '1' },
-	{ name: '南区维修中心', yearly: '27051', ongoing: '110', completed: '27035', overdue: '20' },
-	{ name: '岚中维修中心', yearly: '2935', ongoing: '0', completed: '2934', overdue: '0' },
-])
-
-const initWorkorderChart = () => {
-	if (!workorderChartRef.value) return
-	workorderChart = echarts.init(workorderChartRef.value)
-
+const initOrderPieChart = () => {
+	if (!orderPieChartRef.value) return
+	orderPieChart = echarts.init(orderPieChartRef.value)
 	const option = {
+		tooltip: {
+			trigger: 'item',
+			backgroundColor: 'rgba(0, 0, 0, 0.8)',
+			borderColor: '#00d4ff',
+			textStyle: { color: '#fff' },
+		},
+		legend: {
+			orient: 'vertical',
+			right: 10,
+			top: 'center',
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+		},
 		series: [
 			{
 				type: 'pie',
-				radius: ['55%', '75%'],
-				center: ['50%', '50%'],
+				radius: ['40%', '65%'],
+				center: ['35%', '50%'],
 				avoidLabelOverlap: false,
 				label: { show: false },
 				labelLine: { show: false },
 				data: [
-					{ value: workorderStats.value.pending, name: '待处理', itemStyle: { color: '#f59e0b' } },
-					{ value: workorderStats.value.ongoing, name: '进行中', itemStyle: { color: '#3b82f6' } },
-					{ value: workorderStats.value.total - workorderStats.value.pending - workorderStats.value.ongoing, name: '已完成', itemStyle: { color: '#10b981' } },
+					{ value: 1089, name: '已完成', itemStyle: { color: '#10b981' } },
+					{ value: 128, name: '处理中', itemStyle: { color: '#3b82f6' } },
+					{ value: 39, name: '待处理', itemStyle: { color: '#f59e0b' } },
 				],
 				emphasis: {
 					itemStyle: {
@@ -341,28 +284,303 @@ const initWorkorderChart = () => {
 			},
 		],
 	}
-	workorderChart.setOption(option)
+	orderPieChart.setOption(option)
+}
+
+const initTrendChart = () => {
+	if (!trendChartRef.value) return
+	trendChart = echarts.init(trendChartRef.value)
+	const option = {
+		tooltip: {
+			trigger: 'axis',
+			backgroundColor: 'rgba(0, 0, 0, 0.8)',
+			borderColor: '#00d4ff',
+			textStyle: { color: '#fff' },
+		},
+		legend: {
+			data: ['新增工单', '完成工单', '累计工单'],
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			top: 0,
+		},
+		grid: {
+			left: '3%',
+			right: '4%',
+			bottom: '3%',
+			top: '18%',
+			containLabel: true,
+		},
+		xAxis: {
+			type: 'category',
+			boundaryGap: false,
+			data: ['1月', '2月', '3月', '4月', '5月', '6月'],
+			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+		},
+		yAxis: [
+			{
+				type: 'value',
+				name: '数量',
+				axisLine: { show: false },
+				axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+				splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+			},
+			{
+				type: 'value',
+				name: '累计',
+				axisLine: { show: false },
+				axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+				splitLine: { show: false },
+			},
+		],
+		series: [
+			{
+				name: '新增工单',
+				type: 'line',
+				smooth: true,
+				data: [180, 195, 210, 225, 240, 256],
+				lineStyle: { color: '#00d4ff', width: 2 },
+				areaStyle: {
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+						{ offset: 0, color: 'rgba(0, 212, 255, 0.3)' },
+						{ offset: 1, color: 'rgba(0, 212, 255, 0)' },
+					]),
+				},
+				itemStyle: { color: '#00d4ff' },
+			},
+			{
+				name: '完成工单',
+				type: 'line',
+				smooth: true,
+				data: [165, 180, 195, 210, 225, 238],
+				lineStyle: { color: '#10b981', width: 2 },
+				areaStyle: {
+					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+						{ offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
+						{ offset: 1, color: 'rgba(16, 185, 129, 0)' },
+					]),
+				},
+				itemStyle: { color: '#10b981' },
+			},
+			{
+				name: '累计工单',
+				type: 'line',
+				smooth: true,
+				yAxisIndex: 1,
+				data: [1200, 1395, 1605, 1830, 2070, 2326],
+				lineStyle: { color: '#f59e0b', width: 2, type: 'dashed' },
+				itemStyle: { color: '#f59e0b' },
+			},
+		],
+	}
+	trendChart.setOption(option)
+}
+
+const initTeamBarChart = () => {
+	if (!teamBarChartRef.value) return
+	teamBarChart = echarts.init(teamBarChartRef.value)
+	const option = {
+		tooltip: {
+			trigger: 'axis',
+			backgroundColor: 'rgba(0, 0, 0, 0.8)',
+			borderColor: '#00d4ff',
+			textStyle: { color: '#fff' },
+			axisPointer: { type: 'shadow' },
+		},
+		legend: {
+			data: ['已完成', '处理中', '待处理'],
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			top: 0,
+		},
+		grid: {
+			left: '3%',
+			right: '4%',
+			bottom: '3%',
+			top: '18%',
+			containLabel: true,
+		},
+		xAxis: {
+			type: 'category',
+			data: ['南区', '东区', '岚南', '西区', '岚中'],
+			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+		},
+		yAxis: {
+			type: 'value',
+			axisLine: { show: false },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+		},
+		series: [
+			{
+				name: '已完成',
+				type: 'bar',
+				stack: 'total',
+				data: [245, 228, 212, 198, 186],
+				itemStyle: { color: '#10b981', borderRadius: [0, 0, 0, 0] },
+			},
+			{
+				name: '处理中',
+				type: 'bar',
+				stack: 'total',
+				data: [28, 32, 25, 22, 21],
+				itemStyle: { color: '#3b82f6', borderRadius: [0, 0, 0, 0] },
+			},
+			{
+				name: '待处理',
+				type: 'bar',
+				stack: 'total',
+				data: [8, 10, 6, 9, 6],
+				itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] },
+			},
+		],
+	}
+	teamBarChart.setOption(option)
+}
+
+const initTypeChart = () => {
+	if (!typeChartRef.value) return
+	typeChart = echarts.init(typeChartRef.value)
+	const option = {
+		tooltip: {
+			trigger: 'item',
+			backgroundColor: 'rgba(0, 0, 0, 0.8)',
+			borderColor: '#00d4ff',
+			textStyle: { color: '#fff' },
+		},
+		series: [
+			{
+				type: 'pie',
+				radius: ['35%', '55%'],
+				center: ['50%', '50%'],
+				roseType: 'radius',
+				itemStyle: {
+					borderRadius: 5,
+					borderColor: 'rgba(0, 20, 40, 0.8)',
+					borderWidth: 2,
+				},
+				label: {
+					show: true,
+					color: 'rgba(255, 255, 255, 0.7)',
+					fontSize: 10,
+				},
+				labelLine: {
+					lineStyle: { color: 'rgba(255, 255, 255, 0.3)' },
+				},
+				data: [
+					{ value: 420, name: '机械维修', itemStyle: { color: '#667eea' } },
+					{ value: 310, name: '电气维修', itemStyle: { color: '#4facfe' } },
+					{ value: 250, name: '液压维修', itemStyle: { color: '#43e97b' } },
+					{ value: 180, name: '定期保养', itemStyle: { color: '#fa709a' } },
+					{ value: 96, name: '其他', itemStyle: { color: '#f59e0b' } },
+				],
+			},
+		],
+	}
+	typeChart.setOption(option)
+}
+
+const initGaugeCharts = () => {
+	gaugeCharts = gaugeChartRefs.value.map((el, index) => {
+		if (!el) return null
+		const chart = echarts.init(el)
+		const metric = responseMetrics.value[index]
+		const colors = ['#00d4ff', '#10b981', '#f59e0b', '#667eea']
+		const maxValues = [10, 24, 100, 5]
+		const option = {
+			series: [
+				{
+					type: 'gauge',
+					startAngle: 200,
+					endAngle: -20,
+					min: 0,
+					max: maxValues[index],
+					splitNumber: 5,
+					itemStyle: {
+						color: colors[index],
+					},
+					progress: {
+						show: true,
+						width: 12,
+					},
+					pointer: {
+						show: false,
+					},
+					axisLine: {
+						lineStyle: {
+							width: 12,
+							color: [[1, 'rgba(255, 255, 255, 0.1)']],
+						},
+					},
+					axisTick: {
+						show: false,
+					},
+					splitLine: {
+						show: false,
+					},
+					axisLabel: {
+						show: false,
+					},
+					anchor: {
+						show: false,
+					},
+					title: {
+						show: false,
+					},
+					detail: {
+						show: false,
+					},
+					data: [
+						{
+							value: metric.value,
+						},
+					],
+				},
+			],
+		}
+		chart.setOption(option)
+		return chart
+	})
 }
 
 const handleResize = () => {
-	workorderChart?.resize()
+	orderPieChart?.resize()
+	trendChart?.resize()
+	teamBarChart?.resize()
+	typeChart?.resize()
+	gaugeCharts.forEach(chart => chart?.resize())
 }
 
 onMounted(() => {
 	setTimeout(() => {
-		initWorkorderChart()
+		initOrderPieChart()
+		initTrendChart()
+		initTeamBarChart()
+		initTypeChart()
+		initGaugeCharts()
 	}, 100)
 	window.addEventListener('resize', handleResize)
 })
 
 onBeforeUnmount(() => {
 	window.removeEventListener('resize', handleResize)
-	workorderChart?.dispose()
+	orderPieChart?.dispose()
+	trendChart?.dispose()
+	teamBarChart?.dispose()
+	typeChart?.dispose()
+	gaugeCharts.forEach(chart => chart?.dispose())
 })
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
+
+$primary-color: #00d4ff;
+$primary-dark: #0096ff;
+$bg-card: rgba(0, 20, 40, 0.6);
+$border-color: rgba(0, 212, 255, 0.2);
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+$text-muted: rgba(255, 255, 255, 0.5);
 
 .maintenance-panel {
 	width: 100%;
@@ -370,35 +588,39 @@ onBeforeUnmount(() => {
 }
 
 .screen-body {
-	padding: 15px 20px;
+	padding: 12px 15px;
 	height: 100%;
 	display: grid;
 	grid-template-columns: 1fr 1.4fr 1fr;
-	gap: 15px;
+	gap: 12px;
+	box-sizing: border-box;
 }
 
 .left-column,
 .right-column {
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 12px;
+	min-height: 0;
 }
 
 .center-column {
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 12px;
+	min-height: 0;
 }
 
 .panel-card {
-	background: linear-gradient(135deg, rgba(0, 150, 255, 0.08) 0%, rgba(0, 50, 100, 0.08) 100%);
-	border: 1px solid rgba(0, 212, 255, 0.2);
-	border-radius: 8px;
+	background: $bg-card;
+	border: 1px solid $border-color;
+	border-radius: 10px;
 	overflow: hidden;
 	backdrop-filter: blur(10px);
 	display: flex;
 	flex-direction: column;
 	flex: 1;
+	min-height: 0;
 	position: relative;
 
 	&::before {
@@ -408,509 +630,130 @@ onBeforeUnmount(() => {
 		left: 0;
 		right: 0;
 		height: 2px;
-		background: linear-gradient(90deg, transparent, #00d4ff, #0096ff, transparent);
+		background: linear-gradient(90deg, transparent, $primary-color, $primary-dark, transparent);
 	}
 
-	.card-header {
-		padding: 12px 15px;
-		background: linear-gradient(90deg, rgba(0, 150, 255, 0.1), transparent);
-		border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+	.panel-header {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
+		padding: 10px 12px;
+		background: linear-gradient(90deg, rgba(0, 212, 255, 0.08), transparent);
+		border-bottom: 1px solid $border-color;
+		flex-shrink: 0;
 
-		.header-icon {
-			width: 4px;
-			height: 16px;
-			background: linear-gradient(180deg, #00d4ff, #0096ff);
-			border-radius: 2px;
+		.header-icon-box {
+			width: 24px;
+			height: 24px;
+			background: linear-gradient(135deg, $primary-color, $primary-dark);
+			border-radius: 5px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 12px;
 		}
 
-		.card-title {
-			flex: 1;
-			font-size: 14px;
+		.panel-title {
+			font-size: 13px;
 			font-weight: 600;
-			color: #00d4ff;
-			margin: 0;
+			color: $text-primary;
 			letter-spacing: 1px;
 		}
 
 		.header-line {
 			flex: 1;
 			height: 1px;
-			background: linear-gradient(90deg, rgba(0, 212, 255, 0.3), transparent);
+			background: linear-gradient(90deg, $border-color, transparent);
 		}
 
 		.time-tabs {
 			display: flex;
-			gap: 5px;
+			gap: 4px;
 
 			.time-tab {
 				padding: 3px 10px;
-				font-size: 11px;
-				color: rgba(255, 255, 255, 0.6);
+				font-size: 10px;
+				color: $text-muted;
 				cursor: pointer;
-				border-radius: 3px;
+				border-radius: 8px;
 				transition: all 0.3s ease;
 
 				&:hover {
-					color: #00d4ff;
+					color: $primary-color;
 				}
 
 				&.active {
 					background: rgba(0, 212, 255, 0.2);
-					color: #00d4ff;
+					color: $primary-color;
 				}
 			}
 		}
-	}
 
-	.card-body {
-		flex: 1;
-		padding: 15px;
-		overflow: hidden;
-		min-height: 0;
-	}
-}
-
-.workorder-header {
-	margin-bottom: 15px;
-
-	.workorder-total {
-		display: flex;
-		align-items: center;
-		gap: 15px;
-		padding: 15px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
-		margin-bottom: 12px;
-
-		.total-icon {
-			width: 55px;
-			height: 55px;
+		.header-badge {
+			display: flex;
+			align-items: baseline;
+			gap: 4px;
+			padding: 4px 10px;
 			border-radius: 12px;
-			background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 150, 255, 0.3));
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: #00d4ff;
-		}
+			background: rgba(0, 212, 255, 0.15);
 
-		.total-info {
-			.total-value {
-				font-size: 32px;
-				font-weight: 700;
-				color: #fff;
-				font-family: 'Orbitron', monospace;
+			&.warning {
+				background: rgba(245, 158, 11, 0.2);
 			}
 
-			.total-label {
-				font-size: 12px;
-				color: rgba(255, 255, 255, 0.6);
-			}
-		}
-	}
-
-	.workorder-status {
-		display: flex;
-		justify-content: space-around;
-		gap: 10px;
-
-		.status-item {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-			flex: 1;
-			padding: 10px;
-			background: rgba(255, 255, 255, 0.03);
-			border-radius: 6px;
-
-			.status-icon {
-				width: 40px;
-				height: 40px;
-				border-radius: 8px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				color: #fff;
-				flex-shrink: 0;
-			}
-
-			.status-info {
-				.status-value {
-					font-size: 20px;
-					font-weight: 700;
-					color: #fff;
-					font-family: 'Orbitron', monospace;
-				}
-
-				.status-label {
-					font-size: 11px;
-					color: rgba(255, 255, 255, 0.6);
-				}
-			}
-		}
-	}
-}
-
-.workorder-list {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-
-	.workorder-list-item {
-		padding: 10px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 6px;
-		transition: all 0.3s ease;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateX(3px);
-		}
-
-		.workorder-name {
-			color: #fff;
-			font-size: 12px;
-			font-weight: 500;
-			margin-bottom: 6px;
-		}
-
-		.workorder-counts {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-
-			span {
-				font-size: 10px;
-				color: rgba(255, 255, 255, 0.6);
-			}
-		}
-	}
-}
-
-.rank-list {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-
-	.rank-item {
-		display: flex;
-		align-items: center;
-		gap: 15px;
-		padding: 12px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
-		transition: all 0.3s ease;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateX(3px);
-		}
-
-		.rank-badge {
-			width: 60px;
-			height: 60px;
-			border-radius: 10px;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-
-			.rank-number {
-				font-size: 22px;
-				font-weight: 700;
-				color: #fff;
-				font-family: 'Orbitron', monospace;
-			}
-
-			&.rank-1 {
-				background: linear-gradient(135deg, #fbbf24, #f59e0b);
-				box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
-			}
-
-			&.rank-2 {
-				background: linear-gradient(135deg, #9ca3af, #6b7280);
-				box-shadow: 0 0 20px rgba(156, 163, 175, 0.4);
-			}
-
-			&.rank-3 {
-				background: linear-gradient(135deg, #cd7f32, #b5651d);
-				box-shadow: 0 0 20px rgba(205, 127, 50, 0.4);
-			}
-
-			&.rank-4,
-			&.rank-5 {
-				background: rgba(0, 212, 255, 0.2);
-				border: 1px solid rgba(0, 212, 255, 0.4);
-			}
-		}
-
-		.rank-content {
-			flex: 1;
-
-			.rank-name {
-				color: #fff;
-				font-size: 14px;
-				font-weight: 600;
-				margin-bottom: 6px;
-			}
-
-			.rank-detail {
-				display: flex;
-				gap: 15px;
-				margin-bottom: 4px;
-
-				span {
-					font-size: 11px;
-					color: rgba(255, 255, 255, 0.6);
-				}
-			}
-
-			.rank-avg {
-				span {
-					font-size: 12px;
-					color: #00d4ff;
-					font-weight: 500;
-				}
-			}
-		}
-	}
-}
-
-.center-card {
-	flex: 1.2;
-}
-
-.center-workorder-wrapper {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	position: relative;
-
-	.workorder-chart-container {
-		position: relative;
-		width: 280px;
-		height: 280px;
-
-		.workorder-chart {
-			width: 100%;
-			height: 100%;
-		}
-
-		.chart-center-info {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			text-align: center;
-
-			.center-value {
-				font-size: 36px;
-				font-weight: 700;
-				color: #00d4ff;
-				font-family: 'Orbitron', monospace;
-			}
-
-			.center-label {
-				font-size: 12px;
-				color: rgba(255, 255, 255, 0.7);
-				margin-top: 5px;
-			}
-		}
-	}
-
-	.workorder-side-stats {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
-
-		.side-stat {
-			position: absolute;
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			pointer-events: auto;
-
-			&.left {
-				left: 20px;
-				top: 30%;
-			}
-
-			&.right {
-				right: 20px;
-				top: 30%;
-			}
-
-			.stat-icon {
-				width: 50px;
-				height: 50px;
-				border-radius: 50%;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				color: #fff;
-				box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-
-				&.pending {
-					background: linear-gradient(135deg, #f59e0b, #d97706);
-					box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-				}
-
-				&.ongoing {
-					background: linear-gradient(135deg, #3b82f6, #2563eb);
-					box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-				}
-			}
-
-			.stat-info {
-				.stat-value {
-					font-size: 24px;
-					font-weight: 700;
-					color: #fff;
-					font-family: 'Orbitron', monospace;
-				}
-
-				.stat-label {
-					font-size: 12px;
-					color: rgba(255, 255, 255, 0.7);
-				}
-			}
-		}
-	}
-}
-
-.team-tabs {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-bottom: 12px;
-
-	.team-tab {
-		padding: 6px 12px;
-		font-size: 11px;
-		color: rgba(255, 255, 255, 0.7);
-		cursor: pointer;
-		border-radius: 15px;
-		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid rgba(0, 212, 255, 0.2);
-		transition: all 0.3s ease;
-
-		&:hover {
-			color: #00d4ff;
-			border-color: rgba(0, 212, 255, 0.4);
-		}
-
-		&.active {
-			background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 150, 255, 0.3));
-			color: #00d4ff;
-			border-color: rgba(0, 212, 255, 0.6);
-			font-weight: 600;
-		}
-	}
-}
-
-.team-hour-list {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-
-	.team-hour-item {
-		padding: 10px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 6px;
-		transition: all 0.3s ease;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateX(3px);
-		}
-
-		.team-hour-name {
-			color: #fff;
-			font-size: 12px;
-			font-weight: 500;
-			margin-bottom: 6px;
-		}
-
-		.team-hour-detail {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-
-			span {
-				font-size: 10px;
-				color: rgba(255, 255, 255, 0.6);
-			}
-		}
-	}
-}
-
-.fulfill-list {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-
-	.fulfill-item {
-		padding: 12px;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 6px;
-		transition: all 0.3s ease;
-
-		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateX(3px);
-		}
-
-		.fulfill-name {
-			color: #fff;
-			font-size: 13px;
-			font-weight: 500;
-			margin-bottom: 10px;
-		}
-
-		.fulfill-bar {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-
-			.fulfill-track {
-				flex: 1;
-				height: 8px;
-				background: rgba(255, 255, 255, 0.1);
-				border-radius: 4px;
-				overflow: hidden;
-
-				.fulfill-fill {
-					height: 100%;
-					background: linear-gradient(90deg, #43e97b, #38f9d7);
-					border-radius: 4px;
-					transition: width 1s ease;
-				}
-			}
-
-			.fulfill-rate {
-				color: #00d4ff;
+			.badge-num {
 				font-size: 16px;
 				font-weight: 700;
-				min-width: 55px;
-				text-align: right;
+				color: $primary-color;
 				font-family: 'Orbitron', monospace;
+			}
+
+			&.warning .badge-num {
+				color: #f59e0b;
+			}
+
+			.badge-label {
+				font-size: 10px;
+				color: $text-muted;
+			}
+		}
+	}
+
+	.panel-body {
+		flex: 1;
+		padding: 10px 12px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		min-height: 0;
+
+		&::-webkit-scrollbar {
+			width: 4px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: rgba(0, 212, 255, 0.05);
+			border-radius: 2px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(0, 212, 255, 0.3);
+			border-radius: 2px;
+
+			&:hover {
+				background: rgba(0, 212, 255, 0.5);
 			}
 		}
 	}
 }
 
-.plan-stats {
+.order-summary {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 10px;
 	margin-bottom: 15px;
 
-	.plan-stat-item {
+	.summary-item {
 		display: flex;
 		align-items: center;
 		gap: 10px;
@@ -920,69 +763,332 @@ onBeforeUnmount(() => {
 		transition: all 0.3s ease;
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			transform: translateY(-3px);
+			background: rgba(0, 212, 255, 0.1);
+			transform: translateY(-2px);
 		}
 
-		.plan-icon {
-			width: 50px;
-			height: 50px;
+		.summary-icon {
+			width: 40px;
+			height: 40px;
 			border-radius: 10px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			color: #fff;
-			flex-shrink: 0;
 		}
 
-		.plan-info {
-			.plan-value {
-				font-size: 20px;
+		.summary-info {
+			.summary-value {
+				font-size: 18px;
 				font-weight: 700;
-				color: #fff;
+				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
 
-			.plan-label {
-				font-size: 11px;
-				color: rgba(255, 255, 255, 0.6);
-				margin-top: 3px;
+			.summary-label {
+				font-size: 10px;
+				color: $text-muted;
 			}
 		}
 	}
 }
 
-.plan-list {
+.order-pie-chart {
+	height: 120px;
+}
+
+.pending-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 100%;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 2px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(0, 212, 255, 0.3);
+		border-radius: 2px;
+	}
+
+	.pending-item {
+		padding: 12px;
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: 8px;
+		transition: all 0.3s ease;
+		border-left: 3px solid transparent;
+
+		&:hover {
+			background: rgba(0, 212, 255, 0.1);
+			transform: translateX(3px);
+		}
+
+		&.critical {
+			border-left-color: #ef4444;
+		}
+
+		&.high {
+			border-left-color: #f59e0b;
+		}
+
+		&.normal {
+			border-left-color: #3b82f6;
+		}
+
+		.order-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 6px;
+
+			.order-id {
+				font-size: 11px;
+				color: $text-muted;
+				font-family: 'Orbitron', monospace;
+			}
+
+			.order-priority {
+				font-size: 10px;
+				padding: 2px 8px;
+				border-radius: 10px;
+
+				&.critical {
+					background: rgba(239, 68, 68, 0.2);
+					color: #ef4444;
+				}
+
+				&.high {
+					background: rgba(245, 158, 11, 0.2);
+					color: #f59e0b;
+				}
+
+				&.normal {
+					background: rgba(59, 130, 246, 0.2);
+					color: #3b82f6;
+				}
+			}
+		}
+
+		.order-title {
+			font-size: 12px;
+			color: $text-primary;
+			margin-bottom: 6px;
+		}
+
+		.order-meta {
+			display: flex;
+			justify-content: space-between;
+
+			.order-team,
+			.order-time {
+				font-size: 10px;
+				color: $text-muted;
+			}
+		}
+	}
+}
+
+.trend-card {
+	flex: 1.2;
+}
+
+.trend-chart {
+	width: 100%;
+	height: 100%;
+	min-height: 150px;
+}
+
+.team-bar-chart {
+	width: 100%;
+	height: 160px;
+}
+
+.response-metrics {
+	.response-item {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		padding: 15px;
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: 10px;
+
+		.response-gauge {
+			width: 80px;
+			height: 80px;
+
+			.gauge-chart {
+				width: 100%;
+				height: 100%;
+			}
+		}
+
+		.response-info {
+			flex: 1;
+
+			.response-value {
+				font-size: 28px;
+				font-weight: 700;
+				color: $text-primary;
+				font-family: 'Orbitron', monospace;
+
+				.unit {
+					font-size: 14px;
+					font-weight: normal;
+					color: $text-muted;
+					margin-left: 4px;
+				}
+			}
+
+			.response-label {
+				font-size: 12px;
+				color: $text-secondary;
+				margin-top: 4px;
+			}
+
+			.response-change {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				font-size: 11px;
+				margin-top: 6px;
+
+				&.up {
+					color: #10b981;
+				}
+
+				&.down {
+					color: #10b981;
+				}
+			}
+		}
+	}
+}
+
+.response-nav {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 15px;
+
+	.nav-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.2);
+		cursor: pointer;
+		transition: all 0.3s ease;
+
+		&:hover {
+			background: rgba(0, 212, 255, 0.5);
+		}
+
+		&.active {
+			background: $primary-color;
+			box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+		}
+	}
+}
+
+.type-chart {
+	height: 150px;
+}
+
+.rank-list {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 
-	.plan-list-item {
-		padding: 10px;
+	.rank-item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 12px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 6px;
+		border-radius: 8px;
 		transition: all 0.3s ease;
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.08);
+			background: rgba(0, 212, 255, 0.1);
 			transform: translateX(3px);
 		}
 
-		.plan-list-name {
-			color: #fff;
-			font-size: 12px;
-			font-weight: 500;
-			margin-bottom: 6px;
+		.rank-num {
+			width: 22px;
+			height: 22px;
+			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 11px;
+			font-weight: 700;
+			background: rgba(255, 255, 255, 0.1);
+			color: $text-secondary;
+
+			&.rank-1 {
+				background: linear-gradient(135deg, #ffd700, #ffb800);
+				color: #000;
+			}
+
+			&.rank-2 {
+				background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+				color: #000;
+			}
+
+			&.rank-3 {
+				background: linear-gradient(135deg, #cd7f32, #b87333);
+				color: #fff;
+			}
 		}
 
-		.plan-list-counts {
+		.rank-avatar {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, $primary-color, $primary-dark);
 			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
+			align-items: center;
+			justify-content: center;
+			color: #fff;
+			font-size: 14px;
+			font-weight: 600;
+		}
 
-			span {
+		.rank-info {
+			flex: 1;
+
+			.rank-name {
+				font-size: 12px;
+				color: $text-primary;
+				font-weight: 500;
+			}
+
+			.rank-team {
 				font-size: 10px;
-				color: rgba(255, 255, 255, 0.6);
+				color: $text-muted;
+			}
+		}
+
+		.rank-score {
+			text-align: right;
+
+			.score-value {
+				font-size: 18px;
+				font-weight: 700;
+				color: $primary-color;
+				font-family: 'Orbitron', monospace;
+			}
+
+			.score-label {
+				display: block;
+				font-size: 10px;
+				color: $text-muted;
 			}
 		}
 	}
