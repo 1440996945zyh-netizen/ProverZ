@@ -241,7 +241,7 @@
 				<div class="panel-header">
 					<div class="panel-title">
 						<div class="title-icon"></div>
-						<span>工单统计</span>
+						<span>工单来源统计</span>
 					</div>
 					<div class="panel-tabs">
 						<span :class="{ active: workOrderTab === 'today' }" @click="workOrderTab = 'today'">今日</span>
