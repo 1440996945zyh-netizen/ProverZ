@@ -234,6 +234,18 @@ export const constantRoutes = [
 			isIframe: true, // 标记为 iframe 页面
 		},
 	},
+	{
+		path: '/dashboard/BigScreenDashboard',
+		component: () => import('@/views/dashboard/BigScreenDashboard'),
+		hidden: true,
+		meta: { title: '数据大屏' },
+	},
+	{
+		path: '/dashboard/more',
+		component: () => import('@/views/dashboard/MoreScreen'),
+		hidden: true,
+		meta: { title: '更多' },
+	},
 ]
 
 // 动态路由，基于用户权限动态去加载
