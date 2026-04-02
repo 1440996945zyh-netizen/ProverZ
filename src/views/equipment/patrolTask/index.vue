@@ -11,6 +11,7 @@
 			:total="total"
 			:showNum="3"
 			:defaultWidth="47"
+			:rowClassName="rowClassName"
 		/>
 		<!-- 任务明细 -->
 		<el-drawer v-model="isShow" title="巡检任务明细" size="80%">
@@ -82,6 +83,23 @@ const selectData = reactive([
 	},
 ])
 
+const rowClassName = ({ row }) => {
+	if (row.status !== 2 || row.status !== '2') {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const endDate = row.endDate ? new Date(row.endDate) : null
+		if (endDate) {
+			endDate.setHours(0, 0, 0, 0)
+			if (endDate.getTime() === today.getTime()) {
+				return 'row-due'
+			} else if (endDate < today) {
+				return 'row-overdue'
+			}
+		}
+	}
+	return ''
+}
+
 const buttonList = ref([{ label: 'hidden', vif: false }])
 const total = ref(0)
 const queryParams = ref({
@@ -94,24 +112,24 @@ const tableColumns = reactive([
 	{ label: '序号', type: 'seq', width: 60, align: 'center', fixed: 'left' },
 	{ label: '计划名称', prop: 'planName', width: 150 },
 	{ label: '巡检路线', prop: 'routeName', width: 150 },
-  {
-    label: '巡检路线等级',
-    prop: 'routeLevel',
-	  minWidth: 80,
-    render: row => {
-      return [
-        h(
-          ElTag,
-          {
-            type: row.routeLevel == '1' ? '' : 'warning',
-          },
-          {
-            default: () => (row.routeLevel == '1' ? '普通' : '高危'),
-          },
-        ),
-      ]
-    },
-  },
+	{
+		label: '巡检路线等级',
+		prop: 'routeLevel',
+		minWidth: 80,
+		render: row => {
+			return [
+				h(
+					ElTag,
+					{
+						type: row.routeLevel == '1' ? '' : 'warning',
+					},
+					{
+						default: () => (row.routeLevel == '1' ? '普通' : '高危'),
+					},
+				),
+			]
+		},
+	},
 	{ label: '巡检员', prop: 'patrolName', minWidth: 120 },
 	{ label: '开始日期', prop: 'startDate', width: 160 },
 	{ label: '结束日期', prop: 'endDate', width: 160 },
@@ -120,20 +138,14 @@ const tableColumns = reactive([
 		prop: 'status',
 		align: 'center',
 		width: 100,
-		render: (row) => {
+		render: row => {
 			const statusMap = {
 				0: { text: '未检', type: 'info' },
 				1: { text: '进行中', type: 'primary' },
 				2: { text: '已检', type: 'success' },
 			}
 			const status = statusMap[row.status] || { text: '未知', type: 'info' }
-			return [
-				h(
-					ElTag,
-					{ type: status.type },
-					{ default: () => status.text }
-				),
-			]
+			return [h(ElTag, { type: status.type }, { default: () => status.text })]
 		},
 	},
 	{ label: '创建人', prop: 'createByName', minWidth: 100 },
@@ -144,7 +156,7 @@ const tableColumns = reactive([
 		width: 80,
 		fixed: 'right',
 		align: 'center',
-		render: (row) => {
+		render: row => {
 			return [
 				h(
 					ElButton,
@@ -154,7 +166,7 @@ const tableColumns = reactive([
 						link: true,
 						icon: 'View',
 					},
-					{ default: () => '详情' }
+					{ default: () => '详情' },
 				),
 			]
 		},
@@ -162,11 +174,11 @@ const tableColumns = reactive([
 ])
 
 // 查询主列表
-const getList = (e) => {
+const getList = e => {
 	queryParams.value = { ...queryParams.value, ...e }
 	queryParams.value.startDate = queryParams.value.date ? proxy.parseTime(queryParams.value.date[0], '{y}-{m}-{d}') : ''
 	queryParams.value.endDate = queryParams.value.date ? proxy.parseTime(queryParams.value.date[1], '{y}-{m}-{d}') : ''
-	api.getList(queryParams.value).then((res) => {
+	api.getList(queryParams.value).then(res => {
 		tableData.value = res.data.pages
 		total.value = res.data.totalNum
 	})
@@ -174,7 +186,7 @@ const getList = (e) => {
 
 const viewRef = ref(null)
 const isShow = ref(false)
-const handleUpdate = (row) => {
+const handleUpdate = row => {
 	isShow.value = true
 	nextTick(() => {
 		viewRef.value.taskId = row.id
@@ -184,3 +196,12 @@ const handleUpdate = (row) => {
 
 getList(queryParams.value)
 </script>
+
+<style scoped>
+:deep(.row-due) {
+	background-color: #fcedd9 !important;
+}
+:deep(.row-overdue) {
+	background-color: #fce9e9 !important;
+}
+</style>
