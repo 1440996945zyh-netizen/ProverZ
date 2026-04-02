@@ -40,7 +40,7 @@
 					</div>
 				</div>
 				<div class="system-name">
-					<div class="name-main">智慧设备物资管理平台</div>
+					<div class="name-main">数智设备物资管理平台</div>
 					<div class="name-sub">Smart Equipment & Material Management</div>
 				</div>
 			</div>
