@@ -458,11 +458,11 @@ const inspectionRows = ref([
 ])
 
 const companyList = ref([
-	{ name: '一公司', equipment: 1256, personnel: 186, percent: 78 },
-	{ name: '二公司', equipment: 1089, personnel: 152, percent: 65 },
-	{ name: '三公司', equipment: 945, personnel: 128, percent: 82 },
-	{ name: '集装箱公司', equipment: 1567, personnel: 203, percent: 92 },
-	{ name: '岚山公司', equipment: 882, personnel: 115, percent: 54 },
+	{ name: 'xx 公司', equipment: 1256, personnel: 186, percent: 78 },
+	{ name: 'xx 公司', equipment: 1089, personnel: 152, percent: 65 },
+	{ name: 'xx 公司', equipment: 945, personnel: 128, percent: 82 },
+	{ name: 'xx 公司', equipment: 1567, personnel: 203, percent: 92 },
+	{ name: 'xx 公司', equipment: 882, personnel: 115, percent: 54 },
 ])
 
 const materialWarning = ref([

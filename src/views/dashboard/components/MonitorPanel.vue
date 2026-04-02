@@ -315,11 +315,11 @@ const deviceStats = ref({
 })
 
 const realtimeAlerts = ref([
-	{ title: '门机设备温度异常', source: '港务公司', time: '10:23:45', level: 'critical', resolved: false },
-	{ title: '铲车液压系统压力过低', source: '煤炭港区公司', time: '10:18:32', level: 'major', resolved: false },
-	{ title: '传送带运行速度波动', source: '矿石港区公司', time: '10:15:21', level: 'minor', resolved: true },
-	{ title: '电机振动数据异常', source: '集装箱港区公司', time: '10:12:08', level: 'warning', resolved: false },
-	{ title: '润滑系统油位偏低', source: '综合保税区公司', time: '10:08:55', level: 'warning', resolved: true },
+	{ title: '门机设备温度异常', source: 'xx 公司', time: '10:23:45', level: 'critical', resolved: false },
+	{ title: '铲车液压系统压力过低', source: 'xx 公司', time: '10:18:32', level: 'major', resolved: false },
+	{ title: '传送带运行速度波动', source: 'xx 公司', time: '10:15:21', level: 'minor', resolved: true },
+	{ title: '电机振动数据异常', source: 'xx 公司', time: '10:12:08', level: 'warning', resolved: false },
+	{ title: '润滑系统油位偏低', source: 'xx 公司', time: '10:08:55', level: 'warning', resolved: true },
 ])
 
 const metrics = ref([
@@ -358,11 +358,11 @@ const metrics = ref([
 ])
 
 const teamMonitorData = ref([
-	{ name: '港务公司', onlineRate: 98.5, alertCount: 3, status: 'normal', statusText: '正常' },
-	{ name: '煤炭港区公司', onlineRate: 95.2, alertCount: 5, status: 'warning', statusText: '告警' },
-	{ name: '矿石港区公司', onlineRate: 99.1, alertCount: 0, status: 'normal', statusText: '正常' },
-	{ name: '集装箱港区公司', onlineRate: 92.8, alertCount: 8, status: 'danger', statusText: '异常' },
-	{ name: '综合保税区公司', onlineRate: 88.5, alertCount: 12, status: 'danger', statusText: '异常' },
+	{ name: 'xx 公司', onlineRate: 98.5, alertCount: 3, status: 'normal', statusText: '正常' },
+	{ name: 'xx 公司', onlineRate: 95.2, alertCount: 5, status: 'warning', statusText: '告警' },
+	{ name: 'xx 公司', onlineRate: 99.1, alertCount: 0, status: 'normal', statusText: '正常' },
+	{ name: 'xx 公司', onlineRate: 92.8, alertCount: 8, status: 'danger', statusText: '异常' },
+	{ name: 'xx 公司', onlineRate: 88.5, alertCount: 12, status: 'danger', statusText: '异常' },
 ])
 
 const getAlertIcon = level => {
@@ -436,11 +436,11 @@ const initMapChart = () => {
 				type: 'scatter',
 				coordinateSystem: 'geo',
 				data: [
-					{ name: '港务公司', value: [119.2, 35.1], symbolSize: 20, itemStyle: { color: '#10b981' } },
-					{ name: '煤炭港区公司', value: [119.8, 35.5], symbolSize: 18, itemStyle: { color: '#f59e0b' } },
-					{ name: '矿石港区公司', value: [119.0, 34.8], symbolSize: 15, itemStyle: { color: '#10b981' } },
-					{ name: '集装箱港区公司', value: [118.5, 35.3], symbolSize: 22, itemStyle: { color: '#ef4444' } },
-					{ name: '综合保税区公司', value: [118.8, 35.6], symbolSize: 16, itemStyle: { color: '#ef4444' } },
+					{ name: 'xx 公司', value: [119.2, 35.1], symbolSize: 20, itemStyle: { color: '#10b981' } },
+					{ name: 'xx 公司', value: [119.8, 35.5], symbolSize: 18, itemStyle: { color: '#f59e0b' } },
+					{ name: 'xx 公司', value: [119.0, 34.8], symbolSize: 15, itemStyle: { color: '#10b981' } },
+					{ name: 'xx 公司', value: [118.5, 35.3], symbolSize: 22, itemStyle: { color: '#ef4444' } },
+					{ name: 'xx 公司', value: [118.8, 35.6], symbolSize: 16, itemStyle: { color: '#ef4444' } },
 				],
 				symbol: 'circle',
 				symbolSize: 15,

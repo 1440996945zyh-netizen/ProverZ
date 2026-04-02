@@ -221,14 +221,14 @@ const pendingOrders = ref([
 	{
 		id: 'WO-2024-1256',
 		title: '门机液压系统故障维修',
-		team: '港务公司',
-		time: '2小时前',
+		team: 'xx 公司',
+		time: '2 小时前',
 		priority: 'critical',
 		priorityText: '紧急',
 	},
-	{ id: 'WO-2024-1255', title: '铲车发动机定期保养', team: '煤炭港区公司', time: '3小时前', priority: 'high', priorityText: '高优' },
-	{ id: 'WO-2024-1254', title: '传送带轴承更换', team: '矿石港区公司', time: '5小时前', priority: 'normal', priorityText: '普通' },
-	{ id: 'WO-2024-1253', title: '电机控制系统检修', team: '集装箱港区公司', time: '昨天', priority: 'normal', priorityText: '普通' },
+	{ id: 'WO-2024-1255', title: '铲车发动机定期保养', team: 'xx 公司', time: '3 小时前', priority: 'high', priorityText: '高优' },
+	{ id: 'WO-2024-1254', title: '传送带轴承更换', team: 'xx 公司', time: '5 小时前', priority: 'normal', priorityText: '普通' },
+	{ id: 'WO-2024-1253', title: '电机控制系统检修', team: 'xx 公司', time: '昨天', priority: 'normal', priorityText: '普通' },
 ])
 
 const responseMetrics = ref([
@@ -239,11 +239,11 @@ const responseMetrics = ref([
 ])
 
 const rankList = ref([
-	{ name: '张伟', team: '港务公司', score: 156 },
-	{ name: '李强', team: '煤炭港区公司', score: 142 },
-	{ name: '王磊', team: '矿石港区公司', score: 138 },
-	{ name: '刘洋', team: '集装箱港区公司', score: 125 },
-	{ name: '陈明', team: '综合保税区公司', score: 118 },
+	{ name: '张伟', team: 'xx 公司', score: 156 },
+	{ name: '李强', team: 'xx 公司', score: 142 },
+	{ name: '王磊', team: 'xx 公司', score: 138 },
+	{ name: '刘洋', team: 'xx 公司', score: 125 },
+	{ name: '陈明', team: 'xx 公司', score: 118 },
 ])
 
 const initOrderPieChart = () => {
