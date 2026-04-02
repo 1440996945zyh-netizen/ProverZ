@@ -87,7 +87,7 @@
 									</span>
 								</div>
 								<div class="kpi-chart-wrapper">
-									<div :ref="el => kpiChartRefs[index] = el" class="kpi-chart"></div>
+									<div :ref="el => (kpiChartRefs[index] = el)" class="kpi-chart"></div>
 								</div>
 								<div class="kpi-value">{{ kpi.value }}%</div>
 							</div>
@@ -212,7 +212,7 @@ import {
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 
-const activeTeam = ref('南区维修中心')
+const activeTeam = ref('黄骅港务公司')
 const timeType = ref('month')
 const kpiChartRefs = ref([])
 const archiveChartRef = ref(null)
@@ -221,7 +221,7 @@ let kpiCharts = []
 let archiveChart = null
 let trendChart = null
 
-const teams = ref(['南区维修中心', '东区维修中心', '西区维修中心', '岚中维修中心', '岚南维修中心'])
+const teams = ref(['黄骅港务公司', '煤炭港区公司', '矿石港区公司', '集装箱港区公司', '综合保税区公司'])
 
 const equipmentTypes = ref([
 	{ name: '门机', value: 13, icon: 'Monitor', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', trend: 5.2 },
@@ -242,19 +242,19 @@ const kpiStats = ref([
 ])
 
 const knowledgeList = ref([
-	{ name: '南区维修中心', count: 189 },
-	{ name: '东区维修中心', count: 166 },
-	{ name: '岚南维修中心', count: 131 },
-	{ name: '西区维修中心', count: 105 },
-	{ name: '岚中维修中心', count: 69 },
+	{ name: '黄骅港务公司', count: 189 },
+	{ name: '煤炭港区公司', count: 166 },
+	{ name: '矿石港区公司', count: 131 },
+	{ name: '集装箱港区公司', count: 105 },
+	{ name: '综合保税区公司', count: 69 },
 ])
 
 const rateList = ref([
-	{ name: '南区维修中心', faultRate: 0.0, availRate: 99.34 },
-	{ name: '东区维修中心', faultRate: 0.0, availRate: 99.04 },
-	{ name: '岚南维修中心', faultRate: 0.0, availRate: 99.79 },
-	{ name: '西区维修中心', faultRate: 0.0, availRate: 99.51 },
-	{ name: '岚中维修中心', faultRate: 0.0, availRate: 53.13 },
+	{ name: '黄骅港务公司', faultRate: 0.0, availRate: 99.34 },
+	{ name: '煤炭港区公司', faultRate: 0.0, availRate: 99.04 },
+	{ name: '矿石港区公司', faultRate: 0.0, availRate: 99.79 },
+	{ name: '集装箱港区公司', faultRate: 0.0, availRate: 99.51 },
+	{ name: '综合保税区公司', faultRate: 0.0, availRate: 53.13 },
 ])
 
 const formatNumber = num => {
@@ -269,49 +269,49 @@ const initKpiCharts = () => {
 		const option = {
 			series: [
 				{
-					type: 'gauge',
-					startAngle: 180,
-					endAngle: 0,
-					min: 0,
-					max: 100,
-					splitNumber: 5,
-					itemStyle: {
-						color: kpi.color,
-					},
-					progress: {
-						show: true,
-						width: 10,
-					},
-					pointer: {
-						show: false,
-					},
-					axisLine: {
-						lineStyle: {
-							width: 10,
-							color: [[1, 'rgba(255, 255, 255, 0.1)']],
-						},
-					},
-					axisTick: {
-						show: false,
-					},
-					splitLine: {
-						show: false,
-					},
-					axisLabel: {
-						show: false,
-					},
-					anchor: {
-						show: false,
-					},
-					title: {
-						show: false,
-					},
-					detail: {
-						show: false,
-					},
+					type: 'pie',
+					radius: ['60%', '80%'],
+					center: ['50%', '50%'],
+					startAngle: 90,
+					clockwise: false,
+					silent: true,
+					label: { show: false },
+					labelLine: { show: false },
 					data: [
 						{
 							value: kpi.value,
+							name: kpi.label,
+							itemStyle: {
+								color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
+									{ offset: 0, color: kpi.color },
+									{ offset: 1, color: kpi.color + '99' },
+								]),
+								shadowColor: kpi.color,
+								shadowBlur: 10,
+							},
+						},
+						{
+							value: 100 - kpi.value,
+							name: '剩余',
+							itemStyle: {
+								color: 'rgba(255, 255, 255, 0.08)',
+							},
+						},
+					],
+				},
+				{
+					type: 'pie',
+					radius: ['50%', '52%'],
+					center: ['50%', '50%'],
+					silent: true,
+					label: { show: false },
+					labelLine: { show: false },
+					data: [
+						{
+							value: 1,
+							itemStyle: {
+								color: 'rgba(255, 255, 255, 0.1)',
+							},
 						},
 					],
 				},
@@ -335,7 +335,7 @@ const initArchiveChart = () => {
 		series: [
 			{
 				type: 'pie',
-				radius: ['50%', '70%'],
+				radius: ['45%', '75%'],
 				center: ['50%', '50%'],
 				avoidLabelOverlap: false,
 				label: { show: false },
@@ -633,15 +633,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .team-tabs {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
-	margin-bottom: 12px;
+	gap: 6px;
+	margin-bottom: 10px;
 
 	.team-tab {
-		padding: 6px 12px;
-		font-size: 11px;
+		padding: 4px 10px;
+		font-size: 10px;
 		color: $text-secondary;
 		cursor: pointer;
-		border-radius: 15px;
+		border-radius: 12px;
 		background: rgba(255, 255, 255, 0.03);
 		border: 1px solid rgba(0, 212, 255, 0.2);
 		transition: all 0.3s ease;
@@ -663,15 +663,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .equipment-type-stats {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 
 	.type-item {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 12px;
+		gap: 10px;
+		padding: 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -680,9 +680,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.type-icon {
-			width: 50px;
-			height: 50px;
-			border-radius: 10px;
+			width: 40px;
+			height: 40px;
+			border-radius: 8px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -694,14 +694,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			flex: 1;
 
 			.type-value {
-				font-size: 24px;
+				font-size: 20px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.type-label {
-				font-size: 12px;
+				font-size: 11px;
 				color: $text-muted;
 			}
 		}
@@ -709,11 +709,11 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		.type-trend {
 			display: flex;
 			align-items: center;
-			gap: 4px;
-			font-size: 12px;
+			gap: 3px;
+			font-size: 10px;
 			font-weight: 600;
-			padding: 4px 8px;
-			border-radius: 10px;
+			padding: 3px 6px;
+			border-radius: 8px;
 
 			&.up {
 				color: #10b981;
@@ -731,28 +731,28 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .archive-stats {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 10px;
-	margin-bottom: 15px;
+	gap: 8px;
+	margin-bottom: 10px;
 
 	.archive-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 8px;
+		gap: 6px;
+		padding: 8px 6px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
 			background: rgba(0, 212, 255, 0.1);
-			transform: translateY(-3px);
+			transform: translateY(-2px);
 		}
 
 		.archive-icon {
-			width: 40px;
-			height: 40px;
-			border-radius: 10px;
+			width: 32px;
+			height: 32px;
+			border-radius: 8px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -763,23 +763,23 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			text-align: center;
 
 			.archive-value {
-				font-size: 14px;
+				font-size: 12px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.archive-label {
-				font-size: 10px;
+				font-size: 9px;
 				color: $text-muted;
-				margin-top: 2px;
+				margin-top: 1px;
 			}
 		}
 	}
 }
 
 .archive-chart-wrapper {
-	height: 120px;
+	height: 140px;
 
 	.archive-chart {
 		width: 100%;
@@ -794,7 +794,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .kpi-container {
 	display: flex;
 	justify-content: space-around;
-	gap: 30px;
+	gap: 20px;
 	height: 100%;
 	align-items: center;
 
@@ -809,22 +809,22 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			justify-content: space-between;
 			align-items: center;
 			width: 100%;
-			margin-bottom: 10px;
+			margin-bottom: 6px;
 
 			.kpi-label {
-				font-size: 14px;
+				font-size: 12px;
 				font-weight: 600;
 				color: $text-primary;
 			}
 
 			.kpi-change {
-				font-size: 11px;
+				font-size: 10px;
 				font-weight: 600;
-				padding: 3px 8px;
-				border-radius: 10px;
+				padding: 2px 6px;
+				border-radius: 8px;
 				display: flex;
 				align-items: center;
-				gap: 3px;
+				gap: 2px;
 
 				.change-label {
 					font-weight: normal;
@@ -845,7 +845,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.kpi-chart-wrapper {
 			width: 100%;
-			height: 80px;
+			height: 70px;
 		}
 
 		.kpi-chart {
@@ -854,38 +854,38 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.kpi-value {
-			font-size: 24px;
+			font-size: 18px;
 			font-weight: 700;
 			color: $text-primary;
 			font-family: 'Orbitron', monospace;
-			margin-top: 10px;
+			margin-top: 6px;
 		}
 	}
 }
 
 .trend-chart {
 	width: 100%;
-	height: 150px;
+	height: 120px;
 }
 
 .knowledge-stats {
 	display: flex;
-	gap: 15px;
-	margin-bottom: 15px;
+	gap: 10px;
+	margin-bottom: 10px;
 
 	.knowledge-item {
 		flex: 1;
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 15px;
+		gap: 10px;
+		padding: 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 
 		.knowledge-icon {
-			width: 50px;
-			height: 50px;
-			border-radius: 12px;
+			width: 40px;
+			height: 40px;
+			border-radius: 10px;
 			background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 150, 255, 0.3));
 			display: flex;
 			align-items: center;
@@ -900,14 +900,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.knowledge-info {
 			.knowledge-value {
-				font-size: 26px;
+				font-size: 20px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.knowledge-label {
-				font-size: 12px;
+				font-size: 10px;
 				color: $text-muted;
 			}
 		}
@@ -917,15 +917,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .knowledge-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 6px;
 
 	.knowledge-list-item {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 10px 12px;
+		gap: 10px;
+		padding: 8px 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 6px;
+		border-radius: 5px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -934,13 +934,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.knowledge-rank {
-			width: 22px;
-			height: 22px;
-			border-radius: 6px;
+			width: 18px;
+			height: 18px;
+			border-radius: 5px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			font-size: 11px;
+			font-size: 10px;
 			font-weight: 700;
 			background: rgba(255, 255, 255, 0.1);
 			color: $text-secondary;
@@ -964,12 +964,12 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		.knowledge-name {
 			flex: 1;
 			color: $text-primary;
-			font-size: 12px;
+			font-size: 11px;
 		}
 
 		.knowledge-count {
 			color: $primary-color;
-			font-size: 12px;
+			font-size: 11px;
 			font-weight: 600;
 		}
 	}
@@ -978,12 +978,12 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .rate-list {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 
 	.rate-item {
-		padding: 12px;
+		padding: 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -993,30 +993,30 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.rate-name {
 			color: $text-primary;
-			font-size: 12px;
+			font-size: 11px;
 			font-weight: 500;
-			margin-bottom: 10px;
+			margin-bottom: 8px;
 		}
 
 		.rate-bars {
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 6px;
 
 			.rate-bar-item {
 				display: flex;
 				align-items: center;
-				gap: 8px;
+				gap: 6px;
 
 				.bar-label {
-					font-size: 10px;
+					font-size: 9px;
 					color: $text-muted;
-					min-width: 40px;
+					min-width: 35px;
 				}
 
 				.bar-track {
 					flex: 1;
-					height: 6px;
+					height: 5px;
 					background: rgba(255, 255, 255, 0.1);
 					border-radius: 3px;
 					overflow: hidden;
@@ -1037,9 +1037,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				}
 
 				.bar-value {
-					font-size: 11px;
+					font-size: 10px;
 					color: $primary-color;
-					min-width: 45px;
+					min-width: 40px;
 					text-align: right;
 					font-family: 'Orbitron', monospace;
 				}

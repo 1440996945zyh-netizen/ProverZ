@@ -221,14 +221,14 @@ const pendingOrders = ref([
 	{
 		id: 'WO-2024-1256',
 		title: '门机液压系统故障维修',
-		team: '南区维修中心',
+		team: '黄骅港务公司',
 		time: '2小时前',
 		priority: 'critical',
 		priorityText: '紧急',
 	},
-	{ id: 'WO-2024-1255', title: '铲车发动机定期保养', team: '东区维修中心', time: '3小时前', priority: 'high', priorityText: '高优' },
-	{ id: 'WO-2024-1254', title: '传送带轴承更换', team: '岚南维修中心', time: '5小时前', priority: 'normal', priorityText: '普通' },
-	{ id: 'WO-2024-1253', title: '电机控制系统检修', team: '西区维修中心', time: '昨天', priority: 'normal', priorityText: '普通' },
+	{ id: 'WO-2024-1255', title: '铲车发动机定期保养', team: '煤炭港区公司', time: '3小时前', priority: 'high', priorityText: '高优' },
+	{ id: 'WO-2024-1254', title: '传送带轴承更换', team: '矿石港区公司', time: '5小时前', priority: 'normal', priorityText: '普通' },
+	{ id: 'WO-2024-1253', title: '电机控制系统检修', team: '集装箱港区公司', time: '昨天', priority: 'normal', priorityText: '普通' },
 ])
 
 const responseMetrics = ref([
@@ -239,11 +239,11 @@ const responseMetrics = ref([
 ])
 
 const rankList = ref([
-	{ name: '张伟', team: '南区维修中心', score: 156 },
-	{ name: '李强', team: '东区维修中心', score: 142 },
-	{ name: '王磊', team: '岚南维修中心', score: 138 },
-	{ name: '刘洋', team: '西区维修中心', score: 125 },
-	{ name: '陈明', team: '岚中维修中心', score: 118 },
+	{ name: '张伟', team: '黄骅港务公司', score: 156 },
+	{ name: '李强', team: '煤炭港区公司', score: 142 },
+	{ name: '王磊', team: '矿石港区公司', score: 138 },
+	{ name: '刘洋', team: '集装箱港区公司', score: 125 },
+	{ name: '陈明', team: '综合保税区公司', score: 118 },
 ])
 
 const initOrderPieChart = () => {
@@ -750,16 +750,16 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .order-summary {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 10px;
-	margin-bottom: 15px;
+	gap: 8px;
+	margin-bottom: 10px;
 
 	.summary-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px;
+		gap: 8px;
+		padding: 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -768,9 +768,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.summary-icon {
-			width: 40px;
-			height: 40px;
-			border-radius: 10px;
+			width: 32px;
+			height: 32px;
+			border-radius: 8px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -779,14 +779,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.summary-info {
 			.summary-value {
-				font-size: 18px;
+				font-size: 14px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.summary-label {
-				font-size: 10px;
+				font-size: 9px;
 				color: $text-muted;
 			}
 		}
@@ -794,13 +794,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .order-pie-chart {
-	height: 120px;
+	height: 100px;
 }
 
 .pending-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 6px;
 	max-height: 100%;
 	overflow-y: auto;
 
@@ -819,9 +819,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 
 	.pending-item {
-		padding: 12px;
+		padding: 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 		border-left: 3px solid transparent;
 

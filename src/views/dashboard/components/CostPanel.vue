@@ -648,27 +648,27 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .cost-overview {
 	.overview-main {
 		text-align: center;
-		padding: 20px;
+		padding: 15px;
 		background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 150, 255, 0.05));
-		border-radius: 12px;
-		margin-bottom: 15px;
+		border-radius: 10px;
+		margin-bottom: 10px;
 
 		.overview-label {
-			font-size: 12px;
+			font-size: 10px;
 			color: $text-secondary;
 		}
 
 		.overview-value {
-			margin: 10px 0;
+			margin: 6px 0;
 
 			.currency {
-				font-size: 20px;
+				font-size: 16px;
 				color: $primary-color;
 				font-weight: 600;
 			}
 
 			.amount {
-				font-size: 36px;
+				font-size: 28px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
@@ -679,9 +679,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: inline-flex;
 			align-items: center;
 			gap: 4px;
-			font-size: 12px;
-			padding: 4px 12px;
-			border-radius: 15px;
+			font-size: 10px;
+			padding: 3px 10px;
+			border-radius: 12px;
 
 			&.up {
 				background: rgba(239, 68, 68, 0.15);
@@ -698,15 +698,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	.overview-breakdown {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 8px;
 
 		.breakdown-item {
 			display: flex;
 			align-items: center;
-			gap: 12px;
-			padding: 12px;
+			gap: 10px;
+			padding: 10px;
 			background: rgba(255, 255, 255, 0.03);
-			border-radius: 8px;
+			border-radius: 6px;
 			transition: all 0.3s ease;
 
 			&:hover {
@@ -715,9 +715,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.breakdown-icon {
-				width: 36px;
-				height: 36px;
-				border-radius: 8px;
+				width: 30px;
+				height: 30px;
+				border-radius: 6px;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -728,20 +728,20 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				flex: 1;
 
 				.breakdown-value {
-					font-size: 16px;
+					font-size: 14px;
 					font-weight: 700;
 					color: $text-primary;
 					font-family: 'Orbitron', monospace;
 				}
 
 				.breakdown-label {
-					font-size: 11px;
+					font-size: 10px;
 					color: $text-muted;
 				}
 			}
 
 			.breakdown-percent {
-				font-size: 14px;
+				font-size: 12px;
 				font-weight: 600;
 				color: $primary-color;
 			}
@@ -750,7 +750,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .structure-chart {
-	height: 160px;
+	height: 130px;
 }
 
 .trend-card {
@@ -760,23 +760,23 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .trend-chart {
 	width: 100%;
 	height: 100%;
-	min-height: 150px;
+	min-height: 120px;
 }
 
 .team-compare-chart {
 	width: 100%;
-	height: 160px;
+	height: 130px;
 }
 
 .kpi-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 12px;
+	gap: 8px;
 
 	.kpi-item {
-		padding: 12px;
+		padding: 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -788,15 +788,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 8px;
+			margin-bottom: 6px;
 
 			.kpi-label {
-				font-size: 11px;
+				font-size: 10px;
 				color: $text-secondary;
 			}
 
 			.kpi-change {
-				font-size: 10px;
+				font-size: 9px;
 				font-weight: 600;
 
 				&.up {
@@ -810,14 +810,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.kpi-value {
-			font-size: 20px;
+			font-size: 16px;
 			font-weight: 700;
 			color: $text-primary;
 			font-family: 'Orbitron', monospace;
-			margin-bottom: 8px;
+			margin-bottom: 6px;
 
 			.kpi-unit {
-				font-size: 11px;
+				font-size: 10px;
 				font-weight: normal;
 				color: $text-muted;
 				margin-left: 4px;
@@ -825,7 +825,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.kpi-bar {
-			height: 4px;
+			height: 3px;
 			background: rgba(255, 255, 255, 0.1);
 			border-radius: 2px;
 			overflow: hidden;
@@ -842,15 +842,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .material-list {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 
 	.material-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 10px 12px;
+		gap: 8px;
+		padding: 8px 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -859,13 +859,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.material-rank {
-			width: 22px;
-			height: 22px;
-			border-radius: 6px;
+			width: 18px;
+			height: 18px;
+			border-radius: 5px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			font-size: 11px;
+			font-size: 10px;
 			font-weight: 700;
 			background: rgba(255, 255, 255, 0.1);
 			color: $text-secondary;
@@ -890,14 +890,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			flex: 1;
 
 			.material-name {
-				font-size: 12px;
+				font-size: 10px;
 				color: $text-primary;
-				margin-bottom: 6px;
+				margin-bottom: 4px;
 			}
 
 			.material-bar {
 				.bar-track {
-					height: 4px;
+					height: 3px;
 					background: rgba(255, 255, 255, 0.1);
 					border-radius: 2px;
 					overflow: hidden;
@@ -916,14 +916,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			text-align: right;
 
 			.value-amount {
-				font-size: 12px;
+				font-size: 10px;
 				font-weight: 600;
 				color: $primary-color;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.value-unit {
-				font-size: 10px;
+				font-size: 9px;
 				color: $text-muted;
 			}
 		}
@@ -933,22 +933,22 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .budget-stats {
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: 15px;
+	margin-bottom: 10px;
 
 	.budget-item {
 		text-align: center;
 
 		.budget-label {
-			font-size: 10px;
+			font-size: 9px;
 			color: $text-muted;
 		}
 
 		.budget-value {
-			font-size: 14px;
+			font-size: 12px;
 			font-weight: 700;
 			color: $text-primary;
 			font-family: 'Orbitron', monospace;
-			margin-top: 4px;
+			margin-top: 3px;
 
 			&.used {
 				color: #f59e0b;
@@ -965,10 +965,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	.progress-header {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 
 		span {
-			font-size: 11px;
+			font-size: 10px;
 			color: $text-secondary;
 		}
 
@@ -979,15 +979,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 
 	.progress-bar {
-		height: 8px;
+		height: 6px;
 		background: rgba(255, 255, 255, 0.1);
-		border-radius: 4px;
+		border-radius: 3px;
 		overflow: hidden;
 
 		.progress-fill {
 			height: 100%;
 			background: linear-gradient(90deg, $primary-color, #10b981);
-			border-radius: 4px;
+			border-radius: 3px;
 			position: relative;
 
 			.progress-glow {
@@ -1003,11 +1003,11 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 
 	.progress-status {
-		margin-top: 10px;
-		font-size: 10px;
+		margin-top: 8px;
+		font-size: 9px;
 		text-align: center;
-		padding: 6px 12px;
-		border-radius: 10px;
+		padding: 5px 10px;
+		border-radius: 8px;
 
 		&.normal {
 			background: rgba(16, 185, 129, 0.15);

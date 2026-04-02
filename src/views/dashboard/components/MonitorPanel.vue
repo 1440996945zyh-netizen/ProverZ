@@ -315,11 +315,11 @@ const deviceStats = ref({
 })
 
 const realtimeAlerts = ref([
-	{ title: '门机设备温度异常', source: '南区维修中心', time: '10:23:45', level: 'critical', resolved: false },
-	{ title: '铲车液压系统压力过低', source: '东区维修中心', time: '10:18:32', level: 'major', resolved: false },
-	{ title: '传送带运行速度波动', source: '岚南维修中心', time: '10:15:21', level: 'minor', resolved: true },
-	{ title: '电机振动数据异常', source: '西区维修中心', time: '10:12:08', level: 'warning', resolved: false },
-	{ title: '润滑系统油位偏低', source: '岚中维修中心', time: '10:08:55', level: 'warning', resolved: true },
+	{ title: '门机设备温度异常', source: '黄骅港务公司', time: '10:23:45', level: 'critical', resolved: false },
+	{ title: '铲车液压系统压力过低', source: '煤炭港区公司', time: '10:18:32', level: 'major', resolved: false },
+	{ title: '传送带运行速度波动', source: '矿石港区公司', time: '10:15:21', level: 'minor', resolved: true },
+	{ title: '电机振动数据异常', source: '集装箱港区公司', time: '10:12:08', level: 'warning', resolved: false },
+	{ title: '润滑系统油位偏低', source: '综合保税区公司', time: '10:08:55', level: 'warning', resolved: true },
 ])
 
 const metrics = ref([
@@ -358,11 +358,11 @@ const metrics = ref([
 ])
 
 const teamMonitorData = ref([
-	{ name: '南区维修中心', onlineRate: 98.5, alertCount: 3, status: 'normal', statusText: '正常' },
-	{ name: '东区维修中心', onlineRate: 95.2, alertCount: 5, status: 'warning', statusText: '告警' },
-	{ name: '岚南维修中心', onlineRate: 99.1, alertCount: 0, status: 'normal', statusText: '正常' },
-	{ name: '西区维修中心', onlineRate: 92.8, alertCount: 8, status: 'danger', statusText: '异常' },
-	{ name: '岚中维修中心', onlineRate: 88.5, alertCount: 12, status: 'danger', statusText: '异常' },
+	{ name: '黄骅港务公司', onlineRate: 98.5, alertCount: 3, status: 'normal', statusText: '正常' },
+	{ name: '煤炭港区公司', onlineRate: 95.2, alertCount: 5, status: 'warning', statusText: '告警' },
+	{ name: '矿石港区公司', onlineRate: 99.1, alertCount: 0, status: 'normal', statusText: '正常' },
+	{ name: '集装箱港区公司', onlineRate: 92.8, alertCount: 8, status: 'danger', statusText: '异常' },
+	{ name: '综合保税区公司', onlineRate: 88.5, alertCount: 12, status: 'danger', statusText: '异常' },
 ])
 
 const getAlertIcon = level => {
@@ -436,11 +436,11 @@ const initMapChart = () => {
 				type: 'scatter',
 				coordinateSystem: 'geo',
 				data: [
-					{ name: '南区维修中心', value: [119.2, 35.1], symbolSize: 20, itemStyle: { color: '#10b981' } },
-					{ name: '东区维修中心', value: [119.8, 35.5], symbolSize: 18, itemStyle: { color: '#f59e0b' } },
-					{ name: '岚南维修中心', value: [119.0, 34.8], symbolSize: 15, itemStyle: { color: '#10b981' } },
-					{ name: '西区维修中心', value: [118.5, 35.3], symbolSize: 22, itemStyle: { color: '#ef4444' } },
-					{ name: '岚中维修中心', value: [118.8, 35.6], symbolSize: 16, itemStyle: { color: '#ef4444' } },
+					{ name: '黄骅港务公司', value: [119.2, 35.1], symbolSize: 20, itemStyle: { color: '#10b981' } },
+					{ name: '煤炭港区公司', value: [119.8, 35.5], symbolSize: 18, itemStyle: { color: '#f59e0b' } },
+					{ name: '矿石港区公司', value: [119.0, 34.8], symbolSize: 15, itemStyle: { color: '#10b981' } },
+					{ name: '集装箱港区公司', value: [118.5, 35.3], symbolSize: 22, itemStyle: { color: '#ef4444' } },
+					{ name: '综合保税区公司', value: [118.8, 35.6], symbolSize: 16, itemStyle: { color: '#ef4444' } },
 				],
 				symbol: 'circle',
 				symbolSize: 15,
@@ -882,8 +882,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .alert-summary {
 	display: flex;
-	gap: 15px;
-	margin-bottom: 15px;
+	gap: 12px;
+	margin-bottom: 12px;
 
 	.alert-total {
 		flex: 0 0 100px;
@@ -891,8 +891,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 15px;
-		background: rgba(239, 68, 68, 0.1);
+		padding: 15px 10px;
+		background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
 		border-radius: 10px;
 		border: 1px solid rgba(239, 68, 68, 0.3);
 
@@ -901,6 +901,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			font-weight: 700;
 			color: #ef4444;
 			font-family: 'Orbitron', monospace;
+			text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 		}
 
 		.total-label {
@@ -920,34 +921,40 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			padding: 8px 12px;
+			padding: 10px 12px;
 			background: rgba(255, 255, 255, 0.03);
-			border-radius: 6px;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+
+			&:hover {
+				background: rgba(0, 212, 255, 0.1);
+				transform: translateX(3px);
+			}
 
 			.breakdown-dot {
-				width: 10px;
-				height: 10px;
+				width: 12px;
+				height: 12px;
 				border-radius: 50%;
 			}
 
 			&.critical .breakdown-dot {
 				background: #ef4444;
-				box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+				box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 			}
 
 			&.major .breakdown-dot {
 				background: #f97316;
-				box-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+				box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
 			}
 
 			&.minor .breakdown-dot {
 				background: #eab308;
-				box-shadow: 0 0 8px rgba(234, 179, 8, 0.5);
+				box-shadow: 0 0 8px rgba(234, 179, 8, 0.6);
 			}
 
 			&.warning .breakdown-dot {
 				background: #3b82f6;
-				box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+				box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
 			}
 
 			.breakdown-label {
@@ -957,8 +964,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.breakdown-value {
 				margin-left: auto;
-				font-size: 14px;
-				font-weight: 600;
+				font-size: 16px;
+				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
@@ -973,7 +980,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .alert-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 5px;
 	max-height: 100%;
 	overflow-y: auto;
 
@@ -994,10 +1001,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	.alert-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 10px 12px;
+		gap: 6px;
+		padding: 6px 8px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 5px;
 		transition: all 0.3s ease;
 		border-left: 3px solid transparent;
 
@@ -1039,7 +1046,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.alert-level-icon {
-			font-size: 18px;
+			font-size: 12px;
 		}
 
 		.alert-content {
@@ -1047,7 +1054,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			min-width: 0;
 
 			.alert-title {
-				font-size: 12px;
+				font-size: 10px;
 				color: $text-primary;
 				white-space: nowrap;
 				overflow: hidden;
@@ -1056,21 +1063,21 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.alert-meta {
 				display: flex;
-				gap: 10px;
-				margin-top: 4px;
+				gap: 6px;
+				margin-top: 1px;
 
 				.alert-source,
 				.alert-time {
-					font-size: 10px;
+					font-size: 8px;
 					color: $text-muted;
 				}
 			}
 		}
 
 		.alert-status {
-			font-size: 10px;
-			padding: 3px 8px;
-			border-radius: 10px;
+			font-size: 8px;
+			padding: 2px 5px;
+			border-radius: 6px;
 			background: rgba(239, 68, 68, 0.2);
 			color: #ef4444;
 
@@ -1100,9 +1107,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .map-stats {
 	display: flex;
 	justify-content: space-around;
-	padding-top: 15px;
+	padding: 12px 0;
 	border-top: 1px solid $border-color;
-	margin-top: 15px;
+	margin-top: 12px;
 
 	.map-stat-item {
 		display: flex;
@@ -1157,21 +1164,21 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .trend-chart {
 	width: 100%;
-	height: 130px;
+	height: 80px;
 }
 
 .metrics-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 10px;
+	gap: 6px;
 
 	.metric-item {
 		display: flex;
-		flex-direction: column;
+		align-items: center;
 		gap: 8px;
-		padding: 12px;
+		padding: 8px 10px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 6px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -1180,24 +1187,28 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.metric-icon {
-			width: 36px;
-			height: 36px;
-			border-radius: 8px;
+			width: 32px;
+			height: 32px;
+			border-radius: 6px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			color: #fff;
+			flex-shrink: 0;
 		}
 
 		.metric-info {
+			flex: 1;
+			min-width: 0;
+
 			.metric-value {
-				font-size: 20px;
+				font-size: 14px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 
 				.metric-unit {
-					font-size: 11px;
+					font-size: 9px;
 					font-weight: normal;
 					color: $text-muted;
 					margin-left: 2px;
@@ -1205,7 +1216,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.metric-label {
-				font-size: 11px;
+				font-size: 9px;
 				color: $text-muted;
 			}
 		}
@@ -1214,8 +1225,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: flex;
 			align-items: center;
 			gap: 2px;
-			font-size: 11px;
+			font-size: 9px;
 			font-weight: 600;
+			flex-shrink: 0;
 
 			&.up {
 				color: #10b981;
@@ -1231,12 +1243,12 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .team-monitor-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 5px;
 
 	.team-monitor-item {
-		padding: 10px 12px;
+		padding: 6px 8px;
 		background: rgba(255, 255, 255, 0.03);
-		border-radius: 8px;
+		border-radius: 5px;
 		transition: all 0.3s ease;
 
 		&:hover {
@@ -1247,18 +1259,18 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 8px;
+			margin-bottom: 4px;
 
 			.team-name {
-				font-size: 12px;
+				font-size: 10px;
 				color: $text-primary;
 				font-weight: 500;
 			}
 
 			.team-status {
-				font-size: 10px;
-				padding: 2px 8px;
-				border-radius: 10px;
+				font-size: 8px;
+				padding: 2px 5px;
+				border-radius: 6px;
 
 				&.normal {
 					background: rgba(16, 185, 129, 0.2);
@@ -1279,23 +1291,23 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.team-metrics {
 			display: flex;
-			gap: 15px;
+			gap: 8px;
 
 			.team-metric {
 				display: flex;
 				align-items: center;
-				gap: 6px;
+				gap: 3px;
 				flex: 1;
 
 				.metric-label {
-					font-size: 10px;
+					font-size: 8px;
 					color: $text-muted;
-					min-width: 35px;
+					min-width: 28px;
 				}
 
 				.metric-bar {
 					flex: 1;
-					height: 4px;
+					height: 3px;
 					background: rgba(255, 255, 255, 0.1);
 					border-radius: 2px;
 					overflow: hidden;
@@ -1309,14 +1321,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				}
 
 				.metric-value {
-					font-size: 11px;
+					font-size: 9px;
 					color: $primary-color;
-					min-width: 35px;
+					min-width: 28px;
 					text-align: right;
 				}
 
 				.metric-num {
-					font-size: 12px;
+					font-size: 10px;
 					color: $text-primary;
 					font-weight: 600;
 
@@ -1330,33 +1342,33 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .response-chart {
-	height: 100px;
+	height: 60px;
 }
 
 .response-stats {
 	display: flex;
 	justify-content: space-around;
-	margin-top: 12px;
-	padding-top: 12px;
+	margin-top: 8px;
+	padding-top: 8px;
 	border-top: 1px solid $border-color;
 
 	.response-stat {
 		text-align: center;
 
 		.stat-label {
-			font-size: 10px;
+			font-size: 8px;
 			color: $text-muted;
 		}
 
 		.stat-value {
-			font-size: 18px;
+			font-size: 14px;
 			font-weight: 700;
 			color: $text-primary;
 			font-family: 'Orbitron', monospace;
-			margin-top: 4px;
+			margin-top: 2px;
 
 			.unit {
-				font-size: 11px;
+				font-size: 9px;
 				font-weight: normal;
 				color: $text-muted;
 			}
