@@ -212,7 +212,7 @@ import {
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 
-const activeTeam = ref('黄骅港务公司')
+const activeTeam = ref('  港务公司')
 const timeType = ref('month')
 const kpiChartRefs = ref([])
 const archiveChartRef = ref(null)
@@ -221,7 +221,7 @@ let kpiCharts = []
 let archiveChart = null
 let trendChart = null
 
-const teams = ref(['黄骅港务公司', '煤炭港区公司', '矿石港区公司', '集装箱港区公司', '综合保税区公司'])
+const teams = ref(['  港务公司', '煤炭港区公司', '矿石港区公司', '集装箱港区公司', '综合保税区公司'])
 
 const equipmentTypes = ref([
 	{ name: '门机', value: 13, icon: 'Monitor', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', trend: 5.2 },
@@ -242,7 +242,7 @@ const kpiStats = ref([
 ])
 
 const knowledgeList = ref([
-	{ name: '黄骅港务公司', count: 189 },
+	{ name: '港务公司', count: 189 },
 	{ name: '煤炭港区公司', count: 166 },
 	{ name: '矿石港区公司', count: 131 },
 	{ name: '集装箱港区公司', count: 105 },
@@ -250,7 +250,7 @@ const knowledgeList = ref([
 ])
 
 const rateList = ref([
-	{ name: '黄骅港务公司', faultRate: 0.0, availRate: 99.34 },
+	{ name: '港务公司', faultRate: 0.0, availRate: 99.34 },
 	{ name: '煤炭港区公司', faultRate: 0.0, availRate: 99.04 },
 	{ name: '矿石港区公司', faultRate: 0.0, availRate: 99.79 },
 	{ name: '集装箱港区公司', faultRate: 0.0, availRate: 99.51 },

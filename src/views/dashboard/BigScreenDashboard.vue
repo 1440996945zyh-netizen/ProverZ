@@ -36,7 +36,7 @@
 					</div>
 				</div>
 				<div class="system-name">
-					<div class="name-main">智慧设备物资管理平台</div>
+					<div class="name-main">数智设备物资管理平台</div>
 					<div class="name-sub">Smart Equipment & Material Management</div>
 				</div>
 			</div>
@@ -562,13 +562,13 @@ const initMapChart = () => {
 	mapChart = echarts.init(mapChartRef.value)
 
 	const areaData = [
-		{ name: '黄骅港东区', value: 186, color: '#00d4ff' },
-		{ name: '黄骅港西区', value: 142, color: '#0096ff' },
+		{ name: ' 东区', value: 186, color: '#00d4ff' },
+		{ name: ' 西区', value: 142, color: '#0096ff' },
 		{ name: '煤炭港区', value: 210, color: '#667eea' },
 		{ name: '矿石港区', value: 168, color: '#764ba2' },
 		{ name: '集装箱港区', value: 134, color: '#4facfe' },
 		{ name: '综合保税区', value: 156, color: '#43e97b' },
-		{ name: '黄骅港南区', value: 98, color: '#38f9d7' },
+		{ name: ' 南区', value: 98, color: '#38f9d7' },
 		{ name: '物流园区', value: 78, color: '#fa709a' },
 	]
 

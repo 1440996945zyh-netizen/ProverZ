@@ -221,7 +221,7 @@ const pendingOrders = ref([
 	{
 		id: 'WO-2024-1256',
 		title: '门机液压系统故障维修',
-		team: '黄骅港务公司',
+		team: '港务公司',
 		time: '2小时前',
 		priority: 'critical',
 		priorityText: '紧急',
@@ -239,7 +239,7 @@ const responseMetrics = ref([
 ])
 
 const rankList = ref([
-	{ name: '张伟', team: '黄骅港务公司', score: 156 },
+	{ name: '张伟', team: '港务公司', score: 156 },
 	{ name: '李强', team: '煤炭港区公司', score: 142 },
 	{ name: '王磊', team: '矿石港区公司', score: 138 },
 	{ name: '刘洋', team: '集装箱港区公司', score: 125 },
