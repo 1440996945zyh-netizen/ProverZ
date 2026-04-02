@@ -32,6 +32,13 @@ const api = {
 			params: params
 		})
 	},
+	// 获取设备选项列表
+	getEqptOptions() {
+		return request({
+			url: '/api/internal/patrolStandard/getEqptOptions',
+			method: 'get'
+		})
+	},
 }
 export default api
 

@@ -57,6 +57,7 @@ import { ElButton, ElInputNumber } from 'element-plus'
 import EditTable from '@/components/EditTable/index.vue'
 import Select from '@/components/Select/index.vue'
 import publicApi from '@/api/public/index'
+import inspectionStandardApi from '@/api/equipment/inspectionStandard'
 
 const { proxy } = getCurrentInstance()
 
@@ -184,8 +185,12 @@ const validate = async () => {
 }
 
 const getEquipList = () => {
-	publicApi.getLocalSelect({ type: 'EQUIPMENT' }).then(res => {
-		equipList.value = res.data || []
+	inspectionStandardApi.getEqptOptions().then(res => {
+		equipList.value = (res.data || []).map(item => ({
+			value: item.id,
+			label: item.name
+		}))
+		console.log(equipList.value, 'equipList')
 	})
 }
 onMounted(() => {
