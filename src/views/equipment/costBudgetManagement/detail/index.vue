@@ -12,6 +12,24 @@
         />
       </el-form-item>
 
+      <el-form-item label="维修单位" prop="maintenanceUnitId">
+        <el-select
+          v-model="formData.maintenanceUnitId"
+          placeholder="请选择维修单位"
+          clearable
+          filterable
+          style="width: 100%"
+          @change="handleMaintenanceUnitChange"
+        >
+          <el-option
+            v-for="item in maintenanceUnitOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+
       <el-form-item label="费用类型" prop="costType">
         <el-select
           v-model="formData.costType"
@@ -45,8 +63,8 @@
 
 <script setup name="costBudgetManagementDetail">
 import { ref, reactive, getCurrentInstance, toRefs, onMounted } from 'vue'
+import api from '@/api/equipment/costBudgetManagement/index'
 import publicApi from '@/api/public/index'
-
 const { proxy } = getCurrentInstance()
 
 const ruleForm = ref()
@@ -55,19 +73,23 @@ const data = reactive({
   formData: {
     id: null,
     year: '',
+    maintenanceUnitId: null,
+    maintenanceUnitName: '',
     costType: '',
     amount: null,
   },
   costTypeOptions: [],
+  maintenanceUnitOptions: [],
 })
 
-const { formData, costTypeOptions } = toRefs(data)
+const { formData, costTypeOptions, maintenanceUnitOptions } = toRefs(data)
 
 /**
  * 表单校验
  */
 const rules = reactive({
   year: proxy.getRules({ required: true }),
+  maintenanceUnitId: proxy.getRules({ required: true }),
   costType: proxy.getRules({ required: true }),
   amount: proxy.getRules({ required: true }),
 })
@@ -94,6 +116,32 @@ const loadCostTypeOptions = async () => {
     proxy.$message.error('加载费用类型失败')
   }
 }
+/**
+ * 加载维修单位
+ */
+const loadMaintenanceUnitOptions = async () => {
+  try {
+    const res = await api.queryRepairUnitName({})
+    if (res.code === '0000' && Array.isArray(res.data)) {
+      maintenanceUnitOptions.value = res.data.map(item => ({
+        label: item.unitName || '',
+        value: item.externalCompanyId ?? item.id ?? '',
+      }))
+      return
+    }
+    maintenanceUnitOptions.value = []
+    proxy.$message.error(res.msg || '加载维修单位失败')
+  } catch (error) {
+    maintenanceUnitOptions.value = []
+    console.error('加载维修单位失败:', error)
+    proxy.$message.error('加载维修单位失败')
+  }
+}
+
+const handleMaintenanceUnitChange = value => {
+  const current = maintenanceUnitOptions.value.find(item => String(item.value) === String(value))
+  formData.value.maintenanceUnitName = current?.label || ''
+}
 
 /**
  * 表单校验方法
@@ -117,6 +165,8 @@ const validate = async () => {
 const resetForm = () => {
   formData.value.id = null
   formData.value.year = ''
+  formData.value.maintenanceUnitId = null
+  formData.value.maintenanceUnitName = ''
   formData.value.costType = ''
   formData.value.amount = null
   ruleForm.value?.clearValidate()
@@ -124,6 +174,7 @@ const resetForm = () => {
 
 onMounted(() => {
   loadCostTypeOptions()
+  loadMaintenanceUnitOptions()
 })
 
 defineExpose({

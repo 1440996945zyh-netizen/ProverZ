@@ -18,6 +18,15 @@ const api = {
     })
   },
 
+  // 查询维修单位下拉
+  queryRepairUnitName(params) {
+    return request({
+      url: '/api/internal/EMEquipRepairContract/queryUnitName',
+      method: 'get',
+      params,
+    })
+  },
+
   // 新增预算管理
   add(data) {
     return request({

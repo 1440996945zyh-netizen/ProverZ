@@ -14,10 +14,10 @@
     <Drawer v-model="dialogVisible" :title="title" size="30%">
       <detail ref="detailRef" />
       <template #footer>
-				<span class="dialog-footer">
-					<el-button @click="cancel">取消</el-button>
-					<el-button type="primary" @click="submitForm">确定</el-button>
-				</span>
+        <span class="dialog-footer">
+          <el-button @click="cancel">取消</el-button>
+          <el-button type="primary" @click="submitForm">确定</el-button>
+        </span>
       </template>
     </Drawer>
   </div>
@@ -82,19 +82,26 @@ const selectData = reactive([
  */
 const tableColumns = ref([
   { label: '序号', type: 'seq', width: 90, align: 'center', fixed: 'left' },
-  { label: '年份', prop: 'year', align: 'center', width: 220 },
+  { label: '年份', prop: 'year', align: 'center', width: 180 },
+  {
+    label: '单位名称',
+    prop: 'maintenanceUnitName',
+    align: 'center',
+    width: 220,
+    showOverFlow: true,
+  },
   {
     label: '费用类型',
     prop: 'costTypeName',
     align: 'center',
-    minWidth: 690,
+    minWidth: 320,
     showOverFlow: true,
   },
   {
     label: '预算金额',
     prop: 'amount',
     align: 'right',
-    width: 260,
+    width: 220,
     render: row => {
       const value = Number(row.amount)
       const text = !isNaN(value)
@@ -110,7 +117,7 @@ const tableColumns = ref([
     prop: 'operate',
     label: '操作',
     align: 'left',
-    minWidth: 40,
+    minWidth: 10,
     showOverFlow: false,
     render: row => {
       return h(
@@ -160,6 +167,7 @@ const tableColumns = ref([
     },
   },
 ])
+
 
 /**
  * 右侧按钮
@@ -259,11 +267,14 @@ const handleUpdate = row => {
       const resData = JSON.parse(JSON.stringify(response.data || {}))
       detailRef.value.formData.id = resData.id
       detailRef.value.formData.year = resData.year
+      detailRef.value.formData.maintenanceUnitId = resData.maintenanceUnitId
+      detailRef.value.formData.maintenanceUnitName = resData.maintenanceUnitName
       detailRef.value.formData.costType = resData.costType
       detailRef.value.formData.amount = resData.amount
     })
   })
 }
+
 
 /**
  * 删除
@@ -286,7 +297,7 @@ const handleDelete = row => {
  */
 const submitForm = async () => {
   if (await detailRef.value.validate()) {
-    const params = detailRef.value.formData
+    const params = { ...detailRef.value.formData }
     if (params.id) {
       api.update(params).then(res => {
         proxy.$modal.msgSuccess(res.msg)
