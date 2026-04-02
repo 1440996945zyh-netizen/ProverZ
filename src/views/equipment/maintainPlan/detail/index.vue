@@ -135,12 +135,21 @@
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
+			<el-col :span="24" v-if="formData.equipType==4">
+              <el-form-item label="选择月" prop="setDate">
+                <el-checkbox-group v-model="formData.setDate">
+                  <el-checkbox v-for="item in yearList" :key="item" :value="item" :label="item">
+                  </el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+            </el-col>
 			    </el-row>
 		    </el-form>
       </el-collapse-item>
+
       <el-collapse-item title="润滑保养标准" name="2">
 				<template v-slot:title>
-					<div style='display: flex; justify-content: space-between; width: 95%'>
+					<div style='display: flex;justify-content: space-between; width: 95%'>
 						<div>润滑保养标准</div>
 						<div>
 							<el-button type='primary' @click.stop='addStandard'>添加</el-button>
@@ -210,6 +219,7 @@ const inspectionList = ref([])
 const weekList = ref(["1","2","3","4","5","6","7"])
 const monthList = ref(["1","2","3","4","5","6","7","8","9","10","11","12","13","14",
 "15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"])
+const yearList = ref(["1","2","3","4","5","6","7","8","9","10","11","12"])
 const rules = reactive({
 	equipSmallCategoryId: proxy.getRules({ required: true }),
 	equipInstitutionId: proxy.getRules({ required: true }),

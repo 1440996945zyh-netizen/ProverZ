@@ -24,7 +24,7 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
-							<el-form-item label="点检类型" prop="patrolType">
+							<el-form-item label="巡检类型" prop="patrolType">
 								<Select :selectData="[
 									{ label: '日', value: '1' },
 									{ label: '周', value: '2' },
@@ -81,11 +81,11 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="8" v-if="!'1234'.includes(formData.patrolType)">
-							<el-form-item :label="'点检周期（' + cycleTitle + '）'" prop="cycle">
+							<el-form-item :label="'巡检周期（' + cycleTitle + '）'" prop="cycle">
 								<template #label>
 									<span>
-										点检周期（{{ cycleTitle }}）
-										<el-tooltip lass="box-item" effect="dark" content="设备作业多少数开始下次点检任务" placement="top">
+										巡检周期（{{ cycleTitle }}）
+										<el-tooltip lass="box-item" effect="dark" content="设备作业多少数开始下次巡检任务" placement="top">
 											<el-icon>
 												<QuestionFilled />
 											</el-icon>
@@ -96,11 +96,11 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
-							<el-form-item label="点检时限（天）" prop="timeLimit">
+							<el-form-item label="巡检时限（天）" prop="timeLimit">
 								<template #label>
 									<span>
 										巡检时限（天）
-										<el-tooltip lass="box-item" effect="dark" content="通过点检时限计算点检任务截止日期（多少天内完成点检任务）"
+										<el-tooltip lass="box-item" effect="dark" content="通过巡检时限计算巡检任务截止日期（多少天内完成巡检任务）"
 											placement="top">
 											<el-icon>
 												<QuestionFilled />
@@ -129,6 +129,14 @@
 							<el-form-item label="选择天" prop="setDate">
 								<el-checkbox-group v-model="formData.setDate">
 									<el-checkbox v-for="item in monthList" :key="item" :value="item"
+										:label="item"></el-checkbox>
+								</el-checkbox-group>
+							</el-form-item>
+						</el-col>
+						<el-col :span="24" v-if="formData.patrolType == 4">
+							<el-form-item label="选择月" prop="setDate">
+								<el-checkbox-group v-model="formData.setDate">
+									<el-checkbox v-for="item in yearList" :key="item" :value="item"
 										:label="item"></el-checkbox>
 								</el-checkbox-group>
 							</el-form-item>
@@ -211,6 +219,20 @@ const monthList = ref([
 	'29',
 	'30',
 ])
+const yearList = ref([
+	'1',
+	'2',
+	'3',
+	'4',
+	'5',
+	'6',
+	'7',
+	'8',
+	'9',
+	'10',
+	'11',
+	'12',
+])
 const rules = reactive({
 	equipSmallCategoryName: proxy.getRules({ required: true }),
 	equipName: proxy.getRules({ required: true }),
@@ -288,7 +310,7 @@ const getRouteList = () => {
 }
 // 获取点检员列表
 const getpatrolList = () => {
-	publicApi.getLocalSelect({ type: 'USER', role: 'DJY' }).then(res => {
+	publicApi.getLocalSelect({ type: 'USER', role: 'XJY' }).then(res => {
 		inspectionList.value = res.data
 	})
 }
