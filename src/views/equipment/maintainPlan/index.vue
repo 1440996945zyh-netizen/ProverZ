@@ -231,7 +231,7 @@ const equipTypeChange = e => {
 				return '月（'+e.setDate+'号）';
 				break;
 			case '4':
-				return '年';
+				return '年（'+e.setDate+'月）';
 				break;
 			case '5':
 				return '运行台时';
@@ -259,7 +259,7 @@ const save = async () => {
     const params = JSON.parse(JSON.stringify(viewRef.value.formData))
     if (params.setDate) {
 			if (params.setDate.length > 1) {
-				return proxy.$message.warning('选择天只能勾选一个复选框')
+				return proxy.$message.warning('选择只能勾选一个复选框')
 			}
       params.setDate = params.setDate.join(",")
     }

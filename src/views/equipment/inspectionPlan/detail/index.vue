@@ -139,6 +139,13 @@
 								</el-checkbox-group>
 							</el-form-item>
 						</el-col>
+						<el-col :span="24" v-if="formData.equipType == 4">
+							<el-form-item label="选择月" prop="setDate">
+								<el-checkbox-group v-model="formData.setDate">
+									<el-checkbox v-for="item in yearList" :key="item" :value="item" :label="item"></el-checkbox>
+								</el-checkbox-group>
+							</el-form-item>
+						</el-col>
 					</el-row>
 				</el-form>
 			</el-collapse-item>
@@ -242,6 +249,20 @@ const monthList = ref([
 	'28',
 	'29',
 	'30',
+])
+const yearList = ref([
+	'1',
+	'2',
+	'3',
+	'4',
+	'5',
+	'6',
+	'7',
+	'8',
+	'9',
+	'10',
+	'11',
+	'12',
 ])
 const rules = reactive({
 	equipSmallCategoryId: proxy.getRules({ required: true }),
