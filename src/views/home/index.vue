@@ -173,7 +173,7 @@
 						<div class="title-icon"></div>
 						<span>工单趋势</span>
 					</div>
-					<div style="display: flex; align-items: center; justify-content: center; margin: 0 20px;">
+					<div style="display: flex; align-items: center; justify-content: center; margin: 0 20px">
 						<el-date-picker
 							v-model="trendDateRange"
 							type="daterange"
@@ -184,7 +184,7 @@
 							value-format="YYYY-MM-DD"
 							:clearable="false"
 							@change="handleTrendDateChange"
-							style="width: 320px; font-size: 13px;"
+							style="width: 320px; font-size: 13px"
 						/>
 					</div>
 					<div class="trend-summary">
@@ -318,8 +318,9 @@
 							<div class="warning-content">
 								<span class="warning-name">{{ item.name }}</span>
 								<span class="warning-desc">库存 {{ item.stock }} / 预警 {{ item.threshold }}</span>
+								<span class="warning-time">预警时间：{{ item.createTime }}</span>
 							</div>
-							<span class="warning-tag">{{ item.levelText }}</span>
+							<!-- <span class="warning-tag">{{ item.levelText }}</span> -->
 						</div>
 					</div>
 				</div>
@@ -401,7 +402,7 @@ import {
 import * as echarts from 'echarts'
 import usePermissionStore from '@/store/modules/permission'
 import { getTaskTodoPage } from '@/api/system/bpm/task'
-import { getHomeMap, getMaintInfo } from '@/api/equipment/home'
+import { getHomeMap, getMaintInfo, getWarningRecord } from '@/api/equipment/home'
 const permissionStore = usePermissionStore()
 const router = useRouter()
 
@@ -690,11 +691,7 @@ const getEquipmentIcon = index => {
 	return equipmentIcons[index % equipmentIcons.length]
 }
 
-const materialWarning = ref([
-	{ name: '润滑油', stock: 15, threshold: 50, level: 'danger', levelText: '紧急' },
-	{ name: '密封圈', stock: 28, threshold: 40, level: 'warning', levelText: '预警' },
-	{ name: '轴承', stock: 35, threshold: 50, level: 'warning', levelText: '预警' },
-])
+const materialWarning = ref([])
 
 const materialTopList = ref([
 	{ name: '润滑油', value: 2580, unit: 'L', percent: 100 },
@@ -1035,6 +1032,25 @@ const updateEquipmentChart = () => {
 	equipmentChart.setOption(option)
 }
 
+// 获取物资预警数据
+const getMaterialWarningData = async () => {
+	try {
+		const res = await getWarningRecord()
+		const data = res.data || []
+
+		materialWarning.value = data.map(item => ({
+			name: item.materialName || '未知物资',
+			stock: item.currentStock || 0,
+			threshold: item.warningThreshold || 0,
+			createTime: item.createTime || '',
+			level: 'warning',
+			levelText: '预警',
+		}))
+	} catch (error) {
+		console.error('获取物资预警数据失败:', error)
+	}
+}
+
 const handleResize = () => {
 	workOrderTypeChart?.resize()
 	trendChart?.resize()
@@ -1056,17 +1072,39 @@ const navigateToWorkOrder = tab => {
 
 const navigateToStatus = type => {
 	let path = '/equipment/maintInfo'
+	let query = {}
+
 	if (type.includes('inspection')) {
 		path = '/equipment/patrolTask'
+		if (type === 'inspection-pending') {
+			query.status = '0'
+		} else if (type === 'inspection-done') {
+			query.status = '2'
+		}
 	} else if (type.includes('check')) {
 		path = '/equipment/inspectionTask'
+		if (type === 'check-pending') {
+			query.status = '0'
+		} else if (type === 'check-done') {
+			query.status = '2'
+		}
 	} else if (type.includes('lubrication') || type.includes('maintenance')) {
 		path = '/equipment/maintainTask'
+		if (type === 'lubrication-pending') {
+			query.status = '0'
+			query.planType = '1'
+		} else if (type === 'lubrication-done') {
+			query.status = '2'
+			query.planType = '1'
+		} else if (type === 'maintenance-pending') {
+			query.status = '0'
+			query.planType = '2'
+		} else if (type === 'maintenance-done') {
+			query.status = '2'
+			query.planType = '2'
+		}
 	}
-	router.push({
-		path,
-		query: { status: type },
-	})
+	router.push({ path, query })
 }
 
 const navigateToApproval = tab => {
@@ -1228,6 +1266,9 @@ const getHomeData = async () => {
 				{ label: '保养', value: parseInt(data.eMaintIfonToday.by) || 0, type: 'pink', icon: 'FirstAidKit' },
 			]
 		}
+
+		// 获取物资预警数据
+		await getMaterialWarningData()
 
 		// 更新设备图表
 		updateEquipmentChart()
@@ -2654,6 +2695,13 @@ onUnmounted(() => {
 					font-size: 12px;
 					color: #6b7280;
 				}
+
+				.warning-time {
+					padding-left: 5px;
+					font-size: 11px;
+					color: #9ca3af;
+					margin-top: 4px;
+				}
 			}
 
 			.warning-tag {
@@ -3084,7 +3132,8 @@ onUnmounted(() => {
 		.compact-date-picker {
 			width: 150px !important;
 
-			:deep(.el-range__start), :deep(.el-range__end) {
+			:deep(.el-range__start),
+			:deep(.el-range__end) {
 				width: 52px !important;
 			}
 		}
@@ -3101,7 +3150,8 @@ onUnmounted(() => {
 		.compact-date-picker {
 			width: 160px !important;
 
-			:deep(.el-range__start), :deep(.el-range__end) {
+			:deep(.el-range__start),
+			:deep(.el-range__end) {
 				width: 55px !important;
 			}
 		}
@@ -3133,7 +3183,8 @@ onUnmounted(() => {
 	.trend-filter .compact-date-picker {
 		width: 140px !important;
 
-		:deep(.el-range__start), :deep(.el-range__end) {
+		:deep(.el-range__start),
+		:deep(.el-range__end) {
 			width: 55px !important;
 			padding: 0 4px;
 			font-size: 12px;

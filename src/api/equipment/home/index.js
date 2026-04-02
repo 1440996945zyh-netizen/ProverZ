@@ -27,3 +27,14 @@ export function getMaintInfo(startTime, endTime) {
 		},
 	})
 }
+
+/**
+ * 获取物资预警数据
+ * @returns {Promise}
+ */
+export function getWarningRecord() {
+	return request({
+		url: '/api/internal/home/getWarningRecord',
+		method: 'get',
+	})
+}
