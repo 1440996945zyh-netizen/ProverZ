@@ -32,14 +32,14 @@
 					<span class="setting-text">登录密码</span>
 					<el-button type="text" class="setting-btn">修改密码</el-button>
 				</div>
-				<div class="setting-card">
+				<div class="setting-card" @click="changePhone">
 					<div class="setting-icon">
 						<svg-icon icon-class="phone"></svg-icon>
 					</div>
 					<span class="setting-text">手机号</span>
 					<el-button type="text" class="setting-btn">修改手机号</el-button>
 				</div>
-				<div class="setting-card">
+				<div class="setting-card" @click="changeEmail">
 					<div class="setting-icon">
 						<svg-icon icon-class="email"></svg-icon>
 					</div>
@@ -60,7 +60,7 @@
 					<span class="setting-text">分页</span>
 					<el-button type="text" class="setting-btn">列表条数设置</el-button>
 				</div>
-				<div class="setting-card" @click="setFollow">
+				<div class="setting-card">
 					<div class="setting-icon">
 						<svg-icon icon-class="project"></svg-icon>
 					</div>
@@ -87,6 +87,24 @@
 				</span>
 			</template>
 		</Dialog>
+		<Dialog v-model:visible="mobileVisible" :title="title" width="30%">
+			<mobile ref="mobileRef" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="mobileVisible = false">取消</el-button>
+					<el-button type="primary" @click="saveMobile">保存</el-button>
+				</span>
+			</template>
+		</Dialog>
+		<Dialog v-model:visible="emailVisible" :title="title" width="30%">
+			<email ref="emailRef" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="emailVisible = false">取消</el-button>
+					<el-button type="primary" @click="saveEmail">保存</el-button>
+				</span>
+			</template>
+		</Dialog>
 		<Dialog v-model:visible="pageVisible" title="每页数量" width="20%">
 			<page ref="pageRef" />
 			<template #footer>
@@ -110,8 +128,9 @@
 <script setup>
 // 原有逻辑不变，直接保留
 import change from './change/index.vue'
+import email from './email/index.vue'
+import mobile from './mobile/index.vue'
 import page from './page/index.vue'
-import follow from './follow/index.vue'
 import useUserStore from '@/store/modules/user'
 import Dialog from '@/components/Dialog/index.vue'
 import api from '@/api/system/user'
@@ -125,6 +144,10 @@ const changeRef = ref()
 const pageVisible = ref(false)
 const pageRef = ref(false)
 const followVisible = ref(false)
+const mobileVisible = ref(false)
+const mobileRef = ref()
+const emailVisible = ref(false)
+const emailRef = ref()
 
 const changePassWord = () => {
 	changeVisible.value = true
@@ -141,6 +164,53 @@ const save = async () => {
 			api.updateUserPwd(params.oldPassword, params.newPassword).then(res => {
 				proxy.$modal.msgSuccess(res.msg)
 				changeVisible.value = false
+			})
+		})
+	}
+}
+
+const changePhone = () => {
+	mobileVisible.value = true
+	title.value = '修改手机号'
+	nextTick(() => {
+		mobileRef.value?.resetForm()
+		api.getById(userStore.userId).then(res => {
+			mobileRef.value.formData.oldMobile = res.data.mobile
+		})
+	})
+}
+
+const saveMobile = async () => {
+	if (await mobileRef.value?.validate()) {
+		const params = JSON.parse(JSON.stringify(mobileRef.value.formData))
+		params.id = userStore.userId
+		proxy.$modal.confirm('确定保存？').then(() => {
+			api.updatePhone(params).then(res => {
+				proxy.$modal.msgSuccess(res.msg)
+				mobileVisible.value = false
+			})
+		})
+	}
+}
+const changeEmail = () => {
+	emailVisible.value = true
+	title.value = '修改邮箱'
+	nextTick(() => {
+		emailRef.value?.resetForm()
+		api.getById(userStore.userId).then(res => {
+			emailRef.value.formData.oldEmail = res.data.email
+		})
+	})
+}
+
+const saveEmail = async () => {
+	if (await emailRef.value?.validate()) {
+		const params = JSON.parse(JSON.stringify(emailRef.value.formData))
+		params.id = userStore.userId
+		proxy.$modal.confirm('确定保存？').then(() => {
+			api.updateEmail(params).then(res => {
+				proxy.$modal.msgSuccess(res.msg)
+				emailVisible.value = false
 			})
 		})
 	}
@@ -163,10 +233,6 @@ const savePage = async () => {
 			})
 		})
 	}
-}
-
-const setFollow = () => {
-	followVisible.value = true
 }
 </script>
 
@@ -204,7 +270,6 @@ const setFollow = () => {
 	height: 100%;
 	object-fit: cover;
 }
-
 
 .user-base-info {
 	color: #303133;
