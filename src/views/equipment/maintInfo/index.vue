@@ -1090,7 +1090,9 @@ const edit = row => {
 						'1': '提报',
 						'2': '派工',
 						'3': '点检',
-						'4': '润滑'
+						'4': '润滑',
+						'5': '保养',
+						'6': '巡检'
 					}
 					detailRef.value.formData.reportTypeName = typeMap[detailRef.value.formData.reportTypeCode] || ''
 				}
@@ -1143,7 +1145,9 @@ const view = row => {
 						'1': '提报',
 						'2': '派工',
 						'3': '点检',
-						'4': '润滑'
+						'4': '润滑',
+						'5': '保养',
+						'6': '巡检'
 					}
 					msg.reportTypeName = typeMap[msg.reportTypeCode] || ''
 				}
