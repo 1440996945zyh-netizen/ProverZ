@@ -1072,38 +1072,36 @@ const navigateToWorkOrder = tab => {
 
 const navigateToStatus = type => {
 	let path = '/equipment/maintInfo'
-	let query = {}
+	let query = { fromHome: '1' }
 
 	if (type.includes('inspection')) {
 		path = '/equipment/patrolTask'
-		if (type === 'inspection-pending') {
+		if (type.includes('pending')) {
 			query.status = '0'
-		} else if (type === 'inspection-done') {
+		} else if (type.includes('done')) {
 			query.status = '2'
 		}
 	} else if (type.includes('check')) {
 		path = '/equipment/inspectionTask'
-		if (type === 'check-pending') {
+		if (type.includes('pending')) {
 			query.status = '0'
-		} else if (type === 'check-done') {
+		} else if (type.includes('done')) {
 			query.status = '2'
 		}
 	} else if (type.includes('lubrication') || type.includes('maintenance')) {
 		path = '/equipment/maintainTask'
-		if (type === 'lubrication-pending') {
+		if (type.includes('pending')) {
 			query.status = '0'
-			query.planType = '1'
-		} else if (type === 'lubrication-done') {
+		} else if (type.includes('done')) {
 			query.status = '2'
+		}
+		if (type.includes('lubrication')) {
 			query.planType = '1'
-		} else if (type === 'maintenance-pending') {
-			query.status = '0'
-			query.planType = '2'
-		} else if (type === 'maintenance-done') {
-			query.status = '2'
+		} else if (type.includes('maintenance')) {
 			query.planType = '2'
 		}
 	}
+
 	router.push({ path, query })
 }
 
@@ -2634,6 +2632,15 @@ onUnmounted(() => {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
+		max-height: 300px;
+		overflow-y: auto;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 
 		.warning-item {
 			display: flex;
