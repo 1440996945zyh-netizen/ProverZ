@@ -28,11 +28,14 @@
 <script setup name="patrolTask">
 import BaseTable from '@/components/BaseTable/index.vue'
 import api from '@/api/equipment/patrolTask/index'
-import { ref, reactive, nextTick, h, getCurrentInstance } from 'vue'
+import { ref, reactive, nextTick, h, getCurrentInstance, onMounted, watch } from 'vue'
 import { ElButton, ElTag } from 'element-plus'
+import { useRoute, useRouter } from 'vue-router'
 import detail from './detail/index.vue'
 
 const { proxy } = getCurrentInstance()
+const route = useRoute()
+const router = useRouter()
 
 const selectData = reactive([
 	{
@@ -84,7 +87,7 @@ const selectData = reactive([
 ])
 
 const rowClassName = ({ row }) => {
-	if (row.status !== 2 || row.status !== '2') {
+	if (row.status !== 2 && row.status !== '2') {
 		const today = new Date()
 		today.setHours(0, 0, 0, 0)
 		const endDate = row.endDate ? new Date(row.endDate) : null
@@ -194,7 +197,46 @@ const handleUpdate = row => {
 	})
 }
 
-getList(queryParams.value)
+const initFromHomeParams = () => {
+	const { fromHome, status } = route.query
+	if (fromHome === '1' && status) {
+		queryParams.value = {
+			startPage: 1,
+			pageSize: 20,
+			status: status,
+		}
+		setTimeout(() => {
+			proxy.$bus.emit('setInitSearchData', { status })
+			getList(queryParams.value)
+		}, 100)
+		router.replace({ path: route.path, query: {} })
+	} else {
+		getList(queryParams.value)
+	}
+}
+
+watch(
+	() => route.query,
+	newQuery => {
+		const { fromHome, status } = newQuery
+		if (fromHome === '1' && status) {
+			queryParams.value = {
+				startPage: 1,
+				pageSize: 20,
+				status: status,
+			}
+			setTimeout(() => {
+				proxy.$bus.emit('setInitSearchData', { status })
+				getList(queryParams.value)
+			}, 100)
+			router.replace({ path: route.path, query: {} })
+		}
+	},
+)
+
+onMounted(() => {
+	initFromHomeParams()
+})
 </script>
 
 <style scoped>
