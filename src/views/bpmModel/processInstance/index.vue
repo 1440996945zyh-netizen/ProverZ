@@ -224,9 +224,9 @@ const tableColumnsMyProcess = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -388,7 +388,7 @@ const getListMyProcess = async e => {
 		let pagination = myProcessTableRef.value?.buildQueryParams()
 		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		const res = await getProcessInstanceMyPage(params)
 		if (res.code === '0000') {
@@ -535,9 +535,9 @@ const tableColumnsTodo = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.processInstance.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -645,7 +645,7 @@ const getListTodo = async e => {
 		let pagination = todoTaskTableRef.value?.buildQueryParams()
 		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		const res = await getTaskTodoPage(params)
 		todoData.tableData = res.data.pages
@@ -787,9 +787,9 @@ const tableColumnsDone = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.processInstance.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -918,9 +918,9 @@ const getListDone = async e => {
 	doneData.loading = true
 	try {
 		let pagination = doneTaskTableRef.value?.buildQueryParams()
-		const params ={
+		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		const res = await getTaskDonePage(params)
 		doneData.tableData = res.data.pages || []
@@ -1029,9 +1029,9 @@ const tableColumnsCopy = ref([
 					h(
 						'div',
 						{
-              class: 'flex flex-col',
-              style: { gap: '8px' }
-            },
+							class: 'flex flex-col',
+							style: { gap: '8px' },
+						},
 						row.summary.map((item, index) =>
 							h('div', { key: index }, h('span', { class: 'el-text el-text--info' }, `${item.key} : ${item.value}`))
 						)
@@ -1119,7 +1119,7 @@ const getListCopy = async e => {
 		let pagination = copyTaskTableRef.value?.buildQueryParams()
 		const params = {
 			...e,
-			...pagination
+			...pagination,
 		}
 		if (params.createTime && params.createTime.length === 2) {
 			const [startDate, endDate] = params.createTime
@@ -1189,18 +1189,18 @@ const toggleAdvancedFilter = tabName => {
 	commonData.showPopover = !commonData.showPopover
 }
 
-const initCommonData = async () => {
-	const [categoryData, definitionData] = await Promise.all([CategoryApi.getCategoryPage(), DefinitionApi.getProcessDefinitionPage()])
+// const initCommonData = async () => {
+// 	const [categoryData, definitionData] = await Promise.all([CategoryApi.getCategoryPage(), DefinitionApi.getProcessDefinitionPage()])
 
-	categoryList.value = categoryData.data.pages.map(item => ({ label: item.name, value: item.code }))
-	processDefinitionList.value = definitionData.data.pages.map(item => ({ label: item.name, value: item.key }))
-}
+// 	categoryList.value = categoryData.data.pages.map(item => ({ label: item.name, value: item.code }))
+// 	processDefinitionList.value = definitionData.data.pages.map(item => ({ label: item.name, value: item.key }))
+// }
 
 /** 初始化 **/
 onMounted(async () => {
 	// 获取公共数据
 	try {
-		await initCommonData()
+		// await initCommonData()
 		// 初始化当前 Tab 的数据
 		if (activeTab.value === 'myProcess') {
 			await getListMyProcess()
