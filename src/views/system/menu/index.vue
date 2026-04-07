@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2026-03-16 18:55:10
+ * @LastEditTime: 2026-04-07 15:57:03
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -660,10 +660,9 @@ const buttonList = reactive([
  */
 const getList = e => {
 	tableLoading.value = true
-	
+
 	let params = {
 		...e,
-		
 	}
 	listMenu(params)
 		.then(response => {
@@ -684,7 +683,7 @@ const getTreeselect = async () => {
 	menuOptions.value = []
 	getContentsMenu().then(response => {
 		menuDataInfo.value = response.data
-		const menu = { menuId: 0, menuName: '主类目', children: [] }
+		const menu = { menuId: "0", menuName: '主类目', children: [] }
 		menu.children = proxy.flattenToTree(response.data, 'menuId')
 		menuOptions.value.push(menu)
 	})
@@ -773,12 +772,16 @@ const submitForm = () => {
 				menuData.link = null
 			}
 			// 处理二级类型为目录时的 component 字段
-			if (menuData.menuType == 'M' && menuData.parentId != '0') {
-				menuDataInfo.value.forEach(item => {
-					if (item.menuId == menuData.parentId) {
-						menuData.component = item.path
-					}
-				})
+			if (menuData.menuType == 'M') {
+				const parentId = String(menuData.parentId)
+				if (parentId == '0') {
+					menuData.component = 'Layout' // 一级目录固定值
+				} else {
+					const parentMenu = menuDataInfo.value.find(item => String(item.menuId) === parentId)
+					menuData.component = parentMenu?.path || null
+				}
+			} else {
+				menuData.component = null // 非目录类型清空
 			}
 
 			console.log('提交表单 submitForm menuData', menuData)
