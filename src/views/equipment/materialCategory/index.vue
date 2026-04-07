@@ -123,29 +123,29 @@ const tableColumns = ref([
 		},
 	},
 	// 列4：是否纳入劳保管理
-	{
-		prop: 'isLaborProtection',
-		label: '是否纳入劳保管理',
-		align: 'center',
-		width: 170,
-		render: row => {
-			const isLabor = row.isLaborProtection === 1
-			return [
-				h(
-					ElTag,
-					{
-						type: isLabor ? 'success' : 'info',
-						size: 'default',
-					},
-					{
-						default: () => {
-							return isLabor ? '是' : '否'
-						},
-					}
-				),
-			]
-		},
-	},
+	// {
+	// 	prop: 'isLaborProtection',
+	// 	label: '是否纳入劳保管理',
+	// 	align: 'center',
+	// 	width: 170,
+	// 	render: row => {
+	// 		const isLabor = row.isLaborProtection === 1
+	// 		return [
+	// 			h(
+	// 				ElTag,
+	// 				{
+	// 					type: isLabor ? 'success' : 'info',
+	// 					size: 'default',
+	// 				},
+	// 				{
+	// 					default: () => {
+	// 						return isLabor ? '是' : '否'
+	// 					},
+	// 				}
+	// 			),
+	// 		]
+	// 	},
+	// },
 	// 列5：排序
 	{
 		prop: 'sortOrder',
@@ -379,7 +379,7 @@ const handleUpdate = async row => {
 			detailRef.value.formData.parentId = resData.parentId
 			detailRef.value.formData.categoryLevel = resData.categoryLevel
 			detailRef.value.formData.sortOrder = resData.sortOrder || 0
-			detailRef.value.formData.isLaborProtection = resData.isLaborProtection || 0
+			// detailRef.value.formData.isLaborProtection = resData.isLaborProtection || 0
 		})
 	})
 }

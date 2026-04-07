@@ -13,12 +13,12 @@
 				<el-input v-model="parentName" disabled placeholder="父级类别" />
 			</el-form-item>
 
-			<el-form-item label="是否纳入劳保" prop="isLaborProtection">
+			<!-- <el-form-item label="是否纳入劳保" prop="isLaborProtection">
 				<el-radio-group v-model="formData.isLaborProtection">
 					<el-radio :label="0">否</el-radio>
 					<el-radio :label="1">是</el-radio>
 				</el-radio-group>
-			</el-form-item>
+			</el-form-item> -->
 
 			<el-form-item label="排序" prop="sortOrder">
 				<el-input-number v-model="formData.sortOrder" :min="0" :max="9999" placeholder="排序" />
@@ -49,7 +49,7 @@ const data = reactive({
 		parentId: null,
 		categoryLevel: 1,
 		sortOrder: 0,
-		isLaborProtection: 0,
+		// isLaborProtection: 0,
 		codeCount: null,
 	},
 })
@@ -126,7 +126,7 @@ const resetForm = () => {
 	formData.value.parentId = null
 	formData.value.categoryLevel = 1
 	formData.value.sortOrder = 0
-	formData.value.isLaborProtection = 0
+	// formData.value.isLaborProtection = 0
 	formData.value.codeCount = null
 	ruleForm.value?.clearValidate()
 }
