@@ -62,11 +62,30 @@
 						</el-col>
 					</el-row>
 					<el-row :gutter="20">
-						<el-col :span="24">
+						<el-col :span="8">
+							<el-form-item label="派工人" prop="dispatcherId">
+								<el-select
+									v-model="formData.dispatcherId"
+									placeholder="请选择派工人"
+									style="width: 100%"
+									filterable
+									@change="handleDispatcherChange"
+								>
+									<el-option
+										v-for="item in dispatcherOptions"
+										:key="item.repairId"
+										:label="item.repairName"
+										:value="item.repairId"
+									/>
+								</el-select>
+							</el-form-item>
+						</el-col>
+						<el-col :span="16">
 							<el-form-item label="故障描述" prop="faultDesc">
 								<el-input v-model="formData.faultDesc" type="textarea" :rows="3" placeholder="请输入故障描述" />
 							</el-form-item>
 						</el-col>
+		
 					</el-row>
 					<el-row :gutter="20">
 						<el-col :span="24">
@@ -305,6 +324,9 @@ const imageFileList = ref([]) // 故障图片
 const previewImageUrl = ref('') // 预览图片URL
 const previewVisible = ref(false) // 预览对话框显示状态
 
+// 派工人列表
+const dispatcherOptions = ref([])
+
 // 表单数据
 const formData = reactive({
 	id: null,
@@ -350,6 +372,7 @@ const rules = reactive({
 	maintTypeCode: [{ required: true, message: '维修类型不能为空', trigger: 'change' }],
 	isStopped: [{ required: true, message: '是否停机不能为空', trigger: 'change' }],
 	faultDesc: [{ required: true, message: '故障描述不能为空', trigger: 'blur' }],
+	dispatcherId: [{ required: true, message: '派工人不能为空', trigger: 'change' }],
 	dispatchTypeCode: [],
 	mantAppNumber: [],
 	maintOrgId: [],
@@ -609,6 +632,42 @@ const removeDispatchPart = (row) => {
 	syncDispatchPartToForm()
 }
 
+// 加载派工人列表
+const loadDispatcherOptions = async (equipId) => {
+	if (!equipId) {
+		dispatcherOptions.value = []
+		return
+	}
+	try {
+		const res = await api.getDispatchUserListByEquipId(equipId)
+		if (res.code === '0000' || res.code === 200) {
+			dispatcherOptions.value = res.data || []
+			
+			// 如果是新增模式且没有选过派工人，尝试设置默认值
+			if (props.mode === 'add' && !formData.dispatcherId) {
+				// 获取当前用户ID
+				const currentUserId = proxy.$store.state.user.id
+				const hasCurrentUser = dispatcherOptions.value.some(item => item.repairId === currentUserId)
+				if (hasCurrentUser) {
+					formData.dispatcherId = currentUserId
+					const user = dispatcherOptions.value.find(item => item.repairId === currentUserId)
+					formData.dispatcherName = user.repairName
+				}
+			}
+		}
+	} catch (error) {
+		console.error('加载派工人列表失败:', error)
+	}
+}
+
+// 派工人变更
+const handleDispatcherChange = (val) => {
+	const user = dispatcherOptions.value.find(item => item.repairId === val)
+	if (user) {
+		formData.dispatcherName = user.repairName
+	}
+}
+
 // 处理设备选择变化
 const handleEquipmentChange = (item) => {
 	clearMaintProjApply()
@@ -628,6 +687,8 @@ const handleEquipmentChange = (item) => {
 						queryMaintProjApplyOptions()
 					}
 				}
+				// 选择设备后加载派工人
+				loadDispatcherOptions(item.value)
 			}
 		}).catch(() => {
 			// 如果查询失败，尝试从 label 中提取（如果包含编码信息）
@@ -638,6 +699,9 @@ const handleEquipmentChange = (item) => {
 		formData.equipSmallCategoryName = ''
 		dispatchPartList.value = []
 		syncDispatchPartToForm()
+		dispatcherOptions.value = []
+		formData.dispatcherId = null
+		formData.dispatcherName = ''
 	}
 }
 
@@ -989,6 +1053,10 @@ watch(() => formData.id, (newVal) => {
 	if (newVal && props.mode !== 'add') {
 		// 编辑或查看模式下，加载已有图片
 		loadImages()
+		// 如果有设备ID，加载派工人下拉列表
+		if (formData.equipId) {
+			loadDispatcherOptions(formData.equipId)
+		}
 	}
 })
 
@@ -1124,6 +1192,7 @@ const resetForm = () => {
 	formData.specialJobCode = ''
 	formData.specialJobName = ''
 	formData.specialJobCodeList = []
+	dispatcherOptions.value = []
 	clearMaintProjApply()
 	// 重置状态
 	formData.status = 0
