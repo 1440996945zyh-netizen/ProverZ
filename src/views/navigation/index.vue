@@ -24,6 +24,7 @@ import EachartNavigation from './EachartNavigation'
 import { computed ,watchEffect,ref} from 'vue'
 
 const permissionStore = usePermissionStore()
+console.log("permissionStore.routes",permissionStore.routes)
 const showMenuList = computed(() => {
 	return permissionStore.routes.filter(item => !item.hidden && item.path)
 })
