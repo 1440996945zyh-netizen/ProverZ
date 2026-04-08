@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2026-04-07 15:57:03
+ * @LastEditTime: 2026-04-08 11:20:54
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -147,7 +147,7 @@
 						<el-form-item
 							prop="path"
 							:rules="
-								form.menuType === 'M' && form.parentId == '0'
+								form.parentId == '0'
 									? [
 											{ required: true, message: '路由地址不能为空' },
 											{ pattern: '^\/.*', message: '一级菜单路由以 / 开头' },
@@ -695,7 +695,7 @@ const handleAdd = async row => {
 	if (row != null && row.menuId) {
 		form.value.parentId = row.menuId
 	} else {
-		form.value.parentId = 0
+		form.value.parentId = "0"
 	}
 	open.value = true
 	title.value = '新增'
@@ -780,10 +780,7 @@ const submitForm = () => {
 					const parentMenu = menuDataInfo.value.find(item => String(item.menuId) === parentId)
 					menuData.component = parentMenu?.path || null
 				}
-			} else {
-				menuData.component = null // 非目录类型清空
-			}
-
+			} 
 			console.log('提交表单 submitForm menuData', menuData)
 			if (menuData.id != undefined) {
 				updateMenu(menuData).then(res => {
