@@ -353,7 +353,7 @@ const cellClickEvent = ({ row }) => {
 
 /** 查询列表 */
 const getList = e => {
-	const pagination = applicationExampleTableRef.value?.buildQueryParams() 
+	const pagination = applicationExampleTableRef.value?.buildQueryParams()
 	let params = {
 		...e,
 		...pagination,
@@ -488,7 +488,7 @@ const handleSubmitPayment = (row, paymentType) => {
 			if (res && res.data) {
 				// proxy.setFormData(detailRef.value.formData, res.data)
 				//其他传参案例
-				// res.data.paramsJSON = JSON.stringify({ bagayalu: '1001', amount: 5000 })
+				// res.data.paramsJSON = JSON.stringify({ wojugelizi: '1001', amount: 5000 })
 				startProcess({
 					rowData: res.data, // 点击行数据
 					businessId: route.meta?.menuId, // 业务ID 业务菜单id

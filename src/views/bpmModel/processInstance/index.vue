@@ -1201,18 +1201,18 @@ const toggleAdvancedFilter = tabName => {
 	commonData.showPopover = !commonData.showPopover
 }
 
-const initCommonData = async () => {
-	const [categoryData, definitionData] = await Promise.all([CategoryApi.getCategoryPage(), DefinitionApi.getProcessDefinitionPage()])
+// const initCommonData = async () => {
+// 	const [categoryData, definitionData] = await Promise.all([CategoryApi.getCategoryPage(), DefinitionApi.getProcessDefinitionPage()])
 
-	categoryList.value = categoryData.data.pages.map(item => ({ label: item.name, value: item.code }))
-	processDefinitionList.value = definitionData.data.pages.map(item => ({ label: item.name, value: item.key }))
-}
+// 	categoryList.value = categoryData.data.pages.map(item => ({ label: item.name, value: item.code }))
+// 	processDefinitionList.value = definitionData.data.pages.map(item => ({ label: item.name, value: item.key }))
+// }
 
 /** 初始化 **/
 onMounted(async () => {
 	// 获取公共数据
 	try {
-		await initCommonData()
+		// await initCommonData()
 		// 初始化当前 Tab 的数据
 		if (activeTab.value === 'myProcess') {
 			await getListMyProcess()
