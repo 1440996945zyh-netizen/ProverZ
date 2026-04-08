@@ -136,14 +136,14 @@
 					<div class="card-title-row">
 						<div class="card-icon">
 							<el-icon><Bell /></el-icon>
-							<span class="icon-badge" v-if="messageTotal > 0">{{ messageTotal > 99 ? '99+' : messageTotal }}</span>
+							<!-- <span class="icon-badge" v-if="messageTotal > 0">{{ messageTotal > 99 ? '99+' : messageTotal }}</span> -->
 						</div>
 						<div class="card-info">
 							<div class="card-title">消息中心</div>
 							<div class="card-desc">系统通知公告</div>
 						</div>
 					</div>
-					<div class="card-badge danger" v-if="messageTotal > 0">{{ messageTotal }}条未读</div>
+					<!-- <div class="card-badge danger" v-if="messageTotal > 0">{{ messageTotal }}条未读</div> -->
 				</div>
 				<div class="card-body">
 					<div class="message-list-full">
@@ -401,8 +401,7 @@ import {
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import usePermissionStore from '@/store/modules/permission'
-import { getTaskTodoPage } from '@/api/system/bpm/task'
-import { getHomeMap, getMaintInfo, getWarningRecord } from '@/api/equipment/home'
+import { getHomeMap, getMaintInfo, getWarningRecord, getTaskTodoPage } from '@/api/equipment/home'
 const permissionStore = usePermissionStore()
 const router = useRouter()
 
@@ -1072,38 +1071,36 @@ const navigateToWorkOrder = tab => {
 
 const navigateToStatus = type => {
 	let path = '/equipment/maintInfo'
-	let query = {}
+	let query = { fromHome: '1' }
 
 	if (type.includes('inspection')) {
 		path = '/equipment/patrolTask'
-		if (type === 'inspection-pending') {
+		if (type.includes('pending')) {
 			query.status = '0'
-		} else if (type === 'inspection-done') {
+		} else if (type.includes('done')) {
 			query.status = '2'
 		}
 	} else if (type.includes('check')) {
 		path = '/equipment/inspectionTask'
-		if (type === 'check-pending') {
+		if (type.includes('pending')) {
 			query.status = '0'
-		} else if (type === 'check-done') {
+		} else if (type.includes('done')) {
 			query.status = '2'
 		}
 	} else if (type.includes('lubrication') || type.includes('maintenance')) {
 		path = '/equipment/maintainTask'
-		if (type === 'lubrication-pending') {
+		if (type.includes('pending')) {
 			query.status = '0'
-			query.planType = '1'
-		} else if (type === 'lubrication-done') {
+		} else if (type.includes('done')) {
 			query.status = '2'
+		}
+		if (type.includes('lubrication')) {
 			query.planType = '1'
-		} else if (type === 'maintenance-pending') {
-			query.status = '0'
-			query.planType = '2'
-		} else if (type === 'maintenance-done') {
-			query.status = '2'
+		} else if (type.includes('maintenance')) {
 			query.planType = '2'
 		}
 	}
+
 	router.push({ path, query })
 }
 
@@ -2634,6 +2631,15 @@ onUnmounted(() => {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
+		max-height: 300px;
+		overflow-y: auto;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 
 		.warning-item {
 			display: flex;

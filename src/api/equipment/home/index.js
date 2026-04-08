@@ -8,6 +8,7 @@ export function getHomeMap() {
 	return request({
 		url: '/api/internal/home/getHomeMap',
 		method: 'get',
+		loading: false,
 	})
 }
 
@@ -25,6 +26,7 @@ export function getMaintInfo(startTime, endTime) {
 			startTime,
 			endTime,
 		},
+		loading: false,
 	})
 }
 
@@ -36,5 +38,15 @@ export function getWarningRecord() {
 	return request({
 		url: '/api/internal/home/getWarningRecord',
 		method: 'get',
+		loading: false,
+	})
+}
+
+export const getTaskTodoPage = async params => {
+	return request({
+		url: '/bpm/task/todoPage',
+		method: 'get',
+		params,
+		loading: false,
 	})
 }

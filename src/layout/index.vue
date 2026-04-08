@@ -107,12 +107,21 @@ function resolvePath(routePath, routeQuery) {
 	if (isExternal(routePath)) {
 		return routePath
 	}
-	if (isExternal(props.basePath)) {
+	// basePath 是外部链接
+	if (props.basePath && isExternal(props.basePath)) {
 		return props.basePath
 	}
+
 	if (routeQuery) {
-		let query = JSON.parse(routeQuery)
-		return { path: getNormalPath(props.basePath + '/' + routePath), query: query }
+		try {
+			const query = typeof routeQuery === 'string' ? JSON.parse(routeQuery) : routeQuery
+			return {
+				path: getNormalPath(props.basePath + '/' + routePath),
+				query: query,
+			}
+		} catch (e) {
+			console.warn('routeQuery 解析失败:', e)
+		}
 	}
 	return getNormalPath(props.basePath + '/' + routePath)
 }
@@ -140,24 +149,52 @@ function setLayout() {
 // 点击一级菜单
 const showMenuItemList = ref(false)
 const menuList = ref([])
+/**
+ * 检查菜单是否需要展开子菜单
+ * @param item 菜单项
+ */
 const checkMenu = item => {
-	// 如果一级菜单有子菜单，则显示弹窗
-	if (item.name.includes('GIS地图') || item.name.includes('数据大屏')) {
-		// 如果一级菜单没有子菜单，直接跳转到页面
-		let path = resolvePath(item.path, item.meta?.query)
-		// 确保侧边栏显示，但不改变侧边栏的路由内容
-		appStore.toggleSideBarHide(false)
-		// 路由跳转
-		proxy.$router
-			.push(path)
-			.then(() => {})
-			.catch(err => {})
-	} else {
+	const { menuType, children, path } = item
+	// 1. 判定弹窗逻辑 (Mega Menu)
+	// 只有当类型是 M (目录) 且 确实有子项时，才显示弹出列表
+	if (menuType === 'M' && children?.length > 0) {
 		isInMenu.value = true
 		menuList.value = [item]
 		showMenuItemList.value = true
+		return // 结束逻辑，不执行跳转
 	}
+
+	// 2. 处理跳转 (一级菜单 C 或 目录无子项)
+	const targetIsFrame = item.meta?.isFrame || isFrame || '0'
+
+	if (targetIsFrame == '0') {
+		// 内部路由
+		// 如果是一级菜单，我们刚才改成了嵌套路由，跳转路径应为 /path/index
+		// const jumpPath = item.path.startsWith('/') ? item.path : '/' + item.path
+		router.push(item.path)
+	} else if (targetIsFrame == '1') {
+		// 内部 Iframe
+		handleIframeOpen(item.link || path, item)
+	} else if (targetIsFrame == '2') {
+		// 外部新窗口
+		window.open(item.link || path, '_blank')
+	}
+
+	closeMask()
 }
+
+//  iframe 嵌入打开
+const handleIframeOpen = (url, item) => {
+	const iframeView = {
+		...item,
+		path: `/iframe/${item.id}`,
+		meta: { ...item.meta, link: url },
+	}
+	tagsViewStore.addIframeView(iframeView)
+	tagsViewStore.addVisitedView(iframeView)
+	router.push(iframeView.path)
+}
+
 // 鼠标进入菜单详情
 const isInMenu = ref(false) // 鼠标是否进入过菜单详情
 const handleMouseenter = () => {

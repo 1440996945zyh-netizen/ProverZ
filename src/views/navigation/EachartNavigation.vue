@@ -185,11 +185,14 @@ const transformMenu = (menu, level, parent, ancestors) => {
 		rawData: menu,
 		uniqueId: `node-${menu.id}-level-${level}`,
 	}
-
-	if (menu.children && menu.children.length > 0) {
-		// 递归处理子节点时传递当前的祖先链
+	// 判断是否是我们包装过的一级菜单：
+	// 条件：是第1级，且类型是'C'（菜单），且有子级
+	const isWrappedTopMenu = level === 1 && menu.menuType === 'C' && menu.children && menu.children.length > 0
+	if (menu.children && menu.children.length > 0 && !isWrappedTopMenu) {
+		// 只有非包装菜单才去处理子级
 		transformed.children = menu.children.map(child => transformMenu(child, level + 1, transformed, currentAncestors))
 	}
+	// 如果是包装的一级菜单，transformed.children 将为空，ECharts 就不会画出那一根多余的线和节点
 	return transformed
 }
 
@@ -221,67 +224,74 @@ const handleChartClick = params => {
 }
 // 处理标签点击事件
 const handleLabelClick = labelInfo => {
-	console.log(`点击了${labelInfo.data.level}级标签:`, labelInfo)
-	console.log(`点击了${labelInfo.data.level}级标签:`, JSON.stringify(labelInfo.data.ancestors))
+	const nodeData = labelInfo.data
+	if (!nodeData || nodeData.id === 'root') return
+	console.log(`点击了 ${nodeData.level} 级菜单: ${nodeData.name}`)
+	// 2. 核心逻辑：如果是菜单（C类型），无论哪一级都要执行跳转
+	// 判断依据：rawData 里的 menuType 为 'C'
+	const isMenu = nodeData.rawData?.menuType === 'C'
 
-	// 根据层级执行不同操作示例
-	if (labelInfo.data.level === 1) {
-		console.log('处理一级菜单逻辑')
-	} else if (labelInfo.data.level === 2 && !labelInfo.data.children) {
-		console.log('处理二级菜单不存在三级菜单的逻辑')
-		handleMenuSelect(labelInfo.data)
-	} else if (labelInfo.data.level === 2 && labelInfo.data.children) {
-		console.log('处理二级菜单c存在三级菜单的逻辑')
-	} else if (labelInfo.data.level === 3) {
-		console.log('处理三级菜单逻辑')
-		handleMenuSelect(labelInfo.data)
-	}
-
-	// 跳转示例
-	if (labelInfo.path) {
-		router.push(labelInfo.path)
+	if (isMenu) {
+		handleMenuSelect(nodeData)
+	} else {
+		// 如果是目录（M类型），ECharts 默认会处理展开收起，这里可以不写逻辑
+		console.log('此节点为目录，仅执行展开/折叠')
 	}
 }
 
 // 选择菜单处理方法
 const handleMenuSelect = menuItem => {
-	console.log('选中的菜单:', menuItem)
-	// 从祖先数组和当前菜单拼接完整路径
-	const fullPath = resolvePathFromAncestors(menuItem)
-	if (fullPath) {
-		proxy.$router.push(fullPath)
+	const target = resolvePathFromAncestors(menuItem)
+	if (target) {
+		console.log('最终跳转目标:', target)
+		router.push(target)
+
+		// 如果是在弹窗里，记得触发关闭
+		// proxy.$bus.emit('closeMask');
 	}
 }
 
 // 从祖先数组拼接完整路径
-function resolvePathFromAncestors(menuItem) {
-	// 提取祖先数组中的所有path，过滤掉root的path（因为通常root是'/'）
-	const ancestorPaths = menuItem.ancestors
-		.filter(ancestor => ancestor.id !== 'root') // 排除根节点
-		.map(ancestor => ancestor.path || '')
+const resolvePathFromAncestors = menuItem => {
+	const { level, path, rawData } = menuItem
 
-	// 拼接所有祖先路径和当前菜单路径
-	const allPaths = [...ancestorPaths, menuItem.path || '']
+	// 1. 处理外链 (如果 isFrame 为 0 或按照你定义的逻辑是外链)
+	// 注意：请确认你的系统中 0 和 1 哪个代表外链
+	if (rawData.isFrame === '0' && isExternal(path)) {
+		window.open(path, '_blank')
+		return null
+	}
 
-	// 过滤空路径并拼接
-	const basePath = allPaths.filter(path => path).join('/')
+	// 2. 处理一级菜单 (Level 1)
+	if (level === 1) {
+		// 对应我们之前在 permission.js 里的逻辑：
+		// 一级菜单 C 会被包装成 Layout，路径重定向到 /path/index
+		// 直接跳转 /path，Vue Router 会根据 redirect 自动处理
+		return getNormalPath(path.startsWith('/') ? path : `/${path}`)
+	}
 
-	// 处理查询参数
-	if (menuItem.meta?.query) {
-		let query
+	// 3. 处理多级菜单 (Level 2, 3...)
+	// 过滤掉 root，提取所有祖先的 path
+	const ancestorPaths = menuItem.ancestors.filter(ancestor => ancestor.id !== 'root').map(ancestor => ancestor.path || '')
+
+	// 合并路径：[祖先1, 祖先2, 自己]
+	const allPaths = [...ancestorPaths, path || '']
+
+	// 拼接并规范化路径 (如: /system + /user -> /system/user)
+	const fullPath = allPaths.filter(p => p).join('/')
+	const finalPath = getNormalPath(fullPath.startsWith('/') ? fullPath : `/${fullPath}`)
+
+	// 4. 处理 Query 参数
+	if (rawData?.query) {
 		try {
-			query = JSON.parse(menuItem.meta.query)
+			const query = JSON.parse(rawData.query)
+			return { path: finalPath, query: query }
 		} catch (e) {
-			console.error('解析query参数失败:', e)
-			query = {}
-		}
-		return {
-			path: getNormalPath(basePath),
-			query: query,
+			console.error('Query解析失败', e)
 		}
 	}
 
-	return getNormalPath(basePath)
+	return finalPath
 }
 
 /**
