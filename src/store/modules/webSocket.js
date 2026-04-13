@@ -304,20 +304,19 @@ const useWebSocketStore = defineStore('webSocket', {
                 return;
             }
 
-            // 普通消息通知（保持不变）
-            if (Notification.permission === 'granted') {
-                new Notification('新消息通知', {
-                    title: `来自 ${msg.data?.sender || '服务器'}`,
-                    body: this.getBriefContent(msg),
-                    icon: '/favicon1.ico',
-                    requireInteraction: false
-                });
-            } else if (Notification.permission !== 'denied') {
-                Notification.requestPermission();
-            }
-            // console.log('触发通知', msg);
+            // 普通消息通知（已移除浏览器原生通知，避免双重弹窗和遮挡）
             import('element-plus').then(({ ElNotification }) => {
-                ElNotification({ title: `来自 ${msg.data.data?.sender || '服务器'}`, message: this.getBriefContent(msg.data), position: 'bottom-right', duration: 4000, type: 'info', showClose: true });
+                // 优先使用消息体中的 title 字段，如果没有则显示发送人或兜底“服务器”
+                const displayTitle = msg.data.data?.title || `来自 ${msg.data.data?.sender || '服务器'}`;
+
+                ElNotification({
+                    title: displayTitle,
+                    message: this.getBriefContent(msg.data),
+                    position: 'bottom-right',
+                    duration: 4000,
+                    type: 'info',
+                    showClose: true
+                });
             });
         },
 
@@ -444,10 +443,10 @@ const useWebSocketStore = defineStore('webSocket', {
             // 阻断条件：保留原有逻辑，但增加isReconnecting的日志说明
             if (this.isUnrecoverableError || !token || this.isPaused || this.connected || this.isReconnecting) {
                 console.warn(`WebSocket 重连条件不满足，跳过。状态详情：
-            isUnrecoverableError: ${this.isUnrecoverableError}, 
-            有Token: ${!!token}, 
-            isPaused: ${this.isPaused}, 
-            connected: ${this.connected}, 
+            isUnrecoverableError: ${this.isUnrecoverableError},
+            有Token: ${!!token},
+            isPaused: ${this.isPaused},
+            connected: ${this.connected},
             isReconnecting: ${this.isReconnecting}`);
                 this.isReconnecting = false;
                 return;

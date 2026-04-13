@@ -181,7 +181,7 @@
 								class="timeline-item"
 							>
 								<div class="timeline-dot" :class="getDotClass(item.actionCode, index, timelineList.length)"></div>
-								<div class="dot-label" v-if="index === 0 && timelineList.length > 1">结束</div>
+								<div class="dot-label" v-if="index === 0 && timelineList.length > 1">当前</div>
 								<div class="dot-label" v-else-if="index === timelineList.length - 1 && timelineList.length > 1">开始</div>
 
 								<div class="timeline-card-inner">

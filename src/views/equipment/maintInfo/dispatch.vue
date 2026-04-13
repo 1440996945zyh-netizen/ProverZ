@@ -40,7 +40,25 @@
 							</el-col>
 						</el-row>
 						<el-row :gutter="20">
-							<el-col :span="24">
+							<el-col :span="8">
+								<el-form-item label="派工人" prop="dispatcherId">
+									<el-select
+										v-model="formData.dispatcherId"
+										placeholder="请选择派工人"
+										style="width: 100%"
+										filterable
+										@change="handleDispatcherChange"
+									>
+										<el-option
+											v-for="item in dispatcherOptions"
+											:key="item.repairId"
+											:label="item.repairName"
+											:value="item.repairId"
+										/>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="16">
 								<el-form-item label="故障描述">
 									<el-input v-model="formData.faultDesc" type="textarea" :rows="3" placeholder="故障描述" readonly />
 								</el-form-item>
@@ -218,6 +236,7 @@ const userList = ref([])
 const specialJobOptions = ref([])
 const maintProjApplyLoading = ref(false)
 const maintProjApplyOptions = ref([])
+const dispatcherOptions = ref([])
 
 // 派工部位部件
 const dispatchPartList = ref([])
@@ -260,6 +279,8 @@ const formData = reactive({
 	specialJobCode: '',
 	specialJobName: '',
 	specialJobCodeList: [],
+	dispatcherId: null,
+	dispatcherName: '',
 	itemList: [],
 	status: 1, // 派工后状态为1-已派工
 })
@@ -298,6 +319,7 @@ const rules = reactive({
 	}],
 	maintOrgId: [{ required: true, message: '承修单位不能为空', trigger: 'change' }],
 	maintLeaderId: [{ required: true, message: '维修负责人不能为空', trigger: 'change' }],
+	dispatcherId: [{ required: true, message: '派工人不能为空', trigger: 'change' }],
 	specialJobCodeList: [{
 		validator: (rule, value, callback) => {
 			if (formData.isSpecialJob === '1' && (!Array.isArray(value) || value.length === 0)) {
@@ -770,6 +792,40 @@ const handleMaintLeaderChange = (item) => {
 	})
 }
 
+// 加载派工人列表
+const loadDispatcherOptions = async (equipId) => {
+	if (!equipId) {
+		dispatcherOptions.value = []
+		return
+	}
+	try {
+		const res = await api.getDispatchUserListByEquipId(equipId)
+		if (res.code === '0000' || res.code === 200) {
+			dispatcherOptions.value = res.data || []
+			
+			// 如果没有选过派工人，尝试设置默认值
+			if (!formData.dispatcherId) {
+				const currentUserId = proxy.$store.state.user.id
+				const user = dispatcherOptions.value.find(item => item.repairId === currentUserId)
+				if (user) {
+					formData.dispatcherId = currentUserId
+					formData.dispatcherName = user.repairName
+				}
+			}
+		}
+	} catch (error) {
+		console.error('加载派工人列表失败:', error)
+	}
+}
+
+// 派工人变更
+const handleDispatcherChange = (val) => {
+	const user = dispatcherOptions.value.find(item => item.repairId === val)
+	if (user) {
+		formData.dispatcherName = user.repairName
+	}
+}
+
 watch(
 	() => formData.equipId,
 	(newVal, oldVal) => {
@@ -784,6 +840,10 @@ watch(
 			if (isMaintProjApplyVisible.value) {
 				queryMaintProjApplyOptions()
 			}
+		}
+		// 加载派工人
+		if (newVal) {
+			loadDispatcherOptions(newVal)
 		}
 	}
 )
@@ -823,6 +883,9 @@ const resetForm = () => {
 	formData.specialJobCode = ''
 	formData.specialJobName = ''
 	formData.specialJobCodeList = []
+	formData.dispatcherId = null
+	formData.dispatcherName = ''
+	dispatcherOptions.value = []
 	clearMaintProjApply()
 	setTimeout(() => {
 		if (formRef.value) {
@@ -885,6 +948,8 @@ const loadData = (data) => {
 		formData.specialJobCode = data.specialJobCode || ''
 		formData.specialJobName = data.specialJobName || ''
 		formData.specialJobCodeList = formData.specialJobCode ? formData.specialJobCode.split(',').map(item => item.trim()).filter(Boolean) : []
+		formData.dispatcherId = data.dispatcherId || null
+		formData.dispatcherName = data.dispatcherName || ''
 		formData.status = data.status || 0
 		dispatchPartList.value = normalizeDispatchPartList(data.itemList || data.dispatchItemList || data.partList || [])
 		syncDispatchPartToForm()
@@ -916,6 +981,9 @@ const loadData = (data) => {
 		}
 		if (formData.isSpecialJob === '1') {
 			loadSpecialJobOptions()
+		}
+		if (formData.equipId) {
+			loadDispatcherOptions(formData.equipId)
 		}
 		loadEquipmentSmallCategory()
 	}

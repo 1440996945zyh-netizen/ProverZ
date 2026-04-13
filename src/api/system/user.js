@@ -207,6 +207,28 @@ const api = {
 			loading: false,
 		})
 	},
+   /**
+	 * 修改手机号
+	 * @param {Object} query 筛选条件
+	 */
+   updatePhone(data) {
+		return request({
+			url: 'api/internal/sysUser/updatePhone',
+			method: 'put',
+			data,
+		})
+	},
+   /**
+	 * 修改邮箱
+	 * @param {Object} query 筛选条件
+	 */
+   updateEmail(data) {
+		return request({
+			url: 'api/internal/sysUser/updateEmail',
+			method: 'put',
+			data,
+		})
+	},
 }
 export default api
 

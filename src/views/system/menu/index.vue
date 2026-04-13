@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2026-03-16 18:55:10
+ * @LastEditTime: 2026-04-09 09:19:32
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -68,7 +68,7 @@
 									显示方式
 								</span>
 							</template>
-							<el-radio-group v-model="form.isFrame">
+							<el-radio-group v-model="form.isFrame" :disabled="form.dataType == 'APP'">
 								<el-radio label="0">内部</el-radio>
 								<el-radio label="1">外部链接内部显示</el-radio>
 								<el-radio label="2">外部链接外部显示</el-radio>
@@ -76,7 +76,7 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="12" v-if="form.menuType != 'F'">
-						<el-form-item label="菜单图标" prop="icon">
+						<el-form-item v-if="form.dataType !== 'APP'" label="菜单图标" prop="icon">
 							<el-popover
 								placement="bottom-start"
 								:width="540"
@@ -104,6 +104,9 @@
 								</template>
 								<icon-select ref="iconSelectRef" @selected="selected" />
 							</el-popover>
+						</el-form-item>
+						<el-form-item v-else label="APP图标" prop="iconApp">
+							<el-input v-model="form.iconApp" placeholder="请输入APP图标名称或路径" />
 						</el-form-item>
 					</el-col>
 					<!-- 菜单图标颜色选择 -->
@@ -146,18 +149,7 @@
 					<el-col :span="12" v-if="form.menuType != 'F'">
 						<el-form-item
 							prop="path"
-							:rules="
-								form.menuType === 'M' && form.parentId == '0'
-									? [
-											{ required: true, message: '路由地址不能为空' },
-											{ pattern: '^\/.*', message: '一级菜单路由以 / 开头' },
-									  ]
-									: [
-											// 非一级目录或菜单
-											{ required: true, message: '路由地址不能为空', trigger: 'blur' },
-											{ pattern: '^(?!/).*', message: '非一级菜单路由不能以 / 开头', trigger: 'blur' }, // 增加反向校验
-									  ]
-							"
+							
 						>
 							<template #label>
 								<span>
@@ -264,7 +256,7 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="12">
-						<el-form-item label="数据类别" prop="dataType">
+						<el-form-item label="数据类别" prop="dataType" @change="handleDataTypeChange">
 							<el-radio-group v-model="form.dataType">
 								<el-radio key="PC" label="PC">PC</el-radio>
 								<el-radio key="APP" label="APP">APP</el-radio>
@@ -342,14 +334,42 @@ const data = reactive({
 		menuName: undefined,
 		visible: undefined,
 	},
-	rules: {
-		menuName: [{ required: true, message: '菜单名称不能为空', trigger: 'blur' }],
-		isFrame: [{ required: true, message: '显示方式不能为空', trigger: 'blur' }],
-		orderNum: [{ required: true, message: '菜单顺序不能为空', trigger: 'blur' }],
-		dataType: [{ required: true, message: '数据类别不能为空', trigger: 'blur' }],
-	},
 })
-const { queryParams, form, rules } = toRefs(data)
+const { queryParams, form } = toRefs(data)
+// 1. 完善校验规则
+const rules = reactive({
+	menuName: [{ required: true, message: '菜单名称不能为空', trigger: 'blur' }],
+	orderNum: [{ required: true, message: '菜单顺序不能为空', trigger: 'blur' }],
+	dataType: [{ required: true, message: '数据类别不能为空', trigger: 'blur' }],
+	// 动态图标校验
+	iconApp: [{ required: true, message: 'APP图标不能为空', trigger: 'blur' }],
+	path: [
+		{ required: true, message: '路由地址不能为空', trigger: 'blur' },
+		{
+			validator: (rule, value, callback) => {
+				// 当为外链（内显或外显）时，必须是 http(s) 开头
+				if (form.value.isFrame == '1' || form.value.isFrame == '2') {
+					const urlPattern = /^https?:\/\/.+/
+					if (!urlPattern.test(value)) {
+						callback(new Error('外部链接显示方式下，路由地址必须以 http:// 或 https:// 开头'))
+					} else {
+						callback()
+					}
+				} else {
+					// 原有的普通路由校验
+					if (form.value.parentId == '0' && !value.startsWith('/')) {
+						callback(new Error('一级菜单路由需以 / 开头'))
+					} else if (form.value.parentId != '0' && value.startsWith('/')) {
+						callback(new Error('子菜单路由不能以 / 开头'))
+					} else {
+						callback()
+					}
+				}
+			},
+			trigger: 'blur',
+		},
+	],
+})
 // 菜单数据详情
 const menuDataInfo = ref([])
 //定义预设图标颜色列表（固定6种颜色）
@@ -361,6 +381,19 @@ const colorMap = ref([
 	{ value: '#5a59a6', label: 'purple' },
 	{ value: '#f75e5e', label: 'red' },
 ])
+/**
+ * @description 数据类别改变时，处理图标相关字段
+ * @param val 数据类别值
+ */
+const handleDataTypeChange = val => {
+	if (val == 'APP') {
+		form.value.isFrame = '0' // 强制内部
+		form.value.icon = undefined // 清空PC图标
+	} else {
+		form.value.iconApp = undefined // 清空APP图标
+	}
+}
+
 /**
  * @description 取消关闭弹窗按钮
  */
@@ -375,18 +408,19 @@ const cancel = () => {
  */
 const reset = () => {
 	form.value = {
-		menuId: undefined,
-		parentId: 0,
+		menuId: undefined, // 建议统一使用 menuId
+		parentId: '0',
 		menuName: undefined,
 		icon: undefined,
+		iconApp: undefined, // 新增
 		menuType: 'M',
-		orderNum: undefined,
+		orderNum: 0,
 		isFrame: '0',
 		isCache: '0',
 		visible: '0',
 		status: '0',
 		dataType: 'PC',
-		menuIconColor: '#000000', // 新增：图标颜色默认值（黑色）
+		menuIconColor: '#000000',
 	}
 	proxy.resetForm('menuRef')
 }
@@ -660,10 +694,9 @@ const buttonList = reactive([
  */
 const getList = e => {
 	tableLoading.value = true
-	
+
 	let params = {
 		...e,
-		
 	}
 	listMenu(params)
 		.then(response => {
@@ -684,7 +717,7 @@ const getTreeselect = async () => {
 	menuOptions.value = []
 	getContentsMenu().then(response => {
 		menuDataInfo.value = response.data
-		const menu = { menuId: 0, menuName: '主类目', children: [] }
+		const menu = { menuId: '0', menuName: '主类目', children: [] }
 		menu.children = proxy.flattenToTree(response.data, 'menuId')
 		menuOptions.value.push(menu)
 	})
@@ -696,7 +729,7 @@ const handleAdd = async row => {
 	if (row != null && row.menuId) {
 		form.value.parentId = row.menuId
 	} else {
-		form.value.parentId = 0
+		form.value.parentId = '0'
 	}
 	open.value = true
 	title.value = '新增'
@@ -773,14 +806,15 @@ const submitForm = () => {
 				menuData.link = null
 			}
 			// 处理二级类型为目录时的 component 字段
-			if (menuData.menuType == 'M' && menuData.parentId != '0') {
-				menuDataInfo.value.forEach(item => {
-					if (item.menuId == menuData.parentId) {
-						menuData.component = item.path
-					}
-				})
+			if (menuData.menuType == 'M') {
+				const parentId = String(menuData.parentId)
+				if (parentId == '0') {
+					menuData.component = 'Layout' // 一级目录固定值
+				} else {
+					const parentMenu = menuDataInfo.value.find(item => String(item.menuId) === parentId)
+					menuData.component = parentMenu?.path || null
+				}
 			}
-
 			console.log('提交表单 submitForm menuData', menuData)
 			if (menuData.id != undefined) {
 				updateMenu(menuData).then(res => {

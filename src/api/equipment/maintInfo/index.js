@@ -155,6 +155,16 @@ const api = {
 			params: params,
 		})
 	},
+	// 根据设备ID查询派工人员列表
+	getDispatchUserListByEquipId(equipId) {
+		return request({
+			url: '/api/v1/internal/maintInfo/getDispatchUserListByEquipId',
+			method: 'get',
+			params: {
+				equipId,
+			},
+		})
+	},
 }
 
 export default api

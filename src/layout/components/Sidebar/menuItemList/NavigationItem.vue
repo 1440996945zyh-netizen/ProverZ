@@ -223,7 +223,7 @@ const handleMenuSelect = menuItem => {
 
 	// 路由跳转逻辑
 	const path = resolvePath(menuItem.path, menuItem.meta?.query)
-	// console.log(path)
+	console.log("path", path)
 	if (path) {
 		if (menuItem.isFrame == 2) {
 			// 构建完整的URL，包含noLayout参数

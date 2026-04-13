@@ -56,7 +56,7 @@ export function isHttpOrHttps(url) {
  * @returns {boolean} 是否为外链
  */
 export function isExternal(path) {
-	return /^(https?:|mailto:|tel:)/.test(path)
+	return /^(https?:|mailto:|tel:|\/\/)/.test(path)
 }
 
 /**
@@ -219,7 +219,7 @@ export function getRules(rules) {
 		}
 		return array
 		// eslint-disable-next-line no-empty
-	} catch (e) {}
+	} catch (e) { }
 }
 
 /**

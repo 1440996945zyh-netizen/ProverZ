@@ -1208,6 +1208,8 @@ const saveDispatch = async () => {
 				isSpecialJob: submitData.isSpecialJob,
 				specialJobCode: submitData.specialJobCode,
 				specialJobName: submitData.specialJobName,
+				dispatcherId: submitData.dispatcherId,
+				dispatcherName: submitData.dispatcherName,
 				itemList: (submitData.itemList || []).map(item => ({
 					equipSmallCategoryId: item.equipSmallCategoryId,
 					equipSmallCategoryName: item.equipSmallCategoryName,
@@ -2219,15 +2221,11 @@ const save = async () => {
 				delete submitData.id
 				// 根据表单数据中的status判断模式（status已经在setMode中设置）
 				if (submitData.status === 1) {
-					// 派工模式：状态为1（已派工），派工人和派工时间由后端自动填充
-					delete submitData.dispatcherId
-					delete submitData.dispatcherName
+					// 派工模式：状态为1（已派工）
 					delete submitData.dispatchTime
 				} else {
-					// 新增模式：状态为0（提报），不传派工相关字段
+					// 新增模式：状态为0（提报），不传派工相关字段（但保留派工人相关字段）
 					submitData.status = 0
-					delete submitData.dispatcherId
-					delete submitData.dispatcherName
 					delete submitData.dispatchTime
 					delete submitData.dispatchTypeCode
 					delete submitData.dispatchTypeName
