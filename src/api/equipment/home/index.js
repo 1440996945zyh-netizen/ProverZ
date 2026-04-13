@@ -50,3 +50,12 @@ export const getTaskTodoPage = async params => {
 		loading: false,
 	})
 }
+
+export const getMessageList = async params => {
+	return request({
+		url: '/system/notification/list',
+		method: 'get',
+		params,
+		loading: false,
+	})
+}

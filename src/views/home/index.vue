@@ -76,7 +76,7 @@
 							<div class="card-desc">维修工单管理</div>
 						</div>
 					</div>
-					<div class="card-badge warning">{{ maintenanceInfo.dpg + maintenanceInfo.dys }}项进行中</div>
+					<div class="card-badge warning">{{ totalPendingCount }}项进行中</div>
 				</div>
 				<div class="card-body">
 					<div class="stat-row">
@@ -136,31 +136,31 @@
 					<div class="card-title-row">
 						<div class="card-icon">
 							<el-icon><Bell /></el-icon>
-							<!-- <span class="icon-badge" v-if="messageTotal > 0">{{ messageTotal > 99 ? '99+' : messageTotal }}</span> -->
 						</div>
 						<div class="card-info">
 							<div class="card-title">消息中心</div>
 							<div class="card-desc">系统通知公告</div>
 						</div>
 					</div>
-					<!-- <div class="card-badge danger" v-if="messageTotal > 0">{{ messageTotal }}条未读</div> -->
 				</div>
 				<div class="card-body">
-					<div class="message-list-full">
+					<div class="message-list-full" v-loading="messageLoading">
 						<div class="msg-item-full" v-for="(item, index) in messageList" :key="index" :class="{ unread: !item.read }">
 							<div class="msg-left">
-								<span class="msg-icon" :class="item.type">
-									<el-icon v-if="item.type === 'success'"><Check /></el-icon>
-									<el-icon v-else-if="item.type === 'warning'"><Warning /></el-icon>
-									<el-icon v-else><InfoFilled /></el-icon>
+								<span class="msg-icon">
+									<el-icon><Bell /></el-icon>
 								</span>
 								<div class="msg-content">
 									<span class="msg-title">{{ item.title }}</span>
 									<span class="msg-desc">{{ item.desc || '点击查看详情' }}</span>
 								</div>
 							</div>
-							<span class="msg-time">{{ item.time }}</span>
+							<div class="msg-right">
+								<span class="msg-time">{{ item.time }}</span>
+								<el-button type="primary" link size="small" @click="handleMessageDetail(item)">详情</el-button>
+							</div>
 						</div>
+						<div class="preview-empty" v-if="!messageLoading && messageList.length === 0">暂无消息</div>
 					</div>
 				</div>
 			</div>
@@ -370,6 +370,36 @@
 				</div>
 			</template>
 		</el-dialog>
+
+		<el-dialog v-model="messageDetailVisible" title="消息详情" width="540px" class="message-detail-dialog">
+			<div class="message-detail-content" v-if="currentMessage">
+				<div class="message-card">
+					<div class="card-header">
+						<div class="type-badge">
+							<!-- <el-icon><Bell /></el-icon>
+							<span>系统消息</span> -->
+						</div>
+						<div class="card-time">{{ currentMessage.createTime }}</div>
+					</div>
+					<div class="card-title">{{ currentMessage.title }}</div>
+				</div>
+
+				<div class="detail-section">
+					<div class="section-item">
+						<div class="item-label">
+							<el-icon class="label-icon"><Document /></el-icon>
+							消息内容
+						</div>
+						<div class="item-value">{{ currentMessage.content }}</div>
+					</div>
+				</div>
+			</div>
+			<template #footer>
+				<div class="dialog-footer">
+					<el-button @click="messageDetailVisible = false">关闭</el-button>
+				</div>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 
@@ -398,10 +428,13 @@ import {
 	InfoFilled,
 	CaretRight,
 	CaretLeft,
+	User,
+	Clock,
+	Close,
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import usePermissionStore from '@/store/modules/permission'
-import { getHomeMap, getMaintInfo, getWarningRecord, getTaskTodoPage } from '@/api/equipment/home'
+import { getHomeMap, getMaintInfo, getWarningRecord, getTaskTodoPage, getMessageList } from '@/api/equipment/home'
 const permissionStore = usePermissionStore()
 const router = useRouter()
 
@@ -426,6 +459,9 @@ const iconMap = {
 	InfoFilled,
 	CaretRight,
 	CaretLeft,
+	User,
+	Clock,
+	Close,
 }
 
 const iconList = Object.keys(iconMap)
@@ -629,15 +665,56 @@ const workOrderProgress = computed(() => {
 	return Math.round((completed / total) * 100)
 })
 
-const messageList = ref([
-	{ title: '设备维修工单已审批通过', desc: '您提交的设备维修申请已通过审批', time: '10分钟前', type: 'success', read: false },
-	{ title: '您有新的待办任务需要处理', desc: '有3个工单待派工，请及时处理', time: '30分钟前', type: 'warning', read: false },
-	{ title: '系统将于今晚进行维护升级', desc: '预计维护时间22:00-24:00', time: '2小时前', type: 'info', read: true },
-])
+const totalPendingCount = computed(() => {
+	const wxz = maintenanceInfo.value.wxz || 0
+	const dpg = maintenanceInfo.value.dpg || 0
+	const dys = maintenanceInfo.value.dys || 0
+	const pendingInspection = inspectionStatusList.value[0]?.value || 0
+	const pendingCheck = inspectionStatusList.value[2]?.value || 0
+	const pendingLubrication = inspectionStatusList.value[4]?.value || 0
+	const pendingMaintenance = inspectionStatusList.value[6]?.value || 0
+	return wxz + dpg + dys + pendingInspection + pendingCheck + pendingLubrication + pendingMaintenance
+})
+
+const messageList = ref([])
+const messageLoading = ref(false)
+const messageDetailVisible = ref(false)
+const currentMessage = ref(null)
 
 const messageTotal = computed(() => {
 	return messageList.value.filter(item => !item.read).length
 })
+
+const getMessageListData = async () => {
+	messageLoading.value = true
+	try {
+		const res = await getMessageList({})
+		const data = res.data || []
+		if (data.length > 0) {
+			messageList.value = data.map(item => ({
+				id: item.id,
+				title: item.title || '无标题',
+				desc: item.content ? (item.content.length > 30 ? item.content.substring(0, 30) + '...' : item.content) : '点击查看详情',
+				content: item.content || '',
+				receiverId: item.receiverId || '-',
+				createTime: item.createTime || '',
+				time: formatTimeAgo(item.createTime),
+				read: item.read === 1 || item.read === true,
+			}))
+		} else {
+			messageList.value = []
+		}
+	} catch (error) {
+		console.error('获取消息列表失败:', error)
+	} finally {
+		messageLoading.value = false
+	}
+}
+
+const handleMessageDetail = item => {
+	currentMessage.value = item
+	messageDetailVisible.value = true
+}
 
 const workOrderTab = ref('today')
 
@@ -1277,6 +1354,7 @@ const getHomeData = async () => {
 onMounted(() => {
 	getTodoList()
 	getHomeData()
+	getMessageListData()
 	setTimeout(() => {
 		initTrendChart()
 		initCostChart()
@@ -1762,68 +1840,94 @@ onUnmounted(() => {
 		.message-list-full {
 			display: flex;
 			flex-direction: column;
-			gap: 10px;
+			gap: 12px;
+			max-height: 280px;
+			overflow-y: auto;
+			overflow-x: hidden;
+
+			&::-webkit-scrollbar {
+				width: 4px;
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background: #d1d5db;
+				border-radius: 2px;
+			}
+
+			&::-webkit-scrollbar-track {
+				background: transparent;
+			}
 
 			.msg-item-full {
 				display: flex;
 				align-items: flex-start;
 				justify-content: space-between;
 				gap: 12px;
-				padding: 12px;
-				border-radius: 8px;
+				padding: 14px;
+				border-radius: 10px;
 				background: #f9fafb;
-				cursor: pointer;
-				transition: all 0.2s;
+				border: 1px solid transparent;
+				transition: all 0.25s ease;
 
 				&:hover {
 					background: #f3f4f6;
+					border-color: #e5e7eb;
+					transform: translateX(2px);
 				}
 
 				&.unread {
-					background: #fffbeb;
+					background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+					border-color: rgba(245, 158, 11, 0.2);
 
 					.msg-title {
 						font-weight: 600;
+						color: #1f2937;
+					}
+
+					&::before {
+						content: '';
+						position: absolute;
+						left: 0;
+						top: 50%;
+						transform: translateY(-50%);
+						width: 3px;
+						height: 60%;
+						background: #f59e0b;
+						border-radius: 0 2px 2px 0;
 					}
 				}
 
 				.msg-left {
 					display: flex;
-					gap: 10px;
+					gap: 12px;
 					flex: 1;
 					min-width: 0;
+					overflow: hidden;
 
 					.msg-icon {
-						width: 32px;
-						height: 32px;
-						border-radius: 8px;
+						width: 36px;
+						height: 36px;
+						border-radius: 10px;
 						display: flex;
 						align-items: center;
 						justify-content: center;
 						flex-shrink: 0;
+						background: linear-gradient(135deg, #3b82f6, #60a5fa);
+						box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 
 						.el-icon {
-							font-size: 16px;
+							font-size: 18px;
 							color: #fff;
-						}
-
-						&.success {
-							background: linear-gradient(135deg, #10b981, #34d399);
-						}
-						&.warning {
-							background: linear-gradient(135deg, #f59e0b, #fbbf24);
-						}
-						&.info {
-							background: linear-gradient(135deg, #3b82f6, #60a5fa);
 						}
 					}
 
 					.msg-content {
 						flex: 1;
 						min-width: 0;
+						overflow: hidden;
 
 						.msg-title {
-							font-size: 13px;
+							font-size: 14px;
 							font-weight: 500;
 							color: #1f2937;
 							margin-bottom: 4px;
@@ -1833,7 +1937,7 @@ onUnmounted(() => {
 						}
 
 						.msg-desc {
-							font-size: 11px;
+							font-size: 12px;
 							color: #9ca3af;
 							white-space: nowrap;
 							overflow: hidden;
@@ -1842,10 +1946,24 @@ onUnmounted(() => {
 					}
 				}
 
-				.msg-time {
-					font-size: 11px;
-					color: #9ca3af;
+				.msg-right {
+					display: flex;
+					flex-direction: column;
+					align-items: flex-end;
+					gap: 6px;
 					flex-shrink: 0;
+					min-width: 60px;
+
+					.msg-time {
+						font-size: 11px;
+						color: #9ca3af;
+						white-space: nowrap;
+					}
+
+					.el-button {
+						padding: 4px 8px;
+						font-size: 12px;
+					}
 				}
 			}
 		}
@@ -3203,6 +3321,130 @@ onUnmounted(() => {
 		:deep(.el-range-separator) {
 			padding: 0 2px;
 			font-size: 12px;
+		}
+	}
+}
+
+.message-detail-dialog {
+	.el-dialog__header {
+		padding: 16px 20px;
+		border-bottom: 1px solid #f3f4f6;
+		margin-right: 0;
+
+		.el-dialog__title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #1f2937;
+		}
+	}
+
+	.el-dialog__body {
+		padding: 0;
+	}
+
+	.el-dialog__footer {
+		padding: 16px 20px;
+		border-top: 1px solid #f3f4f6;
+	}
+
+	.message-detail-content {
+		.message-card {
+			padding: 24px;
+			border-bottom: 1px solid #f3f4f6;
+			background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+			.card-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 16px;
+
+				.type-badge {
+					display: inline-flex;
+					align-items: center;
+					gap: 6px;
+					padding: 6px 14px;
+					border-radius: 20px;
+					font-size: 13px;
+					font-weight: 500;
+					background: #eff6ff;
+					color: #2563eb;
+
+					.el-icon {
+						font-size: 14px;
+					}
+				}
+
+				.card-time {
+					font-size: 14px;
+					color: #9ca3af;
+				}
+			}
+
+			.card-title {
+				font-size: 18px;
+				font-weight: 600;
+				color: #111827;
+				line-height: 1.5;
+			}
+		}
+
+		.detail-section {
+			padding: 20px 24px;
+
+			.section-item {
+				margin-bottom: 20px;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+
+				&.inline {
+					display: flex;
+					align-items: flex-start;
+					gap: 12px;
+
+					.item-label {
+						flex-shrink: 0;
+						margin-bottom: 0;
+					}
+
+					.item-value {
+						padding: 10px 14px;
+						background: #f9fafb;
+						border-radius: 6px;
+						font-size: 13px;
+						color: #374151;
+					}
+				}
+
+				.item-label {
+					display: flex;
+					align-items: center;
+					gap: 6px;
+					font-size: 13px;
+					font-weight: 500;
+					color: #6b7280;
+					margin-bottom: 10px;
+
+					.label-icon {
+						font-size: 15px;
+						color: #9ca3af;
+					}
+				}
+
+				.item-value {
+					font-size: 14px;
+					color: #374151;
+					line-height: 1.7;
+					padding: 14px 16px;
+					background: #f9fafb;
+					border-radius: 8px;
+					border: 1px solid #f3f4f6;
+					white-space: pre-wrap;
+					word-break: break-all;
+				}
+			}
 		}
 	}
 }
