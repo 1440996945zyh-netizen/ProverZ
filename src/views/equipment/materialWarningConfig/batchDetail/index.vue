@@ -1,29 +1,34 @@
 <template>
   <div class="formData">
     <el-form :model="formData" ref="ruleForm" label-width="120px" :rules="rules">
-      <el-form-item label="物资" prop="materialId">
-        <el-input v-model="formData.materialName" placeholder="请选择物资" readonly @click="openMaterialSelect">
+      <el-form-item label="物资" prop="materialIds">
+        <el-input
+          :model-value="materialNames"
+          placeholder="请选择物资"
+          readonly
+          @click="openMaterialSelect"
+        >
           <template #suffix>
-            <el-icon style="cursor: pointer"><Search /></el-icon>
+            <el-icon style="cursor: pointer" @click="openMaterialSelect"><Search /></el-icon>
           </template>
         </el-input>
       </el-form-item>
 
-      <!-- 物资选中后自动带出三级类别 -->
+      <!-- 多选后把已选物资的属性汇总展示 -->
       <el-form-item label="物资类型">
-        <el-input v-model="formData.materialType" disabled placeholder="自动带出" />
+        <el-input :model-value="materialTypeNames" disabled placeholder="自动带出" />
       </el-form-item>
 
       <el-form-item label="规格型号">
-        <el-input v-model="formData.specificationModel" disabled placeholder="自动带出" />
+        <el-input :model-value="specificationModelNames" disabled placeholder="自动带出" />
       </el-form-item>
 
       <el-form-item label="计量单位">
-        <el-input v-model="formData.unitName" disabled placeholder="自动带出" />
+        <el-input :model-value="unitNames" disabled placeholder="自动带出" />
       </el-form-item>
 
       <el-form-item label="品牌">
-        <el-input v-model="formData.brand" disabled placeholder="自动带出" />
+        <el-input :model-value="brandNames" disabled placeholder="自动带出" />
       </el-form-item>
 
       <el-form-item label="预警阈值" prop="warningThreshold">
@@ -65,7 +70,7 @@
       </el-form-item>
     </el-form>
 
-    <Dialog v-model:visible="materialDialogVisible" title="选择物资" width="70%" class="material-dialog">
+    <Dialog v-model:visible="materialDialogVisible" title="选择物资" width="75%" class="material-dialog">
       <BaseTable
         ref="materialTableRef"
         :showSearchHeader="true"
@@ -74,16 +79,16 @@
         :tableColumns="materialTableColumns"
         :tableData="materialTableData"
         :loading="materialLoading"
-        :radioConfig="materialRadioConfig"
+        :checkbox-config="checkboxConfig"
         :total="materialTotal"
         :show-pagination="true"
         :tableHeight="tableHeight"
       />
       <template #footer>
-				<span class="dialog-footer">
-					<el-button @click="materialDialogVisible = false">取消</el-button>
-					<el-button type="primary" @click="confirmMaterialSelect">确定</el-button>
-				</span>
+        <span class="dialog-footer">
+          <el-button @click="materialDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmMaterialSelect">确定</el-button>
+        </span>
       </template>
     </Dialog>
 
@@ -91,8 +96,8 @@
   </div>
 </template>
 
-<script setup name="materialWarningConfigDetail">
-import { ref, reactive, toRefs, getCurrentInstance, computed, nextTick } from 'vue'
+<script setup name="materialWarningConfigBatchDetail">
+import { ref, reactive, computed, getCurrentInstance, nextTick } from 'vue'
 import { Search, Plus } from '@element-plus/icons-vue'
 import UserSelectForm from '@/components/UserSelectForm/index.vue'
 import BaseTable from '@/components/BaseTable/index.vue'
@@ -107,6 +112,7 @@ const ruleForm = ref()
 const userSelectFormRef = ref()
 const materialTableRef = ref()
 const selectedUsers = ref([])
+const selectedMaterials = ref([])
 
 const materialDialogVisible = ref(false)
 const materialLoading = ref(false)
@@ -117,31 +123,84 @@ const materialQueryParams = ref({
   startPage: 1,
   pageSize: 20,
   materialName: '',
-  // 预警配置这里只取挂在三级类别下面的物资
   categoryLevel: 3,
 })
 
-const data = reactive({
-  formData: {
-    id: null,
-    materialId: null,
-    materialName: '',
-    materialType: '',
-    brand: '',
-    specificationModel: '',
-    unitName: '',
-    warningThreshold: null,
-    receivers: '',
-    receiverNames: '',
-    status: '1',
-  },
+const formData = ref({
+  materialIds: [],
+  warningThreshold: null,
+  receivers: '',
+  receiverNames: '',
+  status: '1',
 })
-const { formData } = toRefs(data)
 
+// 批量新增这里不能按字符串规则校验
 const rules = reactive({
-  materialId: proxy.getRules({ required: true, message: '请选择物资' }),
-  status: proxy.getRules({ required: true }),
+  materialIds: [
+    {
+      validator: (rule, value, callback) => {
+        if (!Array.isArray(value) || value.length === 0) {
+          callback(new Error('请选择物资'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+  warningThreshold: [
+    {
+      validator: (rule, value, callback) => {
+        if (value === null || value === undefined || value === '') {
+          callback(new Error('请输入预警阈值'))
+          return
+        }
+        if (Number(value) < 0) {
+          callback(new Error('预警阈值不能小于0'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+  receivers: [
+    {
+      validator: (rule, value, callback) => {
+        if (!value || !String(value).trim()) {
+          callback(new Error('没有选择预警接收人，请选择后重新提交'))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
+  status: [
+    {
+      required: true,
+      message: '请选择状态',
+      trigger: 'change',
+    },
+  ],
 })
+
+const joinFieldValues = field => {
+  const valueList = selectedMaterials.value
+    .map(item => item[field])
+    .filter(item => item !== undefined && item !== null && item !== '')
+
+  return [...new Set(valueList)].join('，')
+}
+
+// 输入框里显示已选物资名称
+const materialNames = computed(() => joinFieldValues('materialName'))
+
+// 多选后，把已选物资属性去重后展示
+const materialTypeNames = computed(() => joinFieldValues('categoryName'))
+const specificationModelNames = computed(() => joinFieldValues('specificationModel'))
+const unitNames = computed(() => joinFieldValues('unitName'))
+const brandNames = computed(() => joinFieldValues('brand'))
 
 const materialSelectData = reactive([
   {
@@ -153,7 +212,7 @@ const materialSelectData = reactive([
 ])
 
 const materialTableColumns = ref([
-  { label: '', type: 'radio', width: 50, align: 'center' },
+  { type: 'checkbox', width: 50, align: 'center' },
   { label: '物资名称', prop: 'materialName', align: 'left', minWidth: 180, showOverFlow: true },
   { label: '物资类型', prop: 'categoryName', align: 'left', minWidth: 160, showOverFlow: true },
   { label: '规格型号', prop: 'specificationModel', align: 'left', minWidth: 160, showOverFlow: true },
@@ -161,15 +220,19 @@ const materialTableColumns = ref([
   { label: '计量单位', prop: 'unitName', align: 'center', width: 120 },
 ])
 
-const materialRadioConfig = reactive({
-  highlight: true,
-  strict: false,
+const checkboxConfig = reactive({
   trigger: 'row',
+  checkField: 'checked',
 })
 
 const openMaterialSelect = () => {
   materialDialogVisible.value = true
-  getMaterialList({ startPage: 1, pageSize: 20, materialName: '', categoryLevel: 3 })
+  getMaterialList({
+    startPage: 1,
+    pageSize: 20,
+    materialName: '',
+    categoryLevel: 3,
+  })
 }
 
 const getMaterialList = params => {
@@ -177,6 +240,7 @@ const getMaterialList = params => {
   materialQueryParams.value = {
     ...materialQueryParams.value,
     ...(params || {}),
+    categoryLevel: 3,
   }
 
   materialCodeApi
@@ -187,13 +251,13 @@ const getMaterialList = params => {
         materialTotal.value = res.data?.totalNum || 0
 
         nextTick(() => {
-          if (!materialTableRef.value || !formData.value.materialId) {
+          if (!materialTableRef.value || !selectedMaterials.value.length) {
             return
           }
 
-          const currentRow = materialTableData.value.find(item => item.id === formData.value.materialId)
-          if (currentRow) {
-            materialTableRef.value.setRadioRow(currentRow)
+          const checkedRows = materialTableData.value.filter(item => formData.value.materialIds.includes(item.id))
+          if (checkedRows.length) {
+            materialTableRef.value.setCheckboxRow(checkedRows)
           }
         })
       } else {
@@ -213,24 +277,23 @@ const getMaterialList = params => {
 }
 
 const confirmMaterialSelect = () => {
-  const currentRow = materialTableRef.value?.getRadioRecord?.()
+  const rows = materialTableRef.value?.getSelectEvent?.() || []
 
-  if (!currentRow) {
+  if (!rows.length) {
     proxy.$message.warning('请选择物资')
     return
   }
 
-  formData.value.materialId = currentRow.id
-  formData.value.materialName = currentRow.materialName
-  formData.value.materialType = currentRow.categoryName || ''
-  formData.value.brand = currentRow.brand
-  formData.value.specificationModel = currentRow.specificationModel || ''
-  formData.value.unitName = currentRow.unitName || ''
+  selectedMaterials.value = rows
+  formData.value.materialIds = rows.map(item => item.id)
   materialDialogVisible.value = false
+
+  // 选完物资后把当前字段校验状态清掉
+  ruleForm.value?.validateField('materialIds')
 }
 
 const openUserSelect = () => {
-  userSelectFormRef.value.open(formData.value.id, selectedUsers.value)
+  userSelectFormRef.value.open(null, selectedUsers.value)
 }
 
 const handleUserSelectConfirm = (activityId, userList) => {
@@ -239,7 +302,7 @@ const handleUserSelectConfirm = (activityId, userList) => {
 }
 
 const removeUser = user => {
-  selectedUsers.value = selectedUsers.value.filter(item => item.value !== user.id)
+  selectedUsers.value = selectedUsers.value.filter(item => item.value !== user.value)
   updateReceivers()
 }
 
@@ -249,6 +312,12 @@ const updateReceivers = () => {
 }
 
 const validate = async () => {
+  if (!formData.value.receivers || !String(formData.value.receivers).trim()) {
+    proxy.$message.warning('没有选择预警接收人，请选择后重新提交')
+    ruleForm.value?.validateField('receivers')
+    return false
+  }
+
   let flag = false
   await ruleForm.value.validate(valid => {
     if (valid) {
@@ -262,18 +331,15 @@ const validate = async () => {
 }
 
 const resetForm = () => {
-  formData.value.id = null
-  formData.value.materialId = null
-  formData.value.materialName = ''
-  formData.value.materialType = ''
-  formData.value.brand = ''
-  formData.value.specificationModel = ''
-  formData.value.unitName = ''
-  formData.value.warningThreshold = null
-  formData.value.receivers = ''
-  formData.value.receiverNames = ''
-  formData.value.status = '1'
+  formData.value = {
+    materialIds: [],
+    warningThreshold: null,
+    receivers: '',
+    receiverNames: '',
+    status: '1',
+  }
   selectedUsers.value = []
+  selectedMaterials.value = []
   ruleForm.value?.clearValidate()
 }
 
@@ -281,7 +347,6 @@ defineExpose({
   validate,
   resetForm,
   formData,
-  selectedUsers,
 })
 </script>
 
