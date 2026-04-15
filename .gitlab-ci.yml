@@ -18,7 +18,8 @@ build-sonar:
       - "${SONAR_USER_HOME}/cache"
 
   script:
-      - cmd /c "cd /d %CI_PROJECT_DIR% && sonar-scanner -Dsonar.host.url=http://114.55.226.181:9002 -Dsonar.login=sqp_6d54c6a690fb7b79a921bb5e1afd46f204b1601fa -Dsonar.projectKey=yy-framework_view_400cef87-0887-4323-8413-c07f07bf4b90 -Dsonar.sources=. -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/public/**"
+    - cd "$env:CI_PROJECT_DIR"
+    - cmd /c "cd /d %CI_PROJECT_DIR% && sonar-scanner -Dsonar.host.url=http://114.55.226.181:9002 -Dsonar.login=sqp_6d54c6a690fb7b79a921bb5e1afd46f204b1601fa -Dsonar.projectKey=yy-framework_view_400cef87-0887-4323-8413-c07f07bf4b90 -Dsonar.sources=. -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/public/**"
   allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
