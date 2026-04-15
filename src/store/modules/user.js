@@ -2,7 +2,7 @@ import { login, logout, getInfo } from '../../api/login'
 import { getToken, setToken, removeToken } from '../../utils/auth/token'
 import { defineStore } from 'pinia'
 import api from '@/api/system/user'
-import useWebSocketStore from './webSocket'; // 引入WebSocket Store
+import useWebSocketStore from './webSocket' // 引入WebSocket Store
 const useUserStore = defineStore('user', {
 	state: () => ({
 		token: getToken(),
@@ -56,26 +56,28 @@ const useUserStore = defineStore('user', {
 						} else {
 							this.roles = ['ROLE_DEFAULT']
 						}
-							api.getPageNum().then(res => {
+						api.getPageNum().then(res => {
 							this.pageNum = res.data ? (res.data.pageNum ? res.data.pageNum : '20') : '20'
 						})
 						this.name = res.data.userName
 						this.userId = res.data.userId
 						this.userAccount = res.data.userAccount
 						this.deptName = res.data.deptName
+						this.deptId = res.data.deptId
 						this.posts = res.data.posts
 						this.isSuperadmin = res.data.isSuperadmin
 						const token = getToken()
 						// 若WebSocket未连接，尝试重连（不影响getInfo结果）
 
 						// 在 userStore.getInfo() 的成功回调中修改
-						const wsStore = useWebSocketStore();
-						wsStore.initFromStorage();
+						const wsStore = useWebSocketStore()
+						wsStore.initFromStorage()
 						// 新增：若已连接，则不重复调用connect
 						if (!wsStore.connected && !wsStore.isUnrecoverableError && !wsStore.isPaused) {
-							wsStore.connect(this.token, this.userId)
+							wsStore
+								.connect(this.token, this.userId)
 								.then(() => console.log('WebSocket初始化成功'))
-								.catch(err => console.warn('WebSocket初始化失败（不影响登录）:', err));
+								.catch(err => console.warn('WebSocket初始化失败（不影响登录）:', err))
 						}
 
 						resolve(res)
@@ -91,22 +93,22 @@ const useUserStore = defineStore('user', {
 				logout(this.token)
 					.then(() => {
 						// 获取WebSocket实例
-						const wsStore = useWebSocketStore();
+						const wsStore = useWebSocketStore()
 
 						// 1. 先关闭WebSocket连接（无论后端请求是否成功都执行）
 						try {
 							// 1. 先关闭WebSocket
-							wsStore.disconnect();
+							wsStore.disconnect()
 							// 2. 重置wsStore所有状态（关键：清除残留定时器和状态）
-							wsStore.$reset(); // 若使用Pinia，$reset()可重置所有state
+							wsStore.$reset() // 若使用Pinia，$reset()可重置所有state
 							// 3. 清除webSocketService的残留状态
-							webSocketService.isConnected = false;
-							webSocketService.ws = null;
-							console.log('登出时WebSocket资源已彻底清理');
+							webSocketService.isConnected = false
+							webSocketService.ws = null
+							console.log('登出时WebSocket资源已彻底清理')
 						} catch (error) {
-							console.error('关闭WebSocket失败:', error);
+							console.error('关闭WebSocket失败:', error)
 						}
-						
+
 						this.token = ''
 						this.roles = []
 						this.permissions = []

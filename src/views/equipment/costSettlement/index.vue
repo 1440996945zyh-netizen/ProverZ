@@ -19,7 +19,7 @@
 		<el-drawer v-model="open" :title="title" size="85%" @closed="handleDrawerClosed" destroy-on-close>
 			<detail ref="detailRef" :isViewMode="isViewMode" @saved="handleSaved" />
 			<template #footer>
-				<div style="flex: auto; display: flex; justify-content: flex-end; gap: 10px;">
+				<div style="flex: auto; display: flex; justify-content: flex-end; gap: 10px">
 					<el-button @click="open = false">取消</el-button>
 					<el-button v-if="!isViewMode" type="primary" @click="save">保存</el-button>
 				</div>
@@ -117,19 +117,19 @@ const tableColumns = ref([
 		prop: 'totalBudgetAmount',
 		align: 'center',
 		width: 140,
-		formatter: ({ cellValue }) => formatNumber(cellValue)
+		formatter: ({ cellValue }) => formatNumber(cellValue),
 	},
 	{
 		label: '实际金额合计',
 		prop: 'totalActualAmount',
 		align: 'center',
 		width: 140,
-		formatter: ({ cellValue }) => formatNumber(cellValue)
+		formatter: ({ cellValue }) => formatNumber(cellValue),
 	},
 	{ label: '申请人', prop: 'applyUserName', align: 'center', width: 120 },
 	{ label: '申请时间', prop: 'applyTime', align: 'center', width: 160 },
 	{ label: '备注', prop: 'remark', align: 'center', minWidth: 200, showOverFlow: true },
-		{
+	{
 		label: '状态',
 		prop: 'processStatusLabel',
 		align: 'center',
@@ -174,7 +174,7 @@ const tableColumns = ref([
 					icon: 'View',
 					click: () => handleView(row),
 					permission: 'equipment:costSettlement:view',
-					vif: true
+					vif: true,
 				},
 				{
 					name: '修改',
@@ -183,7 +183,7 @@ const tableColumns = ref([
 					icon: 'Edit',
 					click: () => handleUpdate(row),
 					permission: 'equipment:costSettlement:edit',
-					vif: row.processStatus == 0  || row.processStatus == null
+					vif: row.processStatus == 0 || row.processStatus == null,
 				},
 				{
 					name: '发起',
@@ -192,7 +192,7 @@ const tableColumns = ref([
 					icon: 'Promotion',
 					click: () => handleInitiate(row),
 					permission: 'bpm:equipment:controller:submitSettlementApply',
-					vif: row.processStatus == 0 || row.processStatus == null
+					vif: row.processStatus == 0 || row.processStatus == null,
 				},
 				{
 					name: '审批历史',
@@ -201,7 +201,7 @@ const tableColumns = ref([
 					icon: 'Histogram',
 					permission: 'equipment:costSettlement:history',
 					click: () => handleHistory(row),
-					vif: row.processStatus != 0 && row.processStatus != null
+					vif: row.processStatus != 0 && row.processStatus != null,
 				},
 				{
 					name: '删除',
@@ -210,7 +210,7 @@ const tableColumns = ref([
 					icon: 'Delete',
 					click: () => handleDelete(row),
 					permission: 'equipment:costSettlement:remove',
-					vif: row.processStatus == 0  || row.processStatus == null
+					vif: row.processStatus == 0 || row.processStatus == null,
 				},
 			]
 			return [
@@ -227,11 +227,10 @@ const buttonList = reactive([
 		label: '新增',
 		type: 'primary',
 		icon: 'Plus',
-		click: () => handleAdd(),
+		click: () => handleAdd,
 		permission: 'equipment:costSettlement:add',
 	},
 ])
-
 
 const handleSearch = params => {
 	Object.assign(queryParams, params)
@@ -241,17 +240,19 @@ const handleSearch = params => {
 
 const getList = () => {
 	loading.value = true
-	api.getList(queryParams).then(res => {
-		if (res.code === '0000') {
-			tableData.value = res.data.pages || []
-			total.value = res.data.totalNum || 0
-		} else {
-			proxy.$message.error(res.msg || '获取列表失败')
-		}
-		loading.value = false
-	}).catch(() => {
-		loading.value = false
-	})
+	api.getList(queryParams)
+		.then(res => {
+			if (res.code === '0000') {
+				tableData.value = res.data.pages || []
+				total.value = res.data.totalNum || 0
+			} else {
+				proxy.$message.error(res.msg || '获取列表失败')
+			}
+			loading.value = false
+		})
+		.catch(() => {
+			loading.value = false
+		})
 }
 
 const handleAdd = () => {
@@ -298,16 +299,18 @@ const handleView = row => {
 const handleDelete = row => {
 	ElMessageBox.confirm('是否确定删除该条结算申请数据？', '提示', {
 		type: 'warning',
-	}).then(() => {
-		api.delete(row.id).then(res => {
-			if (res.code === '0000') {
-				proxy.$message.success('删除成功')
-				getList()
-			} else {
-				proxy.$message.error(res.msg || '删除失败')
-			}
+	})
+		.then(() => {
+			api.delete(row.id).then(res => {
+				if (res.code === '0000') {
+					proxy.$message.success('删除成功')
+					getList()
+				} else {
+					proxy.$message.error(res.msg || '删除失败')
+				}
+			})
 		})
-	}).catch(() => {})
+		.catch(() => {})
 }
 
 const handleBatchDelete = () => {
@@ -318,16 +321,18 @@ const handleBatchDelete = () => {
 	const ids = selectedRows.value.map(item => item.id)
 	ElMessageBox.confirm(`是否确定删除选中的 ${ids.length} 条结算申请数据？`, '提示', {
 		type: 'warning',
-	}).then(() => {
-		api.deleteBatch(ids).then(res => {
-			if (res.code === '0000') {
-				proxy.$message.success('删除成功')
-				getList()
-			} else {
-				proxy.$message.error(res.msg || '删除失败')
-			}
+	})
+		.then(() => {
+			api.deleteBatch(ids).then(res => {
+				if (res.code === '0000') {
+					proxy.$message.success('删除成功')
+					getList()
+				} else {
+					proxy.$message.error(res.msg || '删除失败')
+				}
+			})
 		})
-	}).catch(() => {})
+		.catch(() => {})
 }
 
 /** 发起审批回调 */
@@ -357,7 +362,7 @@ const handleInitiate = row => {
 				},
 				onError(err) {
 					proxy.$modal.msgError(err.message || '发起失败')
-				}
+				},
 			})
 		}
 	})
@@ -376,7 +381,6 @@ const handleHistory = row => {
 		},
 	})
 }
-
 
 const save = async () => {
 	const valid = await detailRef.value?.validate()

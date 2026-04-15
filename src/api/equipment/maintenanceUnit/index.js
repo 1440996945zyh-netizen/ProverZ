@@ -40,13 +40,13 @@ const api = {
 		})
 	},
 	/**
-	 * 根据部门级别查询部门列表
+	 * 查询内部部门列表
 	 * @param {Number} deptLevel 部门级别
 	 * @returns {Promise}
 	 */
 	getDeptListByLevel(params) {
 		return request({
-			url: '/api/internal/sysDept/getListByLevel',
+			url: '/api/internal/sysDept/getList',
 			method: 'get',
 			params: params,
 		})

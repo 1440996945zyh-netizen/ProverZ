@@ -27,6 +27,21 @@
 
 			<el-row :gutter="20">
 				<el-col :span="6">
+					<el-form-item label="所属单位" prop="useCompanyId">
+						<el-select
+							v-model="formData.useCompanyId"
+							placeholder="请选择所属单位"
+							clearable
+							filterable
+							:disabled="isViewMode || belongDeptDisabled"
+							@change="handleBelongDeptChange"
+							style="width: 100%"
+						>
+							<el-option v-for="item in belongDeptOptions" :key="item.value" :label="item.label" :value="item.value" />
+						</el-select>
+					</el-form-item>
+				</el-col>
+				<el-col :span="6">
 					<el-form-item label="维修单位" prop="maintOrgId">
 						<Select
 							:selectData="maintOrgOptions"
@@ -54,20 +69,32 @@
 				</el-col>
 				<el-col :span="6">
 					<el-form-item label="预算金额合计(元)" prop="totalBudgetAmount">
-						<el-input-number v-model="formData.totalBudgetAmount" :precision="4" :controls="false" disabled style="width: 100%" />
-					</el-form-item>
-				</el-col>
-				<el-col :span="6">
-					<el-form-item label="实际金额合计(元)" prop="totalActualAmount">
-						<el-input-number v-model="formData.totalActualAmount" :precision="4" :controls="false" disabled style="width: 100%" />
+						<el-input-number
+							v-model="formData.totalBudgetAmount"
+							:precision="4"
+							:controls="false"
+							disabled
+							style="width: 100%"
+						/>
 					</el-form-item>
 				</el-col>
 			</el-row>
 
 			<el-row :gutter="20">
-				<el-col :span="24">
+				<el-col :span="6">
+					<el-form-item label="实际金额合计(元)" prop="totalActualAmount">
+						<el-input-number
+							v-model="formData.totalActualAmount"
+							:precision="4"
+							:controls="false"
+							disabled
+							style="width: 100%"
+						/>
+					</el-form-item>
+				</el-col>
+				<el-col :span="18">
 					<el-form-item label="备注" prop="remark">
-						<el-input v-model="formData.remark" type="textarea" :rows="3" :disabled="isViewMode" placeholder="请输入备注" />
+						<el-input v-model="formData.remark" type="textarea" :rows="1" :disabled="isViewMode" placeholder="请输入备注" />
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -76,7 +103,14 @@
 				<div class="sub-table-header">
 					<span class="sub-table-title">结算明细</span>
 					<div v-if="!isViewMode" class="sub-table-btns">
-						<el-button type="primary" size="small" @click="openWorkOrderDialog" :disabled="!formData.maintOrgId || !formData.projectType">选择工单</el-button>
+						<el-button
+							type="primary"
+							size="small"
+							@click="openWorkOrderDialog"
+							:disabled="!formData.useCompanyId || !formData.maintOrgId || !formData.projectType"
+						>
+							选择工单
+						</el-button>
 					</div>
 				</div>
 				<el-table :data="formData.subList" border stripe style="width: 100%; margin-top: 10px">
@@ -128,7 +162,6 @@
 				@checkbox-all="handleWorkOrderSelection"
 				:row-config="{ keyField: 'id' }"
 				:tableHeight="tableHeight"
-
 			/>
 			<template #footer>
 				<div style="display: flex; justify-content: flex-end; gap: 10px">
@@ -147,11 +180,13 @@ import { ElMessage, ElMessageBox, ElInputNumber, ElTooltip, ElIcon } from 'eleme
 import BaseTable from '@/components/BaseTable/index.vue'
 import Select from '@/components/Select/index.vue'
 import api from '@/api/equipment/costSettlement/index'
+import budgetApi from '@/api/equipment/costBudgetManagement/index'
 import maintenancePersonnelApi from '@/api/equipment/maintenancePersonnel/index'
 import publicApi from '@/api/public/index'
 import tableParamsStore from '@/store/modules/tableParams'
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 const tableHeight = computed(() => tableParamsStore().dialogPageTableHeight)
-
 
 const props = defineProps({
 	isViewMode: {
@@ -166,6 +201,8 @@ const ruleForm = ref()
 const formData = reactive({
 	id: null,
 	settlementNo: '',
+	useCompanyId: null,
+	useCompanyName: '',
 	maintOrgId: null,
 	maintOrgName: '',
 	projectType: '',
@@ -179,10 +216,13 @@ const formData = reactive({
 })
 
 const rules = reactive({
+	useCompanyId: [{ required: true, message: '请选择所属单位', trigger: 'change' }],
 	maintOrgId: [{ required: true, message: '请选择维修单位', trigger: 'change' }],
 	projectType: [{ required: true, message: '请选择项目类型', trigger: 'change' }],
 })
 
+const belongDeptOptions = ref([])
+const belongDeptDisabled = ref(false)
 const maintOrgOptions = ref([])
 
 // 工单选择弹窗相关
@@ -206,7 +246,7 @@ const workOrderSearchData = reactive([
 const workOrderColumns = [
 	{ label: '', type: 'checkbox', width: 50, align: 'center' },
 	{ label: '工单号', prop: 'workOrderNo', width: 180, align: 'center' },
-	{ label: '设备名称', prop: 'equipName', width: 150 , align: 'center'},
+	{ label: '设备名称', prop: 'equipName', width: 150, align: 'center' },
 	{ label: '申请单号', prop: 'mantAppNumber', align: 'center' },
 	{ label: '项目类型', prop: 'dispatchTypeName', width: 120, align: 'center' },
 	{ label: '验收时间', prop: 'acceptanceTime', align: 'center' },
@@ -228,34 +268,38 @@ const handleMaintOrgChange = (val, item) => {
 			type: 'warning',
 			confirmButtonText: '确定',
 			cancelButtonText: '取消',
-		}).then(() => {
-			formData.subList = []
-			calculateTotals()
-			oldMaintOrgId.value = formData.maintOrgId
-			oldMaintOrgName.value = formData.maintOrgName
-		}).catch(() => {
-			formData.maintOrgId = oldMaintOrgId.value
-			formData.maintOrgName = oldMaintOrgName.value
 		})
+			.then(() => {
+				formData.subList = []
+				calculateTotals()
+				oldMaintOrgId.value = formData.maintOrgId
+				oldMaintOrgName.value = formData.maintOrgName
+			})
+			.catch(() => {
+				formData.maintOrgId = oldMaintOrgId.value
+				formData.maintOrgName = oldMaintOrgName.value
+			})
 	} else {
 		oldMaintOrgId.value = formData.maintOrgId
 		oldMaintOrgName.value = formData.maintOrgName
 	}
 }
 
-const handleProjectTypeChange = (val) => {
+const handleProjectTypeChange = val => {
 	if (formData.subList && formData.subList.length > 0) {
 		ElMessageBox.confirm('变更项目类型会清空已选择工单，是否继续？', '提示', {
 			type: 'warning',
 			confirmButtonText: '确定',
 			cancelButtonText: '取消',
-		}).then(() => {
-			formData.subList = []
-			calculateTotals()
-			oldProjectType.value = formData.projectType
-		}).catch(() => {
-			formData.projectType = oldProjectType.value
 		})
+			.then(() => {
+				formData.subList = []
+				calculateTotals()
+				oldProjectType.value = formData.projectType
+			})
+			.catch(() => {
+				formData.projectType = oldProjectType.value
+			})
 	} else {
 		oldProjectType.value = formData.projectType
 	}
@@ -270,25 +314,28 @@ const openWorkOrderDialog = () => {
 }
 
 const loadWorkOrders = (params = {}) => {
-	if (!formData.maintOrgId || !formData.projectType) return
+	if (!formData.useCompanyId || !formData.maintOrgId || !formData.projectType) return
 	workOrderLoading.value = true
 	const query = {
 		...params,
 		maintOrgId: formData.maintOrgId,
 		projectType: formData.projectType,
+		useCompanyId: formData.useCompanyId,
 		id: formData.id,
 	}
-	api.getAcceptedWorkOrders(query).then(res => {
-		if (res.code === '0000') {
-			workOrderList.value = res.data.pages || []
-			workOrderTotal.value = res.data.totalNum || 0
-		} else {
-			proxy.$message.error(res.msg || '加载工单数据失败')
-		}
-		workOrderLoading.value = false
-	}).catch(() => {
-		workOrderLoading.value = false
-	})
+	api.getAcceptedWorkOrders(query)
+		.then(res => {
+			if (res.code === '0000') {
+				workOrderList.value = res.data.pages || []
+				workOrderTotal.value = res.data.totalNum || 0
+			} else {
+				proxy.$message.error(res.msg || '加载工单数据失败')
+			}
+			workOrderLoading.value = false
+		})
+		.catch(() => {
+			workOrderLoading.value = false
+		})
 }
 
 const handleWorkOrderSelection = data => {
@@ -330,7 +377,7 @@ const calculateTotals = () => {
 	formData.totalActualAmount = formData.subList.reduce((sum, item) => sum + (Number(item.actualAmount) || 0), 0)
 }
 
-const formatNumberHelper = (val) => {
+const formatNumberHelper = val => {
 	if (val === null || val === undefined || val === '') return '0.0000'
 	return Number(val).toFixed(4)
 }
@@ -339,6 +386,8 @@ const resetForm = () => {
 	Object.assign(formData, {
 		id: null,
 		settlementNo: '',
+		useCompanyId: null,
+		useCompanyName: '',
 		maintOrgId: null,
 		maintOrgName: '',
 		projectType: '',
@@ -354,6 +403,16 @@ const resetForm = () => {
 	oldMaintOrgId.value = null
 	oldMaintOrgName.value = ''
 	oldProjectType.value = ''
+	belongDeptDisabled.value = false
+	const userDeptId = userStore.deptId
+	if (userDeptId && belongDeptOptions.value.length > 0) {
+		const matched = belongDeptOptions.value.find(item => String(item.value) === String(userDeptId))
+		if (matched) {
+			formData.useCompanyId = matched.value
+			formData.useCompanyName = matched.label
+			belongDeptDisabled.value = true
+		}
+	}
 }
 
 const setFormData = data => {
@@ -362,6 +421,14 @@ const setFormData = data => {
 	oldMaintOrgId.value = formData.maintOrgId
 	oldMaintOrgName.value = formData.maintOrgName
 	oldProjectType.value = formData.projectType
+	if (formData.useCompanyId) {
+		const userDeptId = userStore.deptId
+		if (userDeptId && String(formData.useCompanyId) === String(userDeptId)) {
+			belongDeptDisabled.value = true
+		} else {
+			belongDeptDisabled.value = false
+		}
+	}
 }
 
 const validate = async () => {
@@ -376,6 +443,34 @@ const validate = async () => {
 	return true
 }
 
+const getBelongDeptList = async () => {
+	try {
+		const res = await budgetApi.getDeptListByLevel({ deptLevel: '1', inOutType: 'I' })
+		if (res.code === '0000' && Array.isArray(res.data)) {
+			belongDeptOptions.value = res.data.map(item => ({
+				label: item.deptName,
+				value: item.id,
+			}))
+			const userDeptId = userStore.deptId
+			if (userDeptId) {
+				const matched = belongDeptOptions.value.find(item => String(item.value) === String(userDeptId))
+				if (matched) {
+					formData.useCompanyId = matched.value
+					formData.useCompanyName = matched.label
+					belongDeptDisabled.value = true
+				}
+			}
+		}
+	} catch (error) {
+		console.error('加载所属单位失败:', error)
+	}
+}
+
+const handleBelongDeptChange = value => {
+	const current = belongDeptOptions.value.find(item => String(item.value) === String(value))
+	formData.useCompanyName = current?.label || ''
+}
+
 const getMaintOrgList = () => {
 	maintenancePersonnelApi.queryUnitName({ outType: '2' }).then(res => {
 		if (res.code === '0000') {
@@ -387,10 +482,10 @@ const getMaintOrgList = () => {
 	})
 }
 
-const getLoginUser = () => {
-}
+const getLoginUser = () => {}
 
 onMounted(() => {
+	getBelongDeptList()
 	getMaintOrgList()
 })
 
