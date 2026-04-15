@@ -219,6 +219,7 @@ const handleEditOrView = (row, isView = false) => {
 			detailRef.value.formData.contractCode = resData.contractCode
 			detailRef.value.formData.contractType = resData.contractType
 			detailRef.value.formData.contractAmount = resData.contractAmount
+			detailRef.value.formData.externalCompanyId = resData.externalCompanyId
 			detailRef.value.formData.startDate = resData.startDate
 			detailRef.value.formData.endDate = resData.endDate
 			detailRef.value.formData.applyScope = resData.applyScope
