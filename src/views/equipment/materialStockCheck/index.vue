@@ -66,6 +66,7 @@ const selectData = reactive([
 			{ label: '待盘点', value: 0 },
 			{ label: '盘点中', value: 1 },
 			{ label: '已完成', value: 2 },
+			{ label: '已调整', value: 3 },
 		],
 	},
 ])
@@ -172,29 +173,29 @@ const tableColumns = ref([
 	{ label: '创建人', prop: 'createByName', align: 'left', width: 100 },
 	{ label: '创建时间', prop: 'createTime', align: 'center', width: 150 },
 	{ label: '备注', prop: 'remark', align: 'center', minWidth: 150 },
-	{ 
-		label: '明细总数', 
-		prop: 'totalDetailCount', 
-		align: 'center', 
-		width: 100 
+	{
+		label: '明细总数',
+		prop: 'totalDetailCount',
+		align: 'center',
+		width: 100
 	},
-	{ 
-		label: '未盘点', 
-		prop: 'uncheckedCount', 
-		align: 'center', 
-		width: 100 
+	{
+		label: '待盘点',
+		prop: 'uncheckedCount',
+		align: 'center',
+		width: 100
 	},
-	{ 
-		label: '待确认', 
-		prop: 'pendingConfirmCount', 
-		align: 'center', 
-		width: 100 
+	{
+		label: '待确认',
+		prop: 'pendingConfirmCount',
+		align: 'center',
+		width: 100
 	},
-	{ 
-		label: '已盘点', 
-		prop: 'checkedCount', 
-		align: 'center', 
-		width: 100 
+	{
+		label: '已完成',
+		prop: 'checkedCount',
+		align: 'center',
+		width: 100
 	},
 	{
 		label: '盘点状态',

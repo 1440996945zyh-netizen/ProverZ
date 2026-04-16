@@ -40,9 +40,9 @@ const selectData = reactive([
 		modelValue: 'checkStatus',
 		span: 8,
 		selectData: [
-			{ label: '未盘点', value: '0' },
+			{ label: '待盘点', value: '0' },
 			{ label: '待确认', value: 1 },
-			{ label: '已盘点', value: 2 },
+			{ label: '已完成', value: 2 },
 		],
 	},
 	{
@@ -109,10 +109,9 @@ const getAcceptanceStatusType = (acceptanceStatus) => {
 // 获取盘点状态标签
 const getCheckStatusLabel = (status) => {
 	const statusMap = {
-		0: '未盘点',
+		0: '待盘点',
 		1: '待确认',
-		2: '已盘点',
-		3: '无差异',
+		2: '已完成',
 	}
 	return statusMap[status] || '未知'
 }
@@ -120,18 +119,16 @@ const getCheckStatusLabel = (status) => {
 // 获取盘点状态标签类型
 const getCheckStatusTagType = (checkStatus) => {
 	if (checkStatus === null || checkStatus === undefined) {
-		return 'info' // 未盘点 - 灰色
+		return 'info' // 待盘点 - 灰色
 	}
 	if (checkStatus === 0) {
-		return 'info' // 未盘点 - 灰色
+		return 'info' // 待盘点 - 灰色
 	} else if (checkStatus === 1) {
 		return 'warning' // 待确认 - 橙色
 	} else if (checkStatus === 2) {
-		return 'success' // 已盘点 - 绿色
-	} else if (checkStatus === 3) {
-		return 'success' // 无差异 - 绿色
+		return 'success' // 已完成 - 绿色
 	}
-	return 'info' // 未盘点 - 灰色
+	return 'info' // 待盘点 - 灰色
 }
 
 // 格式化数字
@@ -225,7 +222,7 @@ const tableColumns = ref([
 		width: 100,
 		render: row => {
 			if (row.checkStatus === null || row.checkStatus === undefined) {
-				return [h(ElTag, { type: 'info' }, { default: () => '未盘点' })]
+				return [h(ElTag, { type: 'info' }, { default: () => '待盘点' })]
 			}
 			return [
 				h(
