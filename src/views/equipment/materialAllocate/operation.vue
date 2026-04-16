@@ -481,7 +481,7 @@ const resetForm = () => {
 	Object.assign(baseForm, {
 		id: null,
 		allocateCode: '',
-		title: `物资调拨-${getTodayCode()}`,
+		title: `物资调拨${getTodayCode()}`,
 		fromCompanyId: null,
 		fromCompanyName: '',
 		fromWarehouseId: null,
