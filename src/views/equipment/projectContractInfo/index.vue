@@ -40,6 +40,8 @@ import publicApi from '@/api/public/index'
 import tableParamsStore from '@/store/modules/tableParams'
 import DropDown from '@/components/DropDown/newIndex.vue'
 import { Edit, View, Delete } from '@element-plus/icons-vue'
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 
 const { proxy } = getCurrentInstance()
 
@@ -215,6 +217,8 @@ const handleEditOrView = (row, isView = false) => {
 		api.getById(row.id).then(response => {
 			const resData = JSON.parse(JSON.stringify(response.data))
 			detailRef.value.formData.id = resData.id
+			detailRef.value.formData.useCompanyId = resData.useCompanyId
+			detailRef.value.formData.useCompanyName = resData.useCompanyName || ''
 			detailRef.value.formData.contractName = resData.contractName
 			detailRef.value.formData.contractCode = resData.contractCode
 			detailRef.value.formData.contractType = resData.contractType
@@ -224,6 +228,12 @@ const handleEditOrView = (row, isView = false) => {
 			detailRef.value.formData.endDate = resData.endDate
 			detailRef.value.formData.applyScope = resData.applyScope
 			detailRef.value.formData.status = resData.status
+			if (resData.useCompanyId) {
+				const userDeptId = userStore.deptId
+				if (userDeptId && String(resData.useCompanyId) === String(userDeptId)) {
+					detailRef.value.belongDeptDisabled = true
+				}
+			}
 		})
 	})
 }

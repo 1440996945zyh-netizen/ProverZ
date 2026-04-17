@@ -48,6 +48,8 @@ import DropDown from '@/components/DropDown/newIndex.vue'
 import materialPurchaseApi from '@/api/equipment/materialPurchase/index'
 import { useRoute, useRouter } from 'vue-router'
 import { useProcessStarter } from '@/utils/bpm/useProcessStarter'
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 const { proxy } = getCurrentInstance()
 
 const route = useRoute()
@@ -97,12 +99,19 @@ const viewDetail = row => {
 	nextTick(() => {
 		detailRef.value.resetForm()
 		detailRef.value.formDisabled = true // 设置为只读
+		detailRef.value.getBelongDeptList()
 		materialPurchaseApi.getById(viewRow.id).then(res => {
 			if (res.code === '0000' && res.data) {
 				proxy.setFormData(detailRef.value.formData.form, res.data)
 				detailRef.value.editDetailList(res.data.detailList || [])
 				detailRef.value.editComparisonList(res.data.comparisonList || [])
 				detailRef.value.init(false)
+				if (res.data.useCompanyId) {
+					const userDeptId = userStore.deptId
+					if (userDeptId && String(res.data.useCompanyId) === String(userDeptId)) {
+						detailRef.value.belongDeptDisabled = true
+					}
+				}
 			}
 		})
 	})
@@ -410,6 +419,7 @@ const add = () => {
 	nextTick(() => {
 		detailRef.value.resetForm()
 		detailRef.value.formDisabled = false
+		detailRef.value.getBelongDeptList()
 		detailRef.value.init(true)
 	})
 }
@@ -424,12 +434,19 @@ const edit = row => {
 	nextTick(() => {
 		detailRef.value.resetForm()
 		detailRef.value.formDisabled = false
+		detailRef.value.getBelongDeptList()
 		materialPurchaseApi.getById(editRow.id).then(res => {
 			if (res.code === '0000' && res.data) {
 				proxy.setFormData(detailRef.value.formData.form, res.data)
 				detailRef.value.editDetailList(res.data.detailList || [])
 				detailRef.value.editComparisonList(res.data.comparisonList || [])
 				detailRef.value.init(false)
+				if (res.data.useCompanyId) {
+					const userDeptId = userStore.deptId
+					if (userDeptId && String(res.data.useCompanyId) === String(userDeptId)) {
+						detailRef.value.belongDeptDisabled = true
+					}
+				}
 			}
 		})
 	})

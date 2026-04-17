@@ -4,6 +4,21 @@
 			<el-collapse-item title="基本信息" name="baseData">
 				<el-row :gutter="24">
 					<el-col :span="6">
+						<el-form-item label="所属单位" prop="useCompanyId">
+							<el-select
+								v-model="form.useCompanyId"
+								placeholder="请选择所属单位"
+								clearable
+								filterable
+								:disabled="formDisabled || belongDeptDisabled"
+								@change="handleBelongDeptChange"
+								style="width: 100%"
+							>
+								<el-option v-for="item in belongDeptOptions" :key="item.value" :label="item.label" :value="item.value" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="6">
 						<el-form-item label="采购单主题" prop="purchaseTitle">
 							<el-input
 								v-model="form.purchaseTitle"
@@ -171,11 +186,16 @@ import Select from '@/components/Select/index.vue'
 import RemoteSelect from '@/components/RemoteSelect/index.vue'
 import applicationDetailTable from './applicationDetailTable/index.vue'
 import materialApplicationApi from '@/api/equipment/materialApplication/index'
+import budgetApi from '@/api/equipment/costBudgetManagement/index'
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 const { proxy } = getCurrentInstance()
 const tableHeightBj = 300
 const tableHeight = 500
 const ruleForm = ref()
 const detailTableRef = ref()
+const belongDeptOptions = ref([])
+const belongDeptDisabled = ref(false)
 const comparisonTableRef = ref()
 const formDisabled = ref(false)
 const activeNames = ref(['baseData', 'detailList'])
@@ -188,6 +208,8 @@ const rowConfig = { isCurrent: true, isHover: true, keyField: 'row_id' }
 const formData = reactive({
 	form: {
 		id: null,
+		useCompanyId: null,
+		useCompanyName: '',
 		purchaseTitle: '',
 		purchaseNo: '',
 		supplierId: null,
@@ -209,6 +231,7 @@ const { form, detailList, comparisonList } = formData
 
 // 表单验证规则
 const rules = reactive({
+	useCompanyId: proxy.getRules({ required: true }),
 	purchaseTitle: proxy.getRules({ required: true }),
 	supplierId: proxy.getRules({ required: true }),
 	purchaseTypeCode: proxy.getRules({ required: true }),
@@ -810,6 +833,8 @@ const editDetailList = data => {
 const resetForm = () => {
 	ruleForm.value?.resetFields()
 	form.id = null
+	form.useCompanyId = null
+	form.useCompanyName = ''
 	form.purchaseTitle = ''
 	form.purchaseNo = ''
 	form.supplierId = null
@@ -824,6 +849,44 @@ const resetForm = () => {
 	form.failureReason = ''
 	detailList.length = 0
 	comparisonList.length = 0
+	belongDeptDisabled.value = false
+	const userDeptId = userStore.deptId
+	if (userDeptId && belongDeptOptions.value.length > 0) {
+		const matched = belongDeptOptions.value.find(item => String(item.value) === String(userDeptId))
+		if (matched) {
+			form.useCompanyId = matched.value
+			form.useCompanyName = matched.label
+			belongDeptDisabled.value = true
+		}
+	}
+}
+
+const getBelongDeptList = async () => {
+	try {
+		const res = await budgetApi.getDeptListByLevel({ deptLevel: '1', inOutType: 'I' })
+		if (res.code === '0000' && Array.isArray(res.data)) {
+			belongDeptOptions.value = res.data.map(item => ({
+				label: item.deptName,
+				value: item.id,
+			}))
+			const userDeptId = userStore.deptId
+			if (userDeptId) {
+				const matched = belongDeptOptions.value.find(item => String(item.value) === String(userDeptId))
+				if (matched) {
+					form.useCompanyId = matched.value
+					form.useCompanyName = matched.label
+					belongDeptDisabled.value = true
+				}
+			}
+		}
+	} catch (error) {
+		console.error('加载所属单位失败:', error)
+	}
+}
+
+const handleBelongDeptChange = value => {
+	const current = belongDeptOptions.value.find(item => String(item.value) === String(value))
+	form.useCompanyName = current?.label || ''
 }
 
 // 处理比价信息数据（编辑时调用）
@@ -926,6 +989,8 @@ defineExpose({
 	init,
 	editDetailList,
 	editComparisonList,
+	getBelongDeptList,
+	belongDeptDisabled,
 })
 </script>
 <style lang="scss" scoped>

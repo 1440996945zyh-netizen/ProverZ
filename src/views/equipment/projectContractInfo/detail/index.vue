@@ -1,6 +1,20 @@
 <template>
 	<div class="formData">
 		<el-form :model="formData" ref="ruleForm" label-width="120px" :rules="rules" :disabled="isViewMode">
+			<el-form-item label="所属单位" prop="useCompanyId">
+				<el-select
+					v-model="formData.useCompanyId"
+					placeholder="请选择所属单位"
+					clearable
+					filterable
+					:disabled="isViewMode || belongDeptDisabled"
+					@change="handleBelongDeptChange"
+					style="width: 100%"
+				>
+					<el-option v-for="item in belongDeptOptions" :key="item.value" :label="item.label" :value="item.value" />
+				</el-select>
+			</el-form-item>
+
 			<el-form-item label="合同名称" prop="contractName">
 				<el-input v-model="formData.contractName" placeholder="请输入合同名称" maxlength="255" :disabled="isViewMode" />
 			</el-form-item>
@@ -77,6 +91,9 @@
 import { ref, reactive, getCurrentInstance, toRefs, onMounted } from 'vue'
 import Select from '@/components/Select'
 import api from '@/api/equipment/projectContractInfo/index'
+import budgetApi from '@/api/equipment/costBudgetManagement/index'
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 
 const props = defineProps({
 	isViewMode: {
@@ -89,10 +106,14 @@ const { proxy } = getCurrentInstance()
 
 const ruleForm = ref()
 const contractTypeOptions = ref([])
+const belongDeptOptions = ref([])
+const belongDeptDisabled = ref(false)
 
 const data = reactive({
 	formData: {
 		id: null,
+		useCompanyId: null,
+		useCompanyName: '',
 		contractName: '',
 		contractCode: '',
 		contractAmount: null,
@@ -109,6 +130,7 @@ const data = reactive({
 const { formData } = toRefs(data)
 
 const rules = reactive({
+	useCompanyId: proxy.getRules({ required: true }),
 	contractName: proxy.getRules({ required: true }),
 	contractCode: proxy.getRules({ required: true }),
 	contractType: proxy.getRules({ required: true }),
@@ -135,6 +157,8 @@ const validate = async () => {
 
 const resetForm = () => {
 	formData.value.id = null
+	formData.value.useCompanyId = null
+	formData.value.useCompanyName = ''
 	formData.value.contractName = ''
 	formData.value.contractCode = ''
 	formData.value.contractType = ''
@@ -145,7 +169,18 @@ const resetForm = () => {
 	formData.value.applyScope = ''
 	formData.value.status = '1'
 	ruleForm.value?.clearValidate()
+	belongDeptDisabled.value = false
+	const userDeptId = userStore.deptId
+	if (userDeptId && belongDeptOptions.value.length > 0) {
+		const matched = belongDeptOptions.value.find(item => String(item.value) === String(userDeptId))
+		if (matched) {
+			formData.value.useCompanyId = matched.value
+			formData.value.useCompanyName = matched.label
+			belongDeptDisabled.value = true
+		}
+	}
 }
+
 const maintenanceUnitOptions = ref([])
 const getMaintenanceUnitList = () => {
 	api.queryUnitName({}).then(res => {
@@ -157,7 +192,37 @@ const getMaintenanceUnitList = () => {
 		}
 	})
 }
+
+const getBelongDeptList = async () => {
+	try {
+		const res = await budgetApi.getDeptListByLevel({ deptLevel: '1', inOutType: 'I' })
+		if (res.code === '0000' && Array.isArray(res.data)) {
+			belongDeptOptions.value = res.data.map(item => ({
+				label: item.deptName,
+				value: item.id,
+			}))
+			const userDeptId = userStore.deptId
+			if (userDeptId) {
+				const matched = belongDeptOptions.value.find(item => String(item.value) === String(userDeptId))
+				if (matched) {
+					formData.value.useCompanyId = matched.value
+					formData.value.useCompanyName = matched.label
+					belongDeptDisabled.value = true
+				}
+			}
+		}
+	} catch (error) {
+		console.error('加载所属单位失败:', error)
+	}
+}
+
+const handleBelongDeptChange = value => {
+	const current = belongDeptOptions.value.find(item => String(item.value) === String(value))
+	formData.value.useCompanyName = current?.label || ''
+}
+
 onMounted(() => {
+	getBelongDeptList()
 	getMaintenanceUnitList()
 })
 
