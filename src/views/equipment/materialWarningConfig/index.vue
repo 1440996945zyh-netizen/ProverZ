@@ -251,15 +251,15 @@ const selectData = reactive([
 ])
 
 const buttonList = reactive([
+  // {
+  //   label: '新增',
+  //   type: 'primary',
+  //   icon: 'Plus',
+  //   click: () => handleAdd,
+  //   permission: 'equipment:eMaterialWarningConfig:save',
+  // },
   {
     label: '新增',
-    type: 'primary',
-    icon: 'Plus',
-    click: () => handleAdd,
-    permission: 'equipment:eMaterialWarningConfig:save',
-  },
-  {
-    label: '批量新增',
     type: 'primary',
     icon: 'Plus',
     click: () => handleBatchAdd,

@@ -1,8 +1,8 @@
 <template>
-  <div class="supplier-form">
-    <!-- 详情模式只做只读，不改原来表单样式 -->
+  <div class="supplier-form" :class="{ 'view-mode': viewMode }">
+    <!-- 新增、编辑、详情都走这一套，详情模式直接只读 -->
     <el-form ref="ruleForm" :model="formData" :rules="rules" label-position="top" :disabled="viewMode">
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="8">
           <el-form-item label="供应商编码" prop="supplierCode">
             <el-input v-model="formData.supplierCode" placeholder="供应商编码自动生成" disabled />
@@ -27,7 +27,7 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="8">
           <el-form-item label="供应商名称" prop="supplierName">
             <el-input v-model="formData.supplierName" placeholder="请输入供应商名称" maxlength="100" />
@@ -45,7 +45,7 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="8">
           <el-form-item label="企业曾用名" prop="formerName">
             <el-input v-model="formData.formerName" placeholder="请输入企业曾用名" maxlength="200" />
@@ -63,7 +63,7 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="6">
           <el-form-item label="法定代表人" prop="legalPerson">
             <el-input v-model="formData.legalPerson" placeholder="请输入法定代表人" maxlength="100" />
@@ -86,7 +86,7 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="6">
           <el-form-item label="经营状态" prop="businessState">
             <el-input v-model="formData.businessState" placeholder="请输入经营状态" maxlength="100" />
@@ -109,7 +109,7 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="6">
           <el-form-item label="注册地所属国家" prop="country">
             <el-input v-model="formData.country" placeholder="请输入注册地所属国家" maxlength="100" />
@@ -132,20 +132,34 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="12">
           <el-form-item label="注册地详细地址" prop="address">
-            <el-input v-model="formData.address" placeholder="请输入注册地详细地址" maxlength="500" />
+            <el-input
+              v-model="formData.address"
+              type="textarea"
+              :rows="2"
+              placeholder="请输入注册地详细地址"
+              maxlength="500"
+              show-word-limit
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="公司经营地址" prop="businessAddress">
-            <el-input v-model="formData.businessAddress" placeholder="请输入公司经营地址" maxlength="500" />
+            <el-input
+              v-model="formData.businessAddress"
+              type="textarea"
+              :rows="2"
+              placeholder="请输入公司经营地址"
+              maxlength="500"
+              show-word-limit
+            />
           </el-form-item>
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="8">
           <el-form-item label="组织机构代码" prop="organizationCode">
             <el-input v-model="formData.organizationCode" placeholder="请输入组织机构代码" maxlength="10" />
@@ -163,13 +177,13 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="16">
           <el-form-item label="经营范围" prop="businessScope">
             <el-input
               v-model="formData.businessScope"
               type="textarea"
-              :rows="3"
+              :rows="4"
               placeholder="请输入经营范围"
               maxlength="1000"
               show-word-limit
@@ -177,7 +191,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="状态" prop="status">
+          <el-form-item label="状态" prop="status" class="status-item">
             <el-radio-group v-model="formData.status">
               <el-radio label="2">启用</el-radio>
               <el-radio label="1">禁用</el-radio>
@@ -186,7 +200,7 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
+      <el-row :gutter="24">
         <el-col :span="24">
           <el-form-item label="备注信息" prop="companyInfoRemark">
             <el-input
@@ -264,7 +278,6 @@ const setViewMode = mode => {
 }
 
 const validate = async () => {
-  // 详情模式不做校验
   if (viewMode.value) {
     return true
   }
@@ -328,8 +341,110 @@ defineExpose({
 @import '@/assets/styles/formData.scss';
 
 .supplier-form {
+  padding: 14px 28px 10px 34px;
+  box-sizing: border-box;
+
   :deep(.el-form-item) {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  :deep(.el-form-item__label) {
+    padding-bottom: 6px;
+    line-height: 20px;
+    color: #606266;
+    font-size: 14px;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-select__wrapper),
+  :deep(.el-date-editor .el-input__wrapper) {
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 0 6px 0 !important;
+    border: none !important;
+    border-bottom: 1px solid #dcdfe6 !important;
+  }
+
+  :deep(.el-input__wrapper.is-focus),
+  :deep(.el-select__wrapper.is-focused),
+  :deep(.el-date-editor .el-input__wrapper.is-focus) {
+    box-shadow: none !important;
+    border-bottom: 1px solid #409eff !important;
+  }
+
+  :deep(.el-input__inner) {
+    height: 30px;
+    line-height: 30px;
+  }
+
+  :deep(.el-textarea__inner) {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 6px 0 8px 0 !important;
+    border-bottom: 1px solid #dcdfe6 !important;
+    min-height: 72px !important;
+  }
+
+  :deep(.el-textarea__inner:focus) {
+    box-shadow: none !important;
+    border-bottom: 1px solid #409eff !important;
+  }
+
+  .status-item {
+    padding-top: 2px;
+  }
+
+  &.view-mode {
+    :deep(.el-input__wrapper),
+    :deep(.el-select__wrapper),
+    :deep(.el-date-editor .el-input__wrapper) {
+      background: #f5f7fa !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 0 12px 6px 12px !important;
+      border-bottom: 1px solid #dcdfe6 !important;
+    }
+
+    :deep(.el-input__inner) {
+      color: #303133 !important;
+      -webkit-text-fill-color: #303133 !important;
+    }
+
+    :deep(.el-textarea__inner) {
+      background: #f5f7fa !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 10px 12px 8px 12px !important;
+      color: #303133 !important;
+      -webkit-text-fill-color: #303133 !important;
+      border-bottom: 1px solid #dcdfe6 !important;
+      min-height: 72px !important;
+    }
+
+    /* 详情态不要再出现蓝色焦点下划线 */
+    :deep(.el-input__wrapper.is-focus),
+    :deep(.el-select__wrapper.is-focused),
+    :deep(.el-date-editor .el-input__wrapper.is-focus),
+    :deep(.el-textarea__inner:focus) {
+      border: none !important;
+      box-shadow: none !important;
+      border-bottom: 1px solid #dcdfe6 !important;
+    }
+
+    /* 禁用态文字颜色收深一点 */
+    :deep(.is-disabled .el-input__inner),
+    :deep(.is-disabled textarea),
+    :deep(.is-disabled .el-select__selected-item),
+    :deep(.is-disabled .el-input__wrapper),
+    :deep(.is-disabled .el-select__wrapper) {
+      color: #303133 !important;
+      -webkit-text-fill-color: #303133 !important;
+    }
   }
 }
 </style>
