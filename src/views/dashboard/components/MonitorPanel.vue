@@ -365,14 +365,6 @@ const teamMonitorData = ref([
 	{ name: 'xx 公司', onlineRate: 88.5, alertCount: 12, status: 'danger', statusText: '异常' },
 ])
 
-const responseTimeData = ref([
-	{ label: '鍗楀尯', value: 1.8, percent: 44, color: 'linear-gradient(180deg, #22d3ee 0%, #0ea5e9 100%)' },
-	{ label: '涓滃尯', value: 2.5, percent: 58, color: 'linear-gradient(180deg, #38bdf8 0%, #2563eb 100%)' },
-	{ label: '宀氬崡', value: 1.5, percent: 36, color: 'linear-gradient(180deg, #34d399 0%, #10b981 100%)' },
-	{ label: '瑗垮尯', value: 3.2, percent: 74, color: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%)' },
-	{ label: '宀氫腑', value: 4.1, percent: 96, color: 'linear-gradient(180deg, #fb7185 0%, #ef4444 100%)' },
-])
-
 const getAlertIcon = level => {
 	const icons = {
 		critical: 'SuccessFilled',
