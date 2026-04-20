@@ -371,14 +371,14 @@ const initTrendChart = () => {
 		},
 		legend: {
 			data: ['在用设备', '在修设备', '停用设备'],
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 13 },
 			top: 0,
 		},
 		grid: {
 			left: '3%',
 			right: '4%',
-			bottom: '3%',
-			top: '15%',
+			bottom: '7%',
+			top: '18%',
 			containLabel: true,
 		},
 		xAxis: {
@@ -386,12 +386,13 @@ const initTrendChart = () => {
 			boundaryGap: false,
 			data: ['1月', '2月', '3月', '4月', '5月', '6月'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 12 },
 		},
 		yAxis: {
 			type: 'value',
+			min: 0,
 			axisLine: { show: false },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 12 },
 			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
 		},
 		series: [
@@ -478,15 +479,18 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .equipment-panel {
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 }
 
 .screen-body {
 	padding: 12px 15px;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 	display: grid;
-	grid-template-columns: 1fr 1.4fr 1fr;
+	grid-template-columns: 1fr 1.58fr 1fr;
 	gap: 12px;
+	align-items: stretch;
 	box-sizing: border-box;
 }
 
@@ -503,6 +507,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	flex-direction: column;
 	gap: 12px;
 	min-height: 0;
+	justify-content: stretch;
 }
 
 .panel-card {
@@ -537,8 +542,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex-shrink: 0;
 
 		.header-icon-box {
-			width: 24px;
-			height: 24px;
+			width: 26px;
+			height: 26px;
 			background: linear-gradient(135deg, $primary-color, $primary-dark);
 			border-radius: 5px;
 			display: flex;
@@ -549,10 +554,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.panel-title {
-			font-size: 13px;
-			font-weight: 600;
+			font-size: 17px;
+			font-weight: 700;
 			color: $text-primary;
-			letter-spacing: 1px;
+			letter-spacing: 1.5px;
 		}
 
 		.header-line {
@@ -779,22 +784,26 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .archive-chart-wrapper {
-	height: 140px;
+	height: 210px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
 	.archive-chart {
 		width: 100%;
+		max-width: 320px;
 		height: 100%;
 	}
 }
 
 .center-card {
-	flex: 1.2;
+	flex: 1.28;
 }
 
 .kpi-container {
 	display: flex;
 	justify-content: space-around;
-	gap: 20px;
+	gap: 24px;
 	height: 100%;
 	align-items: center;
 
@@ -845,7 +854,11 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.kpi-chart-wrapper {
 			width: 100%;
-			height: 70px;
+			height: 118px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			max-width: 240px;
 		}
 
 		.kpi-chart {
@@ -854,7 +867,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.kpi-value {
-			font-size: 18px;
+			font-size: 20px;
 			font-weight: 700;
 			color: $text-primary;
 			font-family: 'Orbitron', monospace;
@@ -865,7 +878,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .trend-chart {
 	width: 100%;
-	height: 120px;
+	height: 245px;
 }
 
 .knowledge-stats {
@@ -918,6 +931,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
+	height: 100%;
+	justify-content: space-between;
 
 	.knowledge-list-item {
 		display: flex;
@@ -978,7 +993,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .rate-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 10px;
 
 	.rate-item {
 		padding: 10px;

@@ -43,7 +43,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card response-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Bell /></el-icon>
@@ -269,7 +269,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import {
 	Warning,
 	Bell,
@@ -365,6 +365,14 @@ const teamMonitorData = ref([
 	{ name: 'xx 公司', onlineRate: 88.5, alertCount: 12, status: 'danger', statusText: '异常' },
 ])
 
+const responseTimeData = ref([
+	{ label: '鍗楀尯', value: 1.8, percent: 44, color: 'linear-gradient(180deg, #22d3ee 0%, #0ea5e9 100%)' },
+	{ label: '涓滃尯', value: 2.5, percent: 58, color: 'linear-gradient(180deg, #38bdf8 0%, #2563eb 100%)' },
+	{ label: '宀氬崡', value: 1.5, percent: 36, color: 'linear-gradient(180deg, #34d399 0%, #10b981 100%)' },
+	{ label: '瑗垮尯', value: 3.2, percent: 74, color: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%)' },
+	{ label: '宀氫腑', value: 4.1, percent: 96, color: 'linear-gradient(180deg, #fb7185 0%, #ef4444 100%)' },
+])
+
 const getAlertIcon = level => {
 	const icons = {
 		critical: 'SuccessFilled',
@@ -388,7 +396,7 @@ const initAlertChart = () => {
 		series: [
 			{
 				type: 'pie',
-				radius: ['45%', '70%'],
+				radius: ['42%', '74%'],
 				center: ['50%', '50%'],
 				avoidLabelOverlap: false,
 				label: { show: false },
@@ -449,7 +457,7 @@ const initMapChart = () => {
 					formatter: '{b}',
 					position: 'right',
 					color: 'rgba(255, 255, 255, 0.8)',
-					fontSize: 10,
+					fontSize: 13,
 				},
 			},
 			{
@@ -481,7 +489,7 @@ const initTrendChart = () => {
 		},
 		legend: {
 			data: ['告警数量', '处理数量', '响应时间'],
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 13 },
 			top: 0,
 		},
 		grid: {
@@ -496,21 +504,21 @@ const initTrendChart = () => {
 			boundaryGap: false,
 			data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 13 },
 		},
 		yAxis: [
 			{
 				type: 'value',
 				name: '数量',
 				axisLine: { show: false },
-				axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+				axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 13 },
 				splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
 			},
 			{
 				type: 'value',
 				name: '时间(s)',
 				axisLine: { show: false },
-				axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+				axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 13 },
 				splitLine: { show: false },
 			},
 		],
@@ -568,22 +576,24 @@ const initResponseChart = () => {
 			textStyle: { color: '#fff' },
 		},
 		grid: {
-			left: '3%',
-			right: '4%',
-			bottom: '3%',
-			top: '10%',
+			left: '6%',
+			right: '6%',
+			bottom: '8%',
+			top: '14%',
 			containLabel: true,
 		},
 		xAxis: {
 			type: 'category',
 			data: ['南区', '东区', '岚南', '西区', '岚中'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 13 },
 		},
 		yAxis: {
 			type: 'value',
+			min: 0,
+			max: 5,
 			axisLine: { show: false },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 13 },
 			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
 		},
 		series: [
@@ -636,7 +646,13 @@ const initResponseChart = () => {
 						},
 					},
 				],
-				barWidth: '40%',
+				barWidth: '42%',
+				label: {
+					show: true,
+					position: 'top',
+					color: 'rgba(255, 255, 255, 0.82)',
+					fontSize: 12,
+				},
 				itemStyle: {
 					borderRadius: [4, 4, 0, 0],
 				},
@@ -654,12 +670,17 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-	setTimeout(() => {
-		initAlertChart()
-		initMapChart()
-		initTrendChart()
-		initResponseChart()
-	}, 100)
+	nextTick(() => {
+		requestAnimationFrame(() => {
+			setTimeout(() => {
+				initAlertChart()
+				initMapChart()
+				initTrendChart()
+				initResponseChart()
+				handleResize()
+			}, 120)
+		})
+	})
 	window.addEventListener('resize', handleResize)
 })
 
@@ -685,15 +706,18 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .monitor-panel {
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 }
 
 .screen-body {
 	padding: 12px 15px;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 	display: grid;
-	grid-template-columns: 1fr 1.4fr 1fr;
+	grid-template-columns: 1fr 1.62fr 1fr;
 	gap: 12px;
+	align-items: stretch;
 	box-sizing: border-box;
 }
 
@@ -710,6 +734,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	flex-direction: column;
 	gap: 12px;
 	min-height: 0;
+	justify-content: stretch;
 }
 
 .panel-card {
@@ -744,8 +769,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex-shrink: 0;
 
 		.header-icon-box {
-			width: 24px;
-			height: 24px;
+			width: 26px;
+			height: 26px;
 			background: linear-gradient(135deg, $primary-color, $primary-dark);
 			border-radius: 5px;
 			display: flex;
@@ -756,10 +781,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.panel-title {
-			font-size: 13px;
-			font-weight: 600;
+			font-size: 17px;
+			font-weight: 700;
 			color: $text-primary;
-			letter-spacing: 1px;
+			letter-spacing: 1.5px;
 		}
 
 		.header-line {
@@ -880,6 +905,16 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 }
 
+.response-card {
+	.panel-body {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding-top: 16px;
+		padding-bottom: 16px;
+	}
+}
+
 .alert-summary {
 	display: flex;
 	gap: 12px;
@@ -974,7 +1009,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .alert-chart {
-	height: 100px;
+	height: 190px;
+	margin: 6px auto 0;
 }
 
 .alert-list {
@@ -1090,17 +1126,20 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .map-card {
-	flex: 1.3;
+	flex: 1.42;
 }
 
 .map-container {
 	flex: 1;
 	min-height: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
 	.map-chart {
 		width: 100%;
 		height: 100%;
-		min-height: 180px;
+		min-height: 360px;
 	}
 }
 
@@ -1109,7 +1148,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	justify-content: space-around;
 	padding: 12px 0;
 	border-top: 1px solid $border-color;
-	margin-top: 12px;
+	margin-top: 8px;
 
 	.map-stat-item {
 		display: flex;
@@ -1164,19 +1203,19 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .trend-chart {
 	width: 100%;
-	height: 80px;
+	height: 220px;
 }
 
 .metrics-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 6px;
+	gap: 8px;
 
 	.metric-item {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 8px 10px;
+		padding: 10px 12px;
 		background: rgba(255, 255, 255, 0.03);
 		border-radius: 6px;
 		transition: all 0.3s ease;
@@ -1342,14 +1381,17 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .response-chart {
-	height: 60px;
+	width: 100%;
+	max-width: 300px;
+	height: 180px;
+	margin: 0 auto 10px;
 }
 
 .response-stats {
 	display: flex;
 	justify-content: space-around;
-	margin-top: 8px;
-	padding-top: 8px;
+	margin-top: 14px;
+	padding-top: 12px;
 	border-top: 1px solid $border-color;
 
 	.response-stat {

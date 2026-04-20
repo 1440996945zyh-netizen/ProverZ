@@ -66,18 +66,18 @@
 			</el-form-item>
 			<el-form-item style="margin-left: auto;">
 				<template v-if="activeTab === 'scrap'">
-					<el-button type="warning"  @click="handleExportScrap" v-hasPermi="['equipment:equipScrap:export']" style="margin-right: 8px;">
+					<el-button type="warning" icon="Download"  @click="handleExportScrap" v-hasPermi="['equipment:equipScrap:export']" style="margin-right: 8px;">
 						设备报废导出
 					</el-button>
-					<el-button type="primary"  @click="handleAddScrap" v-hasPermi="['equipment:equipScrap:add']">
+					<el-button type="primary" icon="Plus"  @click="handleAddScrap" v-hasPermi="['equipment:equipScrap:add']">
 						设备报废新增
 					</el-button>
 				</template>
 				<template v-else-if="activeTab === 'allocate'">
-					<el-button type="warning"  @click="handleExportAllocate" v-hasPermi="['equipment:equipAllocate:export']" style="margin-right: 8px;">
+					<el-button type="warning"  icon="Download"  @click="handleExportAllocate" v-hasPermi="['equipment:equipAllocate:export']" style="margin-right: 8px;">
 						设备调拨导出
 					</el-button>
-					<el-button type="primary"  @click="handleAddAllocate" v-hasPermi="['equipment:equipAllocate:add']">
+					<el-button type="primary"  icon="Plus"  @click="handleAddAllocate" v-hasPermi="['equipment:equipAllocate:add']">
 						设备调拨新增
 					</el-button>
 				</template>
