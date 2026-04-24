@@ -81,7 +81,7 @@ const buttonList = ref([
 		type: 'primary',
 		icon: 'Plus',
 		click: () => add,
-		permission: 'equipment:inspectionPlan:add',
+		permission: 'equipment:maintainPlan:add',
 	},
 ])
 const total = ref(0)
@@ -259,7 +259,7 @@ const save = async () => {
     const params = JSON.parse(JSON.stringify(viewRef.value.formData))
     if (params.setDate) {
 			if (params.setDate.length > 1) {
-				return proxy.$message.warning('选择只能勾选一个复选框')
+				return proxy.$message.warning('选择日期时只能勾选一个复选框')
 			}
       params.setDate = params.setDate.join(",")
     }

@@ -1,34 +1,28 @@
 import request from '@/utils/auth/request'
 
 const api = {
-	// 查询设备类型分类树形列表
+	// 查询巡检计划列表
 	getList(params) {
 		return request({
 			url: '/api/internal/ePatrolPlan/getList',
 			method: 'get',
-			params: params
+			params
 		})
 	},
+	// 查询巡检路线列表
 	getRouteList(params) {
 		return request({
 			url: '/api/internal/ePatrolPlan/getRouteList',
 			method: 'get',
-			params: params
+			params
 		})
 	},
-	// 查询点检任务
-	getTaskDetail(params) {
-		return request({
-			url: '/api/internal/ePatrolPlan/getTaskDetail',
-			method: 'get',
-			params: params
-		})
-	},
+	// 根据ID查询巡检计划
 	getById(params) {
 		return request({
 			url: '/api/internal/ePatrolPlan/getById',
 			method: 'get',
-			params: params
+			params
 		})
 	},
 	// 新增
@@ -47,30 +41,14 @@ const api = {
 			data
 		})
 	},
-	// 保存
+	// 删除
 	delete(params) {
 		return request({
 			url: '/api/internal/ePatrolPlan/delete',
 			method: 'delete',
-			params: params
-		})
-	},
-	// 查询设备列表
-	getEquipListById(params) {
-		return request({
-			url: '/api/internal/ePatrolPlan/getEquipListById',
-			method: 'get',
-			params: params
-		})
-	},
-	// 根据id查询设备类型分类
-	queryByUnitId(params) {
-		return request({
-			url: '/api/internal/ePatrolPlan/queryByUnitId',
-			method: 'get',
-			params: params
+			params
 		})
 	},
 }
-export default api
 
+export default api

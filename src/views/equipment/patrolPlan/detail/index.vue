@@ -17,7 +17,7 @@
 							</el-form-item>
 						</el-col>
 						<el-col :span="8">
-							<el-form-item label="线路名称" prop="repairContarctId">
+							<el-form-item label="线路名称" prop="routeId">
 								<Select :selectData="routeOptions" v-model:value="formData.routeId"
 									v-model:label="formData.routeName" :selectValue="'id'" :selectLabel="'routeName'"
 									placeholder="请选择线路名称" />
@@ -30,7 +30,7 @@
 									{ label: '周', value: '2' },
 									{ label: '月', value: '3' },
 									{ label: '年', value: '4' }
-								]" v-model:value="formData.patrolType" @change="patrolTypeChange" />
+								]" v-model:value="formData.patrolType" @change="handlePatrolTypeChange" />
 							</el-form-item>
 						</el-col>
 						<el-col :span="8" v-if="cycleTitle == '天'">
@@ -119,7 +119,7 @@
 						</el-col>
 						<el-col :span="24" v-if="formData.patrolType == 2">
 							<el-form-item label="选择天" prop="setDate">
-								<el-checkbox-group v-model="formData.setDate">
+								<el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
 									<el-checkbox v-for="item in weekList" :key="item" :value="item"
 										:label="item"></el-checkbox>
 								</el-checkbox-group>
@@ -127,7 +127,7 @@
 						</el-col>
 						<el-col :span="24" v-if="formData.patrolType == 3">
 							<el-form-item label="选择天" prop="setDate">
-								<el-checkbox-group v-model="formData.setDate">
+								<el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
 									<el-checkbox v-for="item in monthList" :key="item" :value="item"
 										:label="item"></el-checkbox>
 								</el-checkbox-group>
@@ -135,7 +135,7 @@
 						</el-col>
 						<el-col :span="24" v-if="formData.patrolType == 4">
 							<el-form-item label="选择月" prop="setDate">
-								<el-checkbox-group v-model="formData.setDate">
+								<el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
 									<el-checkbox v-for="item in yearList" :key="item" :value="item"
 										:label="item"></el-checkbox>
 								</el-checkbox-group>
@@ -151,26 +151,25 @@
 </template>
 
 <script setup name="patrolPlan">
-import { ref, reactive, watch, getCurrentInstance, onMounted, toRefs, nextTick } from 'vue'
+import { ref, reactive, watch, getCurrentInstance } from 'vue'
 import api from '@/api/equipment/patrolPlan/index'
 import publicApi from '@/api/public/index'
 import Select from '@/components/Select'
-import { ElButton, ElTag, ElMessage } from 'element-plus'
 
 const { proxy } = getCurrentInstance()
 
 const activeNames = ref(['1', '2'])
 const ruleForm = ref(null)
-const baseTable = ref(null)
 const formData = ref({
 	id: '',
-	equipSmallCategoryId: '',
-	equipSmallCategoryName: '',
-	equipId: '',
-	equipName: '',
+	planCode: '',
+	planName: '',
+	routeId: '',
+	routeName: '',
 	patrolType: '',
 	setDate: [],
 	initialDate: '',
+	initialNumber: '',
 	isSingle: '2',
 	status: '2',
 	cycle: '',
@@ -180,9 +179,7 @@ const formData = ref({
 	timeLimit: '',
 })
 // 设备小类
-const macSmallTypeList = ref([])
 // 设备名称
-const macNameList = ref([])
 // 点检员
 const inspectionList = ref([])
 // 周
@@ -234,8 +231,9 @@ const yearList = ref([
 	'12',
 ])
 const rules = reactive({
-	equipSmallCategoryName: proxy.getRules({ required: true }),
-	equipName: proxy.getRules({ required: true }),
+	planCode: proxy.getRules({ required: true }),
+	planName: proxy.getRules({ required: true }),
+	routeId: proxy.getRules({ required: true }),
 	patrolType: proxy.getRules({ required: true }),
 	setDate: proxy.getRules({ required: true }),
 	initialDate: proxy.getRules({ required: true }),
@@ -283,21 +281,13 @@ const patrolTypeChange = e => {
 	}
 }
 // 获取设备小类
-const getEqptType = () => {
-	if (baseTable.value) baseTable.value.clearCheckboxRow()
-	publicApi.getLocalSelect({ type: 'EQUIP_TYPE', categoryLevel: '3' }).then(res => {
-		macSmallTypeList.value = res.data
-	})
+const handlePatrolTypeChange = value => {
+	patrolTypeChange(value)
+	formData.value.setDate = []
 }
-// 获取设备列表
-const getMacTypeList = value => {
-	macNameList.value = []
-	formData.value.equipId = ''
-	formData.value.equipName = ''
-	if (value) {
-		api.getEquipListById({ id: formData.value.equipSmallCategoryId }).then(res => {
-			macNameList.value = res.data
-		})
+const handleSetDateChange = values => {
+	if (values.length > 1) {
+		formData.value.setDate = [values[values.length - 1]]
 	}
 }
 const routeOptions = ref([])
@@ -323,9 +313,12 @@ const resetForm = () => {
 	formData.value.id = ''
 	formData.value.planCode = ''
 	formData.value.planName = ''
+	formData.value.routeId = ''
+	formData.value.routeName = ''
 	formData.value.patrolType = ''
 	formData.value.setDate = []
 	formData.value.initialDate = ''
+	formData.value.initialNumber = ''
 	formData.value.isSingle = '2'
 	formData.value.status = '2'
 	formData.value.cycle = ''
@@ -346,7 +339,6 @@ const validate = async () => {
 	return flag
 }
 
-getEqptType()
 getpatrolList()
 getRouteList()
 defineExpose({
@@ -354,7 +346,6 @@ defineExpose({
 	formData,
 	resetForm,
 	checkboxSelection,
-	getMacTypeList,
 })
 </script>
 
