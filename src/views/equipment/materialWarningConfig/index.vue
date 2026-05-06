@@ -24,7 +24,7 @@
       </template>
     </Drawer>
 
-    <Drawer v-model="batchDialogVisible" title="批量新增物资预警配置" size="45%">
+    <Drawer v-model="batchDialogVisible" title="新增物资预警配置" size="45%">
       <batchDetail ref="batchDetailRef" />
       <template #footer>
         <span class="dialog-footer">
@@ -251,15 +251,15 @@ const selectData = reactive([
 ])
 
 const buttonList = reactive([
+  // {
+  //   label: '新增',
+  //   type: 'primary',
+  //   icon: 'Plus',
+  //   click: () => handleAdd,
+  //   permission: 'equipment:eMaterialWarningConfig:save',
+  // },
   {
     label: '新增',
-    type: 'primary',
-    icon: 'Plus',
-    click: () => handleAdd,
-    permission: 'equipment:eMaterialWarningConfig:save',
-  },
-  {
-    label: '批量新增',
     type: 'primary',
     icon: 'Plus',
     click: () => handleBatchAdd,
