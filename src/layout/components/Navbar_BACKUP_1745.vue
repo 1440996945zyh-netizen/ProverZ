@@ -29,11 +29,14 @@
 				<!-- 新增：更多菜单 -->
 				<MoreMenuDropdown class="right-menu-item hover-effect" />
 
+<<<<<<< HEAD
 				<el-tooltip content="A-Port智能体" effect="dark" placement="bottom">
 					<div class="right-menu-item hover-effect">
 						<img src="/src/assets/icons/ai.png" @click="aPortClick" style="width: 22px" />
 					</div>
 				</el-tooltip>
+=======
+>>>>>>> 82e162ff8fd3bda6c0ccd7708fff885096517737
 				<el-tooltip content="菜单搜索" effect="dark" placement="bottom">
 					<header-search
 						id="header-search"
