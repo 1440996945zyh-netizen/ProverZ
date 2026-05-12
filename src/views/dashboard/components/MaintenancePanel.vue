@@ -2,7 +2,7 @@
 	<div class="maintenance-panel">
 		<div class="screen-body">
 			<div class="left-column">
-				<div class="panel-card">
+				<div class="panel-card summary-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Tickets /></el-icon>
@@ -26,7 +26,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card pending-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Clock /></el-icon>
@@ -75,7 +75,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card team-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><DataAnalysis /></el-icon>
@@ -90,7 +90,7 @@
 			</div>
 
 			<div class="right-column">
-				<div class="panel-card">
+				<div class="panel-card response-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Timer /></el-icon>
@@ -100,7 +100,7 @@
 					</div>
 					<div class="panel-body">
 						<div class="response-metrics">
-							<div class="response-item" v-for="item in responseMetrics" :key="item.label">
+							<div class="response-item" v-for="item in [activeResponseMetric]" :key="item.label">
 								<div class="response-gauge">
 									<div
 										ref="gaugeChartRefs"
@@ -112,12 +112,12 @@
 								</div>
 								<div class="response-info">
 									<div class="response-value">
-										{{ item.value }}
-										<span class="unit">{{ item.unit }}</span>
+										{{ activeResponseMetric.value }}
+										<span class="unit">{{ activeResponseMetric.unit }}</span>
 									</div>
-									<div class="response-label">{{ item.label }}</div>
-									<div class="response-change" :class="item.change > 0 ? 'up' : 'down'">
-										<el-icon><component :is="item.change > 0 ? 'CaretTop' : 'CaretBottom'" /></el-icon>
+									<div class="response-label">{{ activeResponseMetric.label }}</div>
+									<div class="response-change" :class="activeResponseMetric.change > 0 ? 'up' : 'down'">
+										<el-icon><component :is="activeResponseMetric.change > 0 ? 'CaretTop' : 'CaretBottom'" /></el-icon>
 										{{ Math.abs(item.change) }}% 同比
 									</div>
 								</div>
@@ -135,7 +135,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card type-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Tools /></el-icon>
@@ -148,7 +148,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card rank-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Rank /></el-icon>
@@ -179,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import {
 	Tickets,
 	Clock,
@@ -238,6 +238,8 @@ const responseMetrics = ref([
 	{ label: '客户满意度', value: '4.8', unit: '分', change: 3.1 },
 ])
 
+const activeResponseMetric = computed(() => responseMetrics.value[gaugeIndex.value] || responseMetrics.value[0])
+
 const rankList = ref([
 	{ name: '张伟', team: 'xx 公司', score: 156 },
 	{ name: '李强', team: 'xx 公司', score: 142 },
@@ -257,16 +259,17 @@ const initOrderPieChart = () => {
 			textStyle: { color: '#fff' },
 		},
 		legend: {
-			orient: 'vertical',
-			right: 10,
-			top: 'center',
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			bottom: 0,
+			left: 'center',
+			itemWidth: 10,
+			itemHeight: 10,
+			textStyle: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 12 },
 		},
 		series: [
 			{
 				type: 'pie',
-				radius: ['40%', '65%'],
-				center: ['35%', '50%'],
+				radius: ['34%', '58%'],
+				center: ['50%', '38%'],
 				avoidLabelOverlap: false,
 				label: { show: false },
 				labelLine: { show: false },
@@ -299,13 +302,13 @@ const initTrendChart = () => {
 		},
 		legend: {
 			data: ['新增工单', '完成工单', '累计工单'],
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 12 },
 			top: 0,
 		},
 		grid: {
-			left: '3%',
-			right: '4%',
-			bottom: '3%',
+			left: '2%',
+			right: '3%',
+			bottom: '8%',
 			top: '18%',
 			containLabel: true,
 		},
@@ -314,21 +317,21 @@ const initTrendChart = () => {
 			boundaryGap: false,
 			data: ['1月', '2月', '3月', '4月', '5月', '6月'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 11 },
 		},
 		yAxis: [
 			{
 				type: 'value',
 				name: '数量',
 				axisLine: { show: false },
-				axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+				axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 11 },
 				splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
 			},
 			{
 				type: 'value',
 				name: '累计',
 				axisLine: { show: false },
-				axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+				axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 11 },
 				splitLine: { show: false },
 			},
 		],
@@ -388,13 +391,13 @@ const initTeamBarChart = () => {
 		},
 		legend: {
 			data: ['已完成', '处理中', '待处理'],
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 12 },
 			top: 0,
 		},
 		grid: {
-			left: '3%',
-			right: '4%',
-			bottom: '3%',
+			left: '2%',
+			right: '3%',
+			bottom: '12%',
 			top: '18%',
 			containLabel: true,
 		},
@@ -402,12 +405,13 @@ const initTeamBarChart = () => {
 			type: 'category',
 			data: ['南区', '东区', '岚南', '西区', '岚中'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 11 },
 		},
 		yAxis: {
 			type: 'value',
+			min: 0,
 			axisLine: { show: false },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.78)', fontSize: 11 },
 			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
 		},
 		series: [
@@ -450,7 +454,7 @@ const initTypeChart = () => {
 		series: [
 			{
 				type: 'pie',
-				radius: ['35%', '55%'],
+				radius: ['32%', '52%'],
 				center: ['50%', '50%'],
 				roseType: 'radius',
 				itemStyle: {
@@ -460,8 +464,8 @@ const initTypeChart = () => {
 				},
 				label: {
 					show: true,
-					color: 'rgba(255, 255, 255, 0.7)',
-					fontSize: 10,
+					color: 'rgba(255, 255, 255, 0.78)',
+					fontSize: 11,
 				},
 				labelLine: {
 					lineStyle: { color: 'rgba(255, 255, 255, 0.3)' },
@@ -584,15 +588,18 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .maintenance-panel {
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 }
 
 .screen-body {
-	padding: 12px 15px;
-	height: 100%;
+	padding: 10px 14px;
+	min-height: 100%;
+	height: auto;
 	display: grid;
-	grid-template-columns: 1fr 1.4fr 1fr;
-	gap: 12px;
+	grid-template-columns: 0.98fr 1.2fr 0.94fr;
+	gap: 10px;
+	align-items: stretch;
 	box-sizing: border-box;
 }
 
@@ -600,15 +607,16 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .right-column {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 10px;
 	min-height: 0;
 }
 
 .center-column {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 10px;
 	min-height: 0;
+	justify-content: center;
 }
 
 .panel-card {
@@ -643,8 +651,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex-shrink: 0;
 
 		.header-icon-box {
-			width: 24px;
-			height: 24px;
+			width: 26px;
+			height: 26px;
 			background: linear-gradient(135deg, $primary-color, $primary-dark);
 			border-radius: 5px;
 			display: flex;
@@ -655,10 +663,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.panel-title {
-			font-size: 13px;
-			font-weight: 600;
+			font-size: 17px;
+			font-weight: 700;
 			color: $text-primary;
-			letter-spacing: 1px;
+			letter-spacing: 1.5px;
 		}
 
 		.header-line {
@@ -722,7 +730,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 	.panel-body {
 		flex: 1;
-		padding: 10px 12px;
+		padding: 8px 10px;
 		overflow-y: auto;
 		overflow-x: hidden;
 		min-height: 0;
@@ -747,17 +755,60 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 }
 
+.summary-card {
+	flex: 0.78;
+}
+
+.pending-card {
+	flex: 1.22;
+}
+
+.team-card {
+	flex: 1.08;
+
+	.panel-body {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+}
+
+.response-card {
+	flex: 1.02;
+
+	.panel-body {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 14px;
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+}
+
+.type-card {
+	flex: 0.8;
+}
+
+.rank-card {
+	flex: 0.98;
+}
+
 .order-summary {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 8px;
-	margin-bottom: 10px;
+	gap: 4px;
+	margin-bottom: 2px;
 
 	.summary-item {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		padding: 10px;
+		gap: 6px;
+		padding: 6px 8px;
+		min-height: 0;
 		background: rgba(255, 255, 255, 0.03);
 		border-radius: 6px;
 		transition: all 0.3s ease;
@@ -768,8 +819,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.summary-icon {
-			width: 32px;
-			height: 32px;
+			width: 24px;
+			height: 24px;
 			border-radius: 8px;
 			display: flex;
 			align-items: center;
@@ -779,28 +830,31 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.summary-info {
 			.summary-value {
-				font-size: 14px;
+				font-size: 12px;
 				font-weight: 700;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.summary-label {
-				font-size: 9px;
+				font-size: 8px;
 				color: $text-muted;
+				line-height: 1.2;
 			}
 		}
 	}
 }
 
 .order-pie-chart {
-	height: 100px;
+	height: 148px;
+	max-width: 270px;
+	margin: 0 auto;
 }
 
 .pending-list {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 5px;
 	max-height: 100%;
 	overflow-y: auto;
 
@@ -819,7 +873,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 
 	.pending-item {
-		padding: 10px;
+		padding: 7px 8px;
 		background: rgba(255, 255, 255, 0.03);
 		border-radius: 6px;
 		transition: all 0.3s ease;
@@ -846,17 +900,17 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 6px;
+			margin-bottom: 4px;
 
 			.order-id {
-				font-size: 11px;
+				font-size: 10px;
 				color: $text-muted;
 				font-family: 'Orbitron', monospace;
 			}
 
 			.order-priority {
-				font-size: 10px;
-				padding: 2px 8px;
+				font-size: 9px;
+				padding: 2px 7px;
 				border-radius: 10px;
 
 				&.critical {
@@ -877,9 +931,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.order-title {
-			font-size: 12px;
+			font-size: 11px;
 			color: $text-primary;
-			margin-bottom: 6px;
+			margin-bottom: 4px;
 		}
 
 		.order-meta {
@@ -888,7 +942,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.order-team,
 			.order-time {
-				font-size: 10px;
+				font-size: 9px;
 				color: $text-muted;
 			}
 		}
@@ -896,7 +950,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .trend-card {
-	flex: 1.2;
+	flex: 0.84;
 }
 
 .trend-chart {
@@ -907,21 +961,31 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .team-bar-chart {
 	width: 100%;
-	height: 160px;
+	height: 100%;
+	min-height: 245px;
 }
 
 .response-metrics {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	max-width: 320px;
+	min-height: 0;
+	flex: 1;
+
 	.response-item {
 		display: flex;
 		align-items: center;
-		gap: 20px;
-		padding: 15px;
+		gap: 18px;
+		width: 100%;
+		padding: 18px 18px;
 		background: rgba(255, 255, 255, 0.03);
 		border-radius: 10px;
 
-		.response-gauge {
-			width: 80px;
-			height: 80px;
+			.response-gauge {
+				width: 110px;
+				height: 110px;
 
 			.gauge-chart {
 				width: 100%;
@@ -929,35 +993,35 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 		}
 
-		.response-info {
-			flex: 1;
+			.response-info {
+				flex: 1;
 
-			.response-value {
-				font-size: 28px;
-				font-weight: 700;
-				color: $text-primary;
-				font-family: 'Orbitron', monospace;
+				.response-value {
+					font-size: 30px;
+					font-weight: 700;
+					color: $text-primary;
+					font-family: 'Orbitron', monospace;
 
-				.unit {
-					font-size: 14px;
-					font-weight: normal;
-					color: $text-muted;
-					margin-left: 4px;
+					.unit {
+						font-size: 14px;
+						font-weight: normal;
+						color: $text-muted;
+						margin-left: 4px;
+					}
 				}
-			}
 
-			.response-label {
-				font-size: 12px;
-				color: $text-secondary;
-				margin-top: 4px;
-			}
+				.response-label {
+					font-size: 13px;
+					color: $text-secondary;
+					margin-top: 4px;
+				}
 
-			.response-change {
-				display: flex;
-				align-items: center;
-				gap: 4px;
-				font-size: 11px;
-				margin-top: 6px;
+				.response-change {
+					display: flex;
+					align-items: center;
+					gap: 4px;
+					font-size: 12px;
+					margin-top: 8px;
 
 				&.up {
 					color: #10b981;
@@ -975,7 +1039,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	display: flex;
 	justify-content: center;
 	gap: 8px;
-	margin-top: 15px;
+	margin-top: 10px;
 
 	.nav-dot {
 		width: 8px;
@@ -997,7 +1061,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .type-chart {
-	height: 150px;
+	height: 165px;
+	max-width: 250px;
+	margin: 0 auto;
 }
 
 .rank-list {
@@ -1008,8 +1074,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	.rank-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 10px 12px;
+		gap: 8px;
+		padding: 8px 10px;
 		background: rgba(255, 255, 255, 0.03);
 		border-radius: 8px;
 		transition: all 0.3s ease;
@@ -1020,13 +1086,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.rank-num {
-			width: 22px;
-			height: 22px;
+			width: 20px;
+			height: 20px;
 			border-radius: 6px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			font-size: 11px;
+			font-size: 10px;
 			font-weight: 700;
 			background: rgba(255, 255, 255, 0.1);
 			color: $text-secondary;
@@ -1048,15 +1114,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.rank-avatar {
-			width: 32px;
-			height: 32px;
+			width: 28px;
+			height: 28px;
 			border-radius: 50%;
 			background: linear-gradient(135deg, $primary-color, $primary-dark);
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			color: #fff;
-			font-size: 14px;
+			font-size: 12px;
 			font-weight: 600;
 		}
 
@@ -1064,13 +1130,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			flex: 1;
 
 			.rank-name {
-				font-size: 12px;
+				font-size: 11px;
 				color: $text-primary;
 				font-weight: 500;
 			}
 
 			.rank-team {
-				font-size: 10px;
+				font-size: 9px;
 				color: $text-muted;
 			}
 		}
@@ -1079,7 +1145,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			text-align: right;
 
 			.score-value {
-				font-size: 18px;
+				font-size: 16px;
 				font-weight: 700;
 				color: $primary-color;
 				font-family: 'Orbitron', monospace;
@@ -1087,7 +1153,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.score-label {
 				display: block;
-				font-size: 10px;
+				font-size: 9px;
 				color: $text-muted;
 			}
 		}

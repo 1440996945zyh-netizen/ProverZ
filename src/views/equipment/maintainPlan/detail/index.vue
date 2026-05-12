@@ -10,7 +10,7 @@
 					    		:selectData="macSmallTypeList"
 					    		v-model:value="formData.equipSmallCategoryId"
 					    		v-model:label="formData.equipSmallCategoryName"
-                  @change="getMacTypeList"
+                  @change="handleEquipSmallCategoryChange"
                 />
 					    </el-form-item>
 				    </el-col>
@@ -48,7 +48,7 @@
 					    			{ label: '里程', value: '6' },
 					    		]"
 					    		v-model:value="formData.equipType"
-									@change="equipTypeChange"
+									@change="handleEquipTypeChange"
 					    	/>
 					    </el-form-item>
 				    </el-col>
@@ -88,8 +88,8 @@
 					    <el-form-item :label="'周期（'+cycleTitle+'）'" prop="cycle">
 								<template #label>
           			  <span>
-										点检周期（{{cycleTitle}}）
-          			    <el-tooltip lass="box-item" effect="dark" content="设备作业多少数开始下次点检任务" placement="top">
+										润滑保养周期（{{cycleTitle}}）
+          			    <el-tooltip lass="box-item" effect="dark" content="设备作业达到多少数值后开始下一次润滑保养任务" placement="top">
 											<el-icon><QuestionFilled /></el-icon>
           			    </el-tooltip>
           			  </span>
@@ -121,7 +121,7 @@
 				    </el-col>
             <el-col :span="24" v-if="formData.equipType==2">
               <el-form-item label="选择天" prop="setDate">
-                <el-checkbox-group v-model="formData.setDate">
+                <el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
                   <el-checkbox v-for="item in weekList" :key="item" :value="item" :label="item">
                   </el-checkbox>
                 </el-checkbox-group>
@@ -129,7 +129,7 @@
             </el-col>
             <el-col :span="24" v-if="formData.equipType==3">
               <el-form-item label="选择天" prop="setDate">
-                <el-checkbox-group v-model="formData.setDate">
+                <el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
                   <el-checkbox v-for="item in monthList" :key="item" :value="item" :label="item">
                   </el-checkbox>
                 </el-checkbox-group>
@@ -137,7 +137,7 @@
             </el-col>
 			<el-col :span="24" v-if="formData.equipType==4">
               <el-form-item label="选择月" prop="setDate">
-                <el-checkbox-group v-model="formData.setDate">
+                <el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
                   <el-checkbox v-for="item in yearList" :key="item" :value="item" :label="item">
                   </el-checkbox>
                 </el-checkbox-group>
@@ -213,7 +213,7 @@ const formData = ref({
 const macSmallTypeList = ref([])
 // 设备名称
 const macNameList = ref([])
-// 点检员
+// 润滑保养人员
 const inspectionList = ref([])
 // 周
 const weekList = ref(["1","2","3","4","5","6","7"])
@@ -305,6 +305,24 @@ const getMacTypeList = value => {
   }
 }
 // 获取润滑保养员列表
+const clearSelectedStandards = () => {
+	tableData.value = []
+	checkboxSelection.value = []
+}
+const handleEquipSmallCategoryChange = value => {
+	getMacTypeList(value)
+	clearSelectedStandards()
+}
+const handleEquipTypeChange = value => {
+	equipTypeChange(value)
+	formData.value.setDate = []
+	clearSelectedStandards()
+}
+const handleSetDateChange = values => {
+	if (values.length > 1) {
+		formData.value.setDate = [values[values.length - 1]]
+	}
+}
 const getInspectorList = () =>{
   publicApi.getLocalSelect({type: 'USER',role: 'WXBY'}).then(res => {
     inspectionList.value = res.data
@@ -442,12 +460,12 @@ const validate = async () => {
   })
   return flag
 }
-// 打开点检标准
+// 打开润滑保养标准
 const isShow = ref(false)
 const detailRef = ref(null)
 const addStandard = () => {
 	if (!formData.value.equipSmallCategoryId || !formData.value.equipType){
-		return proxy.$message.warning("请选择设备小类和计划周期类型")
+		return proxy.$message.warning("请选择设备小类和润滑保养周期类型")
 	}
 
 	isShow.value = true
@@ -460,7 +478,7 @@ const addStandard = () => {
 // 保存选中的标准
 const saveStandard = () => {
 	if (detailRef.value.checkboxSelection.length == 0) {
-		return proxy.$message.warning("请勾选点检标准")
+		return proxy.$message.warning("请勾选润滑保养标准")
 	}
 	for (let i=0;i<detailRef.value.checkboxSelection.length;i++) {
 		let select = detailRef.value.checkboxSelection[i]

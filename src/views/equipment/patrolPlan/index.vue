@@ -53,7 +53,7 @@ const selectData = reactive([
   {
 		name: '巡检编号',
 		type: 'input',
-		modelValue: 'planCpde',
+		modelValue: 'planCode',
 		span: 8,
 	},
 ])
@@ -103,7 +103,7 @@ const tableColumns = reactive([
 					'span',
           {},
 					{
-						default: () => row.isSingle == '1' ? '是' : '否',
+						default: () => row.status == '1' ? '是' : '否',
 					}
 				),
 			]
@@ -220,7 +220,7 @@ const save = async () => {
     const params = JSON.parse(JSON.stringify(viewRef.value.formData))
     if (params.setDate) {
 			if (params.setDate.length > 1) {
-				return proxy.$message.warning('选择只能勾选一个复选框')
+				return proxy.$message.warning('选择日期时只能勾选一个复选框')
 			}
       params.setDate = params.setDate.join(",")
     }
@@ -250,7 +250,6 @@ const handleUpdate = (row) => {
       viewRef.value.formData = JSON.parse(JSON.stringify(res.data))
 			if (viewRef.value.formData.setDate)
 				viewRef.value.formData.setDate = viewRef.value.formData.setDate.split(',')
-			viewRef.value.getMacTypeList(res.data.equipSmallCategoryId)
 			viewRef.value.formData.planCode = res.data.planCode
 			viewRef.value.formData.planName = res.data.planName
     })

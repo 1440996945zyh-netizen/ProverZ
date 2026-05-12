@@ -1911,12 +1911,21 @@ const saveEndMaintenance = async () => {
 		}
 	}
 
-	// 如果有勾选的配件，校验本次使用数量
-	if (partReplaceList.value && partReplaceList.value.length > 0) {
+	// 以“本次使用数量”作为最终提交依据，避免只填数量未勾选时数据丢失
+	const selectedPartRows = (availablePartDetails.value || []).filter(item => {
+		if (!item) {
+			return false
+		}
+		const currentUsedQty = item.currentUsedQuantity
+		return currentUsedQty != null && currentUsedQty !== '' && !isNaN(Number(currentUsedQty)) && Number(currentUsedQty) > 0
+	})
+
+	// 如果填写了配件使用数量，校验本次使用数量
+	if (selectedPartRows.length > 0) {
 		// 校验：勾选的配件必须都填写了本次使用数量
 		const invalidRows = []
-		partReplaceList.value.forEach(row => {
-			const usedQty = row.usedQuantity
+		selectedPartRows.forEach(row => {
+			const usedQty = row.currentUsedQuantity
 			// 检查是否为空、null、undefined、空字符串
 			if (usedQty == null || usedQty === '' || usedQty === undefined) {
 				invalidRows.push({
@@ -1954,10 +1963,25 @@ const saveEndMaintenance = async () => {
 		}
 	}
 
-	// 验证配件更换列表（只验证勾选的）
-	const validPartReplaceList = partReplaceList.value.filter(item =>
-		item.warehouseOutNo && item.warehouseOutDetailId && item.usedQuantity != null && item.usedQuantity > 0
-	)
+	// 以填写了本次使用数量的行作为最终保存的配件更换列表
+	const validPartReplaceList = selectedPartRows
+		.map(item => ({
+			warehouseOutNo: item.warehouseOutNo,
+			warehouseOutDetailId: item.warehouseOutDetailId,
+			materialId: item.materialId,
+			materialName: item.materialName,
+			specificationModel: item.specificationModel,
+			unitCode: item.unitCode,
+			unitName: item.unitName,
+			applicationQuantity: item.applicationQuantity,
+			usedQuantity: Number(item.currentUsedQuantity),
+		}))
+		.filter(item =>
+			item.warehouseOutNo &&
+			item.warehouseOutDetailId &&
+			item.usedQuantity != null &&
+			item.usedQuantity > 0
+		)
 
 	const validHourFeedbackList = hourFeedbackList.value.map(item => {
 		const workHour = calculateWorkHour(item.startTime, item.endTime)
@@ -1980,17 +2004,7 @@ const saveEndMaintenance = async () => {
 	// 准备提交数据
 	const submitData = {
 		...endMaintForm.value,
-		partReplaceList: validPartReplaceList.map(item => ({
-			warehouseOutNo: item.warehouseOutNo,
-			warehouseOutDetailId: item.warehouseOutDetailId,
-			materialId: item.materialId,
-			materialName: item.materialName,
-			specificationModel: item.specificationModel,
-			unitCode: item.unitCode,
-			unitName: item.unitName,
-			applicationQuantity: item.applicationQuantity,
-			usedQuantity: item.usedQuantity,
-		})),
+		partReplaceList: validPartReplaceList,
 		hourFeedbackList: validHourFeedbackList.map(item => ({
 			id: item.id || null,
 			maintInfoId: endMaintForm.value.id,

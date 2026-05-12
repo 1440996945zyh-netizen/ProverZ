@@ -207,7 +207,7 @@ const materialSelectData = reactive([
     name: '物资名称',
     type: 'input',
     modelValue: 'materialName',
-    span: 12,
+    span: 24,
   },
 ])
 

@@ -1,10 +1,12 @@
 <template>
 	<div class="big-screen-container">
-		<div class="bg-layer">
+		<div class="screen-scale-shell">
+			<div class="screen-scale-stage" :style="screenScaleStyle">
+				<div class="bg-layer">
 			<div class="bg-grid"></div>
 			<div class="bg-glow"></div>
 			<div class="bg-particles" ref="particlesRef"></div>
-		</div>
+				</div>
 
 		<div class="corner-deco corner-tl">
 			<div class="corner-line-h"></div>
@@ -27,7 +29,7 @@
 			<div class="corner-dot"></div>
 		</div>
 
-		<div class="screen-header">
+				<div class="screen-header">
 			<div class="header-left">
 				<div class="logo-container">
 					<div class="logo-ring"></div>
@@ -82,7 +84,7 @@
 			</div>
 		</div>
 
-		<div class="screen-body">
+				<div class="screen-body">
 			<div class="left-column">
 				<div class="panel-card equipment-overview">
 					<div class="panel-header">
@@ -328,6 +330,8 @@
 					</div>
 				</div>
 			</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -361,7 +365,10 @@ const router = useRouter()
 const currentTime = ref('00:00:00')
 const currentDate = ref('')
 const currentWeek = ref('')
+const screenScaleStyle = ref({})
 let timer = null
+const designWidth = 1920
+const designHeight = 1080
 
 const equipmentChartRef = ref(null)
 const workorderTrendRef = ref(null)
@@ -864,7 +871,19 @@ const initMaterialChart = () => {
 	materialChart.setOption(option)
 }
 
+const updateScreenScale = () => {
+	const scale = Math.min(window.innerWidth / designWidth, window.innerHeight / designHeight)
+	const offsetX = (window.innerWidth - designWidth * scale) / 2
+	const offsetY = (window.innerHeight - designHeight * scale) / 2
+	screenScaleStyle.value = {
+		width: `${designWidth}px`,
+		height: `${designHeight}px`,
+		transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
+	}
+}
+
 const handleResize = () => {
+	updateScreenScale()
 	equipmentChart?.resize()
 	workorderTrendChart?.resize()
 	mapChart?.resize()
@@ -874,6 +893,7 @@ const handleResize = () => {
 
 onMounted(() => {
 	updateTime()
+	updateScreenScale()
 	timer = setInterval(updateTime, 1000)
 
 	setTimeout(() => {
@@ -924,6 +944,43 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
 	background: $bg-dark;
 	color: $text-primary;
+}
+
+.screen-scale-shell {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+		background-size: 60px 60px;
+		animation: gridMove 20s linear infinite;
+		opacity: 0.65;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 150, 255, 0.15) 0%, transparent 50%),
+			radial-gradient(ellipse 60% 40% at 20% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+			radial-gradient(ellipse 60% 40% at 80% 100%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+	}
+}
+
+.screen-scale-stage {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: top left;
+	z-index: 1;
 }
 
 .bg-layer {
@@ -1106,15 +1163,17 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .screen-header {
-	height: 90px;
+	height: 92px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 30px;
+	padding: 0 28px;
 	position: relative;
 	z-index: 20;
-	background: linear-gradient(180deg, rgba(0, 20, 40, 0.8) 0%, transparent 100%);
-	border-bottom: 1px solid $border-color;
+	background:
+		linear-gradient(180deg, rgba(1, 14, 30, 0.92) 0%, rgba(1, 14, 30, 0.7) 68%, transparent 100%);
+	border-bottom: 1px solid rgba(0, 212, 255, 0.24);
+	box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
 
 	.header-left {
 		display: flex;
@@ -1161,10 +1220,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.system-name {
 			.name-main {
-				font-size: 18px;
+				font-size: 28px;
 				font-weight: 700;
 				color: $text-primary;
-				letter-spacing: 2px;
+				letter-spacing: 2.5px;
 			}
 
 			.name-sub {
@@ -1213,7 +1272,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.main-title {
-				font-size: 32px;
+				font-size: 40px;
 				font-weight: 900;
 				background: linear-gradient(135deg, $primary-color 0%, $primary-dark 50%, #8a2be2 100%);
 				-webkit-background-clip: text;
@@ -1221,7 +1280,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				background-clip: text;
 				letter-spacing: 6px;
 				font-family: 'Orbitron', 'Microsoft YaHei', sans-serif;
-				text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+				text-shadow: 0 0 48px rgba(0, 212, 255, 0.45);
 				white-space: nowrap;
 			}
 		}
@@ -1317,55 +1376,90 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .screen-body {
 	display: grid;
-	grid-template-columns: 1fr 1.8fr 1fr;
-	gap: 15px;
-	height: calc(100vh - 90px);
-	padding: 15px 20px;
+	grid-template-columns: minmax(300px, 1fr) minmax(560px, 1.7fr) minmax(300px, 1fr);
+	gap: 14px;
+	height: 988px;
+	padding: 14px 18px 16px;
 	position: relative;
 	z-index: 10;
+	align-items: stretch;
 }
 
 .left-column,
 .right-column {
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
+	display: grid;
+	grid-template-rows: minmax(0, 1.04fr) minmax(0, 1.08fr) minmax(0, 0.88fr);
+	gap: 14px;
+	min-height: 0;
 }
 
 .center-column {
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
+	display: grid;
+	grid-template-rows: minmax(0, 0.72fr) minmax(0, 2.05fr) minmax(0, 0.92fr);
+	gap: 14px;
+	min-height: 0;
+}
+
+.screen-body > div {
+	min-height: 0;
 }
 
 .panel-card {
 	background: $bg-card;
 	border: 1px solid $border-color;
-	border-radius: 12px;
+	border-radius: 18px;
 	overflow: hidden;
-	backdrop-filter: blur(10px);
+	backdrop-filter: blur(14px);
 	display: flex;
 	flex-direction: column;
+	min-height: 0;
+	position: relative;
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.04),
+		0 16px 36px rgba(0, 0, 0, 0.24);
+	transition:
+		transform 0.3s ease,
+		border-color 0.3s ease,
+		box-shadow 0.3s ease;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto 0;
+		height: 3px;
+		background: linear-gradient(90deg, rgba(0, 212, 255, 0), rgba(0, 212, 255, 0.9), rgba(0, 150, 255, 0));
+		opacity: 0.8;
+	}
+
+	&:hover {
+		transform: translateY(-4px);
+		border-color: rgba(0, 212, 255, 0.34);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.06),
+			0 22px 42px rgba(0, 0, 0, 0.3);
+	}
 
 	.panel-header {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 15px;
-		background: linear-gradient(90deg, rgba(0, 212, 255, 0.08), transparent);
-		border-bottom: 1px solid $border-color;
+		gap: 12px;
+		padding: 13px 15px 12px;
+		background:
+			linear-gradient(90deg, rgba(0, 212, 255, 0.14), rgba(0, 150, 255, 0.06) 48%, transparent 100%);
+		border-bottom: 1px solid rgba(0, 212, 255, 0.16);
 		position: relative;
 
 		.header-icon-box {
-			width: 28px;
-			height: 28px;
+			width: 32px;
+			height: 32px;
 			background: linear-gradient(135deg, $primary-color, $primary-dark);
-			border-radius: 6px;
+			border-radius: 10px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			color: #fff;
 			font-size: 14px;
+			box-shadow: 0 8px 20px rgba(0, 212, 255, 0.22);
 
 			&.warning {
 				background: linear-gradient(135deg, #f59e0b, #ef4444);
@@ -1373,16 +1467,17 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.panel-title {
-			font-size: 14px;
-			font-weight: 600;
+			font-size: 18px;
+			font-weight: 700;
 			color: $text-primary;
-			letter-spacing: 1px;
+			letter-spacing: 2px;
+			text-shadow: 0 0 18px rgba(0, 212, 255, 0.15);
 		}
 
 		.header-line {
 			flex: 1;
-			height: 1px;
-			background: linear-gradient(90deg, $border-color, transparent);
+			height: 2px;
+			background: linear-gradient(90deg, rgba(0, 212, 255, 0.34), transparent);
 		}
 
 		.map-legend {
@@ -1452,6 +1547,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex: 1;
 		padding: 12px;
 		overflow: hidden;
+		min-height: 0;
 	}
 }
 
@@ -1478,17 +1574,17 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .equipment-overview {
-	flex: 1.2;
-
 	.panel-body {
 		display: flex;
-		gap: 15px;
+		align-items: center;
+		gap: 16px;
+		padding: 12px;
 	}
 
 	.equipment-chart-box {
 		position: relative;
-		width: 140px;
-		height: 140px;
+		width: clamp(138px, 30%, 180px);
+		aspect-ratio: 1;
 		flex-shrink: 0;
 
 		.chart-ring {
@@ -1513,8 +1609,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.center-label {
 				font-size: 10px;
-				color: $text-muted;
-				margin-top: 2px;
+				color: rgba(255, 255, 255, 0.6);
+				margin-top: 4px;
 			}
 		}
 	}
@@ -1523,6 +1619,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: 8px;
 
 		.legend-item {
@@ -1552,7 +1649,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.legend-value {
-				font-size: 14px;
+				font-size: 13px;
 				font-weight: 600;
 				color: $text-primary;
 				font-family: 'Orbitron', monospace;
@@ -1569,19 +1666,17 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .workorder-stats {
-	flex: 1.5;
-
 	.workorder-grid {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: 10px;
-		margin-bottom: 15px;
+		gap: 12px;
+		margin-bottom: 12px;
 
 		.workorder-item {
 			display: flex;
 			align-items: center;
 			gap: 10px;
-			padding: 12px;
+			padding: 10px;
 			background: rgba(255, 255, 255, 0.03);
 			border-radius: 8px;
 			transition: all 0.3s ease;
@@ -1592,8 +1687,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.item-icon {
-				width: 40px;
-				height: 40px;
+				width: 36px;
+				height: 36px;
 				border-radius: 10px;
 				display: flex;
 				align-items: center;
@@ -1604,7 +1699,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.item-content {
 				.item-value {
-					font-size: 22px;
+					font-size: 20px;
 					font-weight: 700;
 					color: $text-primary;
 					font-family: 'Orbitron', monospace;
@@ -1620,28 +1715,49 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 
 	.workorder-trend {
+		padding: 10px 10px 4px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 212, 255, 0.03));
+		border: 1px solid rgba(0, 212, 255, 0.12);
+		border-radius: 14px;
+
 		.trend-header {
 			margin-bottom: 8px;
 
 			.trend-title {
 				font-size: 11px;
-				color: $text-muted;
+				font-weight: 600;
+				color: rgba(255, 255, 255, 0.72);
 			}
 		}
 
 		.trend-chart {
-			height: 80px;
+			height: 92px;
 		}
 	}
 }
 
 .inspection-stats {
-	flex: 1;
-
 	.inspection-grid {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		max-height: 100%;
+		overflow-y: auto;
+		padding-right: 4px;
+
+		&::-webkit-scrollbar {
+			width: 4px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: rgba(0, 212, 255, 0.1);
+			border-radius: 2px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(0, 212, 255, 0.3);
+			border-radius: 2px;
+		}
 
 		.inspection-row {
 			display: grid;
@@ -1649,7 +1765,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			gap: 8px;
 
 			.inspection-item {
-				padding: 10px 12px;
+				padding: 8px 10px;
 				background: rgba(255, 255, 255, 0.03);
 				border-radius: 8px;
 				border-left: 3px solid transparent;
@@ -1673,10 +1789,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 					display: flex;
 					justify-content: space-between;
 					align-items: center;
-					margin-bottom: 6px;
+					margin-bottom: 4px;
 
 					.item-name {
-						font-size: 11px;
+						font-size: 10px;
 						color: $text-secondary;
 					}
 
@@ -1698,7 +1814,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				}
 
 				.item-value {
-					font-size: 20px;
+					font-size: 18px;
 					font-weight: 700;
 					color: $text-primary;
 					font-family: 'Orbitron', monospace;
@@ -1711,16 +1827,19 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .top-stats {
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
-	gap: 15px;
-	flex-shrink: 0;
+	gap: 12px;
+	min-height: 0;
+	align-items: stretch;
 
 	.stat-card {
 		position: relative;
-		padding: 18px 20px;
-		border-radius: 12px;
+		padding: 14px 16px;
+		border-radius: 18px;
 		overflow: hidden;
 		cursor: pointer;
 		transition: all 0.4s ease;
+		min-height: 0;
+		min-height: 0;
 
 		.stat-bg {
 			position: absolute;
@@ -1787,7 +1906,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			justify-content: center;
 			color: #fff;
 			font-size: 22px;
-			margin-bottom: 12px;
+			margin-bottom: 8px;
 			transition: all 0.4s ease;
 			z-index: 1;
 		}
@@ -1797,20 +1916,20 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			z-index: 1;
 
 			.stat-label {
-				font-size: 12px;
+				font-size: 11px;
 				color: $text-muted;
 				letter-spacing: 1px;
-				margin-bottom: 6px;
+				margin-bottom: 4px;
 			}
 
 			.stat-value {
 				display: flex;
 				align-items: baseline;
 				gap: 4px;
-				margin-bottom: 8px;
+				margin-bottom: 6px;
 
 				.value-num {
-					font-size: 28px;
+					font-size: 22px;
 					font-weight: 900;
 					color: $text-primary;
 					font-family: 'Orbitron', monospace;
@@ -1863,7 +1982,6 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .center-map-panel {
-	flex: 1;
 	min-height: 0;
 
 	.map-card {
@@ -1871,45 +1989,47 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.panel-body {
 			padding: 0;
-			height: calc(100% - 45px);
+			height: calc(100% - 56px);
 		}
 
 		.map-container {
 			width: 100%;
 			height: 100%;
-			min-height: 200px;
+			min-height: 260px;
 		}
 	}
 }
 
 .bottom-charts {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 15px;
-	flex-shrink: 0;
+	grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+	gap: 14px;
+	min-height: 0;
 
 	.cost-chart-card,
 	.material-chart-card {
+		min-height: 0;
+
 		.cost-chart,
 		.material-chart {
-			height: 150px;
+			height: 100%;
+			min-height: 185px;
 		}
 	}
 }
 
 .company-stats {
-	flex: 1;
-
 	.company-list {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		justify-content: space-between;
 
 		.company-item {
 			display: flex;
 			align-items: center;
 			gap: 12px;
-			padding: 10px 12px;
+			padding: 8px 10px;
 			background: rgba(255, 255, 255, 0.03);
 			border-radius: 8px;
 			transition: all 0.3s ease;
@@ -2001,14 +2121,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .warning-panel {
-	flex: 1.2;
-
 	.warning-list {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
 		max-height: 100%;
 		overflow-y: auto;
+		justify-content: space-between;
 
 		&::-webkit-scrollbar {
 			width: 4px;
@@ -2028,7 +2147,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			display: flex;
 			align-items: flex-start;
 			gap: 10px;
-			padding: 10px;
+			padding: 8px;
 			background: rgba(255, 255, 255, 0.03);
 			border-radius: 8px;
 			border-left: 3px solid transparent;
@@ -2119,14 +2238,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .realtime-panel {
-	flex: 0.8;
-
 	.realtime-list {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
 		max-height: 100%;
 		overflow-y: auto;
+		justify-content: space-between;
 
 		&::-webkit-scrollbar {
 			width: 4px;
@@ -2145,7 +2263,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		.realtime-item {
 			display: flex;
 			gap: 10px;
-			padding: 8px 10px;
+			padding: 7px 9px;
 			background: rgba(255, 255, 255, 0.03);
 			border-radius: 6px;
 			transition: all 0.3s ease;
@@ -2195,13 +2313,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 @media screen and (max-width: 1600px) {
 	.screen-header {
-		height: 75px;
+		height: 80px;
 		padding: 0 20px;
 
 		.header-center .title-box {
 			.main-title {
-				font-size: 26px;
-				letter-spacing: 4px;
+				font-size: 36px;
+				letter-spacing: 5px;
 			}
 
 			.title-deco .deco-line {
@@ -2228,7 +2346,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.system-name .name-main {
-				font-size: 15px;
+				font-size: 24px;
 			}
 		}
 	}
@@ -2236,10 +2354,12 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	.screen-body {
 		padding: 10px 15px;
 		gap: 12px;
+		height: 1000px;
 	}
 
 	.top-stats .stat-card {
 		padding: 14px 16px;
+		min-height: 144px;
 
 		.stat-icon {
 			width: 42px;
@@ -2248,7 +2368,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.stat-info .stat-value .value-num {
-			font-size: 24px;
+				font-size: 20px;
 		}
 	}
 }
@@ -2261,7 +2381,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			gap: 15px;
 
 			.main-title {
-				font-size: 22px;
+				font-size: 34px;
 				letter-spacing: 3px;
 			}
 
@@ -2297,7 +2417,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 			.system-name {
 				.name-main {
-					font-size: 13px;
+					font-size: 22px;
 				}
 
 				.name-sub {
@@ -2311,19 +2431,20 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		grid-template-columns: 1fr 1.6fr 1fr;
 		gap: 10px;
 		padding: 10px 12px;
+		height: 1015px;
 	}
 
-	.panel-card .panel-header {
-		padding: 10px 12px;
+		.panel-card .panel-header {
+			padding: 10px 12px;
 
-		.panel-title {
-			font-size: 13px;
-		}
+			.panel-title {
+				font-size: 17px;
+			}
 
 		.header-icon-box {
-			width: 24px;
-			height: 24px;
-			font-size: 12px;
+			width: 28px;
+			height: 28px;
+			font-size: 13px;
 		}
 	}
 
@@ -2359,7 +2480,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		.material-chart-card {
 			.cost-chart,
 			.material-chart {
-				height: 120px;
+				height: 180px;
 			}
 		}
 	}
@@ -2396,21 +2517,25 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	.screen-body {
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: auto auto 1fr;
+		height: auto;
 
 		.left-column {
 			grid-column: 1;
 			grid-row: 1 / 3;
+			grid-template-rows: repeat(3, minmax(220px, auto));
 		}
 
 		.center-column {
 			grid-column: 2;
 			grid-row: 1 / 3;
+			grid-template-rows: auto minmax(320px, 1fr) auto;
 		}
 
 		.right-column {
 			grid-column: 1 / -1;
 			grid-row: 3;
-			flex-direction: row;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-template-rows: 1fr;
 
 			.panel-card {
 				flex: 1;
@@ -2436,7 +2561,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			gap: 10px;
 
 			.main-title {
-				font-size: 16px;
+				font-size: 20px;
 				letter-spacing: 2px;
 			}
 
@@ -2475,16 +2600,15 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		grid-template-rows: auto;
 		gap: 8px;
 		padding: 8px 10px;
+		height: auto;
 
 		.left-column,
 		.center-column,
 		.right-column {
 			grid-column: 1;
 			grid-row: auto;
-		}
-
-		.right-column {
-			flex-direction: column;
+			grid-template-columns: 1fr;
+			grid-template-rows: auto;
 		}
 	}
 
@@ -2527,13 +2651,13 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			padding: 8px 10px;
 
 			.panel-title {
-				font-size: 12px;
+				font-size: 14px;
 			}
 
 			.header-icon-box {
-				width: 22px;
-				height: 22px;
-				font-size: 11px;
+				width: 24px;
+				height: 24px;
+				font-size: 12px;
 			}
 		}
 
@@ -2547,11 +2671,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		align-items: center;
 
 		.equipment-chart-box {
-			width: 120px;
-			height: 120px;
+			width: min(180px, 100%);
 
 			.chart-center-info .center-num {
-				font-size: 22px;
+				font-size: 28px;
 			}
 		}
 
@@ -2580,7 +2703,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	}
 
 	.center-map-panel {
-		min-height: 250px;
+		min-height: 260px;
 	}
 
 	.bottom-charts {
@@ -2588,7 +2711,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		.material-chart-card {
 			.cost-chart,
 			.material-chart {
-				height: 100px;
+				height: 150px;
 			}
 		}
 	}
@@ -2597,7 +2720,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 @media screen and (max-width: 480px) {
 	.screen-header {
 		.header-center .title-box .main-title {
-			font-size: 14px;
+			font-size: 16px;
 			letter-spacing: 1px;
 		}
 
@@ -2652,7 +2775,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			padding: 6px 8px;
 
 			.panel-title {
-				font-size: 11px;
+				font-size: 13px;
 			}
 		}
 
@@ -2675,6 +2798,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				font-size: 16px;
 			}
 		}
+	}
+
+	.workorder-stats .workorder-trend .trend-chart {
+		height: 110px;
 	}
 
 	.inspection-stats .inspection-grid .inspection-row .inspection-item {

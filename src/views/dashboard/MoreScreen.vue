@@ -1,10 +1,12 @@
 <template>
 	<div class="more-screen-container">
-		<div class="bg-layer">
+		<div class="screen-scale-shell">
+			<div class="screen-scale-stage" :style="screenScaleStyle">
+				<div class="bg-layer">
 			<div class="bg-grid"></div>
 			<div class="bg-glow"></div>
 			<div class="bg-particles"></div>
-		</div>
+				</div>
 
 		<div class="corner-deco corner-tl">
 			<div class="corner-line-h"></div>
@@ -27,7 +29,7 @@
 			<div class="corner-dot"></div>
 		</div>
 
-		<div class="screen-header">
+				<div class="screen-header">
 			<div class="header-left">
 				<div class="back-btn" @click="handleBack">
 					<el-icon><ArrowLeft /></el-icon>
@@ -78,13 +80,15 @@
 			</div>
 		</div>
 
-		<div class="screen-content">
+				<div class="screen-content">
 			<Transition name="fade-slide" mode="out-in">
 				<MonitorPanel v-if="activeTab === 'monitor'" />
 				<EquipmentPanel v-else-if="activeTab === 'equipment'" />
 				<MaintenancePanel v-else-if="activeTab === 'maintenance'" />
 				<CostPanel v-else-if="activeTab === 'cost'" />
 			</Transition>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -103,7 +107,10 @@ const router = useRouter()
 const currentTime = ref('00:00:00')
 const currentDate = ref('')
 const currentWeek = ref('')
+const screenScaleStyle = ref({})
 let timer = null
+const designWidth = 1920
+const designHeight = 1080
 
 const activeTab = ref('monitor')
 
@@ -134,13 +141,27 @@ const handleBack = () => {
 	router.push('/dashboard/dashboard1')
 }
 
+const updateScreenScale = () => {
+	const scale = Math.min(window.innerWidth / designWidth, window.innerHeight / designHeight)
+	const offsetX = (window.innerWidth - designWidth * scale) / 2
+	const offsetY = (window.innerHeight - designHeight * scale) / 2
+	screenScaleStyle.value = {
+		width: `${designWidth}px`,
+		height: `${designHeight}px`,
+		transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
+	}
+}
+
 onMounted(() => {
 	updateTime()
+	updateScreenScale()
 	timer = setInterval(updateTime, 1000)
+	window.addEventListener('resize', updateScreenScale)
 })
 
 onBeforeUnmount(() => {
 	if (timer) clearInterval(timer)
+	window.removeEventListener('resize', updateScreenScale)
 })
 </script>
 
@@ -170,6 +191,43 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
 	background: $bg-dark;
 	color: $text-primary;
+}
+
+.screen-scale-shell {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+		background-size: 60px 60px;
+		animation: gridMove 20s linear infinite;
+		opacity: 0.65;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 150, 255, 0.15) 0%, transparent 50%),
+			radial-gradient(ellipse 60% 40% at 20% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+			radial-gradient(ellipse 60% 40% at 80% 100%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+	}
+}
+
+.screen-scale-stage {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: top left;
+	z-index: 1;
 }
 
 .bg-layer {
@@ -429,10 +487,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.system-name {
 			.name-main {
-				font-size: 16px;
+				font-size: 26px;
 				font-weight: 700;
 				color: $text-primary;
-				letter-spacing: 2px;
+				letter-spacing: 2.5px;
 			}
 
 			.name-sub {
@@ -451,23 +509,24 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.tab-nav {
 			display: flex;
-			gap: 8px;
+			gap: 16px;
 
 			.tab-item {
 				position: relative;
 				display: flex;
 				align-items: center;
-				gap: 8px;
-				padding: 12px 24px;
+				gap: 14px;
+				padding: 14px 28px;
 				background: rgba(255, 255, 255, 0.03);
-				border: 1px solid rgba(0, 212, 255, 0.2);
-				border-radius: 25px;
+				border: 1px solid rgba(0, 212, 255, 0.24);
+				border-radius: 28px;
 				color: $text-secondary;
-				font-size: 14px;
-				font-weight: 500;
+				font-size: 18px;
+				font-weight: 700;
 				cursor: pointer;
 				transition: all 0.3s ease;
 				overflow: hidden;
+				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 
 				&::before {
 					content: '';
@@ -480,8 +539,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 				&:hover {
 					color: $primary-color;
-					border-color: rgba(0, 212, 255, 0.4);
-					transform: translateY(-2px);
+					border-color: rgba(0, 212, 255, 0.5);
+					transform: translateY(-2px) scale(1.02);
 
 					&::before {
 						opacity: 1;
@@ -489,11 +548,14 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				}
 
 				&.active {
-					background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 150, 255, 0.15));
-					border-color: rgba(0, 212, 255, 0.6);
+					background: linear-gradient(135deg, rgba(0, 212, 255, 0.28), rgba(0, 150, 255, 0.2));
+					border-color: rgba(0, 212, 255, 0.7);
 					color: $primary-color;
-					font-weight: 600;
-					box-shadow: 0 0 25px rgba(0, 212, 255, 0.3);
+					font-weight: 700;
+					box-shadow:
+						0 0 30px rgba(0, 212, 255, 0.28),
+						inset 0 0 22px rgba(0, 212, 255, 0.08);
+					transform: translateY(-1px) scale(1.03);
 
 					.tab-indicator {
 						transform: scaleX(1);
@@ -506,9 +568,9 @@ $text-muted: rgba(255, 255, 255, 0.5);
 				}
 
 				.tab-icon {
-					width: 28px;
-					height: 28px;
-					border-radius: 8px;
+					width: 40px;
+					height: 40px;
+					border-radius: 12px;
 					display: flex;
 					align-items: center;
 					justify-content: center;
@@ -516,6 +578,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 					transition: all 0.3s ease;
 					position: relative;
 					z-index: 1;
+					font-size: 18px;
 				}
 
 				.tab-label {
@@ -604,10 +667,27 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .screen-content {
-	height: calc(100vh - 80px);
+	height: 1000px;
+	min-height: 1000px;
 	position: relative;
 	z-index: 2;
-	overflow: hidden;
+	overflow: visible;
+	display: flex;
+	align-items: stretch;
+}
+
+.screen-content :deep(.monitor-panel),
+.screen-content :deep(.equipment-panel),
+.screen-content :deep(.maintenance-panel),
+.screen-content :deep(.cost-panel) {
+	width: 100%;
+	height: 100%;
+	min-height: 100%;
+}
+
+.screen-content :deep(.screen-body) {
+	height: 100%;
+	min-height: 0;
 }
 
 .fade-slide-enter-active,
@@ -637,18 +717,19 @@ $text-muted: rgba(255, 255, 255, 0.5);
 			}
 
 			.system-name .name-main {
-				font-size: 14px;
+				font-size: 24px;
 			}
 		}
 
 		.header-center .tab-nav .tab-item {
-			padding: 10px 20px;
-			font-size: 13px;
+			padding: 12px 22px;
+			font-size: 16px;
 
 			.tab-icon {
-				width: 24px;
-				height: 24px;
+				width: 34px;
+				height: 34px;
 			}
+
 		}
 
 		.header-right .datetime-box .time-display .time-num {
@@ -664,18 +745,23 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 		.header-left {
 			.system-name {
-				display: none;
+				display: block;
+			}
+
+			.system-name .name-main {
+				font-size: 24px;
 			}
 		}
 
 		.header-center .tab-nav .tab-item {
-			padding: 8px 16px;
-			font-size: 12px;
+			padding: 11px 18px;
+			font-size: 15px;
 
 			.tab-icon {
-				width: 22px;
-				height: 22px;
+				width: 30px;
+				height: 30px;
 			}
+
 		}
 
 		.header-right .datetime-box {

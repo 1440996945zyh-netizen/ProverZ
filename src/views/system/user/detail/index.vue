@@ -8,11 +8,13 @@
 						<el-input v-model="formData.userAccount" placeholder="请输入用户账号" maxlength="30" />
 					</el-form-item>
 				</el-col>
+				<!--
 				<el-col :span="12">
 					<el-form-item label="身份证号" prop="idCard">
 						<el-input v-model="formData.idCard" @change="isValidIdCard" placeholder="请输入身份证号" maxlength="18" />
 					</el-form-item>
 				</el-col>
+				-->
 				<el-col :span="12">
 					<el-form-item label="用户姓名" prop="userName">
 						<el-input v-model="formData.userName" placeholder="请输入用户姓名" maxlength="30" />
@@ -115,17 +117,18 @@ import api from '@/api/system/user'
 import { reactive } from 'vue'
 import publicApi from '@/api/public/index'
 import Select from '@/components/Select'
-import RemoteSelect from '@/components/RemoteSelect'
 import upload from '@/components/upload/index'
+
 const ruleForm = ref()
 const deptOptions = ref([])
 const roleOptions = ref([])
 const { proxy } = getCurrentInstance()
+
 const formData = reactive({
 	id: '',
 	userAccount: '',
+	// idCard: '',
 	userName: '',
-	idCard: '',
 	deptId: '',
 	roleIds: [],
 	status: '1',
@@ -134,10 +137,13 @@ const formData = reactive({
 	isLabor: '0',
 	sex: '',
 })
+
 const fileIds = ref([])
+
 const changeFile = ids => {
 	fileIds.value = ids
 }
+
 // 表单验证规则
 const rules = reactive({
 	remark: proxy.getRules({
@@ -165,19 +171,20 @@ const rules = reactive({
 	isSuperadmin: proxy.getRules({
 		required: true,
 	}),
+	// idCard: proxy.getRules({
+	// 	required: true,
+	// }),
 	unitTypeCode: proxy.getRules({
 		required: true,
 	}),
-	idCard: proxy.getRules({
-		required: true,
-	}),
 	/*  postCode: proxy.getRules({
-    required: true
-  })*/
+		required: true,
+	}) */
 })
+
 const validate = async () => {
 	let flag = false
-	await ruleForm.value.validate((valid, fields) => {
+	await ruleForm.value.validate(valid => {
 		if (valid) {
 			flag = true
 		} else {
@@ -187,60 +194,60 @@ const validate = async () => {
 	})
 	return flag
 }
+
 // 重置
 const resetForm = () => {
-	console.log('重置', 'ruleForm')
 	ruleForm.value.resetFields()
 	formData.id = ''
 }
+
 /** 查询角色列表 */
 function getRoleList() {
 	api.getListNoPage().then(res => {
 		roleOptions.value = res.data
 	})
 }
+
 /** 查询部门下拉树结构 */
 function getDeptTree() {
 	publicApi.getDeptList().then(response => {
 		deptOptions.value = proxy.flattenToTree(response.data)
 	})
 }
-//身份证号是否合理
+
+/*
+身份证号逻辑暂时屏蔽，后续需要时可直接取消注释恢复
 const isValidIdCard = () => {
 	formData.sex = null
 	formData.birthday = null
-	// 1. 检查长度是否为18位
 	if (formData.idCard.length !== 18) {
-		proxy.$modal.msgError(`身份证号不正确`)
+		proxy.$modal.msgError('身份证号不正确')
 		return false
 	}
 
-	// 2. 校验码验证
 	const weights = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
 	const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2']
 	let sum = 0
 	for (let i = 0; i < 17; i++) {
 		const digit = parseInt(formData.idCard[i])
 		if (isNaN(digit)) {
-			proxy.$modal.msgError(`身份证号不正确`)
+			proxy.$modal.msgError('身份证号不正确')
 			return false
 		}
 		sum += digit * weights[i]
 	}
 	const remainder = sum % 11
-	console.log(typeof formData.idCard, 'type')
 	if (checkCodes[remainder] !== formData.idCard[17].toUpperCase()) {
-		proxy.$modal.msgError(`身份证号不正确`)
+		proxy.$modal.msgError('身份证号不正确')
 		return false
 	}
 
-	// 3. 出生日期合法性验证
 	const year = formData.idCard.slice(6, 10)
 	const month = formData.idCard.slice(10, 12)
 	const day = formData.idCard.slice(12, 14)
 	const date = new Date(year, parseInt(month) - 1, parseInt(day))
 	if (date.getFullYear() !== parseInt(year) || date.getMonth() + 1 !== parseInt(month) || date.getDate() !== parseInt(day)) {
-		proxy.$modal.msgError(`身份证号不正确`)
+		proxy.$modal.msgError('身份证号不正确')
 		return false
 	}
 	const sexCode = parseInt(formData.idCard.slice(16, 17))
@@ -251,8 +258,11 @@ const isValidIdCard = () => {
 	}
 	formData.birthday = year + '-' + month + '-' + day
 }
+*/
+
 getDeptTree()
 getRoleList()
+
 defineExpose({
 	validate,
 	resetForm,

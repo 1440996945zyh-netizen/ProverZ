@@ -17,7 +17,9 @@
 						<el-col :span="8">
 							<el-form-item label="设备名称" prop="equipName">
 								<Select
-									:dataConfig="{ params: { type: 'EQUIPMENT' } }"
+									:selectData="macNameList"
+									selectLabel="equipName"
+									selectValue="id"
 									v-model:value="formData.equipId"
 									v-model:label="formData.equipName"
 									placeholder="请选择设备（可搜索）"
@@ -127,21 +129,21 @@
 						</el-col>
 						<el-col :span="24" v-if="formData.equipType == 2">
 							<el-form-item label="选择天" prop="setDate">
-								<el-checkbox-group v-model="formData.setDate">
+								<el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
 									<el-checkbox v-for="item in weekList" :key="item" :value="item" :label="item"></el-checkbox>
 								</el-checkbox-group>
 							</el-form-item>
 						</el-col>
 						<el-col :span="24" v-if="formData.equipType == 3">
 							<el-form-item label="选择天" prop="setDate">
-								<el-checkbox-group v-model="formData.setDate">
+								<el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
 									<el-checkbox v-for="item in monthList" :key="item" :value="item" :label="item"></el-checkbox>
 								</el-checkbox-group>
 							</el-form-item>
 						</el-col>
 						<el-col :span="24" v-if="formData.equipType == 4">
 							<el-form-item label="选择月" prop="setDate">
-								<el-checkbox-group v-model="formData.setDate">
+								<el-checkbox-group v-model="formData.setDate" @change="handleSetDateChange">
 									<el-checkbox v-for="item in yearList" :key="item" :value="item" :label="item"></el-checkbox>
 								</el-checkbox-group>
 							</el-form-item>
@@ -279,10 +281,17 @@ const rules = reactive({
 	timeLimit: proxy.getRules({ required: true }),
 })
 const cycleTitle = ref('天')
+const clearSelectedStandards = () => {
+	tableData.value = []
+}
 watch(
 	() => formData.value.equipType,
-	newV => {
+	(newV, oldV) => {
 		if (newV) equipTypeChange(newV)
+		if (oldV && newV !== oldV) {
+			formData.value.setDate = []
+			clearSelectedStandards()
+		}
 	},
 )
 // 类型change事件
@@ -315,6 +324,11 @@ const equipTypeChange = e => {
 	}
 }
 // 获取设备小类
+const handleSetDateChange = value => {
+	if (Array.isArray(value) && value.length > 1) {
+		formData.value.setDate = value.slice(-1)
+	}
+}
 const getEqptType = () => {
 	if (baseTable.value) baseTable.value.clearCheckboxRow()
 	publicApi.getLocalSelect({ type: 'EQUIP_TYPE', categoryLevel: '3' }).then(res => {
@@ -326,7 +340,7 @@ const getMacTypeList = value => {
 	macNameList.value = []
 	formData.value.equipId = ''
 	formData.value.equipName = ''
-	// tableData.value = []
+	clearSelectedStandards()
 	if (value) {
 		api.getEquipListById({ id: formData.value.equipSmallCategoryId }).then(res => {
 			macNameList.value = res.data
@@ -473,7 +487,7 @@ const resetForm = () => {
 	formData.value.inspectorId = ''
 	formData.value.inspectorName = ''
 	formData.value.timeLimit = ''
-	tableData.value = []
+	clearSelectedStandards()
 	if (ruleForm.value) {
 		ruleForm.value.resetFields()
 	}

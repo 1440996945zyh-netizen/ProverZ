@@ -26,14 +26,10 @@
 
 		<div class="right-menu">
 			<template v-if="appStore.device !== 'mobile'">
-				<!-- 新增：更多菜单 -->
+						<!-- 新增：更多菜单 -->
 				<MoreMenuDropdown class="right-menu-item hover-effect" />
-
-				<el-tooltip content="A-Port智能体" effect="dark" placement="bottom">
-					<div class="right-menu-item hover-effect">
-						<img src="/src/assets/icons/ai.png" @click="aPortClick" style="width: 22px" />
-					</div>
-				</el-tooltip>
+			
+		
 				<el-tooltip content="菜单搜索" effect="dark" placement="bottom">
 					<header-search
 						id="header-search"
@@ -69,7 +65,7 @@
 					:style="{ color: settingsStore.topNav ? '#c1c1c1' : '#5a5e66' }"
 				>
 					<div class="avatar-wrapper">
-						<span class="user-name-text">{{ userName }}</span>
+						{{ userName }}
 						<el-icon><caret-bottom /></el-icon>
 					</div>
 					<template #dropdown>
@@ -132,7 +128,7 @@ function toggleSideBar() {
 }
 const logoStyle = computed(() => {
 	if (settingsStore.topNav) {
-		return { width: '250px', minWidth: '250px' }
+		return { width: '150px' }
 	}
 	return { width: isCollapse ? '54px' : variables.sideBarWidth }
 })
@@ -191,10 +187,6 @@ function setLayout() {
 const toNavigation = () => {
 	router.push({ name: 'Navigation' })
 }
-// 跳转A-Port智能体页面
-const aPortClick = () => {
-	router.push({ name: 'chatAgent' })
-}
 </script>
 
 
@@ -244,8 +236,7 @@ const aPortClick = () => {
 	// 	float: left;
 	// }
 
-	.topmenu-container {
-		// 这是 TopNav 组件的 id
+	.topmenu-container { // 这是 TopNav 组件的 id
 		// 移除或覆盖 TopNav 内部可能设置的固定宽度
 		// width: auto !important; // 如果 TopNav 内部有计算宽度，可能需要覆盖
 		// 或者，让其宽度由父级 .topnav-wrapper 决定
@@ -293,31 +284,11 @@ const aPortClick = () => {
 
 		.avatar-container {
 			margin-right: 10px;
-			/* 用户名文本样式 */
-			.user-name-text {
-				/* 强制不换行 */
-				white-space: nowrap;
-				/* 超出部分隐藏 */
-				overflow: hidden;
-				/* 超出部分显示省略号 */
-				text-overflow: ellipsis;
-				/* 保留你原来的最小宽度，同时设置最大宽度防止过长 */
-				min-width: 75px;
-				max-width: 100px; /* 可根据你的UI调整，建议最多显示6-7个字 */
-				/* 行内块元素才能设置宽度 */
-				display: inline-block;
-				/* 垂直居中对齐下拉箭头 */
-				vertical-align: middle;
-				/* 增加一点右边距，和箭头分开 */
-				margin-right: 4px;
-			}
+
 			.avatar-wrapper {
 				// margin-top: 17px;
 				position: relative;
 				font-size: 14px;
-				display: flex;
-				align-items: center;
-				white-space: nowrap;
 
 				.user-avatar {
 					cursor: pointer;
@@ -326,9 +297,11 @@ const aPortClick = () => {
 					border-radius: 10px;
 				}
 
-				.el-icon {
-					margin-left: 5px;
+				i {
 					cursor: pointer;
+					position: absolute;
+					right: -10px;
+					// top: 10px;
 					font-size: 12px;
 				}
 			}

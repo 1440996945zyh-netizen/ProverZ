@@ -39,7 +39,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card structure-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><PieChart /></el-icon>
@@ -72,7 +72,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card compare-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><DataAnalysis /></el-icon>
@@ -87,7 +87,7 @@
 			</div>
 
 			<div class="right-column">
-				<div class="panel-card">
+				<div class="panel-card kpi-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Odometer /></el-icon>
@@ -116,7 +116,7 @@
 					</div>
 				</div>
 
-				<div class="panel-card">
+				<div class="panel-card budget-card">
 					<div class="panel-header">
 						<div class="header-icon-box">
 							<el-icon><Box /></el-icon>
@@ -190,7 +190,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import {
 	Wallet,
 	PieChart,
@@ -266,15 +266,15 @@ const initStructureChart = () => {
 		},
 		legend: {
 			orient: 'vertical',
-			right: 10,
+			right: 18,
 			top: 'center',
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 13 },
 		},
 		series: [
 			{
 				type: 'pie',
-				radius: ['40%', '65%'],
-				center: ['35%', '50%'],
+				radius: ['44%', '70%'],
+				center: ['34%', '52%'],
 				avoidLabelOverlap: false,
 				label: { show: false },
 				labelLine: { show: false },
@@ -315,14 +315,14 @@ const initTrendChart = () => {
 		},
 		legend: {
 			data: ['实际成本', '预算成本', '节约成本'],
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 13 },
 			top: 0,
 		},
 		grid: {
 			left: '3%',
 			right: '4%',
-			bottom: '3%',
-			top: '18%',
+			bottom: '9%',
+			top: '20%',
 			containLabel: true,
 		},
 		xAxis: {
@@ -330,14 +330,14 @@ const initTrendChart = () => {
 			boundaryGap: false,
 			data: ['1月', '2月', '3月', '4月', '5月', '6月'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 12 },
 		},
 		yAxis: {
 			type: 'value',
 			axisLine: { show: false },
 			axisLabel: {
 				color: 'rgba(255, 255, 255, 0.7)',
-				fontSize: 10,
+				fontSize: 12,
 				formatter: value => (value / 10000).toFixed(0) + '万',
 			},
 			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
@@ -404,28 +404,28 @@ const initTeamCompareChart = () => {
 		},
 		legend: {
 			data: ['维修成本', '采购成本', '人工成本'],
-			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 11 },
+			textStyle: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 13 },
 			top: 0,
 		},
 		grid: {
 			left: '3%',
 			right: '4%',
-			bottom: '3%',
-			top: '18%',
+			bottom: '9%',
+			top: '20%',
 			containLabel: true,
 		},
 		xAxis: {
 			type: 'category',
 			data: ['南区', '东区', '岚南', '西区', '岚中'],
 			axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 10 },
+			axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 12 },
 		},
 		yAxis: {
 			type: 'value',
 			axisLine: { show: false },
 			axisLabel: {
 				color: 'rgba(255, 255, 255, 0.7)',
-				fontSize: 10,
+				fontSize: 12,
 				formatter: value => (value / 10000).toFixed(0) + '万',
 			},
 			splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
@@ -482,11 +482,16 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-	setTimeout(() => {
-		initStructureChart()
-		initTrendChart()
-		initTeamCompareChart()
-	}, 100)
+	nextTick(() => {
+		requestAnimationFrame(() => {
+			setTimeout(() => {
+				initStructureChart()
+				initTrendChart()
+				initTeamCompareChart()
+				handleResize()
+			}, 120)
+		})
+	})
 	window.addEventListener('resize', handleResize)
 })
 
@@ -511,15 +516,18 @@ $text-muted: rgba(255, 255, 255, 0.5);
 
 .cost-panel {
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 }
 
 .screen-body {
 	padding: 12px 15px;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 	display: grid;
-	grid-template-columns: 1fr 1.4fr 1fr;
+	grid-template-columns: 1fr 1.58fr 1fr;
 	gap: 12px;
+	align-items: stretch;
 	box-sizing: border-box;
 }
 
@@ -536,6 +544,7 @@ $text-muted: rgba(255, 255, 255, 0.5);
 	flex-direction: column;
 	gap: 12px;
 	min-height: 0;
+	justify-content: stretch;
 }
 
 .panel-card {
@@ -570,8 +579,8 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		flex-shrink: 0;
 
 		.header-icon-box {
-			width: 24px;
-			height: 24px;
+			width: 26px;
+			height: 26px;
 			background: linear-gradient(135deg, $primary-color, $primary-dark);
 			border-radius: 5px;
 			display: flex;
@@ -582,10 +591,10 @@ $text-muted: rgba(255, 255, 255, 0.5);
 		}
 
 		.panel-title {
-			font-size: 13px;
-			font-weight: 600;
+			font-size: 17px;
+			font-weight: 700;
 			color: $text-primary;
-			letter-spacing: 1px;
+			letter-spacing: 1.5px;
 		}
 
 		.header-line {
@@ -750,28 +759,58 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .structure-chart {
-	height: 130px;
+	width: 100%;
+	height: 100%;
+	min-height: 250px;
+	max-height: 290px;
+	max-width: 360px;
+	margin: 0 auto;
 }
 
 .trend-card {
 	flex: 1.2;
 }
 
+.structure-card,
+.compare-card,
+.budget-card {
+	.panel-body {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+}
+
+.structure-card {
+	.panel-body {
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+}
+
 .trend-chart {
 	width: 100%;
 	height: 100%;
-	min-height: 120px;
+	min-height: 235px;
 }
 
 .team-compare-chart {
 	width: 100%;
-	height: 130px;
+	height: 100%;
+	min-height: 250px;
+}
+
+.kpi-card {
+	.panel-body {
+		display: block;
+	}
 }
 
 .kpi-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 8px;
+	gap: 10px;
 
 	.kpi-item {
 		padding: 10px;
@@ -842,12 +881,16 @@ $text-muted: rgba(255, 255, 255, 0.5);
 .material-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 10px;
+	justify-content: flex-start;
+	height: 100%;
+	width: 100%;
 
 	.material-item {
 		display: flex;
 		align-items: center;
 		gap: 8px;
+		width: 100%;
 		padding: 8px 10px;
 		background: rgba(255, 255, 255, 0.03);
 		border-radius: 6px;
@@ -962,6 +1005,11 @@ $text-muted: rgba(255, 255, 255, 0.5);
 }
 
 .budget-progress {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 100%;
+
 	.progress-header {
 		display: flex;
 		justify-content: space-between;

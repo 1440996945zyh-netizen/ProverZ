@@ -1,7 +1,7 @@
 <!--
  * @Author: zhangsd
  * @Date: 2025-07-28 16:51:35
- * @LastEditTime: 2026-04-09 09:19:32
+ * @LastEditTime: 2026-04-09 14:20:58
  * @LastEditors: zhangsd
  * @Description: 菜单管理
  * @FilePath: \view\src\views\system\menu\index.vue
@@ -68,7 +68,7 @@
 									显示方式
 								</span>
 							</template>
-							<el-radio-group v-model="form.isFrame" :disabled="form.dataType == 'APP'">
+							<el-radio-group v-model="form.isFrame" 	>
 								<el-radio label="0">内部</el-radio>
 								<el-radio label="1">外部链接内部显示</el-radio>
 								<el-radio label="2">外部链接外部显示</el-radio>

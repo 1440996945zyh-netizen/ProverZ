@@ -259,11 +259,16 @@ const loadStockQuantity = row => {
 		row.stockQuantity = null
 		return
 	}
+	const materialId = row.materialId
+	const warehouseId = form.warehouseId
 	console.log('loadStockQuantity - 开始查询库存数量 - materialId:', row.materialId, 'warehouseId:', form.warehouseId)
 	materialWarehouseInApi
-		.getStockQuantity(row.materialId, form.warehouseId)
+		.getStockQuantity(materialId, warehouseId)
 		.then(res => {
 			console.log('库存数量查询结果:', res)
+			if (String(row.materialId) !== String(materialId) || String(form.warehouseId) !== String(warehouseId)) {
+				return
+			}
 			if (res.code === '0000' && res.data !== null && res.data !== undefined) {
 				row.stockQuantity = res.data
 			} else {
@@ -272,6 +277,9 @@ const loadStockQuantity = row => {
 		})
 		.catch(error => {
 			console.error('加载库存数量失败:', error)
+			if (String(row.materialId) !== String(materialId) || String(form.warehouseId) !== String(warehouseId)) {
+				return
+			}
 			row.stockQuantity = 0
 		})
 }
@@ -289,11 +297,16 @@ const loadAvailableInventory = row => {
 		row.availableInventory = null
 		return
 	}
+	const materialId = row.materialId
+	const warehouseId = form.warehouseId
 	console.log('loadAvailableInventory - 开始查询可用库存数量 - materialId:', row.materialId, 'warehouseId:', form.warehouseId)
 	materialWarehouseInApi
-		.getAvailableInventory(row.materialId, form.warehouseId)
+		.getAvailableInventory(materialId, warehouseId)
 		.then(res => {
 			console.log('可用库存数量查询结果:', res)
+			if (String(row.materialId) !== String(materialId) || String(form.warehouseId) !== String(warehouseId)) {
+				return
+			}
 			if (res.code === '0000' && res.data !== null && res.data !== undefined) {
 				row.availableInventory = res.data
 			} else {
@@ -302,6 +315,9 @@ const loadAvailableInventory = row => {
 		})
 		.catch(error => {
 			console.error('加载库存数量失败:', error)
+			if (String(row.materialId) !== String(materialId) || String(form.warehouseId) !== String(warehouseId)) {
+				return
+			}
 			row.availableInventory = 0
 		})
 }
@@ -319,6 +335,7 @@ watch(
 		} else {
 			detailList.forEach(row => {
 				row.stockQuantity = null
+				row.availableInventory = null
 			})
 		}
 	},
@@ -511,6 +528,7 @@ const addDetail = () => {
 		unitName: '',
 		brand: '',
 		stockQuantity: null,
+		availableInventory: null,
 		applicationQuantity: null,
 		flowType: '02', // 默认选择"其他"
 		flowDirection: '',
@@ -649,16 +667,20 @@ const handleMaterialNameChange = (e, row) => {
 		row.unitName = ''
 		row.brand = ''
 		row.stockQuantity = null
+		row.availableInventory = null
 	}
 
 	// 无论option是否存在，只要row.materialId有值，就尝试查询库存数量
 	// 这样可以确保即使option查找失败，但materialId已经设置的情况下也能查询库存
 	if (row.materialId) {
+		row.stockQuantity = null
+		row.availableInventory = null
 		console.log('物资选择变化 - materialId:', row.materialId, 'warehouseId:', form.warehouseId)
 		console.log('准备调用 loadStockQuantity，row:', row)
 		// 无论仓库ID是否为空，都尝试调用（如果为空会在loadStockQuantity中处理）
 		try {
 			loadStockQuantity(row)
+			loadAvailableInventory(row)
 			console.log('loadStockQuantity 调用完成')
 		} catch (error) {
 			console.error('调用 loadStockQuantity 出错:', error)
@@ -730,6 +752,7 @@ const editDetailList = data => {
 				unitName: item.unitName || '',
 				brand: item.brand || '',
 				stockQuantity: null, // 编辑时重新查询库存数量
+				availableInventory: null, // 编辑时重新查询可用库存数量
 				applicationQuantity: item.applicationQuantity || null,
 				flowType: item.flowType || '02', // 默认选择"其他"
 				flowDirection: item.flowDirection || '',
@@ -741,6 +764,7 @@ const editDetailList = data => {
 			// 编辑时加载库存数量
 			if (item.materialId && form.warehouseId) {
 				loadStockQuantity(detailList[detailList.length - 1])
+				loadAvailableInventory(detailList[detailList.length - 1])
 			}
 		})
 		// 初始化禁用状态
@@ -964,6 +988,9 @@ const saveApplicationDetails = () => {
 		// 如果库存数量为空，且有物资ID和仓库ID，则查询库存数量（接口可能没有返回）
 		if (item.stockQuantity == null && item.materialId && form.warehouseId) {
 			loadStockQuantity(item)
+		}
+		if (item.availableInventory == null && item.materialId && form.warehouseId) {
+			loadAvailableInventory(item)
 		}
 	})
 
